@@ -406,10 +406,6 @@ var CardRenderer = {
             brokenSprite.anchor.set(0.5, 0.5);
             brokenSprite.x = 10; //centre in correct area of card
             this.brokenSprites.push(brokenSprite);
-            if (typeof this.card.subroutines[i].visual !== "undefined") {
-              brokenSprite.y = -209 + this.card.subroutines[i].visual.y; //-209 is half card height
-              brokenSprite.scale.y = this.card.subroutines[i].visual.h / 149.0; //149.0 is the height of broken.png
-            }
             brokenSprite.visible = false;
           }
         }
@@ -1057,6 +1053,26 @@ var CardRenderer = {
 		else {
 			this.frontTexture = this.loresTexture;
 		}
+		//update subroutine positions, if relevant (this needs to be done because we could switch dynamically between low and high res)
+		if (strengthInfo.ice) {
+	      for (var i = 0; i < this.card.subroutines.length; i++) {
+		    if (typeof this.card.subroutines[i].visual !== "undefined") {
+			  let sub_y = -209 + this.card.subroutines[i].visual.y; //-209 is half card height
+			  if (this.frontTexture == this.hiresTexture) sub_y += (4 * i) + 5; //placement slightly different on hi-res versions
+			  let sub_h = this.card.subroutines[i].visual.h / 149.0; //149.0 is the height of broken.png
+			  this.brokenSprites[i].y = sub_y;
+			  this.brokenSprites[i].scale.y = sub_h;
+			  if (cardRenderer.subroutineChoices) {
+				for (var j = 0; j < cardRenderer.subroutineChoices.length; j++) {
+					if (cardRenderer.subroutineChoices[j].subroutine == this.card.subroutines[i]) {
+                      cardRenderer.subroutineChoices[j].y = sub_y;
+                      cardRenderer.subroutineChoices[j].scale.y = sub_h;
+					}
+				}
+			  }
+			}
+		  }
+	    }
         if (
           this == pixi_holdCard &&
           !pixi_holdZoom &&
@@ -2151,10 +2167,6 @@ var CardRenderer = {
             this.subroutineChoices[i].subroutine = subroutine;
             card.renderer.sprite.addChild(this.subroutineChoices[i]);
             this.subroutineChoices[i].x = 10; //centre in correct area of card
-            if (typeof subroutine.visual !== "undefined") {
-              this.subroutineChoices[i].y = -209 + subroutine.visual.y; //-209 is half card height
-              this.subroutineChoices[i].scale.y = subroutine.visual.h / 149.0; //149.0 is the height of broken.png
-            }
             this.subroutineChoices[i].visible = true;
             this.subroutineChoices[i].tint = parseInt("FFFFFF", 16); //white by default
           }
