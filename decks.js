@@ -250,6 +250,7 @@ function CorpTestField(
       glowTextures,
       strengthTextures
   );
+  corp.identityCard.faceUp = true;
   for (var i = 0; i < archivesCards.length; i++) {
     InstanceCardsPush(
       archivesCards[i],
@@ -415,6 +416,7 @@ function RunnerTestField(
 		  glowTextures,
 		  strengthTextures
 		);
+		runner.identityCard.faceUp = true;
   }
   for (var i = 0; i < heapCards.length; i++) {
     var newCard = InstanceCardsPush(
