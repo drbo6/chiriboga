@@ -90,11 +90,11 @@
 						var imgSrc = 'images/'+ChangeImageFileToJPG(cardSet[i].imageFile);
 						var cardHtml = '<div class="card-item" data-id="'+i+'">'
 							+'<div class="count-badge" data-id="'+i+'">0</div>'
-							+'<img loading="lazy" src="'+imgSrc+'" alt="'+cardSet[i].title+'" />'
+							+'<img class="card-image" loading="lazy" src="'+imgSrc+'" alt="'+cardSet[i].title+'" />'
 							+'<div class="card-title">'+cardSet[i].title+'</div>'
 							+'<div class="card-controls">'
-								+'<button type="button" class="add-btn" data-id="'+i+'">+</button>'
 								+'<button type="button" class="remove-btn" data-id="'+i+'">-</button>'
+								+'<button type="button" class="add-btn" data-id="'+i+'">+</button>'
 							+'</div>'
 						+'</div>';
 						$("#cardcontainer").append(cardHtml);
@@ -107,6 +107,7 @@
 			function AttachCardListEvents() {
 				$("#cardcontainer .add-btn").off('click').on('click',function(){ AddCardToDeck(parseInt($(this).attr('data-id'))); });
 				$("#cardcontainer .remove-btn").off('click').on('click',function(){ RemoveCardFromDeck(parseInt($(this).attr('data-id'))); });
+				$("#cardcontainer .card-item img").off('click').on('click',function(e){ e.stopPropagation(); ShowLightbox($(this).attr('src')); });
 			}
 
 			function UpdateCardCountsUI() {
@@ -116,6 +117,30 @@
 					$(this).text(ct);
 					$(this).toggleClass('has-copies', ct>0);
 				});
+			}
+
+			function ShowLightbox(src) { $('#lightbox-img').attr('src',src); $('#lightbox').addClass('active'); }
+			function HideLightbox() { $('#lightbox').removeClass('active'); }
+			$(document).on('click','#lightbox-close',HideLightbox);
+			$(document).on('click','#lightbox',function(e){ if(e.target.id==='lightbox') HideLightbox(); });
+
+			var showingOnlySelected = false;
+			function ToggleOtherCards() {
+				if (!showingOnlySelected) {
+					// Hide cards with count 0
+					$('#cardcontainer .card-item').each(function(){
+						var id = parseInt($(this).find('.count-badge').attr('data-id'));
+						var ct = deckCounts[id] || 0;
+						if (ct === 0) $(this).hide();
+					});
+					$('#togglecards').text('Show other cards');
+					showingOnlySelected = true;
+				} else {
+					// Show all cards
+					$('#cardcontainer .card-item').show();
+					$('#togglecards').text('Hide other cards');
+					showingOnlySelected = false;
+				}
 			}
 
 			function IdentityImageFromDeckString(compressed) {
@@ -526,58 +551,33 @@
 			  UpdateCardCountsUI();
 			  //done checking, permit launch if valid
 			  if (validDeck) {
-				var validityOutput = "";
-				numstylestr = "";
-				if (totalCards < cardSet[json.identity].deckSize) numstylestr = ' style="color:red;"';
-				infstylestr = "";
-				if (totalInfluence > cardSet[json.identity].influenceLimit) infstylestr = ' style="color:red;"';
-				if (totalCards !== 1)
-				  validityOutput +=
-					"<span" +
-					numstylestr +
-					">" +
-					totalCards +
-					" cards </span><br><br><span" +
-					infstylestr +
-					">" +
-					totalInfluence +
-					" influence</span><br>";
-				else
-				  validityOutput += totalCards + " card<br><br>" + totalInfluence + " influence<br>";
+				var deckSizeTarget = cardSet[json.identity].deckSize;
+				var influenceLimit = cardSet[json.identity].influenceLimit;
+				var validityOutput = '<div class="deck-stats">';
+				// Cards stat
+				var cardsClass = 'deck-stat';
+				if (totalCards < deckSizeTarget) cardsClass += ' bad';
+				validityOutput += '<div class="'+cardsClass+'"><span class="stat-label">Cards:</span> '+totalCards+' / '+deckSizeTarget+'</div>';
+				// Influence stat
+				var infClass = 'deck-stat';
+				if (totalInfluence > influenceLimit) infClass += ' bad';
+				validityOutput += '<div class="'+infClass+'"><span class="stat-label">Influence:</span> '+totalInfluence+' / '+influenceLimit+'</div>';
+				// Corp agenda points
 				if (deckPlayer == corp) {
-				  var agendaMin = 2 * Math.floor(Math.max(totalCards,cardSet[json.identity].deckSize) / 5) + 2;
+				  var agendaMin = 2 * Math.floor(Math.max(totalCards,deckSizeTarget) / 5) + 2;
 				  var agendaMax = agendaMin + 1;
-				  agpstylestr = "";
-				  if (totalAgendaPoints < agendaMin || totalAgendaPoints > agendaMax)
-					agpstylestr = ' style="color:red;"';
-				  if (totalAgendaPoints !== 1)
-					validityOutput +=
-					  "<br><span" +
-					  agpstylestr +
-					  ">" +
-					  totalAgendaPoints +
-					  " agenda points (" +
-					  agendaMin +
-					  "-" +
-					  agendaMax +
-					  " required)</span>";
-				  else
-					validityOutput +=
-					  "<br><span" +
-					  agpstylestr +
-					  ">1 agenda point (" +
-					  agendaMin +
-					  "-" +
-					  agendaMax +
-					  " required)</span>";
+				  var agClass = 'deck-stat';
+				  if (totalAgendaPoints < agendaMin || totalAgendaPoints > agendaMax) agClass += ' bad';
+				  validityOutput += '<div class="'+agClass+'"><span class="stat-label">Agenda Pts:</span> '+totalAgendaPoints+' ('+agendaMin+'-'+agendaMax+' required)</div>';
 				}
+				validityOutput += '</div>';
 				$("#output").html(validityOutput);
 				$("#launch").prop("disabled", false);
 			  }
 			  $("#launch").html("Play using this deck");
 			  UpdateLaunchStrings();
 			  //update opponent image
-			  if (opponentdeckimg != "") $("#opponentid").html('Opponent: <img src="'+opponentdeckimg+'"/>');
+			  if (opponentdeckimg != "") $("#opponentid").html('Opponent:<br><img src="'+opponentdeckimg+'"/>');
 			}
 			
 			//function for testing and debugging
@@ -605,15 +605,22 @@
 		<style>
 			/* Card builder styles */
 			#cardcontainer { display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:14px; padding:18px; }
-			#cardcontainer .card-item { background:#1e2730; border:1px solid #2e3b46; border-radius:10px; padding:8px; position:relative; box-shadow:0 2px 4px rgba(0,0,0,.4); transition:box-shadow .15s; }
+			#cardcontainer .card-item { background:#1e2730; border:1px solid #2e3b46; border-radius:10px; padding:8px; position:relative; box-shadow:0 2px 4px rgba(0,0,0,.4); transition:box-shadow .15s; cursor:pointer; }
 			#cardcontainer .card-item:hover { box-shadow:0 4px 10px rgba(0,0,0,.6); }
 			#cardcontainer .card-item img { width:100%; height:auto; border-radius:6px; display:block; }
-			#cardcontainer .card-title { font-size:12px; line-height:1.2; margin-top:6px; color:#ddd; min-height:30px; }
+			#cardcontainer .card-title { font-size:12px; line-height:1.2; margin-top:6px; color:#ddd; min-height:30px; text-align:center; }
 			#cardcontainer .card-controls { display:flex; justify-content:space-between; margin-top:6px; }
-			#cardcontainer .card-controls button { flex:1; margin:0 2px; padding:4px 0; font-size:14px; cursor:pointer; background:#2f4a5a; color:#fff; border:1px solid #466577; border-radius:4px; }
-			#cardcontainer .card-controls button:hover { background:#3d5d71; }
-			#cardcontainer .count-badge { position:absolute; top:6px; left:6px; background:#000a; color:#fff; padding:2px 8px; font-size:12px; border-radius:12px; min-width:24px; text-align:center; }
-			#cardcontainer .count-badge.has-copies { background:#1976d2; }
+			#cardcontainer .card-controls button { flex:1; margin:0 2px; padding:8px 0; font-size:16px; cursor:pointer; background:#f1f1f1; color:#000; border:1px solid grey; border-radius:5px; font-weight:bold; transition:background .2s; }
+			#cardcontainer .card-controls button:hover { background:grey; color:white; }
+			#cardcontainer .count-badge { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); background:rgba(0,0,0,0.85); color:#fff; padding:8px 14px; font-size:24px; font-weight:bold; border-radius:50%; min-width:50px; min-height:50px; display:flex; align-items:center; justify-content:center; pointer-events:none; opacity:0; transition:opacity .2s; }
+			#cardcontainer .count-badge.has-copies { opacity:1; background:#1976d2; box-shadow:0 0 12px rgba(25,118,210,0.6); }
+			/* Lightbox styles */
+			#lightbox { display:none; position:fixed; z-index:9999; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.9); align-items:center; justify-content:center; }
+			#lightbox.active { display:flex; }
+			#lightbox-content { max-width:90%; max-height:90%; position:relative; }
+			#lightbox-content img { max-width:100%; max-height:90vh; border-radius:10px; box-shadow:0 0 30px rgba(0,0,0,0.8); }
+			#lightbox-close { position:absolute; top:-40px; right:0; font-size:36px; color:#fff; cursor:pointer; font-weight:bold; }
+			#lightbox-close:hover { color:#ccc; }
 			
 			body {
 			  background:#354149;
@@ -624,11 +631,87 @@
 			}
 			
 			.button {
-			  padding: 15px;
+			  background: linear-gradient(135deg,#0a1f33 0%, #093b5e 50%, #0a1f33 100%);
+			  border: 1px solid #0d6ea5;
+			  color: #9fdcff;
+			  padding: 12px 16px;
+			  text-align: center;
+			  text-decoration: none;
+			  display: inline-block;
+			  font-size: 15px;
+			  margin: 4px 2px;
+			  cursor: pointer;
+			  border-radius: 8px;
+			  letter-spacing: .06em;
+			  font-weight:600;
+			  text-transform:uppercase;
+			  box-shadow:0 0 6px #0d6ea5, inset 0 0 12px rgba(13,110,165,0.4);
+			  transition: box-shadow .25s, transform .15s, background .4s, color .3s;
+			}
+			.button:hover {
+			  background: linear-gradient(135deg,#0c2843 0%, #0d507f 50%, #0c2843 100%);
+			  color:#c7eeff;
+			  box-shadow:0 0 12px #25b4ff, 0 0 30px rgba(37,180,255,.6), inset 0 0 22px rgba(37,180,255,0.55);
+			  transform:translateY(-2px);
+			}
+			.button:active {
+			  transform:translateY(1px);
+			  box-shadow:0 0 6px #25b4ff, inset 0 0 14px rgba(37,180,255,.55);
+			}
+			.button:disabled {
+			  background:linear-gradient(135deg,#1a2d42 0%, #1e3d58 60%, #1a2d42 100%);
+			  color:#4d6d7f;
+			  border-color:#1e3d58;
+			  box-shadow:none;
+			  cursor: default;
 			}
 			
+			#dataentry {
+			  width: 100%;
+			  max-width: 450px;
+			  min-width: 320px;
+			}
+			
+			#identityselect {
+			  width:100%;
+			  background:#162938;
+			  border:1px solid #25b4ff;
+			  color:#e6f8ff;
+			  padding:10px 12px;
+			  border-radius:8px;
+			  font-size:15px;
+			  box-shadow:0 0 6px #132a3a, inset 0 0 12px rgba(37,180,255,0.25);
+			  box-sizing:border-box;
+			}
+			#identityselect:focus { box-shadow:0 0 12px #25b4ff, 0 0 30px rgba(37,180,255,.6), inset 0 0 22px rgba(37,180,255,0.55); outline:none; }
+			#identityselect option { background:#162938; color:#e6f8ff; }
+
+			#identity { width:100%; display:block; margin:12px 0 4px 0; border-radius:8px; box-shadow:0 0 12px rgba(37,180,255,.4); }
+
+			#deck {
+			  width:100%;
+			  background: linear-gradient(135deg,#0a1f33 0%, #093b5e 50%, #0a1f33 100%);
+			  border:1px solid #0d6ea5;
+			  color:#9fdcff;
+			  padding:10px 12px;
+			  border-radius:8px;
+			  font-size:14px;
+			  line-height:1.3;
+			  box-sizing:border-box;
+			  resize:vertical;
+			  box-shadow:0 0 6px #0d6ea5, inset 0 0 12px rgba(13,110,165,0.4);
+			}
+			#deck:focus { box-shadow:0 0 12px #25b4ff, 0 0 30px rgba(37,180,255,.6), inset 0 0 22px rgba(37,180,255,0.55); outline:none; }
+			
 			.leftrow.buttons {
-				margin-bottom: -15px;
+				margin-bottom: 10px;
+				display:flex;
+				flex-wrap:wrap;
+				gap:8px;
+			}
+			.leftrow.buttons .button {
+				flex:1;
+				min-width:140px;
 			}
 			
 			.cardgroup {
@@ -636,32 +719,70 @@
 			}
 			
 			.leftrow {
-				padding-left:30px;
+				padding:10px;
+				max-width:340px;
+				box-sizing:border-box;
 			}
 			
 			.toprow {
-				padding-top:30px;
+				padding-top:20px;
 			}
 			
 			.rightpart {
-				display:inline-block;
+				display:block;
 				vertical-align:top;
-				width:160px;
+				width:100%;
 				padding-top:20px;
+				color:#9fdcff;
+				font-size:13px;
 			}
+
+			#cardcontainer { background:transparent; }
+			#cardcontainer .card-item { background:#0b141c; border:1px solid #132a3a; box-shadow:0 0 6px #132a3a, inset 0 0 10px rgba(19,42,58,0.4); }
+			#cardcontainer .card-item:hover { box-shadow:0 0 12px #25b4ff, 0 0 26px rgba(37,180,255,.5), inset 0 0 16px rgba(37,180,255,0.45); }
+			#cardcontainer .card-title { color:#cfe9f7; }
+			#cardcontainer .card-controls button { background:linear-gradient(135deg,#0a1f33,#093b5e); border:1px solid #0d6ea5; color:#9fdcff; box-shadow:0 0 6px #0d6ea5, inset 0 0 12px rgba(13,110,165,0.4); }
+			#cardcontainer .card-controls button:hover { background:linear-gradient(135deg,#0c2843,#0d507f); color:#c7eeff; box-shadow:0 0 12px #25b4ff, 0 0 30px rgba(37,180,255,.6), inset 0 0 22px rgba(37,180,255,0.55); }
+			#cardcontainer .count-badge.has-copies { background:#0d507f; box-shadow:0 0 14px #25b4ff; }
 			
 			.ui-widget-content {
 				background: #113;
 			}
+
+			/* Deck stats (cards / influence / agenda) */
+			.deck-stats { margin-top:10px; background:linear-gradient(135deg,#0a1f33 0%, #093b5e 55%, #0a1f33 100%); border:1px solid #0d6ea5; padding:10px 14px; border-radius:10px; font-size:13px; box-shadow:0 0 6px #0d6ea5, inset 0 0 12px rgba(13,110,165,0.35); letter-spacing:.04em; }
+			.deck-stats { width:100%; box-sizing:border-box; }
+			.deck-stat { margin:4px 0; color:#9fdcff; font-weight:600; display:flex; justify-content:space-between; align-items:center; }
+			.deck-stat.bad { color:#ff4d73; text-shadow:0 0 6px rgba(255,77,115,0.7), 0 0 12px rgba(255,77,115,0.35); }
+			.deck-stat .stat-label { font-weight:700; opacity:.9; }
 			
 			#opponentid {
 				margin-top: 20px;
+				background:linear-gradient(135deg,#050f1a 0%, #041f33 55%, #050f1a 100%);
+				border:1px solid #0a5580;
+				padding:10px 14px;
+				border-radius:10px;
+				box-shadow:0 0 6px #0a5580, inset 0 0 12px rgba(10,85,128,0.35);
+				color:#7ac5e8;
+				font-weight:600;
+				letter-spacing:.04em;
+				text-align:center;
 			}
 			
 			#opponentid img {
 				width: 50px;
-				margin: 0px;
+				margin: 8px 0 0 0;
 				vertical-align: middle;
+				border-radius:6px;
+				box-shadow:0 0 8px rgba(122,197,232,0.3);
+				display:block;
+				margin-left:auto;
+				margin-right:auto;
+			}
+			
+			@media (max-width: 768px) {
+			  #contentcontainer { flex-direction: column; }
+			  #dataentry { max-width: 100%; float:none; }
 			}
 			
 		</style>
@@ -670,9 +791,9 @@
 
 	<body onload="Init();">
 		<div id="contentcontainer">
-			<div id="dataentry" style="width:400px; float:left; max-height: 100vh; overflow:auto;">
+			<div id="dataentry" style="width:340px; float:left; max-height: 100vh; overflow:auto;">
 				<div class="leftrow toprow">
-					<select id="identityselect" style="max-width: 340px;"></select>
+					<select id="identityselect"></select>
 					<img id="identity" src="images/glow_outline.png">
 					<div class="rightpart">
 						<div id="output">
@@ -680,19 +801,21 @@
 						<div id="opponentid"></div>
 					</div>
 				</div>
-				<div class="leftrow buttons">
-					<button id="exittomenu" onclick="window.location.href='index.php';" class="button">Exit</button>
-					<button id="launch" class="button" onclick="window.location.href=$(this).prop('href');">Play using this deck</button>
-					<button id="randomise" onclick="$('#identityselect').change();" class="button">Randomise</button>
-					<button id="opponent" class="button" onclick="window.location.href=$(this).prop('href');">Set as opponent</button>
-				</div>
+			<div class="leftrow buttons">
+				<button id="launch" class="button" onclick="window.location.href=$(this).prop('href');">Play using this deck</button>
+				<button id="opponent" class="button" onclick="window.location.href=$(this).prop('href');">Set as opponent</button>
+				<button id="togglecards" onclick="ToggleOtherCards();" class="button">Hide other cards</button>
+				<button id="exittomenu" onclick="window.location.href='index.php';" class="button">Exit</button>
+			</div>
 				<div class="leftrow toprow">
-					<textarea id="deck" spellcheck="false" cols="30" style="max-width:340px; min-width:340px;"></textarea><br/>
+					<textarea id="deck" spellcheck="false" cols="30" style="width:100%;"></textarea><br/>
 				</div>
 				<br/>
 			</div>
 			<div id="cardcontainer" style="max-height: 100vh; overflow:auto;">
 			</div>
 		</div>
+		<!-- Lightbox container for enlarged card view -->
+		<div id="lightbox"><div id="lightbox-content"><span id="lightbox-close">&times;</span><img id="lightbox-img" src="" alt="Card"/></div></div>
 	</body>
 </html>
