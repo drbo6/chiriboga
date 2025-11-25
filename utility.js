@@ -59,6 +59,14 @@ var debugging = false;
   };
 })();
 
+//Normalize numbered card art filenames: convert missing .png references to .jpg
+function ChangeImageFileToJPG(name) {
+  if (typeof name === 'string' && /^[0-9]{5}\.png$/.test(name)) {
+    return name.replace('.png', '.jpg');
+  }
+  return name;
+}
+
 // Functions used to save card locations
 // currently only handles a few specific locations
 function ServerAddress(server) {

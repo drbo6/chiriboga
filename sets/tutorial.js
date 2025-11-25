@@ -12,7 +12,7 @@ function SharedTutorialFunction(str) {
 
 tutorial[5] = {
   title: "Tutorial",
-  imageFile: "30076.png",
+  imageFile: "30076.jpg",
   player: runner,
   link: 0,
   cardType: "identity",
@@ -301,7 +301,7 @@ tutorial[5] = {
 };
 tutorial[4] = {
   title: "Tutorial",
-  imageFile: "30076.png",
+  imageFile: "30076.jpg",
   player: runner,
   link: 0,
   cardType: "identity",
@@ -544,7 +544,7 @@ tutorial[4] = {
 };
 tutorial[3] = {
   title: "Tutorial",
-  imageFile: "30076.png",
+  imageFile: "30076.jpg",
   player: runner,
   link: 0,
   cardType: "identity",
@@ -732,7 +732,7 @@ tutorial[3] = {
 };
 tutorial[2] = {
   title: "Tutorial",
-  imageFile: "30076.png",
+  imageFile: "30076.jpg",
   player: runner,
   link: 0,
   cardType: "identity",
@@ -1019,7 +1019,7 @@ tutorial[2] = {
 };
 tutorial[1] = {
   title: "Tutorial",
-  imageFile: "30076.png",
+  imageFile: "30076.jpg",
   player: runner,
   link: 0,
   cardType: "identity",
@@ -1124,7 +1124,7 @@ tutorial[1] = {
 };
 tutorial[0] = {
   title: "Tutorial",
-  imageFile: "30076.png",
+  imageFile: "30076.jpg",
   player: runner,
   link: 0,
   cardType: "identity",

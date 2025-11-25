@@ -45,7 +45,7 @@
 				var oppjson = JSON.parse(
 				  LZString.decompressFromEncodedURIComponent(compressed)
 				);
-				opponentdeckimg = "images/"+cardSet[oppjson.identity].imageFile;
+				opponentdeckimg = "images/"+ChangeImageFileToJPG(cardSet[oppjson.identity].imageFile);
 			}
 
 			var deckPlayer = corp;
@@ -157,7 +157,7 @@
 				$("#deck").val(deckListArray.join("\n"));
 				$(this).append(
 				  '<img src="images/' +
-					cardSet[id].imageFile +
+					ChangeImageFileToJPG(cardSet[id].imageFile) +
 					'" style="margin-left: -120px; transform:rotate(' +
 					(Math.random() * 10 - 5) +
 					'deg);">'
@@ -214,7 +214,7 @@
 				);
 				$("#identity").prop(
 				  "src",
-				  "images/" + cardSet[json.identity].imageFile
+				  "images/" + ChangeImageFileToJPG(cardSet[json.identity].imageFile)
 				);
 				for (var i = 0; i < json.cards.length; i++) {
 			      //increment count, add to playerCards if not present yet
@@ -335,7 +335,7 @@
 				json.identity = $("select#identityselect option:checked").val();
 				$("#identity").prop(
 				  "src",
-				  "images/" + cardSet[json.identity].imageFile
+				  "images/" + ChangeImageFileToJPG(cardSet[json.identity].imageFile)
 				);
 				history.pushState(null, "Chiriboga", "decklauncher.php"); //so a random deck is generated
 				GenerateDeck();
@@ -445,7 +445,7 @@
 						  .children()
 						  .last()
 						  .append(
-							'<img src="images/' + cardSet[id].imageFile + stylestr + '">'
+							'<img src="images/' + ChangeImageFileToJPG(cardSet[id].imageFile) + stylestr + '">'
 						  );
 					  }
 					  Math.seedrandom(storedRandomness); //restore unpredictable randomness

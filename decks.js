@@ -124,7 +124,7 @@ function InstanceCard(
   ) {
     if (typeof cardDefinition.frontTexture === "undefined")
       cardDefinition.frontTexture = cardRenderer.LoadTexture(
-        "images/" + card.imageFile
+        "images/" + ChangeImageFileToJPG(card.imageFile)
       );
     card.renderer = cardRenderer.CreateCard(
       card,

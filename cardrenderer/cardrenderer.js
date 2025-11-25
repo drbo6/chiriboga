@@ -1031,8 +1031,8 @@ var CardRenderer = {
 		  if (this.hiresTexture) {
 			  this.frontTexture = this.hiresTexture;
 		  }
-		  else {
-			  const imgaddr = "images/hires/"+this.card.imageFile;
+      else {
+        const imgaddr = "images/hires/"+ChangeImageFileToJPG(this.card.imageFile);
 			  if (!this.app.loadingHiresTextures) {
 				  this.app.loadingHiresTextures = {};
 				  this.app.loadedHiresTextures = {};
