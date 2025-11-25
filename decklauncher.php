@@ -574,13 +574,15 @@
 				$("#output").html(validityOutput);
 				$("#launch").prop("disabled", false);
 			  }
-			  $("#launch").html("Play using this deck");
-			  UpdateLaunchStrings();
-			  //update opponent image
-			  if (opponentdeckimg != "") $("#opponentid").html('Opponent:<br><img src="'+opponentdeckimg+'"/>');
-			}
-			
-			//function for testing and debugging
+		  $("#launch").html("Play using this deck");
+		  UpdateLaunchStrings();
+		  //update opponent image
+		  if (opponentdeckimg != "") {
+			  $("#opponentid").html('Opponent:<br><img src="'+opponentdeckimg+'"/>').show();
+		  } else {
+			  $("#opponentid").hide();
+		  }
+		}			//function for testing and debugging
 			function TestGeneration(seed=0) {
 				Math.seedrandom(seed);
 				$('#identityselect').change();
@@ -603,16 +605,16 @@
 			}
 		</script>
 		<style>
-			/* Card builder styles */
-			#cardcontainer { display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:14px; padding:18px; }
-			#cardcontainer .card-item { background:#1e2730; border:1px solid #2e3b46; border-radius:10px; padding:8px; position:relative; box-shadow:0 2px 4px rgba(0,0,0,.4); transition:box-shadow .15s; cursor:pointer; }
+		/* Card builder styles */
+		    #cardcontainer { display:grid; grid-template-columns:repeat(auto-fit,minmax(120px,150px)); gap:12px; padding:16px; justify-content:start; overflow-x:auto; min-width:min-content; grid-auto-rows:min-content; }
+			#cardcontainer .card-item { background:#1e2730; border:1px solid #2e3b46; border-radius:10px; padding:8px; position:relative; box-shadow:0 2px 4px rgba(0,0,0,.4); transition:box-shadow .15s; cursor:pointer; display:grid; grid-template-rows: auto minmax(30px, auto) auto; align-content:start; }
 			#cardcontainer .card-item:hover { box-shadow:0 4px 10px rgba(0,0,0,.6); }
-			#cardcontainer .card-item img { width:100%; height:auto; border-radius:6px; display:block; }
-			#cardcontainer .card-title { font-size:12px; line-height:1.2; margin-top:6px; color:#ddd; min-height:30px; text-align:center; }
-			#cardcontainer .card-controls { display:flex; justify-content:space-between; margin-top:6px; }
+			#cardcontainer .card-item img { width:100%; height:auto; border-radius:6px; display:block; position:relative; }
+			#cardcontainer .card-title { font-size:12px; line-height:1.2; margin-top:6px; color:#ddd; min-height:30px; max-height:44px; overflow:hidden; text-align:center; display:flex; align-items:center; justify-content:center; word-break:break-word; align-self:start; }
+			#cardcontainer .card-controls { display:flex; justify-content:space-between; margin-top:6px; align-self:start; }
 			#cardcontainer .card-controls button { flex:1; margin:0 2px; padding:8px 0; font-size:16px; cursor:pointer; background:#f1f1f1; color:#000; border:1px solid grey; border-radius:5px; font-weight:bold; transition:background .2s; }
 			#cardcontainer .card-controls button:hover { background:grey; color:white; }
-			#cardcontainer .count-badge { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); background:rgba(0,0,0,0.85); color:#fff; padding:8px 14px; font-size:24px; font-weight:bold; border-radius:50%; min-width:50px; min-height:50px; display:flex; align-items:center; justify-content:center; pointer-events:none; opacity:0; transition:opacity .2s; }
+			#cardcontainer .count-badge { position:absolute; top:calc(50% - 15px); left:50%; transform:translate(-50%,-50%); background:rgba(0,0,0,0.85); color:#fff; padding:8px 14px; font-size:24px; font-weight:bold; border-radius:50%; min-width:50px; min-height:50px; display:flex; align-items:center; justify-content:center; pointer-events:none; opacity:0; transition:opacity .2s; z-index:2; }
 			#cardcontainer .count-badge.has-copies { opacity:1; background:#1976d2; box-shadow:0 0 12px rgba(25,118,210,0.6); }
 			/* Lightbox styles */
 			#lightbox { display:none; position:fixed; z-index:9999; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.9); align-items:center; justify-content:center; }
@@ -666,13 +668,20 @@
 			  cursor: default;
 			}
 			
-			#dataentry {
-			  width: 100%;
-			  max-width: 450px;
-			  min-width: 320px;
-			}
-			
-			#identityselect {
+		#contentcontainer {
+		  display:flex;
+		  flex-wrap:wrap;
+		  gap:0;
+		  width:100%;
+		}
+		
+		#dataentry {
+		  flex: 0 0 auto;
+		  width: 340px;
+		  min-width: 280px;
+		  max-width: 100%;
+		  box-sizing:border-box;
+		}			#identityselect {
 			  width:100%;
 			  background:#162938;
 			  border:1px solid #25b4ff;
@@ -718,13 +727,11 @@
 				cursor:pointer;
 			}
 			
-			.leftrow {
-				padding:10px;
-				max-width:340px;
-				box-sizing:border-box;
-			}
-			
-			.toprow {
+		.leftrow {
+			padding:10px;
+			width:100%;
+			box-sizing:border-box;
+		}			.toprow {
 				padding-top:20px;
 			}
 			
@@ -737,7 +744,7 @@
 				font-size:13px;
 			}
 
-			#cardcontainer { background:transparent; }
+			#cardcontainer { background:transparent; flex:1; min-width:0; }
 			#cardcontainer .card-item { background:#0b141c; border:1px solid #132a3a; box-shadow:0 0 6px #132a3a, inset 0 0 10px rgba(19,42,58,0.4); }
 			#cardcontainer .card-item:hover { box-shadow:0 0 12px #25b4ff, 0 0 26px rgba(37,180,255,.5), inset 0 0 16px rgba(37,180,255,0.45); }
 			#cardcontainer .card-title { color:#cfe9f7; }
@@ -757,6 +764,7 @@
 			.deck-stat .stat-label { font-weight:700; opacity:.9; }
 			
 			#opponentid {
+				display:none;
 				margin-top: 20px;
 				background:linear-gradient(135deg,#050f1a 0%, #041f33 55%, #050f1a 100%);
 				border:1px solid #0a5580;
@@ -780,18 +788,57 @@
 				margin-right:auto;
 			}
 			
-			@media (max-width: 768px) {
-			  #contentcontainer { flex-direction: column; }
-			  #dataentry { max-width: 100%; float:none; }
-			}
-			
-		</style>
+		@media (max-width: 1024px) {
+		  #cardcontainer { grid-template-columns:repeat(auto-fit,minmax(110px,140px)); gap:10px; padding:12px; }
+		}
+		
+		@media (max-width: 768px) {
+		  #contentcontainer { flex-direction: column; }
+		  #dataentry { width:100%; max-width: 100%; float:none; }
+		  #cardcontainer { grid-template-columns:repeat(auto-fit,minmax(100px,130px)); gap:8px; padding:10px; max-height:none !important; }
+		  .leftrow.buttons .button { min-width:120px; font-size:13px; padding:10px 12px; }
+		  #deck { font-size:13px; }
+		  .deck-stats { font-size:12px; padding:8px 10px; }
+		  #cardcontainer .card-title { font-size:11px; min-height:25px; }
+		  #cardcontainer .count-badge { font-size:20px; min-width:42px; min-height:42px; padding:6px 10px; }
+		}
+		
+		@media (max-width: 480px) {
+		  #cardcontainer { grid-template-columns:repeat(auto-fit,minmax(90px,120px)) !important; gap:2px !important; padding:3px !important; row-gap:1px !important; grid-template-rows: repeat(2, min-content) !important; overflow-y:auto !important; max-height:calc(100vh - 20px) !important; }
+		  .leftrow { padding:8px; }
+		  .leftrow.buttons { gap:6px; }
+		  .leftrow.buttons .button { min-width:100px; font-size:12px; padding:8px 10px; }
+		  #identityselect, #deck { font-size:12px; padding:8px 10px; }
+		  .deck-stats { font-size:11px; padding:6px 8px; }
+		  #cardcontainer .card-title { font-size:9px !important; min-height:12px !important; max-height:20px !important; margin-top:1px !important; line-height:1.0 !important; padding:0 !important; }
+		  #cardcontainer .card-item { padding:1px !important; grid-template-rows: auto 12px auto !important; }
+		  #cardcontainer .count-badge { font-size:16px; min-width:34px; min-height:34px; padding:4px 6px; }
+		  #cardcontainer .card-controls button { flex:1; margin:0 1px !important; padding:4px 0 !important; font-size:13px !important; min-height:24px !important; }
+		  #cardcontainer .card-controls { margin-top:1px !important; gap:1px !important; }
+		  #opponentid { font-size:12px; padding:8px 10px; }
+		  #opponentid img { width:40px; }
+		}
+		
+		@media (max-width: 360px) {
+		  #dataentry { width:100%; min-width:100%; }
+		  #cardcontainer { grid-template-columns:repeat(auto-fit,minmax(80px,110px)); gap:1px; padding:2px; row-gap:1px; }
+		  .leftrow { padding:6px; }
+		  .leftrow.buttons .button { min-width:80px; font-size:11px; padding:6px 8px; }
+		  #identityselect, #deck { font-size:11px; padding:6px 8px; }
+		  .deck-stats { font-size:10px; padding:4px 6px; }
+		  #cardcontainer .card-title { font-size:8px; min-height:16px; max-height:28px; margin-top:2px; line-height:1.1; }
+		  #cardcontainer .card-item { padding:2px; border-radius:6px; }
+		  #cardcontainer .card-item img { border-radius:4px; }
+		  #cardcontainer .count-badge { font-size:14px; min-width:28px; min-height:28px; padding:3px 5px; }
+		  #cardcontainer .card-controls button { font-size:12px; padding:3px 0; border-radius:3px; }
+		  #cardcontainer .card-controls { margin-top:2px; gap:1px; }
+		}		</style>
 	</head>
 
 
 	<body onload="Init();">
 		<div id="contentcontainer">
-			<div id="dataentry" style="width:340px; float:left; max-height: 100vh; overflow:auto;">
+			<div id="dataentry" style="max-height: 100vh; overflow:auto;">
 				<div class="leftrow toprow">
 					<select id="identityselect"></select>
 					<img id="identity" src="images/glow_outline.png">
@@ -812,7 +859,7 @@
 				</div>
 				<br/>
 			</div>
-			<div id="cardcontainer" style="max-height: 100vh; overflow:auto;">
+			<div id="cardcontainer">
 			</div>
 		</div>
 		<!-- Lightbox container for enlarged card view -->
