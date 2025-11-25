@@ -22,6 +22,9 @@
 			var corp = {};
 			var cardSet = []; //prepare to receive card definitions
 			var setIdentifiers = []; //set identifiers
+			//new globals for visual builder
+			var deckCounts = {}; //cardId -> count
+			var allCardIdsForPlayer = []; //cache of non-identity cards for current side
 		</script>
 		<?php
 		echo '<script src="utility.js?' . filemtime('utility.js') . '"></script>';
@@ -40,6 +43,80 @@
 			var opponentdeckstr = "";
 			var opponentdeckimg = "";
 			var uid = 0;
+
+			//UTILITY: ensure deckCounts matches json.cards
+			function RecalculateDeckCounts() {
+				deckCounts = {};
+				for (var i=0;i<json.cards.length;i++) {
+					var id = json.cards[i];
+					if (typeof deckCounts[id] === 'undefined') deckCounts[id] = 1; else deckCounts[id]++;
+				}
+				UpdateCardCountsUI();
+			}
+
+			function UpdateDeckTextareaFromCounts() {
+				var lines = [];
+				for (var i=0;i<allCardIdsForPlayer.length;i++) {
+					var id = allCardIdsForPlayer[i];
+					var ct = deckCounts[id] || 0;
+					if (ct>0) lines.push(ct+" "+cardSet[id].title);
+				}
+				$("#deck").val(lines.join("\n"));
+			}
+
+			function AddCardToDeck(id) {
+				if (typeof deckCounts[id] === 'undefined') deckCounts[id]=0;
+				deckCounts[id]++;
+				json.cards.push(id);
+				UpdateDeckTextareaFromCounts();
+				Parse();
+			}
+			function RemoveCardFromDeck(id) {
+				if (typeof deckCounts[id] === 'undefined' || deckCounts[id]===0) return;
+				deckCounts[id]--;
+				//remove one occurrence from json.cards
+				var idx = json.cards.indexOf(id);
+				if (idx>-1) json.cards.splice(idx,1);
+				UpdateDeckTextareaFromCounts();
+				Parse();
+			}
+
+			function RenderAllCardsList() {
+				$("#cardcontainer").empty();
+				allCardIdsForPlayer = [];
+				for (var i=0;i<cardSet.length;i++) {
+					if (typeof cardSet[i] !== 'undefined' && cardSet[i].player == deckPlayer && cardSet[i].cardType !== 'identity') {
+						allCardIdsForPlayer.push(i);
+						var imgSrc = 'images/'+ChangeImageFileToJPG(cardSet[i].imageFile);
+						var cardHtml = '<div class="card-item" data-id="'+i+'">'
+							+'<div class="count-badge" data-id="'+i+'">0</div>'
+							+'<img loading="lazy" src="'+imgSrc+'" alt="'+cardSet[i].title+'" />'
+							+'<div class="card-title">'+cardSet[i].title+'</div>'
+							+'<div class="card-controls">'
+								+'<button type="button" class="add-btn" data-id="'+i+'">+</button>'
+								+'<button type="button" class="remove-btn" data-id="'+i+'">-</button>'
+							+'</div>'
+						+'</div>';
+						$("#cardcontainer").append(cardHtml);
+					}
+				}
+				AttachCardListEvents();
+				UpdateCardCountsUI();
+			}
+
+			function AttachCardListEvents() {
+				$("#cardcontainer .add-btn").off('click').on('click',function(){ AddCardToDeck(parseInt($(this).attr('data-id'))); });
+				$("#cardcontainer .remove-btn").off('click').on('click',function(){ RemoveCardFromDeck(parseInt($(this).attr('data-id'))); });
+			}
+
+			function UpdateCardCountsUI() {
+				$("#cardcontainer .count-badge").each(function(){
+					var id = parseInt($(this).attr('data-id'));
+					var ct = deckCounts[id] || 0;
+					$(this).text(ct);
+					$(this).toggleClass('has-copies', ct>0);
+				});
+			}
 
 			function IdentityImageFromDeckString(compressed) {
 				var oppjson = JSON.parse(
@@ -254,7 +331,18 @@
 			  $("#deck").val(deckText);
 			  $("#deck").prop("rows", numRows); //resize textarea height to fit
 			  $("#deck").on("input propertychange paste", Parse);
+			  //initial deckCounts from generated deck
+			  deckCounts = {};
+			  for (var i=0;i<playerCards.length;i++) {
+				var id = playerCards[i];
+				deckCounts[id] = countSoFar[i];
+			  }
+			  json.cards = [];
+			  for (var id in deckCounts) {
+				for (var j=0;j<deckCounts[id];j++) json.cards.push(parseInt(id));
+			  }
 			  Parse();
+			  UpdateCardCountsUI();
 			}
 
 			function Init() {
@@ -360,6 +448,9 @@
 				  .prop("selected", "selected")
 				  .change(); //calling change also means a deck will be generated
 			  } else GenerateDeck(); //this will recognise the input string and load it
+			  //Render full card list for visual deck building
+			  RenderAllCardsList();
+			  UpdateCardCountsUI();
 			}
 
 			function Normalise(src) {
@@ -387,7 +478,7 @@
 			  $("#launch").prop("disabled", "disabled");
 			  $("#launch").html("Checking...");
 			  $("#output").html("");
-			  $(".cardgroup").remove();
+			  //visual deck preview retired
 
 			  //read the textarea and create the deck
 			  var validDeck = true;
@@ -396,6 +487,7 @@
 			  var totalAgendaPoints = 0; //only for corp
 			  var outputLine = 0;
 			  json.cards = [];
+			  deckCounts = {};
 			  var splitText = $("#deck").val().replace("’","'").split("\n");
 			  for (var i = 0; i < splitText.length; i++) {
 				var cardCount = 0;
@@ -410,59 +502,28 @@
 				}
 				if (cardCount > 0 && cardTitle != "") {
 				  var id = GetCardIdFromTitle(cardTitle);
-				  if (id > -1) {
-					if (cardSet[id].player == deckPlayer) {
-					  $("#cardcontainer").append(
-						'<div id="cg-' +
-						  uid++ +
-						  '" class="cardgroup" style="float:left;" data-id="' +
-						  id +
-						  '" data-line="' +
-						  outputLine +
-						  '" oncontextmenu="return false"></div>'
-					  );
-					  //the seed random is just to keep card rotations consistent
-					  //we need to restore randomness afterwards, so we'll store a random number to use as seed
-					  var storedRandomness = Math.random();
-					  Math.seedrandom(id);
-					  for (var j = 0; j < cardCount; j++) {
-						totalCards++;
-						if (cardSet[id].faction !== cardSet[json.identity].faction)
-						  totalInfluence += cardSet[id].influence;
-						if (
-						  deckPlayer == corp &&
-						  typeof cardSet[id].agendaPoints !== "undefined"
-						)
-						  totalAgendaPoints += cardSet[id].agendaPoints;
-						json.cards.push(id);
-						var stylestr = "";
-						if (j > 0)
-						  stylestr =
-							'" style="margin-left: -120px; transform:rotate(' +
-							(Math.random() * 10 - 5) +
-							"deg);";
-						$("#cardcontainer")
-						  .children()
-						  .last()
-						  .append(
-							'<img src="images/' + ChangeImageFileToJPG(cardSet[id].imageFile) + stylestr + '">'
-						  );
-					  }
-					  Math.seedrandom(storedRandomness); //restore unpredictable randomness
-					  $("#cardcontainer").children().last().mousedown(mouseDownCallback);
-					  outputLine++;
+					if (id > -1) {
+						if (cardSet[id].player == deckPlayer) {
+							//update counts only
+							deckCounts[id] = (deckCounts[id]||0) + cardCount;
+							for (var j=0;j<cardCount;j++) {
+								json.cards.push(id);
+								totalCards++;
+								if (cardSet[id].faction !== cardSet[json.identity].faction) totalInfluence += cardSet[id].influence;
+								if (deckPlayer == corp && typeof cardSet[id].agendaPoints !== 'undefined') totalAgendaPoints += cardSet[id].agendaPoints;
+							}
+						} else {
+							if (deckPlayer == runner) $("#output").append(cardTitle + " is not a Runner card<br/>");
+							else $("#output").append(cardTitle + " is not a Corp card<br/>");
+							validDeck = false;
+						}
 					} else {
-					  if (deckPlayer == runner)
-						$("#output").append(cardTitle + " is not a Runner card<br/>");
-					  else $("#output").append(cardTitle + " is not a Corp card<br/>");
-					  validDeck = false;
+						$("#output").append(cardTitle + " not found<br/>");
+						validDeck = false;
 					}
-				  } else {
-					$("#output").append(cardTitle + " not found<br/>");
-					validDeck = false;
-				  }
 				}
 			  }
+			  UpdateCardCountsUI();
 			  //done checking, permit launch if valid
 			  if (validDeck) {
 				var validityOutput = "";
@@ -542,10 +603,17 @@
 			}
 		</script>
 		<style>
-			img {
-				width: 144px;
-				margin: 15px;
-			}
+			/* Card builder styles */
+			#cardcontainer { display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:14px; padding:18px; }
+			#cardcontainer .card-item { background:#1e2730; border:1px solid #2e3b46; border-radius:10px; padding:8px; position:relative; box-shadow:0 2px 4px rgba(0,0,0,.4); transition:box-shadow .15s; }
+			#cardcontainer .card-item:hover { box-shadow:0 4px 10px rgba(0,0,0,.6); }
+			#cardcontainer .card-item img { width:100%; height:auto; border-radius:6px; display:block; }
+			#cardcontainer .card-title { font-size:12px; line-height:1.2; margin-top:6px; color:#ddd; min-height:30px; }
+			#cardcontainer .card-controls { display:flex; justify-content:space-between; margin-top:6px; }
+			#cardcontainer .card-controls button { flex:1; margin:0 2px; padding:4px 0; font-size:14px; cursor:pointer; background:#2f4a5a; color:#fff; border:1px solid #466577; border-radius:4px; }
+			#cardcontainer .card-controls button:hover { background:#3d5d71; }
+			#cardcontainer .count-badge { position:absolute; top:6px; left:6px; background:#000a; color:#fff; padding:2px 8px; font-size:12px; border-radius:12px; min-width:24px; text-align:center; }
+			#cardcontainer .count-badge.has-copies { background:#1976d2; }
 			
 			body {
 			  background:#354149;
