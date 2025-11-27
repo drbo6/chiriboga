@@ -438,6 +438,38 @@
 			  }
 			};
 
+			// Helper: Select a precon for the given identity with priority order
+			function SelectPreconForIdentity(identityId) {
+				// Priority 1: Find all default precons matching identity
+				var defaultPrecons = [];
+				for (var i = 0; i < preconDecks.length; i++) {
+					if (String(preconDecks[i].identity) === String(identityId) && preconDecks[i].default === true) {
+						defaultPrecons.push(i);
+					}
+				}
+				if (defaultPrecons.length > 0) {
+					// Pick one randomly if multiple exist
+					var randomIdx = defaultPrecons[RandomRange(0, defaultPrecons.length - 1)];
+					return randomIdx;
+				}
+				
+				// Priority 2: Find all non-default precons matching identity
+				var nonDefaultPrecons = [];
+				for (var i = 0; i < preconDecks.length; i++) {
+					if (String(preconDecks[i].identity) === String(identityId) && preconDecks[i].default !== true) {
+						nonDefaultPrecons.push(i);
+					}
+				}
+				if (nonDefaultPrecons.length > 0) {
+					// Pick one randomly if multiple exist
+					var randomIdx = nonDefaultPrecons[RandomRange(0, nonDefaultPrecons.length - 1)];
+					return randomIdx;
+				}
+				
+				// Priority 3: No matching precon found
+				return -1;
+			}
+
 			function GenerateDeck() {
 			  var playerCards = [];
 			  var countSoFar = []; //of each card (by index in playerCards)
@@ -476,19 +508,41 @@
 				  }
 				  else countSoFar[pci]++;
 				}
-			  } //create a random deck for this identity
+			  } //create a deck for this identity - try precon first, then random generation
 			  else {
-				var cardsChosen = DeckBuild(cardSet[json.identity]);
-				//convert generated deck into counts
-				for (var i = 0; i < cardsChosen.length; i++) {
-				  var pci = playerCards.indexOf(cardsChosen[i]);
-				  if (pci < 0) {
-					pci = playerCards.length;
-					playerCards.push(cardsChosen[i]);
-					countSoFar[pci] = 1;
-				  }
-				  else countSoFar[pci]++;
-				}	  
+				// Try to find a matching precon with priority order
+				var preconIdx = SelectPreconForIdentity(json.identity);
+				if (preconIdx >= 0) {
+					// Load from selected precon
+					var precon = preconDecks[preconIdx];
+					for (var cardCode in precon.cards) {
+						var qty = precon.cards[cardCode];
+						var cardIdx = parseInt(cardCode);
+						if (typeof cardSet[cardIdx] !== 'undefined') {
+							var pci = playerCards.indexOf(cardIdx);
+							if (pci < 0) {
+								pci = playerCards.length;
+								playerCards.push(cardIdx);
+								countSoFar[pci] = qty;
+							} else {
+								countSoFar[pci] += qty;
+							}
+						}
+					}
+				} else {
+					// No matching precon - use random generation
+					var cardsChosen = DeckBuild(cardSet[json.identity]);
+					//convert generated deck into counts
+					for (var i = 0; i < cardsChosen.length; i++) {
+					  var pci = playerCards.indexOf(cardsChosen[i]);
+					  if (pci < 0) {
+						pci = playerCards.length;
+						playerCards.push(cardsChosen[i]);
+						countSoFar[pci] = 1;
+					  }
+					  else countSoFar[pci]++;
+					}
+				}
 			  }
 
 			  //print into textarea
