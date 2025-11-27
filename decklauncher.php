@@ -54,7 +54,7 @@
 					if (cardData && cardData.data) {
 						for (var i = 0; i < cardData.data.length; i++) {
 							var c = cardData.data[i];
-							window.cardCodeLookup[c.code] = { title: c.title || c.stripped_title, type_code: c.type_code };
+							window.cardCodeLookup[c.code] = { title: c.title || c.stripped_title, type_code: c.type_code, side_code: c.side_code };
 						}
 					}
 				} catch(e) { /* ignore */ }
@@ -583,6 +583,22 @@
 									console.log('Entry:', entry);
 									var cardsObj = entry.cards || {};
 									console.log('Cards object:', cardsObj);
+									
+									// Check if imported deck side matches current launcher mode
+									// We're in corp mode if p=c OR if r parameter is empty (default is corp)
+									var pParam = URIParameter("p");
+									var rParam = URIParameter("r");
+									var currentMode = (pParam === "c" || rParam === "") ? "corp" : "runner";
+									var firstCardCode = Object.keys(cardsObj)[0];
+									if (firstCardCode && window.cardCodeLookup && window.cardCodeLookup[firstCardCode]) {
+										var importedSide = window.cardCodeLookup[firstCardCode].side_code;
+										console.log('Current mode:', currentMode, 'Imported side:', importedSide);
+										if ((currentMode === "corp" && importedSide === "runner") || 
+										    (currentMode === "runner" && importedSide === "corp")) {
+											alert('Cannot import ' + importedSide + ' deck. You are in ' + currentMode + ' mode. Click on "Set as Opponent" to switch sides.');
+											return;
+										}
+									}
 									
 									// Find identity from cards - it should be in the cardsObj with type_code === 'identity'
 									var identityCode = null;
