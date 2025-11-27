@@ -207,7 +207,10 @@
 			// Card text - replace bracketed words with images (NSG SVG format)
 			if (cardInfo.text) {
 				var cardText = cardInfo.text.replace(/\[([^\]]+)\]/g, function(match, word) {
-					return '<img src="images/nsg/NSG_' + word.toUpperCase() + '.svg" class="card-icon" alt="' + word + '">';
+					var iconName = word.toUpperCase();
+					// Special case: [trash] maps to TRASH_ABILITY
+					if (iconName === 'TRASH') iconName = 'TRASH_ABILITY';
+					return '<img src="images/nsg/NSG_' + iconName + '.svg" class="card-icon" alt="' + word + '">';
 				});
 				// Replace newlines with <br> tags (handle both literal \n and actual newlines)
 				cardText = cardText.replace(/\\n/g, '<br>').replace(/\n/g, '<br>');
