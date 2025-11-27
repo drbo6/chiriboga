@@ -551,13 +551,15 @@
 			  
 			  //identity select will regenerate a deck if changed
 			  $("#identityselect").change(function () {
-				json.identity = $("select#identityselect option:checked").val();
-				$("#identity").prop(
-				  "src",
-				  "images/" + ChangeImageFileToJPG(cardSet[json.identity].imageFile)
-				);
-				history.pushState(null, "Chiriboga", "decklauncher.php"); //so a random deck is generated
-				GenerateDeck();
+								json.identity = $("select#identityselect option:checked").val();
+								$("#identity").prop(
+									"src",
+									"images/" + ChangeImageFileToJPG(cardSet[json.identity].imageFile)
+								);
+								// Update deckPlayer to match selected identity's side
+								deckPlayer = cardSet[json.identity].player;
+								history.pushState(null, "Chiriboga", "decklauncher.php"); //so a random deck is generated
+								GenerateDeck();
 			  });
 
 			  //set up identity select
@@ -572,23 +574,42 @@
 							$.getJSON(apiUrl)
 							 .done(function(resp){
 								try {
+									console.log('NRDB Response:', resp);
 									var entry = (resp && resp.data && resp.data[0]) ? resp.data[0] : null;
 									if (!entry) { alert('Decklist not found'); return; }
-									var cardsObj = entry.cards || entry.cards_by_code || {};
-									var identityCode = entry.identity || entry.identity_code || entry.cards?.identity || null;
+									console.log('Entry:', entry);
+									var cardsObj = entry.cards || {};
+									console.log('Cards object:', cardsObj);
+									
+									// Find identity from cards - it should be in the cardsObj with type_code === 'identity'
+									var identityCode = null;
+									for (var code in cardsObj) {
+										if (window.cardCodeLookup && window.cardCodeLookup[code] && window.cardCodeLookup[code].type_code === 'identity') {
+											identityCode = code;
+											break;
+										}
+									}
+									console.log('Identity code found:', identityCode);
+									
 									var lines = [];
 									// If identity present, switch identity in builder
 									if (identityCode && window.cardCodeLookup && window.cardCodeLookup[identityCode]) {
 										// find matching cardSet index for identity title
 										var identTitle = window.cardCodeLookup[identityCode].title;
+										console.log('Looking for identity:', identTitle);
 										for (var i=0;i<cardSet.length;i++) {
 											if (typeof cardSet[i] !== 'undefined' && cardSet[i].cardType === 'identity') {
-												if (cardSet[i].title === identTitle) {
-													$("#identityselect option[value=" + i + "]").prop("selected","selected");
-													$("#identity").prop("src","images/" + ChangeImageFileToJPG(cardSet[i].imageFile));
-													json.identity = i;
-													break;
-												}
+											if (cardSet[i].title === identTitle) {
+												console.log('Found identity at index:', i);
+												// Set identity without triggering change yet
+												$("#identityselect").val(i);
+												$("#identity").prop("src", "images/" + ChangeImageFileToJPG(cardSet[i].imageFile));
+												json.identity = i;
+												deckPlayer = cardSet[i].player;
+												// Refresh card list for new side
+												RenderAllCardsList();
+												break;
+											}
 											}
 										}
 									}
@@ -601,7 +622,7 @@
 										if (info.type_code === 'identity') continue;
 										lines.push(qty + ' ' + info.title);
 									}
-									// Fill textarea and trigger parse
+									// Fill textarea and trigger parse (this validates without generating new deck)
 									$("#deck").val(lines.join("\n"));
 									Parse();
 								} catch(e) {
