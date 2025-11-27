@@ -38,6 +38,20 @@
 			echo '<script src="sets/'.$set.'.js?' . filemtime('sets/'.$set.'.js') . '"></script>';
 		}
 		
+		?>
+		<script>
+			var json = {};
+			var opponentdeckstr = "";
+			var opponentdeckimg = "";
+			var uid = 0;
+			var preconDecks = []; // List of precon decks loaded from files
+			
+			// Function to register a precon deck
+			function registerPrecon(deck) {
+				preconDecks.push(deck);
+			}
+		</script>
+		<?php
 		// Load preconstructed decks
 		$preconDir = 'precons';
 		if (is_dir($preconDir)) {
@@ -46,15 +60,8 @@
 				echo '<script src="' . $preconFile . '?' . filemtime($preconFile) . '"></script>';
 			}
 		}
-		
 		?>
 		<script>
-			var json = {};
-			var opponentdeckstr = "";
-			var opponentdeckimg = "";
-			var uid = 0;
-			var preconDecks = []; // List of precon decks loaded from files
-
 			// Load card data from JSON
 			$.getJSON('carddata/carddata.json', function(data) {
 				cardData = data;
@@ -68,12 +75,6 @@
 						}
 					}
 				} catch(e) { /* ignore */ }
-				// Collect all precon decks from global scope
-				for (var key in window) {
-					if (key.indexOf('precon_') === 0 && typeof window[key] === 'object') {
-						preconDecks.push(window[key]);
-					}
-				}
 				// Sort by name
 				preconDecks.sort(function(a, b) {
 					return a.name.localeCompare(b.name);

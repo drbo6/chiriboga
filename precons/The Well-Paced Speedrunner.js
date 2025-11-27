@@ -1,6 +1,6 @@
 // Ken "Express" Tenma preconstructed deck
-var precon_ken_express = {
-	name: "Ken \"Express\" Tenma: Disappeared Clone",
+registerPrecon({
+	name: "The Well-Paced Speedrunner",
 	identity: "31013",
 	cards: {
 		"30008": 2,  // Leech
@@ -26,4 +26,4 @@ var precon_ken_express = {
 		"31038": 2,  // Prepaid VoicePAD
 		"31039": 3   // Earthrise Hotel
 	}
-};
+});
