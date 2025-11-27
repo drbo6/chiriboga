@@ -256,6 +256,8 @@
 					$('#lightbox-text').html('<div class="card-text-info"><p>Card data not found</p></div>');
 				}
 				
+				// Track which card is shown in lightbox
+				window.currentLightboxCardId = cardId;
 				$('#lightbox').addClass('active');
 			}
 			function HideLightbox() { $('#lightbox').removeClass('active'); }
@@ -928,6 +930,33 @@
 					  ShowLightbox(parseInt(json.identity));
 				  }
 			  });
+
+			  // Hide Export JS Deck by default; reveal via secret gesture
+			  (function(){
+				var exportBtn = document.getElementById('exportjs');
+				if (exportBtn) exportBtn.style.display = 'none';
+				var clickCount = 0;
+				// When lightbox image is clicked, if it's the identity, count up to 6
+				$(document).off('click._expsec','#lightbox-img').on('click._expsec','#lightbox-img', function(){
+					var shownId = window.currentLightboxCardId;
+					if (json && parseInt(json.identity) === shownId) {
+						clickCount++;
+						if (clickCount >= 6) {
+							if (exportBtn) exportBtn.style.display = '';
+						}
+					} else {
+						// Reset if not identity card
+						clickCount = 0;
+					}
+				});
+				// Reset counter when closing lightbox
+				$(document).off('click._expsec_close','#lightbox-close, #lightbox').on('click._expsec_close','#lightbox-close, #lightbox', function(e){
+					// Only reset if actually closing
+					if (e.target.id === 'lightbox' || e.target.id === 'lightbox-close') {
+						clickCount = 0;
+					}
+				});
+			  })();
 			  //choose an identity at random, unless a load string was specified
 			  var specifiedPlayerDeck = URIParameter(dC);
 			  if (specifiedPlayerDeck == "" || specifiedPlayerDeck == "random") {
