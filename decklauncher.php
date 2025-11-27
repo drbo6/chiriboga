@@ -38,12 +38,22 @@
 			echo '<script src="sets/'.$set.'.js?' . filemtime('sets/'.$set.'.js') . '"></script>';
 		}
 		
+		// Load preconstructed decks
+		$preconDir = 'precons';
+		if (is_dir($preconDir)) {
+			$preconFiles = glob($preconDir . '/*.js');
+			foreach ($preconFiles as $preconFile) {
+				echo '<script src="' . $preconFile . '?' . filemtime($preconFile) . '"></script>';
+			}
+		}
+		
 		?>
 		<script>
 			var json = {};
 			var opponentdeckstr = "";
 			var opponentdeckimg = "";
 			var uid = 0;
+			var preconDecks = []; // List of precon decks loaded from files
 
 			// Load card data from JSON
 			$.getJSON('carddata/carddata.json', function(data) {
@@ -58,6 +68,21 @@
 						}
 					}
 				} catch(e) { /* ignore */ }
+				// Collect all precon decks from global scope
+				for (var key in window) {
+					if (key.indexOf('precon_') === 0 && typeof window[key] === 'object') {
+						preconDecks.push(window[key]);
+					}
+				}
+				// Sort by name
+				preconDecks.sort(function(a, b) {
+					return a.name.localeCompare(b.name);
+				});
+				// Populate precon dropdown
+				var dropdown = $('#preconselect');
+				for (var i = 0; i < preconDecks.length; i++) {
+					dropdown.append('<option value="' + i + '">' + preconDecks[i].name + '</option>');
+				}
 			});
 
 			//UTILITY: ensure deckCounts matches json.cards
@@ -683,6 +708,64 @@
 						  }
 
 						  $('#importdeck').off('click').on('click', ImportDeckFromNRDB);
+
+			// Load preconstructed deck
+			function LoadPrecon() {
+				var selectedIdx = parseInt($('#preconselect').val());
+				if (selectedIdx < 0 || selectedIdx >= preconDecks.length) return;
+				
+				var precon = preconDecks[selectedIdx];
+				
+				// Convert identity code to cardSet index (code is used as index)
+				var identityIdx = parseInt(precon.identity);
+				
+				if (typeof cardSet[identityIdx] === 'undefined') {
+					alert('Identity not found in cardSet');
+					return;
+				}
+				
+				// Set identity
+				$('#identityselect').val(identityIdx);
+				$('#identity').prop('src', 'images/' + ChangeImageFileToJPG(cardSet[identityIdx].imageFile));
+				json.identity = identityIdx;
+				deckPlayer = cardSet[identityIdx].player;
+				
+				// Refresh card list for new side
+				RenderAllCardsList();
+				
+				// Build deck from cards
+				var lines = [];
+				json.cards = [];
+				deckCounts = {};
+				
+				for (var cardCode in precon.cards) {
+					var qty = precon.cards[cardCode];
+					var cardIdx = parseInt(cardCode); // Code is the index
+					
+					if (typeof cardSet[cardIdx] !== 'undefined') {
+						deckCounts[cardIdx] = qty;
+						for (var j = 0; j < qty; j++) {
+							json.cards.push(cardIdx);
+						}
+						lines.push(qty + ' ' + cardSet[cardIdx].title);
+					}
+				}
+				
+				// Fill textarea and trigger parse
+				$('#deck').val(lines.join('\n'));
+				$('#deck').prop('rows', lines.length);
+				Parse();
+				UpdateCardCountsUI();
+				
+				// Reset dropdown
+				$('#preconselect').val('-1');
+			}
+			
+			$('#preconselect').off('change').on('change', function() {
+				if ($(this).val() !== '-1') {
+					LoadPrecon();
+				}
+			});
 			  for (var i = 0; i < playerIdentities.length; i++) {
 				$("#identityselect").append(
 				  "<option value=" +
@@ -878,6 +961,11 @@
 					<textarea id="deck" spellcheck="false" cols="30" style="width:100%;"></textarea>
 					<div style="margin-top:8px;">
 						<button id="importdeck" class="button" type="button">Import Deck</button>
+					</div>
+					<div style="margin-top:8px;">
+						<select id="preconselect" class="button" style="width:85%; display:block; margin:0 auto;">
+							<option value="-1">Load Precon Deck...</option>
+						</select>
 					</div>
 					<br/>
 				</div>
