@@ -645,6 +645,7 @@
 								}
 									// Fill textarea and trigger parse (this validates without generating new deck)
 									$("#deck").val(lines.join("\n"));
+									$("#deck").prop("rows", lines.length); //resize textarea height to fit
 									Parse();
 								} catch(e) {
 									console.error(e);
