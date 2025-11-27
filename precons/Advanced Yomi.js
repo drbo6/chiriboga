@@ -2,6 +2,8 @@
 registerPrecon({
     name: "Advanced Yomi",
     identity: "30043",
+    default: false,
+    deck_set: "none",
     cards: {
         "30038": 1,  // Ansel 1.0
         "30044": 1,  // Longevity Serum

@@ -749,6 +749,8 @@
 															lines.push('registerPrecon({');
 															lines.push('    name: ' + JSON.stringify(name) + ',');
 															lines.push('    identity: ' + JSON.stringify(String(json.identity)) + ',');
+															lines.push('    default: false,');
+															lines.push('    deck_set: "none",');
 															lines.push('    cards: {');
 															var keys = Object.keys(counts).sort(function(a,b){return parseInt(a)-parseInt(b);} );
 															for (var k=0;k<keys.length;k++) {
