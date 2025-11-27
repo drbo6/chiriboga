@@ -613,7 +613,7 @@ div.options {
 #lightbox-img { 
 	max-width: 450px; 
 	max-height: 90vh; 
-	border-radius: 10px; 
+	border-radius: 13px; 
 	box-shadow: 0 0 30px rgba(0,0,0,0.8); 
 	flex-shrink: 0;
 }
@@ -698,6 +698,7 @@ div.options {
 	flex-wrap:wrap;
 	gap:0;
 	width:100%;
+	background: transparent;
 }
 
 #dataentry {
@@ -709,6 +710,7 @@ div.options {
 	height: 100vh;
 	display: flex;
 	flex-direction: column;
+	background: transparent;
 }
 
 #identityselect {
@@ -735,7 +737,7 @@ div.options {
 	width:100%; 
 	display:block; 
 	margin:12px 0 4px 0; 
-	border-radius:8px; 
+	border-radius:15px; 
 	box-shadow:0 0 12px rgba(37,180,255,.4); 
 }
 
