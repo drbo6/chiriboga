@@ -688,6 +688,10 @@
 													deckPlayer = cardSet[i].player;
 													// Refresh card list for new side
 													RenderAllCardsList();
+													// Repopulate precon dropdown to show matching decks for new identity
+													if (typeof window.PopulatePreconDropdownForIdentity === 'function') {
+														window.PopulatePreconDropdownForIdentity(i);
+													}
 													foundIdentity = true;
 													break;
 												}
