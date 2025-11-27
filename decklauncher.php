@@ -48,6 +48,16 @@
 			// Load card data from JSON
 			$.getJSON('carddata/carddata.json', function(data) {
 				cardData = data;
+				// Build quick lookup by code for import
+				try {
+					window.cardCodeLookup = {};
+					if (cardData && cardData.data) {
+						for (var i = 0; i < cardData.data.length; i++) {
+							var c = cardData.data[i];
+							window.cardCodeLookup[c.code] = { title: c.title || c.stripped_title, type_code: c.type_code };
+						}
+					}
+				} catch(e) { /* ignore */ }
 			});
 
 			//UTILITY: ensure deckCounts matches json.cards
@@ -551,6 +561,58 @@
 			  });
 
 			  //set up identity select
+						  // Import deck from NetrunnerDB
+						  function ImportDeckFromNRDB() {
+							var url = prompt('Paste NetrunnerDB deck URL');
+							if (!url) return;
+							var m = url.match(/decklist\/([0-9a-f\-]+)/i);
+							if (!m) { alert('Could not extract deck UUID from URL'); return; }
+							var uuid = m[1];
+							var apiUrl = 'https://netrunnerdb.com/api/2.0/public/decklist/' + uuid;
+							$.getJSON(apiUrl)
+							 .done(function(resp){
+								try {
+									var entry = (resp && resp.data && resp.data[0]) ? resp.data[0] : null;
+									if (!entry) { alert('Decklist not found'); return; }
+									var cardsObj = entry.cards || entry.cards_by_code || {};
+									var identityCode = entry.identity || entry.identity_code || entry.cards?.identity || null;
+									var lines = [];
+									// If identity present, switch identity in builder
+									if (identityCode && window.cardCodeLookup && window.cardCodeLookup[identityCode]) {
+										// find matching cardSet index for identity title
+										var identTitle = window.cardCodeLookup[identityCode].title;
+										for (var i=0;i<cardSet.length;i++) {
+											if (typeof cardSet[i] !== 'undefined' && cardSet[i].cardType === 'identity') {
+												if (cardSet[i].title === identTitle) {
+													$("#identityselect option[value=" + i + "]").prop("selected","selected");
+													$("#identity").prop("src","images/" + ChangeImageFileToJPG(cardSet[i].imageFile));
+													json.identity = i;
+													break;
+												}
+											}
+										}
+									}
+
+									// Convert cards map to lines (skip identities)
+									for (var code in cardsObj) {
+										var qty = cardsObj[code];
+										var info = window.cardCodeLookup ? window.cardCodeLookup[code] : null;
+										if (!info) continue;
+										if (info.type_code === 'identity') continue;
+										lines.push(qty + ' ' + info.title);
+									}
+									// Fill textarea and trigger parse
+									$("#deck").val(lines.join("\n"));
+									Parse();
+								} catch(e) {
+									console.error(e);
+									alert('Error importing deck');
+								}
+							 })
+							 .fail(function(){ alert('Failed to fetch decklist from NRDB'); });
+						  }
+
+						  $('#importdeck').off('click').on('click', ImportDeckFromNRDB);
 			  for (var i = 0; i < playerIdentities.length; i++) {
 				$("#identityselect").append(
 				  "<option value=" +
@@ -727,10 +789,14 @@
 				<button id="launch" class="button" onclick="window.location.href=$(this).prop('href');">Play using this deck</button>
 				<button id="opponent" class="button" onclick="window.location.href=$(this).prop('href');">Set as opponent</button>
 				<button id="togglecards" onclick="ToggleOtherCards();" class="button">Hide other cards</button>
-				<button id="exittomenu" onclick="window.location.href='index.php';" class="button">Exit</button>
+				<button id="exittomenu" onclick="window.location.href='index.php';" class="button">Back to Menu</button>
 			</div>
 				<div class="leftrow toprow">
-					<textarea id="deck" spellcheck="false" cols="30" style="width:100%;"></textarea><br/>
+					<textarea id="deck" spellcheck="false" cols="30" style="width:100%;"></textarea>
+					<div style="margin-top:8px;">
+						<button id="importdeck" class="button" type="button">Import Deck</button>
+					</div>
+					<br/>
 				</div>
 				<br/>
 			</div>

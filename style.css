@@ -781,6 +781,33 @@ div.options {
 	min-width:140px;
 }
 
+/* Import Deck button: centered and cohesive styling */
+#importdeck {
+	display: block;
+	width: 85%;
+	margin: 12px auto 0 auto;
+	background: linear-gradient(135deg,#0a1f33 0%, #093b5e 50%, #0a1f33 100%);
+	border: 1px solid #0d6ea5;
+	color: #e6f8ff;
+	padding: 12px 16px;
+	border-radius: 10px;
+	font-size: 15px;
+	font-weight: 700;
+	letter-spacing: .04em;
+	box-shadow: 0 0 6px #0d6ea5, inset 0 0 12px rgba(13,110,165,0.4);
+}
+#importdeck:hover {
+	background: linear-gradient(135deg,#0c2843 0%, #0d507f 50%, #0c2843 100%);
+	color: #c7eeff;
+	box-shadow: 0 0 12px #25b4ff, 0 0 30px rgba(37,180,255,.6), inset 0 0 22px rgba(37,180,255,0.55);
+}
+#importdeck:disabled {
+	background: #0a1f33;
+	color: #7aa8bf;
+	opacity: 0.6;
+	cursor: default;
+}
+
 .cardgroup {
 	cursor:pointer;
 }
