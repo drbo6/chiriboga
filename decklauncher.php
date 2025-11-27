@@ -560,6 +560,13 @@
 					"</option>\n"
 				);
 			  }
+			  
+			  // Clicking the identity image opens the lightbox for that identity
+			  $('#identity').off('click').on('click', function() {
+				  if (json && json.identity) {
+					  ShowLightbox(parseInt(json.identity));
+				  }
+			  });
 			  //choose an identity at random, unless a load string was specified
 			  var specifiedPlayerDeck = URIParameter(dC);
 			  if (specifiedPlayerDeck == "" || specifiedPlayerDeck == "random") {
