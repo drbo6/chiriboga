@@ -714,6 +714,13 @@
 			}
 
 			function Normalise(src) {
+				if (!src) return "";
+				try { src = src.normalize ? src.normalize('NFKC') : src; } catch(e) {}
+				// Map smart quotes/apostrophes and whitespace to plain ASCII
+				src = src
+					.replace(/\u2019|\u2032|\u02BC|\uFF07/g, "'") // apostrophes/primes
+					.replace(/\u201C|\u201D|\u2033|\uFF02/g, '"') // double quotes
+					.replace(/\u00A0/g, ' '); // non-breaking space
 				return src.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
 			}
 
@@ -748,7 +755,13 @@
 			  var outputLine = 0;
 			  json.cards = [];
 			  deckCounts = {};
-		  var splitText = $("#deck").val().replace(/'/g,"'").replace(/ʼ/g,"'").split("\n");
+		  var pre = $("#deck").val();
+		  // Normalize common apostrophes/quotes in pasted text before parsing
+		  pre = pre
+			.replace(/\u2019|\u2032|\u02BC|\uFF07/g, "'")
+			.replace(/\u201C|\u201D|\u2033|\uFF02/g, '"')
+			.replace(/\u00A0/g, ' ');
+		  var splitText = pre.split("\n");
 			  for (var i = 0; i < splitText.length; i++) {
 				var cardCount = 0;
 				var cardTitle = "";
