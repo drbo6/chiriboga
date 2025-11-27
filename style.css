@@ -781,6 +781,66 @@ div.options {
 	min-width:140px;
 }
 
+/* High-contrast action buttons (Play / Set / Hide / Back) */
+#launch, #opponent, #togglecards, #exittomenu {
+	/* Bright white-silver variant: lively yet cohesive */
+	background: linear-gradient(135deg, #f2f2f2 0%, #e6e9ed 55%, #f2f2f2 100%);
+	border: 1px solid #cfd6dc;
+	color: #0b2133;
+	text-shadow: 0 1px 0 rgba(255,255,255,0.35);
+	box-shadow: 0 0 10px rgba(200,220,235,0.45), inset 0 0 10px rgba(255,255,255,0.35);
+	border-radius: 10px;
+	font-weight: 800;
+}
+#launch:hover, #opponent:hover, #togglecards:hover, #exittomenu:hover {
+	background: linear-gradient(135deg, #ffffff 0%, #eef2f6 55%, #ffffff 100%);
+	border-color: #e0e6ec;
+	color: #061726;
+	box-shadow: 0 0 16px rgba(210,230,245,0.6), 0 0 28px rgba(200,220,235,0.45), inset 0 0 14px rgba(255,255,255,0.5);
+}
+#launch:active, #opponent:active, #togglecards:active, #exittomenu:active {
+	background: linear-gradient(135deg, #e8eaed 0%, #d9dee4 55%, #e8eaed 100%);
+	border-color: #c7d0d8;
+	box-shadow: 0 0 9px rgba(195,210,222,0.5) inset, 0 0 9px rgba(195,210,222,0.45);
+}
+
+/* Action buttons: Play / Set / Hide / Back */
+#play, #set, #hide, #back,
+.btn-play, .btn-set, .btn-hide, .btn-back {
+	display: inline-block;
+	background: transparent;
+	border: 1px solid #25b4ff;
+	color: #cfe9f7;
+	padding: 10px 14px;
+	border-radius: 999px; /* pill shape */
+	font-size: 14px;
+	font-weight: 700;
+	letter-spacing: .03em;
+	text-transform: uppercase;
+	box-shadow: 0 0 10px rgba(37,180,255,0.25) inset, 0 0 6px rgba(37,180,255,0.35);
+	transition: background .15s ease, box-shadow .15s ease, color .15s ease, border-color .15s ease;
+}
+#play:hover, #set:hover, #hide:hover, #back:hover,
+.btn-play:hover, .btn-set:hover, .btn-hide:hover, .btn-back:hover {
+	background: radial-gradient(120px circle at 50% 50%, rgba(37,180,255,0.18) 0%, rgba(9,59,94,0.35) 60%, rgba(10,31,51,0.0) 100%);
+	border-color: #59c9ff;
+	color: #e6f8ff;
+	box-shadow: 0 0 14px rgba(37,180,255,0.55), inset 0 0 14px rgba(37,180,255,0.35);
+}
+#play:active, #set:active, #hide:active, #back:active,
+.btn-play:active, .btn-set:active, .btn-hide:active, .btn-back:active {
+	background: linear-gradient(135deg,#0c2843,#0d507f);
+	border-color: #25b4ff;
+	box-shadow: 0 0 10px rgba(37,180,255,0.45) inset, 0 0 10px rgba(37,180,255,0.45);
+}
+#play:disabled, #set:disabled, #hide:disabled, #back:disabled,
+.btn-play:disabled, .btn-set:disabled, .btn-hide:disabled, .btn-back:disabled {
+	opacity: 0.6;
+	border-color: #0d6ea5;
+	color: #9bbfd1;
+	cursor: default;
+}
+
 /* Import Deck button: centered and cohesive styling */
 #importdeck {
 	display: block;
