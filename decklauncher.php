@@ -149,35 +149,66 @@
 					}
 				}
 				
-				// Build card text display
-				if (cardInfo) {
-					var infoHTML = '<div class="card-text-info">';
-					infoHTML += '<h2>' + cardInfo.title + '</h2>';
-					
-					// Type and keywords
-					var typeLine = cardInfo.type_code;
-					if (cardInfo.keywords) {
-						typeLine += ': ' + cardInfo.keywords;
+			// Build card text display
+			if (cardInfo) {
+				var infoHTML = '<div class="card-text-info">';
+				infoHTML += '<h2>' + cardInfo.title + '</h2>';
+				
+				// Helper function to capitalize first letter only
+				function capitalizeFirst(str) {
+					if (!str) return '';
+					return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+				}
+				
+				// Type and keywords - capitalize first letter only
+				var typeLine = capitalizeFirst(cardInfo.type_code || '');
+				if (cardInfo.keywords) {
+					typeLine += ': ' + capitalizeFirst(cardInfo.keywords || '');
+				}
+				
+				// Handle cost display based on card type
+				if (cardInfo.type_code === 'agenda') {
+					// For agendas: advancement_cost/agenda_points followed by agenda icon
+					if (cardInfo.advancement_cost !== undefined && cardInfo.agenda_points !== undefined) {
+						typeLine += ' · ' + cardInfo.advancement_cost + '/' + cardInfo.agenda_points + ' <img src="images/nsg/NSG_AGENDA.svg" class="card-icon" alt="agenda points">';
 					}
+				} else {
+					// For non-agendas: cost followed by credit icon
 					if (cardInfo.cost !== undefined && cardInfo.cost !== null) {
-						typeLine += ' · ' + cardInfo.cost;
+						typeLine += ' · ' + cardInfo.cost + '<img src="images/nsg/NSG_CREDIT.svg" class="card-icon" alt="credit">';
 					}
-					infoHTML += '<p class="card-type">' + typeLine + '</p>';
-					
-					// Faction
-					infoHTML += '<p class="card-faction">' + cardInfo.faction_code + '</p>';
-					
-					// Card text
-					if (cardInfo.text) {
-						infoHTML += '<div class="card-text">' + cardInfo.text + '</div>';
-					}
-					
-					// Flavor text
-					if (cardInfo.flavor) {
-						infoHTML += '<p class="card-flavor">' + cardInfo.flavor + '</p>';
-					}
-					
-					infoHTML += '</div>';
+				}
+				
+				infoHTML += '<p class="card-type">' + typeLine + '</p>';
+				
+				// Faction - special handling for NBN, HB, and neutral
+				var factionDisplay = '';
+				if (cardInfo.faction_code === 'nbn') {
+					factionDisplay = 'NBN';
+				} else if (cardInfo.faction_code === 'hb') {
+					factionDisplay = 'HB';
+				} else if (cardInfo.faction_code === 'neutral-corp' || cardInfo.faction_code === 'neutral-runner') {
+					factionDisplay = 'Neutral';
+				} else {
+					factionDisplay = capitalizeFirst(cardInfo.faction_code || '');
+				}
+				infoHTML += '<p class="card-faction">' + factionDisplay + '</p>';
+				
+			// Card text - replace bracketed words with images (NSG SVG format)
+			if (cardInfo.text) {
+				var cardText = cardInfo.text.replace(/\[([^\]]+)\]/g, function(match, word) {
+					return '<img src="images/nsg/NSG_' + word.toUpperCase() + '.svg" class="card-icon" alt="' + word + '">';
+				});
+				// Replace newlines with <br> tags (handle both literal \n and actual newlines)
+				cardText = cardText.replace(/\\n/g, '<br>').replace(/\n/g, '<br>');
+				infoHTML += '<div class="card-text">' + cardText + '</div>';
+			}
+			
+			// Flavor text
+			if (cardInfo.flavor) {
+				var flavorText = cardInfo.flavor.replace(/\\n/g, '<br>').replace(/\n/g, '<br>');
+				infoHTML += '<p class="card-flavor">' + flavorText + '</p>';
+			}				infoHTML += '</div>';
 					$('#lightbox-text').html(infoHTML);
 				} else {
 					$('#lightbox-text').html('<div class="card-text-info"><p>Card data not found</p></div>');

@@ -610,7 +610,7 @@ div.options {
 	gap: 20px;
 	align-items: flex-start;
 }
-#lightbox-content img { 
+#lightbox-img { 
 	max-width: 450px; 
 	max-height: 90vh; 
 	border-radius: 10px; 
@@ -619,11 +619,24 @@ div.options {
 }
 #lightbox-text {
 	color: #fff;
-	max-width: 500px;
+	max-width: 400px;
 	overflow-y: auto;
 	max-height: 90vh;
 	padding-right: 10px;
 }
+
+/* Responsive layout for thin resolutions */
+@media (max-width: 900px) {
+	#lightbox-body {
+		flex-direction: column;
+		align-items: center;
+	}
+	#lightbox-text {
+		max-width: 100%;
+		width: 100%;
+	}
+}
+
 .card-text-info h2 {
 	margin: 0 0 15px 0;
 	font-size: 24px;
@@ -633,19 +646,32 @@ div.options {
 	font-size: 16px;
 	color: #aaa;
 	margin: 8px 0;
-	font-style: italic;
+	line-height: 1.6;
+}
+.card-text-info .card-type .card-icon {
+	height: 1.2em;
+	vertical-align: middle;
+	display: inline-block;
+	margin: 0 2px;
+	filter: brightness(0) invert(1);
 }
 .card-text-info .card-faction {
 	font-size: 14px;
 	color: #ffb74d;
 	margin: 8px 0;
-	text-transform: uppercase;
 }
 .card-text-info .card-text {
 	font-size: 15px;
 	line-height: 1.6;
 	margin: 15px 0;
 	color: #e0e0e0;
+}
+.card-text-info .card-text .card-icon {
+	height: 1.2em;
+	vertical-align: middle;
+	display: inline-block;
+	margin: 0 2px;
+	filter: brightness(0) invert(1);
 }
 .card-text-info .card-flavor {
 	font-size: 14px;
