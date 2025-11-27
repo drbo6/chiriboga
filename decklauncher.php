@@ -81,6 +81,9 @@
 				});
 				// Populate precon dropdown
 				var dropdown = $('#preconselect');
+				// Reset placeholder without ellipsis
+				dropdown.empty();
+				dropdown.append('<option value="-1">Load Precon Deck</option>');
 				for (var i = 0; i < preconDecks.length; i++) {
 					dropdown.append('<option value="' + i + '">' + preconDecks[i].name + '</option>');
 				}
@@ -708,7 +711,149 @@
 							 .fail(function(){ alert('Failed to fetch decklist from NRDB'); });
 						  }
 
-						  $('#importdeck').off('click').on('click', ImportDeckFromNRDB);
+						  // Bind NRDB import to the unified id used in UI
+						  $('#importnrdb, #importdeck').off('click').on('click', ImportDeckFromNRDB);
+
+													// Export current deck as a JS precon and download
+													function ExportJSDeck() {
+														try {
+															if (!json || !json.identity || !Array.isArray(json.cards)) {
+																alert('No deck loaded to export.');
+																return;
+															}
+															var name = prompt('Enter a name for this JS deck:', 'My Precon Deck');
+															if (!name) return;
+
+															var counts = {};
+															for (var i=0;i<json.cards.length;i++) {
+																var id = json.cards[i];
+																counts[id] = (counts[id]||0)+1;
+															}
+
+															var lines = [];
+															lines.push('// Exported preconstructed deck');
+															lines.push('registerPrecon({');
+															lines.push('    name: ' + JSON.stringify(name) + ',');
+															lines.push('    identity: ' + JSON.stringify(String(json.identity)) + ',');
+															lines.push('    cards: {');
+															var keys = Object.keys(counts).sort(function(a,b){return parseInt(a)-parseInt(b);} );
+															for (var k=0;k<keys.length;k++) {
+																var cardId = keys[k];
+																var count = counts[cardId];
+																var comment = '';
+																if (cardSet[parseInt(cardId)] && cardSet[parseInt(cardId)].title) {
+																	comment = '  // ' + cardSet[parseInt(cardId)].title;
+																}
+																lines.push('        ' + JSON.stringify(String(cardId)) + ': ' + count + ',' + comment);
+															}
+															// Remove trailing comma from the last card line
+															for (var i=lines.length-1;i>=0;i--) {
+																if (/^\s*\d/.test(lines[i]) || /:\s*\d+,/.test(lines[i])) {
+																	lines[i] = lines[i].replace(/,\s*(\/\/.*)?$/,'$1');
+																	break;
+																}
+															}
+															lines.push('    }');
+															lines.push('});');
+															var content = lines.join('\n');
+
+															var blob = new Blob([content], {type: 'application/javascript'});
+															var a = document.createElement('a');
+															var safeName = name.replace(/[^A-Za-z0-9 _.-]/g,'').trim() || 'deck';
+															a.download = safeName + '.js';
+															a.href = URL.createObjectURL(blob);
+															document.body.appendChild(a);
+															a.click();
+															document.body.removeChild(a);
+															URL.revokeObjectURL(a.href);
+														} catch(e) {
+															console.error(e);
+															alert('Failed to export JS deck: ' + e.message);
+														}
+													}
+
+													// Import a JS precon file and set it as the current deck (no eval)
+													function ImportJSDeckFromText(text) {
+														try {
+															// Basic size guard
+															if (!text || text.length > 200000) { // ~200KB limit
+																alert('Deck file too large or empty.');
+																return;
+															}
+
+															// Strip BOM and normalize line endings
+															text = String(text).replace(/^\uFEFF/, '').replace(/\r\n?|\n/g, '\n');
+
+															// Very conservative parse of registerPrecon({ ... }) without executing
+															// 1) Find the registerPrecon call and capture the object literal body
+															var callMatch = text.match(/registerPrecon\s*\(\s*\{([\s\S]*?)\}\s*\)\s*;?/);
+															if (!callMatch) { alert('Invalid JS deck file format.'); return; }
+															var body = callMatch[1];
+
+															// 2) Extract name and identity as string or number
+															var nameMatch = body.match(/\bname\s*:\s*(["'])([^"']*)\1/);
+															var identityMatch = body.match(/\bidentity\s*:\s*(["']?)(\d+)\1/);
+															var cardsMatch = body.match(/\bcards\s*:\s*\{([\s\S]*?)\}/);
+															if (!identityMatch || !cardsMatch) { alert('Missing identity or cards in deck file.'); return; }
+															var deckName = nameMatch ? nameMatch[2].trim() : 'Imported Deck';
+															var identityId = parseInt(identityMatch[2], 10);
+															var cardsBlock = cardsMatch[1];
+
+															// 3) Parse cards block of lines like "30002": 1, // comment
+															var cards = {};
+															var lineRegex = /(["']?)(\d+)\1\s*:\s*(\d+)\s*,?/g;
+															var m;
+															var totalEntries = 0;
+															while ((m = lineRegex.exec(cardsBlock)) !== null) {
+																var cardId = parseInt(m[2], 10);
+																var qty = parseInt(m[3], 10);
+																if (qty > 0 && qty <= 99) { // reasonable bound
+																	cards[cardId] = qty;
+																	totalEntries++;
+																	if (totalEntries > 1000) { alert('Too many card entries.'); return; }
+																}
+															}
+															if (!totalEntries) { alert('No cards found in deck file.'); return; }
+
+															// Validate identity exists
+															if (!cardSet[identityId] || cardSet[identityId].cardType !== 'identity') {
+																alert('Identity in deck file is not recognized.');
+																return;
+															}
+
+															// Apply imported deck safely
+															json = { identity: identityId, cards: [] };
+															deckPlayer = cardSet[identityId].player;
+															deckCounts = {};
+															Object.keys(cards).forEach(function(idStr){
+																var idNum = parseInt(idStr, 10);
+																var qty = cards[idNum] || 0;
+																// Ignore unknown card ids
+																if (!cardSet[idNum]) return;
+																deckCounts[idNum] = qty;
+																for (var i=0;i<qty;i++) json.cards.push(idNum);
+															});
+
+															// Update identity select, image, and card list
+															$('#identityselect').val(identityId);
+															$('#identity').prop('src', 'images/' + ChangeImageFileToJPG(cardSet[identityId].imageFile));
+															RenderAllCardsList();
+
+															UpdateDeckTextareaFromCounts();
+															Parse();
+															UpdateCardCountsUI();
+															alert('JS deck imported and loaded: ' + deckName);
+														} catch(e) {
+															console.error(e);
+															alert('Failed to import JS deck: ' + e.message);
+														}
+													}
+
+													// Wire the new buttons and file input
+													(function(){
+														var exportBtn = document.getElementById('exportjs');
+														if (exportBtn) exportBtn.addEventListener('click', ExportJSDeck);
+													})();
 
 			// Load preconstructed deck
 			function LoadPrecon() {
@@ -961,12 +1106,15 @@
 				<div class="leftrow toprow">
 					<textarea id="deck" spellcheck="false" cols="30" style="width:100%;"></textarea>
 					<div style="margin-top:8px;">
-						<button id="importdeck" class="button" type="button">Import Deck</button>
+						<button id="importdeck" class="button" type="button">Import Deck from NRDB</button>
 					</div>
 					<div style="margin-top:8px;">
 						<select id="preconselect" class="button" style="width:85%; display:block; margin:0 auto;">
-							<option value="-1">Load Precon Deck...</option>
+							<option value="-1">Load Precon Deck</option>
 						</select>
+					</div>
+					<div style="margin-top:8px;">
+						<button id="exportjs" class="button" type="button" style="width:85%; display:block; margin:0 auto;">Export JS Deck</button>
 					</div>
 					<br/>
 				</div>
