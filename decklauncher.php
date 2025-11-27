@@ -614,14 +614,16 @@
 										}
 									}
 
-									// Convert cards map to lines (skip identities)
-									for (var code in cardsObj) {
-										var qty = cardsObj[code];
-										var info = window.cardCodeLookup ? window.cardCodeLookup[code] : null;
-										if (!info) continue;
-										if (info.type_code === 'identity') continue;
-										lines.push(qty + ' ' + info.title);
-									}
+								// Convert cards map to lines (skip identities)
+								for (var code in cardsObj) {
+									var qty = cardsObj[code];
+									var info = window.cardCodeLookup ? window.cardCodeLookup[code] : null;
+									if (!info) continue;
+									if (info.type_code === 'identity') continue;
+									// Normalize apostrophes (ʼ to ')
+									var title = info.title.replace(/ʼ/g, "'");
+									lines.push(qty + ' ' + title);
+								}
 									// Fill textarea and trigger parse (this validates without generating new deck)
 									$("#deck").val(lines.join("\n"));
 									Parse();
@@ -699,7 +701,7 @@
 			  var outputLine = 0;
 			  json.cards = [];
 			  deckCounts = {};
-			  var splitText = $("#deck").val().replace("’","'").split("\n");
+		  var splitText = $("#deck").val().replace(/'/g,"'").replace(/ʼ/g,"'").split("\n");
 			  for (var i = 0; i < splitText.length; i++) {
 				var cardCount = 0;
 				var cardTitle = "";
