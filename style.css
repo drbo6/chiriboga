@@ -503,6 +503,14 @@ div.options {
 #cardcontainer .card-item:hover { 
 	box-shadow:0 0 12px #25b4ff, 0 0 26px rgba(37,180,255,.5), inset 0 0 16px rgba(37,180,255,0.45); 
 }
+#cardcontainer .card-item.not-in-deck img {
+	opacity: 0.5;
+	filter: brightness(0.6) saturate(0.4);
+}
+#cardcontainer .card-item.not-in-deck:hover img {
+	opacity: 0.7;
+	filter: brightness(0.8) saturate(0.6);
+}
 #cardcontainer .card-item img { 
 	width:100%; 
 	height:auto; 
@@ -555,19 +563,20 @@ div.options {
 	top:calc(50% - 15px); 
 	left:50%; 
 	transform:translate(-50%,-50%); 
-	background:rgba(0,0,0,0.85); 
+	background:linear-gradient(135deg, rgba(5,15,25,0.98), rgba(8,25,40,0.98)); 
 	color:#fff; 
-	padding:8px 14px; 
+	padding:6px 10px; 
 	font-size:24px; 
 	font-weight:bold; 
 	border-radius:50%; 
-	min-width:50px; 
-	min-height:50px; 
+	min-width:40px; 
+	min-height:40px; 
 	display:flex; 
 	align-items:center; 
 	justify-content:center; 
 	pointer-events:none; 
 	opacity:0; 
+	box-shadow:0 0 8px rgba(13,110,165,0.6), inset 0 0 12px rgba(13,110,165,0.3); 
 	transition:opacity .2s; 
 	z-index:2; 
 }

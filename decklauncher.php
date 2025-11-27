@@ -116,6 +116,8 @@
 					var ct = deckCounts[id] || 0;
 					$(this).text(ct);
 					$(this).toggleClass('has-copies', ct>0);
+					// Apply darkening to cards not in deck
+					$(this).closest('.card-item').toggleClass('not-in-deck', ct === 0);
 				});
 			}
 
