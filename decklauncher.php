@@ -79,14 +79,22 @@
 				preconDecks.sort(function(a, b) {
 					return a.name.localeCompare(b.name);
 				});
-				// Populate precon dropdown
-				var dropdown = $('#preconselect');
-				// Reset placeholder without ellipsis
-				dropdown.empty();
-				dropdown.append('<option value="-1">Load Precon Deck</option>');
-				for (var i = 0; i < preconDecks.length; i++) {
-					dropdown.append('<option value="' + i + '">' + preconDecks[i].name + '</option>');
+				// Helper: populate precon dropdown only for current identity
+				// Expose dropdown population globally so identity change handler can call it
+				window.PopulatePreconDropdownForIdentity = function(identityId) {
+					var dropdown = $('#preconselect');
+					dropdown.empty();
+					dropdown.append('<option value="-1">Load Precon Deck</option>');
+					for (var i = 0; i < preconDecks.length; i++) {
+						var deck = preconDecks[i];
+						if (String(identityId) === String(deck.identity)) {
+							dropdown.append('<option value="' + i + '">' + deck.name + '</option>');
+						}
+					}
 				}
+				// Initial populate (if identity known), else placeholder only
+				if (json && json.identity) window.PopulatePreconDropdownForIdentity(json.identity);
+				else $('#preconselect').empty().append('<option value="-1">Load Precon Deck</option>');
 			});
 
 			//UTILITY: ensure deckCounts matches json.cards
@@ -594,6 +602,10 @@
 								deckPlayer = cardSet[json.identity].player;
 								history.pushState(null, "Chiriboga", "decklauncher.php"); //so a random deck is generated
 								GenerateDeck();
+								// Repopulate precon dropdown to only show matching decks (if loaded)
+								if (typeof window.PopulatePreconDropdownForIdentity === 'function') {
+									window.PopulatePreconDropdownForIdentity(json.identity);
+								}
 			  });
 
 			  //set up identity select
