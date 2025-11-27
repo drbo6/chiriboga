@@ -615,20 +615,47 @@
 									if (identityCode && window.cardCodeLookup && window.cardCodeLookup[identityCode]) {
 										// find matching cardSet index for identity title
 										var identTitle = window.cardCodeLookup[identityCode].title;
-										console.log('Looking for identity:', identTitle);
+										console.log('Raw identity title from lookup:', identTitle);
+										console.log('Character codes:', Array.from(identTitle).map(function(c){return c.charCodeAt(0);}).join(','));
+										// Robust normalization function for titles
+										function normalizeTitle(str) {
+											if (!str) return '';
+											try { str = str.normalize ? str.normalize('NFKC') : str; } catch(e) {}
+											// Replace common smart quotes/apostrophes and whitespace variants
+											str = str
+												.replace(/\u2019|\u2032|\u02BC|\uFF07/g, "'") // apostrophes/primes
+												.replace(/\u201C|\u201D|\u2033|\uFF02/g, '"') // double quotes
+												.replace(/\u00A0/g, ' ') // non-breaking space to space
+												.trim();
+											return str;
+										}
+										// Normalize identity title
+										identTitle = normalizeTitle(identTitle);
+										console.log('Normalized identity:', identTitle);
+										var foundIdentity = false;
 										for (var i=0;i<cardSet.length;i++) {
 											if (typeof cardSet[i] !== 'undefined' && cardSet[i].cardType === 'identity') {
-											if (cardSet[i].title === identTitle) {
-												console.log('Found identity at index:', i);
-												// Set identity without triggering change yet
-												$("#identityselect").val(i);
-												$("#identity").prop("src", "images/" + ChangeImageFileToJPG(cardSet[i].imageFile));
-												json.identity = i;
-												deckPlayer = cardSet[i].player;
-												// Refresh card list for new side
-												RenderAllCardsList();
-												break;
+												var cardTitle = normalizeTitle(cardSet[i].title);
+												if (cardTitle === identTitle) {
+													console.log('Found identity at index:', i, 'with title:', cardSet[i].title);
+													// Set identity without triggering change yet
+													$("#identityselect").val(i);
+													$("#identity").prop("src", "images/" + ChangeImageFileToJPG(cardSet[i].imageFile));
+													json.identity = i;
+													deckPlayer = cardSet[i].player;
+													// Refresh card list for new side
+													RenderAllCardsList();
+													foundIdentity = true;
+													break;
+												}
 											}
+										}
+										if (!foundIdentity) {
+											console.log('Identity not found in cardSet. Available identities:');
+											for (var i=0;i<cardSet.length;i++) {
+												if (typeof cardSet[i] !== 'undefined' && cardSet[i].cardType === 'identity') {
+													console.log('  -', cardSet[i].title);
+												}
 											}
 										}
 									}
