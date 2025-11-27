@@ -605,11 +605,55 @@ div.options {
 	max-height:90%; 
 	position:relative; 
 }
+#lightbox-body {
+	display: flex;
+	gap: 20px;
+	align-items: flex-start;
+}
 #lightbox-content img { 
-	max-width:100%; 
-	max-height:90vh; 
-	border-radius:10px; 
-	box-shadow:0 0 30px rgba(0,0,0,0.8); 
+	max-width: 450px; 
+	max-height: 90vh; 
+	border-radius: 10px; 
+	box-shadow: 0 0 30px rgba(0,0,0,0.8); 
+	flex-shrink: 0;
+}
+#lightbox-text {
+	color: #fff;
+	max-width: 500px;
+	overflow-y: auto;
+	max-height: 90vh;
+	padding-right: 10px;
+}
+.card-text-info h2 {
+	margin: 0 0 15px 0;
+	font-size: 24px;
+	color: #4fc3f7;
+}
+.card-text-info .card-type {
+	font-size: 16px;
+	color: #aaa;
+	margin: 8px 0;
+	font-style: italic;
+}
+.card-text-info .card-faction {
+	font-size: 14px;
+	color: #ffb74d;
+	margin: 8px 0;
+	text-transform: uppercase;
+}
+.card-text-info .card-text {
+	font-size: 15px;
+	line-height: 1.6;
+	margin: 15px 0;
+	color: #e0e0e0;
+}
+.card-text-info .card-flavor {
+	font-size: 14px;
+	font-style: italic;
+	color: #888;
+	margin-top: 15px;
+	border-top: 1px solid #444;
+	padding-top: 10px;
 }
 #lightbox-close { 
 	position:absolute; 

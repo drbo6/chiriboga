@@ -25,6 +25,7 @@
 			//new globals for visual builder
 			var deckCounts = {}; //cardId -> count
 			var allCardIdsForPlayer = []; //cache of non-identity cards for current side
+			var cardData = null; //loaded from carddata.json for lightbox display
 		</script>
 		<?php
 		echo '<script src="utility.js?' . filemtime('utility.js') . '"></script>';
@@ -43,6 +44,11 @@
 			var opponentdeckstr = "";
 			var opponentdeckimg = "";
 			var uid = 0;
+
+			// Load card data from JSON
+			$.getJSON('carddata/carddata.json', function(data) {
+				cardData = data;
+			});
 
 			//UTILITY: ensure deckCounts matches json.cards
 			function RecalculateDeckCounts() {
@@ -107,7 +113,11 @@
 			function AttachCardListEvents() {
 				$("#cardcontainer .add-btn").off('click').on('click',function(){ AddCardToDeck(parseInt($(this).attr('data-id'))); });
 				$("#cardcontainer .remove-btn").off('click').on('click',function(){ RemoveCardFromDeck(parseInt($(this).attr('data-id'))); });
-				$("#cardcontainer .card-item img").off('click').on('click',function(e){ e.stopPropagation(); ShowLightbox($(this).attr('src')); });
+				$("#cardcontainer .card-item img").off('click').on('click',function(e){ 
+					e.stopPropagation(); 
+					var cardId = parseInt($(this).closest('.card-item').attr('data-id'));
+					ShowLightbox(cardId); 
+				});
 			}
 
 			function UpdateCardCountsUI() {
@@ -121,7 +131,60 @@
 				});
 			}
 
-			function ShowLightbox(src) { $('#lightbox-img').attr('src',src); $('#lightbox').addClass('active'); }
+			function ShowLightbox(cardId) {
+				if (!cardSet[cardId]) return;
+				
+				var card = cardSet[cardId];
+				var imgSrc = 'images/' + ChangeImageFileToJPG(card.imageFile);
+				$('#lightbox-img').attr('src', imgSrc);
+				
+				// Find matching card in cardData by title
+				var cardInfo = null;
+				if (cardData && cardData.data) {
+					for (var i = 0; i < cardData.data.length; i++) {
+						if (cardData.data[i].title === card.title || cardData.data[i].stripped_title === card.title) {
+							cardInfo = cardData.data[i];
+							break;
+						}
+					}
+				}
+				
+				// Build card text display
+				if (cardInfo) {
+					var infoHTML = '<div class="card-text-info">';
+					infoHTML += '<h2>' + cardInfo.title + '</h2>';
+					
+					// Type and keywords
+					var typeLine = cardInfo.type_code;
+					if (cardInfo.keywords) {
+						typeLine += ': ' + cardInfo.keywords;
+					}
+					if (cardInfo.cost !== undefined && cardInfo.cost !== null) {
+						typeLine += ' · ' + cardInfo.cost;
+					}
+					infoHTML += '<p class="card-type">' + typeLine + '</p>';
+					
+					// Faction
+					infoHTML += '<p class="card-faction">' + cardInfo.faction_code + '</p>';
+					
+					// Card text
+					if (cardInfo.text) {
+						infoHTML += '<div class="card-text">' + cardInfo.text + '</div>';
+					}
+					
+					// Flavor text
+					if (cardInfo.flavor) {
+						infoHTML += '<p class="card-flavor">' + cardInfo.flavor + '</p>';
+					}
+					
+					infoHTML += '</div>';
+					$('#lightbox-text').html(infoHTML);
+				} else {
+					$('#lightbox-text').html('<div class="card-text-info"><p>Card data not found</p></div>');
+				}
+				
+				$('#lightbox').addClass('active');
+			}
 			function HideLightbox() { $('#lightbox').removeClass('active'); }
 			$(document).on('click','#lightbox-close',HideLightbox);
 			$(document).on('click','#lightbox',function(e){ if(e.target.id==='lightbox') HideLightbox(); });
@@ -637,6 +700,14 @@
 			</div>
 		</div>
 		<!-- Lightbox container for enlarged card view -->
-		<div id="lightbox"><div id="lightbox-content"><span id="lightbox-close">&times;</span><img id="lightbox-img" src="" alt="Card"/></div></div>
+		<div id="lightbox">
+			<div id="lightbox-content">
+				<span id="lightbox-close">&times;</span>
+				<div id="lightbox-body">
+					<img id="lightbox-img" src="" alt="Card"/>
+					<div id="lightbox-text"></div>
+				</div>
+			</div>
+		</div>
 	</body>
 </html>
