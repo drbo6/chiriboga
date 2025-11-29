@@ -21,18 +21,29 @@
         </div>
 
         <div class="game-title">
-          <div class="title-line">
-            <h1>NETRUNNER</h1>
+          <div class="title-stack">
+            <div class="title-line">
+              <h1>NETRUNNER</h1>
+            </div>
+            <div class="subtitle-container">
+              <span class="bracket left">[</span><h2>CH1R180G4</h2><span class="bracket right">]</span>
+            </div>
+            <div class="hex-decoration">
+              <div class="hex"></div>
+              <div class="hex"></div>
+              <div class="hex"></div>
+              <div class="hex"></div>
+              <div class="hex"></div>
+            </div>
           </div>
-          <div class="subtitle-container">
-            <span class="bracket left">[</span><h2>CH1R180G4</h2><span class="bracket right">]</span>
-          </div>
-          <div class="hex-decoration">
-            <div class="hex"></div>
-            <div class="hex"></div>
-            <div class="hex"></div>
-            <div class="hex"></div>
-            <div class="hex"></div>
+          <div class="spacer-grow"></div>
+          <div class="meta-stack">
+            <div class="version">BUILD 0.1.0-ALPHA // 2077.11.29</div>
+            <div class="status-bar">
+              <span class="status-item">MEM: 64TB FREE</span>
+              <span class="status-item">NET: CONNECTED</span>
+              <span class="status-item">ICE: NOMINAL</span>
+            </div>
           </div>
         </div>
 
@@ -69,13 +80,7 @@
           </div>
         </div>
 
-        <div class="version">BUILD 0.1.0-ALPHA // 2077.11.29</div>
-
-        <div class="status-bar">
-          <span class="status-item">MEM: 64TB FREE</span>
-          <span class="status-item">NET: CONNECTED</span>
-          <span class="status-item">ICE: NOMINAL</span>
-        </div>
+        <!-- Version & status moved into .game-title for small-height layout -->
       </div>
     </div>
   </div>

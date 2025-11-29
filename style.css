@@ -1397,7 +1397,7 @@ body { background: #0a0a0a; min-height: 100vh; display: flex; align-items: cente
 	========================================================== */
 
 /* Height < 600px: Strip chrome, force 3 functional columns (logo / menu / quick game) */
-@media (max-height: 600px) {
+@media (max-height: 768px) {
 	.terminal-frame {
 		background: none;
 		padding: 10px;
@@ -1410,16 +1410,22 @@ body { background: #0a0a0a; min-height: 100vh; display: flex; align-items: cente
 	.screen {
 		padding: 20px 30px;
 	}
-	/* Hide header/status blocks in short viewport height */
-	.system-text,
-	.version,
-	.status-bar { display: none !important; }
+	/* Hide only the scrolling system header; keep version + status */
+	.system-text { display: none !important; }
 	/* Three direct columns via flex; flatten wrappers so children participate */
 	.screen-content { display: flex; flex-direction: row; gap: 24px; align-items: flex-start; }
 	.menu-items, .menu-layout { display: contents !important; }
-	.game-title { flex: 1 1 33%; text-align: left; }
-	.game-title h1 { font-size: 32px; letter-spacing: 6px; }
-	.game-title h2 { font-size: 20px; letter-spacing: 6px; }
+	.game-title { flex: 1 1 33%; text-align: left; display:flex; flex-direction:column; }
+	.game-title h1 { font-size: 32px; letter-spacing: 6px; margin:0; }
+	.game-title h2 { font-size: 20px; letter-spacing: 6px; margin:8px 0 0; }
+	.game-title .title-stack { flex:0 0 auto; }
+	.game-title .spacer-grow { flex:1 1 auto; }
+	.game-title .meta-stack { flex:0 0 auto; display:flex; flex-direction:column; gap:4px; }
+	.game-title .meta-stack .version { margin:0; text-align:left; opacity:0.7; letter-spacing:2px; }
+	.game-title .meta-stack .status-bar { margin:0; padding:4px 0 0; border-top:1px solid #33ff3333; justify-content:flex-start; gap:12px; }
+	.game-title .meta-stack .status-item { font-size:9px; }
+	/* Force equal height so meta stack sits roughly at menu bottom */
+	.screen-content { align-items:stretch; }
 	.menu-buttons { flex: 1 1 33%; display: flex; flex-direction: column; gap: 6px; max-width: 260px; }
 	.menu-buttons .menu-item { width: 100%; }
 	.match-preview { flex: 1 1 33%; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; margin-top: 0; }
@@ -1429,7 +1435,7 @@ body { background: #0a0a0a; min-height: 100vh; display: flex; align-items: cente
 }
 
 /* Height > 600px AND Width < 480px: Remove border, quick game below menu, horizontal pictures */
-@media (min-height: 601px) and (max-width: 480px) {
+@media (min-height: 769px) and (max-width: 480px) {
 	.system-text, .version, .status-bar {
 		display: none !important;
 	}
