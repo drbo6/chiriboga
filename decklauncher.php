@@ -1330,7 +1330,7 @@
 		<!-- Lightbox container for enlarged card view -->
 		<div id="lightbox">
 			<div id="lightbox-content">
-				<span id="lightbox-close">CLOSE</span>
+				<span id="lightbox-close">[CLOSE]</span>
 				<div id="lightbox-body">
 					<img id="lightbox-img" src="" alt="Card"/>
 					<div id="lightbox-text"></div>

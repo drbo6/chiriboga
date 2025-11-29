@@ -1,3 +1,46 @@
+/* Opponent box styling to match green CRT theme */
+.rightpart #opponentid, #opponentid {
+	display: none; /* shown when opponentdeckimg is set */
+	margin-top: 8px;
+	padding: 12px 14px;
+	border: 1px solid #1f6d1f !important; /* soften border to match buttons */
+	border-radius: 6px;
+	color: #33ff33 !important;
+	background: rgba(12, 24, 12, 0.7) !important;
+	box-shadow: inset 0 0 10px rgba(0, 255, 0, 0.08), 0 0 6px rgba(51, 255, 51, 0.15); /* reduce glow */
+	text-shadow: 0 0 4px rgba(51, 255, 51, 0.4); /* softer text glow */
+	font-family: "Share Tech Mono", monospace;
+	position: relative; /* enable scanline overlay positioning */
+	z-index: 2; /* above any background overlays */
+}
+
+#opponentid img {
+	max-width: 140px;
+	border: 1px solid #1f6d1f; /* match softened border */
+	box-shadow: 0 0 6px rgba(51, 255, 51, 0.2); /* reduce image glow */
+	display: block;
+	margin: 6px auto 0 auto;
+}
+
+/* Subtle scanline overlay for opponent box */
+.rightpart #opponentid::after, #opponentid::after {
+	content: "";
+	position: absolute;
+	inset: 0;
+	pointer-events: none;
+	background-image: linear-gradient(rgba(0,0,0,0) 95%, rgba(51,255,51,0.06) 100%);
+	background-size: 100% 4px;
+	/* Avoid unintended color shifts from blending modes */
+	opacity: 0.6;
+}
+
+/* Lightbox SVG icons should be green */
+#lightbox .card-icon {
+	height: 1em;
+	vertical-align: -0.15em;
+	/* Tint white SVGs to #33ff33 using CSS filter */
+	filter: invert(69%) sepia(84%) saturate(475%) hue-rotate(67deg) brightness(105%) contrast(100%);
+}
 * {
 	font-family: "Lucida Console", Monaco, monospace;
 	color: #33ff33;
@@ -747,7 +790,7 @@ div.options {
 	position:absolute; 
 	top:-40px; 
 	right:0; 
-	font-size:20px; 
+	font-size:14px; 
 	color:#33ff33; 
 	cursor:pointer; 
 	font-weight:800; 
