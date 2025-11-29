@@ -1,4 +1,4 @@
-/* Opponent box styling to match green CRT theme */
+﻿/* Opponent box styling to match green CRT theme */
 .rightpart #opponentid, #opponentid {
 	display: none; /* shown when opponentdeckimg is set */
 	margin-top: 8px;
@@ -1410,6 +1410,10 @@ body { background: #0a0a0a; min-height: 100vh; display: flex; align-items: cente
 	.screen {
 		padding: 20px 30px;
 	}
+	/* Hide header/status blocks in short viewport height */
+	.system-text,
+	.version,
+	.status-bar { display: none !important; }
 	.menu-layout {
 		flex-direction: row;
 		align-items: flex-start;
@@ -1433,6 +1437,9 @@ body { background: #0a0a0a; min-height: 100vh; display: flex; align-items: cente
 
 /* Height > 600px AND Width < 480px: Remove border, quick game below menu, horizontal pictures */
 @media (min-height: 601px) and (max-width: 480px) {
+	.system-text, .version, .status-bar {
+		display: none !important;
+	}
 	.terminal-frame {
 		background: none;
 		padding: 10px;
