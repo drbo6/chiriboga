@@ -92,11 +92,15 @@
 						}
 					}
 				}
-				// Initial populate (if identity known), else placeholder only
-				if (json && json.identity) 
+				// Initial populate: use current identity if selected in dropdown, else placeholder
+				var selectedIdentity = $('#identityselect').val();
+				if (selectedIdentity) {
+					window.PopulatePreconDropdownForIdentity(selectedIdentity);
+				} else if (json && json.identity) {
 					window.PopulatePreconDropdownForIdentity(json.identity);
-				else 
+				} else {
 					$('#preconselect').empty().append('<option value="-1">Load Precon Deck</option>');
+				}
 			});
 
 			//UTILITY: ensure deckCounts matches json.cards
@@ -1130,6 +1134,14 @@
 			  //Render full card list for visual deck building
 			  RenderAllCardsList();
 			  UpdateCardCountsUI();
+			  // After identities and UI are ready, populate precons for current identity
+			  try {
+			    var currentIdSel = $('#identityselect').val();
+			    var effectiveId = currentIdSel || (json && json.identity);
+			    if (effectiveId && typeof window.PopulatePreconDropdownForIdentity === 'function') {
+			      window.PopulatePreconDropdownForIdentity(effectiveId);
+			    }
+			  } catch(e) { /* ignore */ }
 			}
 
 			function Normalise(src) {

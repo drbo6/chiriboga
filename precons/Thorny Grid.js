@@ -4,8 +4,8 @@ registerPrecon({
     identity: "31050",
     default: false,
     deck_set: "Girometics",
-    URL: "",
-    Notes: "",
+    URL: "https://netrunnerdb.com/en/decklist/8865dc54-829b-4bd5-8100-2d85488fb5f4/-sg-su21-personal-evolution-thorny-grid",
+    Notes: "This Jinteki deck specializes in punishing hackers who get too aggressive by hiding traps like Snare! among low-value agendas, and threatens to kill careless runners with Ronin if they don't keep enough cards in their hand.",
     cards: {
         "30037": 3,  // Nico Campaign
         "30044": 1,  // Longevity Serum

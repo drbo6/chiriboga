@@ -4,8 +4,8 @@ registerPrecon({
     identity: "31002",
     default: false,
     deck_set: "Girometics",
-    URL: "",
-    Notes: "",
+    URL: "https://netrunnerdb.com/en/decklist/542a21ca-81b2-4c74-8bb9-379dddd9638e/-sg-su21-reina-roja-fight-or-flight",
+    Notes: "This Reina deck focuses on economic warfare by using cards like Xanadu and Tranquilizer to make the corporation's security barriers extremely expensive to activate, then destroys the ones they can't afford to keep running with En Passant.",
     cards: {
         "30002": 3,  // Wildcat Strike
         "30004": 3,  // Botulus
