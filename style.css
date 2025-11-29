@@ -1199,13 +1199,18 @@ select::-ms-expand { display: none; }
 }
 
 @media (max-width: 768px) {
-	#contentcontainer { flex-direction: column; }
-	#dataentry { width:100%; max-width: 100%; float:none; height: auto; }
+	#contentcontainer { flex-direction: column; min-height: auto !important; padding-bottom: 20px; }
+	#dataentry { width:100%; max-width: 100%; float:none; height: auto; margin-bottom: 20px; }
 	#cardcontainer { 
 		grid-template-columns:repeat(auto-fit,minmax(100px,1fr)); 
 		gap:8px; 
 		padding:10px; 
 		max-height:none !important; 
+		height: auto !important;
+		min-height: 0 !important;
+		flex: 0 0 auto !important;
+		width: 100% !important;
+		align-self: flex-start;
 	}
 	.leftrow.buttons .button { min-width:120px; font-size:13px; padding:10px 12px; }
 	#deck { font-size:13px; }
@@ -1215,6 +1220,8 @@ select::-ms-expand { display: none; }
 }
 
 @media (max-width: 480px) {
+	#contentcontainer { min-height: auto !important; padding-bottom: 15px; }
+	#dataentry { margin-bottom: 15px; }
 	#cardcontainer { 
 		grid-template-columns:repeat(auto-fit,minmax(90px,1fr)) !important; 
 		gap:2px !important; 
@@ -1264,6 +1271,7 @@ select::-ms-expand { display: none; }
 }
 
 @media (max-width: 360px) {
+	#contentcontainer { min-height: auto !important; }
 	#dataentry { width:100%; min-width:100%; }
 	#cardcontainer { 
 		grid-template-columns:repeat(auto-fit,minmax(80px,1fr)); 
