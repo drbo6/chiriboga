@@ -1396,7 +1396,7 @@ body { background: #0a0a0a; min-height: 100vh; display: flex; align-items: cente
 	Index Responsive Breakpoints
 	========================================================== */
 
-/* Height < 600px: Remove grey border, 3 columns vertical */
+/* Height < 600px: Strip chrome, force 3 functional columns (logo / menu / quick game) */
 @media (max-height: 600px) {
 	.terminal-frame {
 		background: none;
@@ -1414,25 +1414,18 @@ body { background: #0a0a0a; min-height: 100vh; display: flex; align-items: cente
 	.system-text,
 	.version,
 	.status-bar { display: none !important; }
-	.menu-layout {
-		flex-direction: row;
-		align-items: flex-start;
-	}
-	.game-title {
-		flex: 1;
-	}
-	.game-title h1 {
-		font-size: 32px;
-	}
-	.game-title h2 {
-		font-size: 20px;
-	}
-	.menu-buttons {
-		flex: 1;
-	}
-	.match-preview {
-		flex: 1;
-	}
+	/* Three direct columns via flex; flatten wrappers so children participate */
+	.screen-content { display: flex; flex-direction: row; gap: 24px; align-items: flex-start; }
+	.menu-items, .menu-layout { display: contents !important; }
+	.game-title { flex: 1 1 33%; text-align: left; }
+	.game-title h1 { font-size: 32px; letter-spacing: 6px; }
+	.game-title h2 { font-size: 20px; letter-spacing: 6px; }
+	.menu-buttons { flex: 1 1 33%; display: flex; flex-direction: column; gap: 6px; max-width: 260px; }
+	.menu-buttons .menu-item { width: 100%; }
+	.match-preview { flex: 1 1 33%; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; margin-top: 0; }
+	/* Tighten portrait stack so height constraint keeps all visible */
+	.match-preview .portrait-container { width: 70px; height: 70px; }
+	.vs-text { font-size: 16px; }
 }
 
 /* Height > 600px AND Width < 480px: Remove border, quick game below menu, horizontal pictures */
@@ -1472,17 +1465,15 @@ body { background: #0a0a0a; min-height: 100vh; display: flex; align-items: cente
 	.terminal-frame {
 		background: none;
 		padding: 10px;
-		box-shadow: none;
-		border-radius: 0;
+	/* Allow nested wrappers to flatten so children become grid items */
+	.menu-items { display: contents; }
+	.menu-layout { display: contents; }
 	}
 	.terminal-frame::before {
 		display: none;
 	}
 	.screen {
-		padding: 20px 30px;
-	}
-	.menu-layout {
-		flex-direction: row;
+	/* Remove now-irrelevant flex adjustments for menu-layout */
 		align-items: flex-start;
 	}
 	.menu-buttons {
