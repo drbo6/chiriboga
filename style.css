@@ -516,19 +516,40 @@ div.options {
 }
 
 /* CRT shared styles for deck builder and index */
-#contentcontainer { background:#0a100a; }
-#dataentry { background:#0a100a; border-radius:10px; position:relative; animation: flicker 0.12s infinite; }
+#contentcontainer { background:#0a100a; overflow: visible; min-height: 100vh; }
+#dataentry { background:#0a100a; border-radius:10px; position:relative; animation: flicker 0.12s infinite; overflow: visible; margin-bottom: 40px; }
 #dataentry::before { content:""; position:absolute; top:0; left:0; right:0; bottom:0; pointer-events:none; background:radial-gradient(ellipse at center, rgba(50,255,50,0.03) 0%, transparent 70%); }
 #dataentry::after { content:""; position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:none; background:repeating-linear-gradient(to bottom, rgba(0,0,0,0) 0px, rgba(0,0,0,0) 2px, rgba(0,0,0,0.12) 3px, rgba(0,0,0,0.12) 4px); animation: scanlines 10s linear infinite; }
 @keyframes scanlines { 0% { background-position:0 0; } 100% { background-position:0 100px; } }
 
-/* Page-level scrolling */
-html, body { overflow-y: auto; }
+/* Page-level scrolling: body is the only scroll container */
+html { overflow-y: scroll; height: 100%; scrollbar-width: thin; scrollbar-color: #006600 #0a100a; }
+body { overflow-y: scroll; overflow-x: hidden; min-height: 100%; }
+/* Prevent nested scrollbar in card list area */
+/* Restore default for #cardcontainer */
+#cardcontainer {
+	max-height: none;
+	overflow: visible;
+}
+
+body::-webkit-scrollbar {
+	width: 10px;
+	background: #0a100a;
+}
+body::-webkit-scrollbar-thumb {
+	background: linear-gradient(90deg, #33ff33 0%, #0a100a 100%);
+	border-radius: 10px;
+	box-shadow: 0 0 8px #33ff33;
+}
+body::-webkit-scrollbar-track {
+	background: #0a100a;
+	border-radius: 10px;
+}
 
 /* Index terminal frame */
 .terminal-frame { background: linear-gradient(145deg, #2a2a2a 0%, #1a1a1a 50%, #0d0d0d 100%); padding:30px; border-radius:20px; box-shadow: 0 0 0 2px #333; position:relative; display:flex; align-items:center; justify-content:center; min-height:100vh; }
 .terminal-frame::before { content:"● ● ●"; position:absolute; top:10px; left:20px; font-size:10px; letter-spacing:4px; color:#444; }
-.screen { background:#0a100a; border-radius:10px; padding:40px 60px; position:relative; overflow:hidden; box-shadow: inset 0 0 30px rgba(0,0,0,0.6); }
+.screen { background:#0a100a; border-radius:10px; padding:40px 60px; position:relative; overflow: visible; box-shadow: inset 0 0 30px rgba(0,0,0,0.6); }
 .screen::before { content:""; position:absolute; inset:0; background: radial-gradient(ellipse at center, transparent 0%, rgba(0,0,0,0.3) 90%, rgba(0,0,0,0.6) 100%); pointer-events:none; z-index:10; }
 .screen::after { content:""; position:absolute; top:0; left:0; width:100%; height:100%; background: repeating-linear-gradient(to bottom, rgba(0,0,0,0) 0px, rgba(0,0,0,0) 2px, rgba(0,0,0,0.12) 3px, rgba(0,0,0,0.12) 4px); pointer-events:none; z-index:11; animation: scanlines 10s linear infinite; }
 .screen-content { animation: flicker 0.1s infinite; position:relative; z-index:5; }
@@ -1108,8 +1129,9 @@ select::-ms-expand { display: none; }
 		padding:3px !important; 
 		row-gap:1px !important; 
 		grid-template-rows: repeat(2, min-content) !important; 
-		overflow-y:auto !important; 
-		max-height:calc(100vh - 20px) !important; 
+		/* Removed overflow-y and max-height to prevent second scrollbar; allow page body to scroll */
+		overflow:visible !important; 
+		max-height:none !important; 
 	}
 	.leftrow { padding:8px; }
 	.leftrow.buttons { gap:6px; }
