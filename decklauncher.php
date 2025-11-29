@@ -525,7 +525,12 @@
 				oC = "r"; //opponentchar is r for runner
 			}
 			var setStr = "";
-			if (URIParameter("sets") !== "") setStr = "sets="+URIParameter("sets")+"&";
+			// Default to all core sets including Midnight Sun if none specified
+			if (URIParameter("sets") !== "") {
+				setStr = "sets="+URIParameter("sets")+"&";
+			} else {
+				setStr = "sets=systemgateway-systemupdate2021-midnightsun&";
+			}
 
 			var playerIdentities = [];
 			for (var i=0; i<cardSet.length; i++) {
