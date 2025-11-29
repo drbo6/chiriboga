@@ -407,6 +407,32 @@
 				}
 			}
 
+			// If no opponent deck parameter was provided, choose a random precon from the opposite side
+			if (opponentdeckstr === "") {
+				var oppositePlayer = (deckPlayer === runner) ? corp : runner;
+				var candidatePrecons = [];
+				for (var pi=0; pi<preconDecks.length; pi++) {
+					var pre = preconDecks[pi];
+					var identCode = parseInt(pre.identity);
+					if (cardSet[identCode] && cardSet[identCode].player === oppositePlayer) {
+						candidatePrecons.push(pre);
+					}
+				}
+				if (candidatePrecons.length > 0) {
+					var chosen = candidatePrecons[Math.floor(Math.random() * candidatePrecons.length)];
+					var oppDeckObj = { identity: parseInt(chosen.identity), cards: [] };
+					for (var cc in chosen.cards) {
+						if (!chosen.cards.hasOwnProperty(cc)) continue;
+						var qty = chosen.cards[cc];
+						for (var q=0; q<qty; q++) oppDeckObj.cards.push(parseInt(cc));
+					}
+					var oppCompressed = LZString.compressToEncodedURIComponent(JSON.stringify(oppDeckObj));
+					var paramKey = (cardSet[oppDeckObj.identity].player === corp) ? "c" : "r";
+					opponentdeckstr = paramKey + "=" + oppCompressed + "&";
+					opponentdeckimg = "images/" + ChangeImageFileToJPG(cardSet[oppDeckObj.identity].imageFile);
+				}
+			}
+
 			//generate available titles
 			var titles = [];
 			for (var i=0; i<cardSet.length; i++) {
@@ -476,7 +502,24 @@
 			  var string = JSON.stringify(json);
 			  var compressed = LZString.compressToEncodedURIComponent(string);
 			  var launchAddress = "engine.php?p=" + dC + "&" + setStr + opponentdeckstr + dC + "=" + compressed;
-			  var opponentAddress = "decklauncher.php?p=" + oC + "&" + setStr + oC + "=random&" + dC + "=" + compressed;
+			  // Build address for switching sides. If we already have an opponent deck, make it the active deck; otherwise use random
+			  var existingOpponentCompressed = "";
+			  if (opponentdeckstr !== "") {
+				// opponentdeckstr format: sideKey=COMPRESSED&  (e.g. c=abcd123&)
+				var eqIdx = opponentdeckstr.indexOf('=');
+				var ampIdx = opponentdeckstr.indexOf('&');
+				if (eqIdx > -1) {
+				  existingOpponentCompressed = opponentdeckstr.substring(eqIdx+1, ampIdx > -1 ? ampIdx : opponentdeckstr.length);
+				}
+			  }
+			  var opponentAddress;
+			  if (existingOpponentCompressed) {
+				// We are transitioning: new active side oC gets opponent deck; old active side becomes opponent
+				opponentAddress = "decklauncher.php?p=" + oC + "&" + setStr + oC + "=" + existingOpponentCompressed + "&" + dC + "=" + compressed;
+			  } else {
+				// No opponent deck yet: keep previous behavior (random opponent) while passing current deck as opposite param
+				opponentAddress = "decklauncher.php?p=" + oC + "&" + setStr + oC + "=random&" + dC + "=" + compressed;
+			  }
 			  $("#launch").prop("href", launchAddress);
 			  $("#opponent").prop("href", opponentAddress);
 			  history.replaceState(
