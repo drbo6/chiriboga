@@ -27,6 +27,45 @@
 			var allCardIdsForPlayer = []; //cache of non-identity cards for current side
 			var cardData = null; //loaded from carddata.json for lightbox display
 		</script>
+
+		<script>
+		// Restore opponent accordion interactions
+		(function(){
+			// Lightbox for opponent deck list
+			function ShowOpponentDeckLightbox(){
+				if (!opponentdeckstr) return;
+				var eqIdx = opponentdeckstr.indexOf('=');
+				if (eqIdx < 0) return;
+				var ampIdx = opponentdeckstr.indexOf('&', eqIdx+1);
+				var compressed = opponentdeckstr.substring(eqIdx+1, ampIdx > -1 ? ampIdx : opponentdeckstr.length);
+				if (!compressed || compressed === 'random') {
+					$('#lightbox-img').attr('src', opponentdeckimg || 'images/glow_outline.png');
+					$('#lightbox-text').html('<div class="card-text-info"><h2>Opponent Deck</h2><p>Deck will be generated at game start.</p></div>');
+					$('#lightbox').addClass('active');
+					return;
+				}
+				var oppJSON;
+				try { oppJSON = JSON.parse(LZString.decompressFromEncodedURIComponent(compressed)); } catch(e) {}
+				if (!oppJSON || !oppJSON.identity || !Array.isArray(oppJSON.cards)) return;
+				var identImg = 'images/'+ChangeImageFileToJPG(cardSet[oppJSON.identity].imageFile);
+				$('#lightbox-img').attr('src', identImg);
+				var counts = {};
+				for (var i=0;i<oppJSON.cards.length;i++) counts[oppJSON.cards[i]] = (counts[oppJSON.cards[i]]||0)+1;
+				var grouped = {};
+				for (var cid in counts) { if (cardSet[cid]) { var ct = cardSet[cid].cardType||'other'; (grouped[ct]=grouped[ct]||[]).push(cid);} }
+				var order = ['identity','agenda','operation','event','asset','upgrade','hardware','program','resource','ice','other'];
+				var lines = [];
+				for (var gi=0; gi<order.length; gi++) { var g=order[gi]; if (!grouped[g]) continue; grouped[g].sort(function(a,b){return cardSet[a].title.localeCompare(cardSet[b].title);}); lines.push('['+g.toUpperCase()+']'); for (var k=0;k<grouped[g].length;k++){ var id=grouped[g][k]; lines.push(counts[id]+' '+cardSet[id].title);} lines.push(''); }
+				var html = '<div class="card-text-info"><h2>'+cardSet[oppJSON.identity].title+'</h2><p class="card-type">Total Cards: '+oppJSON.cards.length+'</p><pre style="white-space:pre-wrap; font-size:13px; line-height:1.4;">'+lines.join('\n')+'</pre></div>';
+				$('#lightbox-text').html(html);
+				$('#lightbox').addClass('active');
+			}
+			$(document).on('click','#opponentid .opponent-body', ShowOpponentDeckLightbox);
+			$(document).on('click','#opponentid .opponent-header', function(){
+				var box = $('#opponentid'); box.toggleClass('collapsed');
+			});
+		})();
+		</script>
 		<?php
 		echo '<script src="utility.js?' . filemtime('utility.js') . '"></script>';
 		
@@ -1123,11 +1162,21 @@
 				}
 			});
 			  for (var i = 0; i < playerIdentities.length; i++) {
+				var fullTitle = cardSet[playerIdentities[i]].title || '';
+				var shortTitle = fullTitle; // fallback
+				// Determine shortening based on side: runner before colon, corp after colon+space
+				if (deckPlayer === corp) {
+					var colonIdx = fullTitle.indexOf(': ');
+					if (colonIdx > -1) shortTitle = fullTitle.substring(colonIdx + 2).trim();
+				} else {
+					// Runner
+					if (fullTitle.indexOf(':') > -1) shortTitle = fullTitle.split(':')[0].trim();
+				}
 				$("#identityselect").append(
 				  "<option value=" +
 					playerIdentities[i] +
 					">" +
-					cardSet[playerIdentities[i]].title +
+					shortTitle +
 					"</option>\n"
 				);
 			  }
@@ -1298,9 +1347,12 @@
 			  }
 		  $("#launch").html("PLAY<br>DECK");
 		  UpdateLaunchStrings();
-		  //update opponent image
+		  //update opponent image (accordion restored)
 		  if (opponentdeckimg != "") {
-			  $("#opponentid").html('Opponent:<br><img src="'+opponentdeckimg+'"/>').show();
+			  var oppHTML = '' +
+				'<div class="opponent-header"><span class="opponent-title">Opponent Deck</span><span class="opponent-arrow" aria-hidden="true">&#9660;</span></div>' +
+				'<div class="opponent-body"><img src="'+opponentdeckimg+'"/></div>';
+			  $("#opponentid").html(oppHTML).addClass('collapsed').show();
 		  } else {
 			  $("#opponentid").hide();
 		  }
@@ -1351,6 +1403,7 @@
 				<button id="exittomenu" onclick="window.location.href='index.php';" class="button">BACK TO MENU</button>
 			</div>
 				<div class="leftrow toprow">
+					<div class="deck-heading">CURRENT DECK:</div>
 					<textarea id="deck" spellcheck="false" cols="30" style="width:100%;"></textarea>
 					<div style="margin-top:8px;">
 						<button id="importdeck" class="button" type="button">Import Deck from NRDB</button>
