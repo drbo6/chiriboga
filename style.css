@@ -58,6 +58,86 @@ textarea {
 	font-size: 125%;
 }
 
+/* Theme the browser autofill/spellcheck/autocomplete visuals */
+/* Autofill (Chrome/Edge) */
+input:-webkit-autofill,
+textarea:-webkit-autofill,
+select:-webkit-autofill {
+	box-shadow: 0 0 0 1000px #0a100a inset !important;
+	-webkit-text-fill-color: #33ff33 !important;
+	border: 1px solid #1f6d1f !important;
+	caret-color: #33ff33 !important;
+}
+
+/* Input focus outline and selection colors */
+input,
+textarea,
+select {
+	caret-color: #33ff33;
+}
+input:focus,
+textarea:focus,
+select:focus {
+	outline: 1px solid #33ff33;
+	box-shadow: 0 0 0 2px rgba(51,255,51,0.15);
+}
+::selection { background: rgba(51,255,51,0.25); color: #0a100a; }
+::-moz-selection { background: rgba(51,255,51,0.25); color: #0a100a; }
+
+/* jQuery UI Autocomplete menu themed to CRT green */
+.ui-autocomplete {
+	background: rgba(12,24,12,0.95);
+	border: 1px solid #1f6d1f;
+	box-shadow: 0 0 12px rgba(0,255,0,0.08);
+	color: #33ff33;
+	font-family: "Share Tech Mono", monospace;
+	z-index: 10000; /* ensure above overlays */
+}
+.ui-menu .ui-menu-item-wrapper {
+	padding: 8px 12px;
+	color: #33ff33;
+}
+.ui-menu .ui-menu-item-wrapper:hover,
+.ui-menu .ui-state-active {
+	background: #33ff33;
+	color: #0a100a;
+	border-color: #33ff33; /* override jQuery UI default blue border */
+}
+
+/* Autocomplete-attached input field */
+.ui-autocomplete-input {
+	color: #33ff33 !important;
+	background: #0a100a !important;
+	border: 1px solid #1f6d1f !important;
+	caret-color: #33ff33 !important;
+	font-family: "Share Tech Mono", monospace;
+}
+
+/* Kill default blue focus ring and enforce green theme */
+input:focus,
+textarea:focus,
+select:focus {
+	outline: 2px solid #33ff33 !important;
+	box-shadow: none !important;
+}
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+	outline: 2px solid #33ff33 !important;
+}
+/* When autofilled and focused in Chromium */
+input:-webkit-autofill:focus,
+textarea:-webkit-autofill:focus,
+select:-webkit-autofill:focus {
+	outline: 2px solid #33ff33 !important;
+	box-shadow: 0 0 0 1000px #0a100a inset !important;
+}
+/* jQuery UI active/focus states sometimes set blue borders */
+.ui-widget-content .ui-state-active,
+.ui-widget-header .ui-state-active {
+	border: 1px solid #33ff33 !important;
+}
+
 select {
     flex: 1;
 	border: 0px solid;
