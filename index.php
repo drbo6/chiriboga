@@ -209,8 +209,31 @@
         item.innerHTML = labels[option];
         
         // Navigate based on option
-        if (option === 'custom') {
-          window.location.href = 'decklauncher.php?sets=systemgateway-systemupdate2021&p=r&r=random';
+        if (option === 'custom' && playerDeck && aiDeck) {
+          // Build compressed deck strings
+          var playerJson = {identity: playerDeck.identity, cards: []};
+          for (var cardId in playerDeck.cards) {
+            for (var i = 0; i < playerDeck.cards[cardId]; i++) {
+              playerJson.cards.push(parseInt(cardId));
+            }
+          }
+          var aiJson = {identity: aiDeck.identity, cards: []};
+          for (var cardId in aiDeck.cards) {
+            for (var i = 0; i < aiDeck.cards[cardId]; i++) {
+              aiJson.cards.push(parseInt(cardId));
+            }
+          }
+          
+          var playerCompressed = LZString.compressToEncodedURIComponent(JSON.stringify(playerJson));
+          var aiCompressed = LZString.compressToEncodedURIComponent(JSON.stringify(aiJson));
+          
+          // Determine player side (r=runner, c=corp)
+          var playerSide = (cardSet[playerDeck.identity].player === runner) ? 'r' : 'c';
+          var aiSide = (cardSet[aiDeck.identity].player === runner) ? 'r' : 'c';
+          
+          window.location.href = 'decklauncher.php?sets=systemgateway-systemupdate2021-midnightsun&p=' + playerSide + 
+                                 '&' + aiSide + '=' + aiCompressed + 
+                                 '&' + playerSide + '=' + playerCompressed;
         } else if (option === 'quick' && playerDeck && aiDeck) {
           // Build compressed deck strings
           var playerJson = {identity: playerDeck.identity, cards: []};
