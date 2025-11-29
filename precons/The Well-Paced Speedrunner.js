@@ -3,7 +3,9 @@ registerPrecon({
 	name: "The Well-Paced Speedrunner",
 	identity: "31013",
 	default: false,
-	deck_set: "Girometic",
+	deck_set: "Girometics",
+	URL: "",
+	Notes: "",
 	cards: {
 		"30008": 2,  // Leech
 		"30011": 2,  // Mutual Favor

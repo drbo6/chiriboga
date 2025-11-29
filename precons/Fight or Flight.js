@@ -3,7 +3,9 @@ registerPrecon({
     name: "Fight or Flight",
     identity: "31002",
     default: false,
-    deck_set: "none",
+    deck_set: "Girometics",
+    URL: "",
+    Notes: "",
     cards: {
         "30002": 3,  // Wildcat Strike
         "30004": 3,  // Botulus
