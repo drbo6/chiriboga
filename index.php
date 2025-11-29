@@ -8,6 +8,34 @@
   <link rel="manifest" href="manifest.json">
   <link rel="stylesheet" href="style.css" />
   <?php include 'cardrenderer/webfont.php'; ?>
+  <script src="deck/lz-string.min.js"></script>
+  <script>
+    var cardSet = []; // prepare to receive card definitions
+    var setIdentifiers = []; // set identifiers
+    var runner = {};
+    var corp = {};
+    var preconDecks = [];
+    function registerPrecon(deck) {
+      preconDecks.push(deck);
+    }
+  </script>
+  <?php
+  // Load card sets
+  echo '<script src="utility.js?' . filemtime('utility.js') . '"></script>';
+  $sets = ["systemgateway","systemupdate2021","midnightsun"];
+  foreach ($sets as $set) {
+    echo '<script src="sets/'.$set.'.js?' . filemtime('sets/'.$set.'.js') . '"></script>';
+  }
+  
+  // Load preconstructed decks
+  $preconDir = 'precons';
+  if (is_dir($preconDir)) {
+    $preconFiles = glob($preconDir . '/*.js');
+    foreach ($preconFiles as $preconFile) {
+      echo '<script src="' . $preconFile . '?' . filemtime($preconFile) . '"></script>';
+    }
+  }
+  ?>
 </head>
 <body>
   <div class="terminal-frame">
@@ -58,21 +86,19 @@
               <div class="menu-item" onclick="handleMenu('settings')">SETTINGS</div>
             </div>
             
-            <div class="match-preview">
+            <div class="match-preview" onclick="rerollDecks()">
               <div class="preview-title">QUICK GAME<br />INCOMING..</div>
-              <div class="portrait-container">
-                <img class="portrait" src="https://chiriboga-nsg.cronbach.com/images/30001.jpg" alt="">
+              <div class="portrait-container" id="player-portrait">
+                <img class="portrait" src="" alt="">
                 <div class="portrait-glow"></div>
-                <div class="portrait-name">Loup</div>
                 <div class="portrait-label">YOU</div>
               </div>
               
               <div class="vs-text">VS</div>
               
-              <div class="portrait-container">
-                <img class="portrait" src="https://chiriboga-nsg.cronbach.com/images/30035.jpg" alt="">
+              <div class="portrait-container" id="ai-portrait">
+                <img class="portrait" src="" alt="">
                 <div class="portrait-glow"></div>
-                <div class="portrait-name">Precision Design</div>
                 <div class="portrait-glow"></div>
                 <div class="portrait-label">CPU</div>
               </div>
@@ -86,6 +112,87 @@
   </div>
 
   <script>
+    // Select random Girometics precon decks
+    var selectedRunnerDeck = null;
+    var selectedCorpDeck = null;
+    var playerDeck = null;
+    var aiDeck = null;
+    var giromRunnerDecks = [];
+    var giromCorpDecks = [];
+    
+    // Function to select random decks
+    function selectRandomDecks() {
+      // Pick random decks
+      if (giromRunnerDecks.length > 0) {
+        selectedRunnerDeck = giromRunnerDecks[Math.floor(Math.random() * giromRunnerDecks.length)];
+      }
+      if (giromCorpDecks.length > 0) {
+        selectedCorpDeck = giromCorpDecks[Math.floor(Math.random() * giromCorpDecks.length)];
+      }
+      
+      // Randomly assign player vs AI
+      if (Math.random() < 0.5) {
+        playerDeck = selectedRunnerDeck;
+        aiDeck = selectedCorpDeck;
+      } else {
+        playerDeck = selectedCorpDeck;
+        aiDeck = selectedRunnerDeck;
+      }
+      
+      updatePortraits();
+    }
+    
+    // Function to update portraits
+    function updatePortraits() {
+      if (playerDeck && aiDeck) {
+        var playerIdentity = cardSet[playerDeck.identity];
+        var aiIdentity = cardSet[aiDeck.identity];
+        
+        // Update player portrait
+        var playerImg = document.querySelector('#player-portrait .portrait');
+        if (playerIdentity) {
+          playerImg.src = 'https://chiriboga-nsg.cronbach.com/images/' + playerIdentity.imageFile.replace('.png', '.jpg');
+        }
+        
+        // Update AI portrait
+        var aiImg = document.querySelector('#ai-portrait .portrait');
+        if (aiIdentity) {
+          aiImg.src = 'https://chiriboga-nsg.cronbach.com/images/' + aiIdentity.imageFile.replace('.png', '.jpg');
+        }
+      }
+    }
+    
+    // Function to reroll decks
+    function rerollDecks() {
+      selectRandomDecks();
+    }
+    
+    // Wait for all scripts to load before selecting decks
+    window.addEventListener('load', function() {
+      console.log('Total precon decks loaded:', preconDecks.length);
+      console.log('Sample deck:', preconDecks[0]);
+      
+      // Filter Girometics decks by side (case-insensitive)
+      giromRunnerDecks = preconDecks.filter(function(d) {
+        var isGirometics = d.deck_set && d.deck_set.toLowerCase() === 'girometics';
+        var hasIdentity = cardSet[d.identity];
+        var isRunner = hasIdentity && cardSet[d.identity].player === runner;
+        return isGirometics && hasIdentity && isRunner;
+      });
+      giromCorpDecks = preconDecks.filter(function(d) {
+        var isGirometics = d.deck_set && d.deck_set.toLowerCase() === 'girometics';
+        var hasIdentity = cardSet[d.identity];
+        var isCorp = hasIdentity && cardSet[d.identity].player === corp;
+        return isGirometics && hasIdentity && isCorp;
+      });
+      
+      console.log('Girometics Runner decks:', giromRunnerDecks.length, giromRunnerDecks.map(function(d) { return d.name; }));
+      console.log('Girometics Corp decks:', giromCorpDecks.length, giromCorpDecks.map(function(d) { return d.name; }));
+      
+      // Select initial random decks
+      selectRandomDecks();
+    });
+    
     function handleMenu(option) {
       const item = event.target.closest('.menu-item');
       item.innerHTML = 'LOADING...';
@@ -101,9 +208,34 @@
         };
         item.innerHTML = labels[option];
         
-        // Navigate to custom game after showing loading
+        // Navigate based on option
         if (option === 'custom') {
           window.location.href = 'decklauncher.php?sets=systemgateway-systemupdate2021&p=r&r=random';
+        } else if (option === 'quick' && playerDeck && aiDeck) {
+          // Build compressed deck strings
+          var playerJson = {identity: playerDeck.identity, cards: []};
+          for (var cardId in playerDeck.cards) {
+            for (var i = 0; i < playerDeck.cards[cardId]; i++) {
+              playerJson.cards.push(parseInt(cardId));
+            }
+          }
+          var aiJson = {identity: aiDeck.identity, cards: []};
+          for (var cardId in aiDeck.cards) {
+            for (var i = 0; i < aiDeck.cards[cardId]; i++) {
+              aiJson.cards.push(parseInt(cardId));
+            }
+          }
+          
+          var playerCompressed = LZString.compressToEncodedURIComponent(JSON.stringify(playerJson));
+          var aiCompressed = LZString.compressToEncodedURIComponent(JSON.stringify(aiJson));
+          
+          // Determine player side (r=runner, c=corp)
+          var playerSide = (cardSet[playerDeck.identity].player === runner) ? 'r' : 'c';
+          var aiSide = (cardSet[aiDeck.identity].player === runner) ? 'r' : 'c';
+          
+          window.location.href = 'engine.php?sets=systemgateway-systemupdate2021-midnightsun&p=' + playerSide + 
+                                 '&' + aiSide + '=' + aiCompressed + 
+                                 '&' + playerSide + '=' + playerCompressed;
         }
       }, 500);
 

@@ -4,7 +4,7 @@ registerPrecon({
     identity: "30019",
     default: false,
     deck_set: "Girometics",
-    URL: "",
+    URL: "https://netrunnerdb.com/en/decklist/ea37998e-138f-408e-9356-efe1b580b315/-sg-su21-t-o-salonga-server-restructuring",
     Notes: "This deck uses the identity ability to make Gordian Blade's ability to retain strength boosts even better by swapping ice around. Botulus helps with the early game and Test Run lets you find and reuse breakers, while cards like Smartware Distributor and Professional Contacts keep your economy flowing efficiently so you can hit servers hard without running out of credits.",
     cards: {
         "30004": 3,  // Botulus

@@ -3,9 +3,7 @@ registerPrecon({
 	name: "Run, bypass, breach, trash, $$$$!",
 	identity: "31013",
 	default: false,
-	deck_set: "Girometics",
-	URL: "",
-	Notes: "",
+	deck_set: "none",
 	cards: {
 		"30002": 1,  // Wildcat Strike
 		"30011": 2,  // Mutual Favor

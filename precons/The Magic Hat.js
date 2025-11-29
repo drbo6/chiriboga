@@ -4,7 +4,7 @@ registerPrecon({
     identity: "31025",
     default: false,
     deck_set: "Girometics",
-    URL: "",
+    URL: "https://netrunnerdb.com/en/decklist/8c3f847f-033e-4909-ba24-ebc8aaba0972/-sg-su21-ayla-bios-rahim-the-magic-hat",
     Notes: "This deck lets you stash cards during setup so you can fetch the right tools exactly when you need them, helping you build a powerful “big-rig” of breakers at your own pace. It plays slowly but steadily, using efficient tricks like Test Run into Femme Fatale and value engines like Professional Contacts and Aesop’s Pawnshop to handle tough ice and keep your economy running.",
     cards: {
         "30005": 1,  // Buzzsaw
