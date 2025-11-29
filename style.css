@@ -703,6 +703,19 @@ body::-webkit-scrollbar-track {
 	grid-template-rows: auto minmax(30px, auto) auto; 
 	align-content:start; 
 }
+#cardcontainer .card-item::after {
+	content:"";
+	position:absolute;
+	inset:0;
+	pointer-events:none;
+	border-radius:10px;
+	background:
+		repeating-linear-gradient(to bottom, rgba(0,0,0,0) 0px, rgba(0,0,0,0) 2px, rgba(0,0,0,0.10) 3px, rgba(0,0,0,0.10) 4px),
+		radial-gradient(ellipse at center, rgba(50,255,50,0.025) 0%, rgba(0,0,0,0.45) 75%);
+	mix-blend-mode:normal;
+	opacity:.55;
+	animation: scanlines 10s linear infinite;
+}
 #cardcontainer .card-item:hover { 
 	box-shadow:0 0 12px #33ff33, 0 0 26px rgba(51,255,51,.25), inset 0 0 16px rgba(51,255,51,0.25); 
 }
@@ -811,6 +824,19 @@ body::-webkit-scrollbar-track {
 	border-radius:10px;
 	padding:20px 24px;
 	box-shadow:0 0 16px rgba(0,255,0,0.08), inset 0 0 14px rgba(31,109,31,0.2);
+}
+#lightbox-content::after {
+	content:"";
+	position:absolute;
+	inset:0;
+	pointer-events:none;
+	border-radius:10px;
+	background:
+		repeating-linear-gradient(to bottom, rgba(0,0,0,0) 0px, rgba(0,0,0,0) 2px, rgba(0,0,0,0.10) 3px, rgba(0,0,0,0.10) 4px),
+		radial-gradient(ellipse at center, rgba(50,255,50,0.02) 0%, rgba(0,0,0,0.45) 75%);
+	mix-blend-mode:normal;
+	opacity:.55;
+	animation: scanlines 10s linear infinite;
 }
 #lightbox-body {
 	display: flex;
