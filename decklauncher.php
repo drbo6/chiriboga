@@ -93,8 +93,10 @@
 					}
 				}
 				// Initial populate (if identity known), else placeholder only
-				if (json && json.identity) window.PopulatePreconDropdownForIdentity(json.identity);
-				else $('#preconselect').empty().append('<option value="-1">Load Precon Deck</option>');
+				if (json && json.identity) 
+					window.PopulatePreconDropdownForIdentity(json.identity);
+				else 
+					$('#preconselect').empty().append('<option value="-1">Load Precon Deck</option>');
 			});
 
 			//UTILITY: ensure deckCounts matches json.cards
@@ -123,6 +125,7 @@
 				json.cards.push(id);
 				UpdateDeckTextareaFromCounts();
 				Parse();
+				if (showingOnlySelected) ApplyFilter();
 			}
 			function RemoveCardFromDeck(id) {
 				if (typeof deckCounts[id] === 'undefined' || deckCounts[id]===0) return;
@@ -132,6 +135,7 @@
 				if (idx>-1) json.cards.splice(idx,1);
 				UpdateDeckTextareaFromCounts();
 				Parse();
+				if (showingOnlySelected) ApplyFilter();
 			}
 
 			function RenderAllCardsList() {
@@ -176,6 +180,19 @@
 					// Apply darkening to cards not in deck
 					$(this).closest('.card-item').toggleClass('not-in-deck', ct === 0);
 				});
+				// Keep filters in sync after counts change
+				if (showingOnlySelected) {
+					// Re-apply current pack filter first
+					ApplyFilter();
+					// Then hide any visible cards that have count 0
+					$('#cardcontainer .card-item').each(function(){
+						if ($(this).is(':visible')) {
+							var id = parseInt($(this).find('.count-badge').attr('data-id'));
+							var ct = deckCounts[id] || 0;
+							if (ct === 0) $(this).hide();
+						}
+					});
+				}
 			}
 
 			function ShowLightbox(cardId) {
@@ -273,21 +290,93 @@
 			$(document).on('click','#lightbox',function(e){ if(e.target.id==='lightbox') HideLightbox(); });
 
 			var showingOnlySelected = false;
+			var currentFilter = 'all'; // 'all', 'systemgateway', 'systemupdate2021'
+
+			function ClearDeck() {
+				json.cards = [];
+				deckCounts = {};
+				$("#deck").val('');
+				UpdateCardCountsUI();
+				Parse();
+			}
+
+			function CycleFilter() {
+				if (currentFilter === 'all') {
+					currentFilter = 'systemgateway';
+					$('#filterdeck').html('FILTER:<br>SG');
+				} else if (currentFilter === 'systemgateway') {
+					currentFilter = 'systemupdate2021';
+					$('#filterdeck').html('FILTER:<br>SU21');
+				} else {
+					currentFilter = 'all';
+					$('#filterdeck').html('FILTER:<br>ALL CARDS');
+				}
+				ApplyFilter();
+			}
+
+		function ApplyFilter() {
+			$('#cardcontainer .card-item').each(function(){
+				var cardId = parseInt($(this).find('.count-badge').attr('data-id'));
+				var card = cardSet[cardId];
+				if (!card) return;
+				
+				if (currentFilter === 'all') {
+					$(this).show();
+				} else {
+					// Look up the card in cardData by code (cardId is the code)
+					var cardCode = String(cardId);
+					var cardInfo = null;
+					if (cardData && cardData.data) {
+						for (var i = 0; i < cardData.data.length; i++) {
+							if (cardData.data[i].code === cardCode) {
+								cardInfo = cardData.data[i];
+								break;
+							}
+						}
+					}
+					
+					if (cardInfo) {
+						var packCode = cardInfo.pack_code || '';
+						if (currentFilter === 'systemgateway' && packCode === 'sg') {
+							$(this).show();
+						} else if (currentFilter === 'systemupdate2021' && packCode === 'su21') {
+							$(this).show();
+						} else {
+							$(this).hide();
+						}
+					} else {
+						// If not found in cardData, hide it when filtering
+						$(this).hide();
+					}
+				}
+			});				// If also showing only selected cards, re-apply that filter
+				if (showingOnlySelected) {
+					$('#cardcontainer .card-item').each(function(){
+						if ($(this).is(':visible')) {
+							var id = parseInt($(this).find('.count-badge').attr('data-id'));
+							var ct = deckCounts[id] || 0;
+							if (ct === 0) $(this).hide();
+						}
+					});
+				}
+			}
+
 			function ToggleOtherCards() {
 				if (!showingOnlySelected) {
-					// Hide cards with count 0
+					// Hide cards with count 0 (respect current pack filter)
+					ApplyFilter();
 					$('#cardcontainer .card-item').each(function(){
 						var id = parseInt($(this).find('.count-badge').attr('data-id'));
 						var ct = deckCounts[id] || 0;
 						if (ct === 0) $(this).hide();
 					});
-					$('#togglecards').text('Show other cards');
+					$('#togglecards').text('SHOW UNSELECTED');
 					showingOnlySelected = true;
 				} else {
-					// Show all cards
-					$('#cardcontainer .card-item').show();
-					$('#togglecards').text('Hide other cards');
-					showingOnlySelected = false;
+					// Show all cards allowed by current pack filter
+					showingOnlySelected = false; // update flag BEFORE applying filter so UpdateCardCountsUI won't re-hide
+					ApplyFilter(); // Re-apply the current filter
+					$('#togglecards').text('HIDE UNSELECTED');
 				}
 			}
 
@@ -1152,7 +1241,7 @@
 				$("#output").html(validityOutput);
 				$("#launch").prop("disabled", false);
 			  }
-		  $("#launch").html("Play using this deck");
+		  $("#launch").html("PLAY<br>DECK");
 		  UpdateLaunchStrings();
 		  //update opponent image
 		  if (opponentdeckimg != "") {
@@ -1199,10 +1288,12 @@
 					</div>
 				</div>
 			<div class="leftrow buttons">
-				<button id="launch" class="button" onclick="window.location.href=$(this).prop('href');">Play using this deck</button>
-				<button id="opponent" class="button" onclick="window.location.href=$(this).prop('href');">Set as opponent</button>
-				<button id="togglecards" onclick="ToggleOtherCards();" class="button">Hide other cards</button>
-				<button id="exittomenu" onclick="window.location.href='index.php';" class="button">Back to Menu</button>
+				<button id="launch" class="button" onclick="window.location.href=$(this).prop('href');">PLAY<br>DECK</button>
+				<button id="opponent" class="button" onclick="window.location.href=$(this).prop('href');">SET AS OPPONENT</button>
+				<button id="cleardeck" onclick="ClearDeck();" class="button">CLEAR<br>DECK</button>
+				<button id="filterdeck" onclick="CycleFilter();" class="button">FILTER:<br>ALL CARDS</button>
+				<button id="togglecards" onclick="ToggleOtherCards();" class="button">HIDE UNSELECTED</button>
+				<button id="exittomenu" onclick="window.location.href='index.php';" class="button">BACK TO MENU</button>
 			</div>
 				<div class="leftrow toprow">
 					<textarea id="deck" spellcheck="false" cols="30" style="width:100%;"></textarea>

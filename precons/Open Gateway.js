@@ -4,8 +4,8 @@ registerPrecon({
     identity: "31026",
     default: false,
     deck_set: "Girometics",
-    URL: "",
-    Notes: "",
+    URL: "https://netrunnerdb.com/en/decklist/e1adee83-e76c-4f85-a8ca-5aace0a85a17/-sg-su21-rielle-kit-peddler-open-gateway",
+    Notes: "Kit is a hacker who can turn the first security barrier she encounters each turn into an easier type to break through, so this deck focuses on making one really effective hacking attempt per turn using sneaky bypass tools like Inside Job and her signature program Gordian Blade to get past the corporation's defenses.",
     cards: {
         "30013": 1,  // Docklands Pass
         "30016": 1,  // Marjanah
