@@ -4,10 +4,10 @@ registerPrecon({
     identity: "30059",
     default: false,
     deck_set: "Girometics",
-    URL: "",
-    Notes: "",
+    URL: "https://netrunnerdb.com/en/decklist/8fc12751-627a-4053-97f4-a9373734c963/-sg-su21-built-to-last-advancement-factory",
+    Notes: "This deck spams advanceable ice to constantly gain credits from its ID ability that gives you credits when you advance a card. It then uses Trick of Light to fast-advance agendas by moving those extra advancement counters around, making cards like Oaktown Renovation both an income source and an ever-present scoring threat.",
     cards: {
-        "30053": 3,  // Spin Doctor
+        "30053": 3,  // Spin Doctorn
         "30060": 1,  // Above the Law
         "30062": 3,  // Ballista
         "30063": 3,  // Pharos

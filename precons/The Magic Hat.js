@@ -5,7 +5,7 @@ registerPrecon({
     default: false,
     deck_set: "Girometics",
     URL: "",
-    Notes: "",
+    Notes: "This deck lets you stash cards during setup so you can fetch the right tools exactly when you need them, helping you build a powerful “big-rig” of breakers at your own pace. It plays slowly but steadily, using efficient tricks like Test Run into Femme Fatale and value engines like Professional Contacts and Aesop’s Pawnshop to handle tough ice and keep your economy running.",
     cards: {
         "30005": 1,  // Buzzsaw
         "30013": 1,  // Docklands Pass

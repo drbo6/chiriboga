@@ -1,6 +1,6 @@
 * {
 	font-family: "Lucida Console", Monaco, monospace;
-	color: white;
+	color: #33ff33;
 }
 
 form {
@@ -34,8 +34,7 @@ input[type=submit] {
 }
 
 body {
-	background:#333333;
-	/*background-image: url("images/bg.jpg");*/
+	background:#0a0a0a;
 }
 
 img.icon {
@@ -473,7 +472,60 @@ div.options {
 	display:block;
 }
 
-/* Deck launcher specific styles */
+/* CRT shared styles for deck builder and index */
+#contentcontainer { background:#0a0a0a; }
+#dataentry { background:#0a100a; border-radius:10px; position:relative; }
+#dataentry::before { content:""; position:absolute; top:0; left:0; right:0; bottom:0; pointer-events:none; background:radial-gradient(ellipse at center, rgba(50,255,50,0.03) 0%, transparent 70%); }
+#dataentry::after { content:""; position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:none; background:repeating-linear-gradient(to bottom, rgba(0,0,0,0) 0px, rgba(0,0,0,0) 2px, rgba(0,0,0,0.12) 3px, rgba(0,0,0,0.12) 4px); animation: scanlines 10s linear infinite; }
+@keyframes scanlines { 0% { background-position:0 0; } 100% { background-position:0 100px; } }
+
+/* Index terminal frame */
+.terminal-frame { background: linear-gradient(145deg, #2a2a2a 0%, #1a1a1a 50%, #0d0d0d 100%); padding:30px; border-radius:20px; box-shadow: 0 0 0 2px #333; position:relative; display:flex; align-items:center; justify-content:center; min-height:100vh; }
+.terminal-frame::before { content:"● ● ●"; position:absolute; top:10px; left:20px; font-size:10px; letter-spacing:4px; color:#444; }
+.screen { background:#0a100a; border-radius:10px; padding:40px 60px; position:relative; overflow:hidden; box-shadow: inset 0 0 30px rgba(0,0,0,0.6); }
+.screen::before { content:""; position:absolute; inset:0; background: radial-gradient(ellipse at center, transparent 0%, rgba(0,0,0,0.3) 90%, rgba(0,0,0,0.6) 100%); pointer-events:none; z-index:10; }
+.screen::after { content:""; position:absolute; top:0; left:0; width:100%; height:100%; background: repeating-linear-gradient(to bottom, rgba(0,0,0,0) 0px, rgba(0,0,0,0) 2px, rgba(0,0,0,0.12) 3px, rgba(0,0,0,0.12) 4px); pointer-events:none; z-index:11; animation: scanlines 10s linear infinite; }
+.screen-content { animation: flicker 0.1s infinite; position:relative; z-index:5; }
+@keyframes flicker { 0%,100%{opacity:1;} 50%{opacity:0.98;} 25%,75%{opacity:0.99;} }
+.glow-overlay { position:absolute; inset:0; background: radial-gradient(ellipse at center, rgba(50,255,50,0.03) 0%, transparent 70%); pointer-events:none; z-index:6; }
+
+.game-title { margin-bottom:10px; position:relative; text-align:center; }
+.title-line { display:flex; align-items:center; justify-content:center; gap:15px; margin-bottom:8px; }
+.title-line::before, .title-line::after { content:"════"; color:#33ff33; opacity:0.5; font-size:14px; }
+.game-title h1 { font-size:48px; color:#33ff33; text-shadow: 0 0 5px #33ff33, 0 0 15px #00aa00, 0 0 40px #00aa00; letter-spacing:10px; position:relative; display:inline-block; }
+.game-title h1::before { content:"NETRUNNER"; position:absolute; left:2px; top:0; color:#ffffff; opacity:0.8; clip-path: inset(0 0 50% 0); animation: glitchTop 4s infinite linear; }
+.game-title h1::after  { content:"NETRUNNER"; position:absolute; left:-2px; top:0; color:#33ffff; opacity:0.8; clip-path: inset(50% 0 0 0); animation: glitchBottom 4s infinite linear; }
+@keyframes glitchTop { 0%,87%,100%{transform:translate(0);opacity:0;} 88%{transform:translate(-3px,1px);opacity:0.8;} 90%{transform:translate(3px,-1px);opacity:0.8;} 92%{transform:translate(-2px,0);opacity:0.8;} 93%{transform:translate(0);opacity:0;} }
+@keyframes glitchBottom { 0%,87%,100%{transform:translate(0);opacity:0;} 88%{transform:translate(2px,1px);opacity:0.8;} 89%{transform:translate(-3px,0);opacity:0.8;} 91%{transform:translate(2px,-1px);opacity:0.8;} 93%{transform:translate(0);opacity:0;} }
+.subtitle-container { position:relative; margin:15px 0; display:flex; align-items:center; justify-content:center; }
+.game-title h2 { font-size:32px; color:#33ff33; letter-spacing:12px; text-shadow: 0 0 10px #33ff33; position:relative; display:inline-block; }
+.game-title h2::before { content:"CH1R180G4"; position:absolute; left:2px; top:0; color:#ffffff; opacity:0; clip-path: inset(0 0 50% 0); }
+.game-title h2::after  { content:"CH1R180G4"; position:absolute; left:-2px; top:0; color:#33ffff; opacity:0; clip-path: inset(50% 0 0 0); }
+.game-title h2.glitch::before { animation: glitchH2Top 0.3s steps(2) forwards; }
+.game-title h2.glitch::after  { animation: glitchH2Bottom 0.3s steps(2) forwards; }
+@keyframes glitchH2Top { 0%{transform:translate(0);opacity:0;} 20%{transform:translate(-4px,2px);opacity:0.9;} 40%{transform:translate(4px,-1px);opacity:0.8;} 60%{transform:translate(-2px,1px);opacity:0.9;} 80%{transform:translate(3px,-2px);opacity:0.7;} 100%{transform:translate(0);opacity:0;} }
+@keyframes glitchH2Bottom { 0%{transform:translate(0);opacity:0;} 20%{transform:translate(3px,-1px);opacity:0.8;} 40%{transform:translate(-3px,2px);opacity:0.9;} 60%{transform:translate(2px,-2px);opacity:0.7;} 80%{transform:translate(-4px,1px);opacity:0.9;} 100%{transform:translate(0);opacity:0;} }
+.bracket { color:#33ff33; font-size:24px; opacity:0.6; vertical-align:middle; }
+.bracket.left { margin-right:10px; }
+.bracket.right { margin-left:10px; }
+.hex-decoration { display:flex; justify-content:center; gap:8px; margin-top:12px; }
+.hex { width:6px; height:6px; background:#33ff33; transform:rotate(45deg); opacity:0.6; box-shadow:0 0 5px #33ff33; animation: hexPulse 2s ease-in-out infinite; }
+.hex:nth-child(2){ animation-delay:0.2s; opacity:0.8; }
+.hex:nth-child(3){ animation-delay:0.4s; opacity:1; }
+.hex:nth-child(4){ animation-delay:0.2s; opacity:0.8; }
+.hex:nth-child(5){ animation-delay:0s; opacity:0.6; }
+@keyframes hexPulse { 0%,100%{ transform:rotate(45deg) scale(1);} 50%{ transform:rotate(45deg) scale(1.3);} }
+
+.menu-layout { display:flex; justify-content:center; }
+.menu-buttons { display:grid; grid-template-columns: repeat(2, minmax(240px, 1fr)); gap:16px; max-width:640px; }
+.menu-item { display:block; padding:14px 18px; border:1px solid #1f6d1f; border-radius:8px; color:#33ff33; background: rgba(12,24,12,0.7); text-decoration:none; box-shadow: inset 0 0 12px rgba(0,255,0,0.1), 0 0 8px rgba(0,255,0,0.05); }
+.menu-item::before { content:""; display:block; height:1px; background:linear-gradient(to right, rgba(51,255,51,0.3), rgba(51,255,51,0)); margin-bottom:8px; }
+.menu-item:hover { border-color:#33ff33; box-shadow: inset 0 0 18px rgba(0,255,0,0.2), 0 0 12px rgba(0,255,0,0.08); }
+.menu-item:active { transform: translateY(1px); }
+.preview-title { font-size:18px; letter-spacing:2px; }
+.achievement-percent { font-size:11px; opacity:0.75; }
+.version { margin-top:12px; text-align:center; font-size:10px; opacity:0.7; }
+
 #cardcontainer { 
 	display:grid; 
 	grid-template-columns:repeat(auto-fit,minmax(120px,1fr)); 
@@ -488,12 +540,12 @@ div.options {
 	min-width:0; 
 }
 #cardcontainer .card-item { 
-	background:#0b141c; 
-	border:1px solid #132a3a; 
+	background:#0a0f0a; 
+	border:1px solid #184e18; 
 	border-radius:10px; 
 	padding:8px; 
 	position:relative; 
-	box-shadow:0 0 6px #132a3a, inset 0 0 10px rgba(19,42,58,0.4); 
+	box-shadow:0 0 6px #184e18, inset 0 0 10px rgba(24,78,24,0.35); 
 	transition:box-shadow .15s; 
 	cursor:pointer; 
 	display:grid; 
@@ -501,11 +553,11 @@ div.options {
 	align-content:start; 
 }
 #cardcontainer .card-item:hover { 
-	box-shadow:0 0 12px #25b4ff, 0 0 26px rgba(37,180,255,.5), inset 0 0 16px rgba(37,180,255,0.45); 
+	box-shadow:0 0 12px #33ff33, 0 0 26px rgba(51,255,51,.25), inset 0 0 16px rgba(51,255,51,0.25); 
 }
 #cardcontainer .card-item.not-in-deck img {
 	opacity: 0.5;
-	filter: brightness(0.6) saturate(0.4);
+	filter: brightness(0.75) saturate(0.5);
 }
 #cardcontainer .card-item.not-in-deck:hover img {
 	opacity: 0.7;
@@ -522,7 +574,7 @@ div.options {
 	font-size:12px; 
 	line-height:1.2; 
 	margin-top:6px; 
-	color:#cfe9f7; 
+	color:#33ff33; 
 	min-height:43px; 
 	max-height:43px; 
 	overflow:hidden; 
@@ -545,26 +597,25 @@ div.options {
 	padding:8px 0; 
 	font-size:16px; 
 	cursor:pointer; 
-	background:linear-gradient(135deg,#0a1f33,#093b5e); 
-	color:#9fdcff; 
-	border:1px solid #0d6ea5; 
+	background:#0a100a; 
+	color:#33ff33; 
+	border:1px solid #1f6d1f; 
 	border-radius:5px; 
 	font-weight:bold; 
-	transition:background .2s; 
-	box-shadow:0 0 6px #0d6ea5, inset 0 0 12px rgba(13,110,165,0.4); 
+	transition:border .2s; 
+	box-shadow:0 0 6px #1f6d1f, inset 0 0 12px rgba(31,109,31,0.25); 
 }
 #cardcontainer .card-controls button:hover { 
-	background:linear-gradient(135deg,#0c2843,#0d507f); 
-	color:#c7eeff; 
-	box-shadow:0 0 12px #25b4ff, 0 0 30px rgba(37,180,255,.6), inset 0 0 22px rgba(37,180,255,0.55); 
+	border-color:#33ff33; 
+	box-shadow:0 0 12px rgba(51,255,51,0.25), inset 0 0 18px rgba(51,255,51,0.2); 
 }
 #cardcontainer .count-badge { 
 	position:absolute; 
 	top:calc(50% - 15px); 
 	left:50%; 
 	transform:translate(-50%,-50%); 
-	background:linear-gradient(135deg, rgba(5,15,25,0.98), rgba(8,25,40,0.98)); 
-	color:#fff; 
+	background:#0a100a; 
+	color:#33ff33; 
 	padding:6px 10px; 
 	font-size:24px; 
 	font-weight:bold; 
@@ -576,17 +627,17 @@ div.options {
 	justify-content:center; 
 	pointer-events:none; 
 	opacity:0; 
-	box-shadow:0 0 8px rgba(13,110,165,0.6), inset 0 0 12px rgba(13,110,165,0.3); 
+	box-shadow:0 0 8px rgba(31,109,31,0.4), inset 0 0 12px rgba(31,109,31,0.25); 
 	transition:opacity .2s; 
 	z-index:2; 
 }
 #cardcontainer .count-badge.has-copies { 
 	opacity:1; 
-	background:#0d507f; 
-	box-shadow:0 0 14px #25b4ff; 
+	background:#0e1a0e; 
+	box-shadow:0 0 14px rgba(51,255,51,0.25); 
 }
 
-/* Lightbox styles */
+/* Lightbox styles - CRT */
 #lightbox { 
 	display:none; 
 	position:fixed; 
@@ -604,11 +655,17 @@ div.options {
 	max-width:90%; 
 	max-height:90%; 
 	position:relative; 
+  background:#0a100a; 
+  border:1px solid #184e18;
+	border-radius:10px;
+	padding:20px 24px;
+	box-shadow:0 0 16px rgba(0,255,0,0.08), inset 0 0 14px rgba(31,109,31,0.2);
 }
 #lightbox-body {
 	display: flex;
 	gap: 20px;
 	align-items: flex-start;
+		margin: 6px 4px;
 }
 #lightbox-img { 
 	max-width: 450px; 
@@ -618,11 +675,11 @@ div.options {
 	flex-shrink: 0;
 }
 #lightbox-text {
-	color: #fff;
+	color: #33ff33;
 	max-width: 400px;
 	overflow-y: auto;
 	max-height: 90vh;
-	padding-right: 10px;
+	padding-right: 12px;
 }
 
 /* Responsive layout for thin resolutions */
@@ -640,11 +697,12 @@ div.options {
 .card-text-info h2 {
 	margin: 0 0 15px 0;
 	font-size: 24px;
-	color: #4fc3f7;
+	color: #33ff33;
+	text-shadow: 0 0 6px rgba(51,255,51,0.25);
 }
 .card-text-info .card-type {
 	font-size: 16px;
-	color: #aaa;
+	color: #8fdc8f;
 	margin: 8px 0;
 	line-height: 1.6;
 }
@@ -657,14 +715,14 @@ div.options {
 }
 .card-text-info .card-faction {
 	font-size: 14px;
-	color: #ffb74d;
+	color: #66ff99;
 	margin: 8px 0;
 }
 .card-text-info .card-text {
 	font-size: 15px;
 	line-height: 1.6;
 	margin: 15px 0;
-	color: #e0e0e0;
+	color: #b8fbb8;
 }
 .card-text-info .card-text .card-icon {
 	height: 1.2em;
@@ -676,23 +734,24 @@ div.options {
 .card-text-info .card-flavor {
 	font-size: 14px;
 	font-style: italic;
-	color: #888;
+	color: #7fdc7f;
 	margin-top: 15px;
-	border-top: 1px solid #444;
+	border-top: 1px solid #184e18;
 	padding-top: 10px;
 }
 #lightbox-close { 
 	position:absolute; 
 	top:-40px; 
 	right:0; 
-	font-size:36px; 
-	color:#fff; 
+	font-size:20px; 
+	color:#33ff33; 
 	cursor:pointer; 
-	font-weight:bold; 
+	font-weight:800; 
+	letter-spacing:0.12em;
 }
-#lightbox-close:hover { color:#ccc; }
+#lightbox-close:hover { color:#66ff66; }
 
-/* Deck launcher layout */
+/* Deck launcher layout - CRT */
 #contentcontainer {
 	display:flex;
 	flex-wrap:wrap;
@@ -715,22 +774,30 @@ div.options {
 
 #identityselect {
 	width:100%;
-	background:#162938;
-	border:1px solid #25b4ff;
-	color:#e6f8ff;
+	background:#0a100a;
+	border:1px solid #1f6d1f;
+	color:#33ff33 !important;
 	padding:10px 12px;
 	border-radius:8px;
 	font-size:15px;
-	box-shadow:0 0 6px #132a3a, inset 0 0 12px rgba(37,180,255,0.25);
+	box-shadow:0 0 6px #1f6d1f, inset 0 0 12px rgba(31,109,31,0.25);
 	box-sizing:border-box;
+	-webkit-appearance: none;
+	-moz-appearance: none;
+	appearance: none;
+	background-color:#0a100a;
+	background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="%2333ff33" d="M7 10l5 5 5-5z"/></svg>');
+	background-repeat: no-repeat;
+	background-position: right 10px center;
+	background-size: 16px 16px;
 }
 #identityselect:focus { 
-	box-shadow:0 0 12px #25b4ff, 0 0 30px rgba(37,180,255,.6), inset 0 0 22px rgba(37,180,255,0.55); 
-	outline:none; 
+	box-shadow:0 0 14px rgba(51,255,51,0.35), inset 0 0 16px rgba(51,255,51,0.2);
+	outline:1px solid #33ff33;
 }
 #identityselect option { 
-	background:#162938; 
-	color:#e6f8ff; 
+	background:#0a100a !important; 
+	color:#33ff33 !important; 
 }
 
 #identity { 
@@ -743,23 +810,23 @@ div.options {
 
 #deck {
 	width:100%;
-	background: linear-gradient(135deg,#0a1f33 0%, #093b5e 50%, #0a1f33 100%);
-	border:1px solid #0d6ea5;
-	color:#9fdcff;
+	background:#0a100a;
+	border:1px solid #1f6d1f;
+	color:#33ff33;
 	padding:10px 12px;
 	border-radius:8px;
 	font-size:14px;
 	line-height:1.3;
 	box-sizing:border-box;
 	resize:none;
-	box-shadow:0 0 6px #0d6ea5, inset 0 0 12px rgba(13,110,165,0.4);
+	box-shadow:0 0 6px #1f6d1f, inset 0 0 12px rgba(31,109,31,0.25);
 	flex: 1;
 	min-height: 0;
 	overflow-y: auto;
 }
 #deck:focus { 
-	box-shadow:0 0 12px #25b4ff, 0 0 30px rgba(37,180,255,.6), inset 0 0 22px rgba(37,180,255,0.55); 
-	outline:none; 
+	box-shadow:0 0 14px rgba(51,255,51,0.35), inset 0 0 16px rgba(51,255,51,0.2);
+	outline:1px solid #33ff33;
 }
 
 .leftrow {
@@ -781,27 +848,20 @@ div.options {
 	min-width:140px;
 }
 
-/* High-contrast action buttons (Play / Set / Hide / Back) */
+/* High-contrast action buttons (Play / Set / Hide / Back) - CRT */
 #launch, #opponent, #togglecards, #exittomenu {
-	/* Bright white-silver variant: lively yet cohesive */
-	background: linear-gradient(135deg, #f2f2f2 0%, #e6e9ed 55%, #f2f2f2 100%);
-	border: 1px solid #cfd6dc;
-	color: #0b2133;
-	text-shadow: 0 1px 0 rgba(255,255,255,0.35);
-	box-shadow: 0 0 10px rgba(200,220,235,0.45), inset 0 0 10px rgba(255,255,255,0.35);
-	border-radius: 10px;
-	font-weight: 800;
+	background:#0a100a;
+	border:1px solid #1f6d1f;
+	color:#33ff33;
+	box-shadow:0 0 10px rgba(0,255,0,0.08) inset, 0 0 10px rgba(0,255,0,0.05);
+	border-radius:10px;
+	font-weight:800;
 }
 #launch:hover, #opponent:hover, #togglecards:hover, #exittomenu:hover {
-	background: linear-gradient(135deg, #ffffff 0%, #eef2f6 55%, #ffffff 100%);
-	border-color: #e0e6ec;
-	color: #061726;
-	box-shadow: 0 0 16px rgba(210,230,245,0.6), 0 0 28px rgba(200,220,235,0.45), inset 0 0 14px rgba(255,255,255,0.5);
+	border-color:#33ff33;
 }
 #launch:active, #opponent:active, #togglecards:active, #exittomenu:active {
-	background: linear-gradient(135deg, #e8eaed 0%, #d9dee4 55%, #e8eaed 100%);
-	border-color: #c7d0d8;
-	box-shadow: 0 0 9px rgba(195,210,222,0.5) inset, 0 0 9px rgba(195,210,222,0.45);
+	box-shadow:0 0 12px rgba(51,255,51,0.25);
 }
 
 /* Action buttons: Play / Set / Hide / Back */
@@ -841,29 +901,29 @@ div.options {
 	cursor: default;
 }
 
-/* Import Deck button: centered and cohesive styling */
+/* Import/Export buttons - CRT */
 #importdeck {
 	display: block;
 	width: 85%;
 	margin: 12px auto 0 auto;
-	background: linear-gradient(135deg,#0a1f33 0%, #093b5e 50%, #0a1f33 100%);
-	border: 1px solid #0d6ea5;
-	color: #e6f8ff;
+	background: #0a100a;
+	border: 1px solid #1f6d1f;
+	color: #33ff33;
 	padding: 12px 16px;
 	border-radius: 10px;
 	font-size: 15px;
 	font-weight: 700;
 	letter-spacing: .04em;
-	box-shadow: 0 0 6px #0d6ea5, inset 0 0 12px rgba(13,110,165,0.4);
+	box-shadow: 0 0 6px #1f6d1f, inset 0 0 12px rgba(31,109,31,0.25);
 }
 #importdeck:hover {
-	background: linear-gradient(135deg,#0c2843 0%, #0d507f 50%, #0c2843 100%);
-	color: #c7eeff;
-	box-shadow: 0 0 12px #25b4ff, 0 0 30px rgba(37,180,255,.6), inset 0 0 22px rgba(37,180,255,0.55);
+	border-color:#33ff33;
+	box-shadow: 0 0 14px rgba(51,255,51,0.35), inset 0 0 16px rgba(51,255,51,0.2);
 }
+
 #importdeck:disabled {
-	background: #0a1f33;
-	color: #7aa8bf;
+	background: #0a100a;
+	color: #2a7a2a;
 	opacity: 0.6;
 	cursor: default;
 }
@@ -871,57 +931,66 @@ div.options {
 	display: block;
 	width: 85%;
 	margin: 12px auto 0 auto;
-	background: linear-gradient(135deg,#0a1f33 0%, #093b5e 50%, #0a1f33 100%);
-	border: 1px solid #0d6ea5;
-	color: #e6f8ff;
+	background: #0a100a;
+	border: 1px solid #1f6d1f;
+	color: #33ff33;
 	padding: 12px 16px;
 	border-radius: 10px;
 	font-size: 15px;
 	font-weight: 700;
 	letter-spacing: .04em;
-	box-shadow: 0 0 6px #0d6ea5, inset 0 0 12px rgba(13,110,165,0.4);
+	box-shadow: 0 0 6px #1f6d1f, inset 0 0 12px rgba(31,109,31,0.25);
 }
 #exportjs:hover {
-	background: linear-gradient(135deg,#0c2843 0%, #0d507f 50%, #0c2843 100%);
-	color: #c7eeff;
-	box-shadow: 0 0 12px #25b4ff, 0 0 30px rgba(37,180,255,.6), inset 0 0 22px rgba(37,180,255,0.55);
+	border-color:#33ff33;
+	box-shadow: 0 0 14px rgba(51,255,51,0.35), inset 0 0 16px rgba(51,255,51,0.2);
 }
+
 #exportjs:disabled {
-	background: #0a1f33;
-	color: #7aa8bf;
+	background: #0a100a;
+	color: #2a7a2a;
 	opacity: 0.6;
 	cursor: default;
 }
 
-/* Precon Deck dropdown: matches import button styling */
+/* Precon Deck dropdown - CRT */
 #preconselect {
 	display: block;
 	width: 85%;
 	margin: 12px auto 0 auto;
-	background: linear-gradient(135deg,#0a1f33 0%, #093b5e 50%, #0a1f33 100%);
-	border: 1px solid #0d6ea5;
-	color: #e6f8ff;
+	background: #0a100a;
+	border: 1px solid #1f6d1f;
+	color: #33ff33 !important;
 	padding: 12px 16px;
 	border-radius: 10px;
 	font-size: 15px;
 	font-weight: 700;
 	letter-spacing: .04em;
-	box-shadow: 0 0 6px #0d6ea5, inset 0 0 12px rgba(13,110,165,0.4);
+	box-shadow: 0 0 6px #1f6d1f, inset 0 0 12px rgba(31,109,31,0.25);
 	cursor: pointer;
+	-webkit-appearance: none;
+	-moz-appearance: none;
+	appearance: none;
+	background-color:#0a100a;
+	background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="%2333ff33" d="M7 10l5 5 5-5z"/></svg>');
+	background-repeat: no-repeat;
+	background-position: right 12px center;
+	background-size: 16px 16px;
 }
 #preconselect:hover {
-	background: linear-gradient(135deg,#0c2843 0%, #0d507f 50%, #0c2843 100%);
-	color: #c7eeff;
-	box-shadow: 0 0 12px #25b4ff, 0 0 30px rgba(37,180,255,.6), inset 0 0 22px rgba(37,180,255,0.55);
+	border-color:#33ff33;
 }
 #preconselect:focus {
-	box-shadow: 0 0 12px #25b4ff, 0 0 30px rgba(37,180,255,.6), inset 0 0 22px rgba(37,180,255,0.55);
-	outline: none;
+	outline: 1px solid #33ff33;
+	box-shadow: 0 0 14px rgba(51,255,51,0.35), inset 0 0 16px rgba(51,255,51,0.2);
 }
 #preconselect option {
-	background: #162938;
-	color: #e6f8ff;
+	background: #0a100a !important;
+	color: #33ff33 !important;
 }
+
+/* Hide default arrow in IE/Edge (legacy) */
+select::-ms-expand { display: none; }
 
 .cardgroup {
 	cursor:pointer;
@@ -940,34 +1009,10 @@ div.options {
 }
 
 /* Deck stats (cards / influence / agenda) */
-.deck-stats { 
-	margin-top:10px; 
-	background:linear-gradient(135deg,#0a1f33 0%, #093b5e 55%, #0a1f33 100%); 
-	border:1px solid #0d6ea5; 
-	padding:10px 14px; 
-	border-radius:10px; 
-	font-size:13px; 
-	box-shadow:0 0 6px #0d6ea5, inset 0 0 12px rgba(13,110,165,0.35); 
-	letter-spacing:.04em; 
-	width:100%; 
-	box-sizing:border-box; 
-}
-.deck-stat { 
-	margin:4px 0; 
-	color:#9fdcff; 
-	font-weight:600; 
-	display:flex; 
-	justify-content:space-between; 
-	align-items:center; 
-}
-.deck-stat.bad { 
-	color:#ff4d73; 
-	text-shadow:0 0 6px rgba(255,77,115,0.7), 0 0 12px rgba(255,77,115,0.35); 
-}
-.deck-stat .stat-label { 
-	font-weight:700; 
-	opacity:.9; 
-}
+.deck-stats { margin-top:10px; background:#0a100a; border:1px solid #1f6d1f; padding:10px 14px; border-radius:10px; font-size:13px; box-shadow:0 0 6px #1f6d1f, inset 0 0 12px rgba(31,109,31,0.25); letter-spacing:.04em; width:100%; box-sizing:border-box; }
+.deck-stat { margin:4px 0; color:#33ff33; font-weight:600; display:flex; justify-content:space-between; align-items:center; }
+.deck-stat.bad { color:#ff6666; text-shadow:0 0 6px rgba(255,102,102,0.7), 0 0 12px rgba(255,102,102,0.35); }
+.deck-stat .stat-label { font-weight:700; opacity:.9; }
 
 #opponentid {
 	display:none;
