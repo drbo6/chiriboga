@@ -1390,4 +1390,104 @@ body { background: #0a0a0a; min-height: 100vh; display: flex; align-items: cente
 .status-bar { display: flex; justify-content: space-between; margin-top: 20px; padding-top: 15px; border-top: 1px solid #33ff3333; font-size: 9px; opacity: 0.6; }
 .status-item { color: #33ff33; letter-spacing: 1px; }
 
-.noise { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%' height='100%' filter='url(%23noise)'/%3E%3C/svg%3E"); opacity: 0.03; pointer-events: none; z-index: 7; }
+.noise { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulease type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%' height='100%' filter='url(%23noise)'/%3E%3C/svg%3E"); opacity: 0.03; pointer-events: none; z-index: 7; }
+
+/* ==========================================================
+	Index Responsive Breakpoints
+	========================================================== */
+
+/* Height < 600px: Remove grey border, 3 columns vertical */
+@media (max-height: 600px) {
+	.terminal-frame {
+		background: none;
+		padding: 10px;
+		box-shadow: none;
+		border-radius: 0;
+	}
+	.terminal-frame::before {
+		display: none;
+	}
+	.screen {
+		padding: 20px 30px;
+	}
+	.menu-layout {
+		flex-direction: row;
+		align-items: flex-start;
+	}
+	.game-title {
+		flex: 1;
+	}
+	.game-title h1 {
+		font-size: 32px;
+	}
+	.game-title h2 {
+		font-size: 20px;
+	}
+	.menu-buttons {
+		flex: 1;
+	}
+	.match-preview {
+		flex: 1;
+	}
+}
+
+/* Height > 600px AND Width < 480px: Remove border, quick game below menu, horizontal pictures */
+@media (min-height: 601px) and (max-width: 480px) {
+	.terminal-frame {
+		background: none;
+		padding: 10px;
+		box-shadow: none;
+		border-radius: 0;
+	}
+	.terminal-frame::before {
+		display: none;
+	}
+	.screen {
+		padding: 20px 15px;
+	}
+	.menu-layout {
+		flex-direction: column;
+	}
+	.match-preview {
+		flex-direction: row;
+		gap: 10px;
+	}
+	.portrait-wrapper {
+		flex-direction: column;
+	}
+	.vs-text {
+		align-self: center;
+	}
+}
+
+/* Height > 600px AND Width 481-678px: Remove border, quick game to right, vertical content */
+@media (min-height: 601px) and (min-width: 481px) and (max-width: 678px) {
+	.terminal-frame {
+		background: none;
+		padding: 10px;
+		box-shadow: none;
+		border-radius: 0;
+	}
+	.terminal-frame::before {
+		display: none;
+	}
+	.screen {
+		padding: 20px 30px;
+	}
+	.menu-layout {
+		flex-direction: row;
+		align-items: flex-start;
+	}
+	.menu-buttons {
+		flex: 1;
+	}
+	.match-preview {
+		flex: 1;
+		flex-direction: column;
+	}
+}
+
+/* Height > 600px AND Width > 678px: Normal display (no overrides needed) */
+@media (min-height: 601px) and (min-width: 679px) {
+	/* Normal desktop display - all default styles apply */
+}
