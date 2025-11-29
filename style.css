@@ -1435,7 +1435,7 @@ body { background: #0a0a0a; min-height: 100vh; display: flex; align-items: cente
 }
 
 /* Height > 600px AND Width < 480px: Remove border, quick game below menu, horizontal pictures */
-@media (min-height: 769px) and (max-width: 480px) {
+@media (min-height: 769px) and (max-width: 678px) {
 	.system-text, .version, .status-bar {
 		display: none !important;
 	}
@@ -1466,32 +1466,7 @@ body { background: #0a0a0a; min-height: 100vh; display: flex; align-items: cente
 	}
 }
 
-/* Height > 600px AND Width 481-678px: Remove border, quick game to right, vertical content */
-@media (min-height: 601px) and (min-width: 481px) and (max-width: 678px) {
-	.terminal-frame {
-		background: none;
-		padding: 10px;
-	/* Allow nested wrappers to flatten so children become grid items */
-	.menu-items { display: contents; }
-	.menu-layout { display: contents; }
-	}
-	.terminal-frame::before {
-		display: none;
-	}
-	.screen {
-	/* Remove now-irrelevant flex adjustments for menu-layout */
-		align-items: flex-start;
-	}
-	.menu-buttons {
-		flex: 1;
-	}
-	.match-preview {
-		flex: 1;
-		flex-direction: column;
-	}
-}
-
 /* Height > 600px AND Width > 678px: Normal display (no overrides needed) */
-@media (min-height: 601px) and (min-width: 679px) {
+@media (min-height: 769px) and (min-width: 679px) {
 	/* Normal desktop display - all default styles apply */
 }
