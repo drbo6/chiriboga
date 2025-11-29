@@ -38,9 +38,9 @@
           </div>
           <div class="spacer-grow"></div>
           <div class="meta-stack">
-            <div class="version">BUILD 0.1.0-ALPHA // 2077.11.29</div>
+            <div class="version">BUILD 0.1.0-ALPHA // 2077.<?php echo date('m.d'); ?></div>
             <div class="status-bar">
-              <span class="status-item">MEM: 64TB FREE</span>
+              <span class="status-item">MEM: 64KB FREE</span>
               <span class="status-item">NET: CONNECTED</span>
               <span class="status-item">ICE: NOMINAL</span>
             </div>
