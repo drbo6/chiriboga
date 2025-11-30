@@ -517,11 +517,9 @@ function Render() {
   cardRenderer.app.renderer.plugins.sprite.sprites.length = 0; //helps with garbage collection
   //https://github.com/pixijs/pixi-particles#note-on-emitter-cleanup
 
-  var footerBackground = "#77779999";
-  if (activePlayer == runner) {
-    footerBackground = "#99777799";
-  }
-  $("#footer").css("background", footerBackground);
+  // Removed legacy grey footer background; allow CSS green CRT gradient.
+  // Clear any previously set inline background so stylesheet applies.
+  $("#footer").css("background", "");
 
   //keep installing card where it was dropped by storing it here and restoring it after apply of cascades
   //part 1 of 2: store

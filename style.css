@@ -170,24 +170,21 @@ img.icon {
 }
 
 .content:before {
-  content: "";
-  position: fixed;
-  left: 0;
-  right: 0;
-  z-index: -2;
-
-  display: block;
-  background-image: url('images/bg.jpg');
-  background-size:cover;
-  width: 100%;
-  height: 100%;
-
-  -webkit-filter: blur(3px);
-  -moz-filter: blur(3px);
-  -o-filter: blur(3px);
-  -ms-filter: blur(3px);
-  filter: blur(3px);
+	content:"";
+	position:fixed;
+	inset:0;
+	z-index:-2;
+	display:block;
+	background:
+		radial-gradient(circle at 50% 35%, rgba(0,64,0,0.55) 0%, rgba(0,32,0,0.75) 55%, rgba(0,0,0,0.92) 85%),
+		repeating-linear-gradient(0deg, rgba(0,255,0,0.05) 0px, rgba(0,255,0,0.05) 2px, rgba(0,0,0,0.08) 4px),
+		repeating-linear-gradient(90deg, rgba(0,255,0,0.03) 0px, rgba(0,255,0,0.03) 2px, rgba(0,0,0,0.08) 4px);
+	width:100%;
+	height:100%;
+	animation:bgpulse 6s ease-in-out infinite;
+	opacity:0.92;
 }
+@keyframes bgpulse { 0%,100% { filter:brightness(1); } 50% { filter:brightness(1.06); } }
 
 
 #turnphase {
@@ -233,13 +230,20 @@ canvas {
  position:fixed;
  bottom:0;
  left:0;
+ margin:0;
  height:65px;
- background:#77777799;
  width:430px;
- display: flex;
- align-items: center;
- justify-content: center;
- border-top-right-radius: 5px;
+ background:linear-gradient(to bottom,#0d1d0d 0%, #0a170a 70%, #091409 100%);
+ display:flex;
+ align-items:center;
+ justify-content:center;
+ padding:6px 18px;
+ border-top-right-radius:12px;
+ border:1px solid #184e18;
+ box-shadow:0 0 14px rgba(51,255,51,0.28), inset 0 0 18px rgba(51,255,51,0.16);
+ animation:flicker 0.12s infinite;
+ overflow:hidden;
+ box-sizing:border-box;
 }
 
 #header {
@@ -247,14 +251,18 @@ canvas {
  top:0;
  right:0;
  height:65px;
- background:#77777799;
+ background:#0a100a;
  width:430px;
  float:right;
- display: flex;
- align-items: center;
- justify-content: center;
- padding-left: 10px;
- border-bottom-left-radius: 5px;
+ display:flex;
+ align-items:center;
+ justify-content:center;
+ padding:6px 24px 6px 18px;
+ border-bottom-left-radius:12px;
+ border:1px solid #184e18;
+ box-shadow:0 0 14px rgba(51,255,51,0.25), inset 0 0 18px rgba(51,255,51,0.15);
+ animation:flicker 0.12s infinite;
+ overflow:hidden;
 }
 
 #menubar {
@@ -347,32 +355,43 @@ canvas {
  width:56px;
  height:100%;
  float:right;
- line-height: 50%;
- overflow-y: auto;
- overflow-x: visible;
- scrollbar-width: thin;
- scrollbar-color: #7F8387 #5B6063;
+ line-height:50%;
+ overflow-y:auto;
+ overflow-x:visible;
+ scrollbar-width:thin;
+ scrollbar-color:#33ff33 #0a100a;
+ background:#0a100a;
+ border-left:1px solid #184e18;
+ box-shadow:0 0 12px rgba(51,255,51,0.25), inset 0 0 14px rgba(51,255,51,0.12);
+ animation:flicker 0.12s infinite;
 }
 
 /* chrome desktop doesn't yet support thin scrollbar so we need all this */
 *::-webkit-scrollbar {
   width: 10px;
 }
-*::-webkit-scrollbar-track {
-  background: #5B6063; 
-}
-*::-webkit-scrollbar-thumb {
-  background: #7F8387; 
-}
-*::-webkit-scrollbar-thumb:hover {
-  background: #66696C; 
-}
+*::-webkit-scrollbar-track { background:#0a100a; }
+*::-webkit-scrollbar-thumb { background:#184e18; }
+*::-webkit-scrollbar-thumb:hover { background:#33ff33; }
 
 #history {
  width:56px;
  display:grid;
- background:#77777799;
- border-bottom-left-radius: 15px;
+ background:#0a100a;
+ border-bottom-left-radius:15px;
+ border:1px solid #184e18;
+ box-shadow:0 0 12px rgba(51,255,51,0.25), inset 0 0 16px rgba(51,255,51,0.15);
+ overflow:hidden;
+ position:relative;
+}
+#header::after, #history::after {
+ content:"";
+ position:absolute;
+ inset:0;
+ pointer-events:none;
+ background:repeating-linear-gradient(to bottom, rgba(0,255,0,0) 0px, rgba(0,255,0,0) 2px, rgba(16,48,16,0.22) 3px, rgba(16,48,16,0.22) 4px);
+ mix-blend-mode:normal;
+ opacity:.35;
 }
 
 .historyentry-corp {
