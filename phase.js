@@ -1678,10 +1678,36 @@ function showHistoryTooltip(el) {
     $('body').append('<pre id="history-tooltip"></pre>');
   }
   var rect = el.getBoundingClientRect();
-  $('#history-tooltip')
-    .text($text.text())
-    .css({ top: (rect.top - 16) + 'px' })
-    .show();
+  var $tip = $('#history-tooltip');
+  // Theme by side
+  var isRunner = $(el).hasClass('historyentry-runner') || $(el).hasClass('historyentry-runner-small') || $(el).hasClass('historyentry-runner-run');
+  $tip.removeClass('corp runner').addClass(isRunner ? 'runner' : 'corp');
+  // Preserve HTML (colors, breaks, icons) and add a break after title if needed
+  var html = $text.html();
+  if (html && html.indexOf('<br') === -1) {
+    // Insert a break after the first closing span if present
+    html = html.replace(/<\/span>(?!<br)/i, '</span><br/>');
+  }
+  // Convert inline <img> icons to mask-based spans colored with current text color
+  function replaceIcons(h) {
+    return h.replace(/<img[^>]*src=["']([^"']+)["'][^>]*>/gi, function(tag, src){
+      var heightMatch = tag.match(/height=["'](\d+)/i);
+      var size = (heightMatch && heightMatch[1]) ? heightMatch[1] : '16';
+      // Ensure relative URLs remain the same
+      return '<span class="tt-ico" style="width:'+size+'px;height:'+size+'px;-webkit-mask-image:url(\''+src+'\');mask-image:url(\''+src+'\');"></span>';
+    });
+  }
+  html = replaceIcons(html);
+  // Wrap each line (split on <br>) to allow striped backgrounds per sentence
+  function wrapLines(h) {
+    var parts = h.split(/<br\s*\/?\s*>/gi);
+    var out = parts.filter(function(p){ return p.trim().length > 0; })
+      .map(function(p){ return '<span class="tt-line">'+ p.trim() +'</span>'; })
+      .join('');
+    return out;
+  }
+  html = wrapLines(html);
+  $tip.html(html).css({ top: (rect.top - 16) + 'px' }).show();
 }
 function hideHistoryTooltip() {
   _historyHoverEl = null;
