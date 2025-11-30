@@ -136,19 +136,17 @@
               </div>
             </div>
 
-            <div class="meta-stack portrait-only">
-              <div class="version">BUILD 0.1.0-ALPHA // 2077.<?php echo date('m.d'); ?></div>
-              <div class="status-bar">
-                <span class="status-item" style="cursor:pointer;" onclick="openCredits()">CREDITS</span>
-                <span class="status-item" id="fullscreen-status" style="cursor:pointer;" onclick="toggleFullscreen()">FULL SCREEN: FALSE</span>
-                <span class="status-item">IP: <?php echo htmlspecialchars($ip); ?></span>
-              </div>
-            </div>
-
           </div>
         </div>
-
-        <!-- Version & status moved into .game-title for small-height layout -->
+        
+        <div class="meta-stack portrait-only">
+          <div class="version">BUILD 0.1.0-ALPHA // 2077.<?php echo date('m.d'); ?></div>
+          <div class="status-bar">
+            <span class="status-item" style="cursor:pointer;" onclick="openCredits()">CREDITS</span>
+            <span class="status-item" id="fullscreen-status" style="cursor:pointer;" onclick="toggleFullscreen()">FULL SCREEN: FALSE</span>
+            <span class="status-item">IP: <?php echo htmlspecialchars($ip); ?></span>
+          </div>
+        </div>
       </div>
     </div>
   </div>
