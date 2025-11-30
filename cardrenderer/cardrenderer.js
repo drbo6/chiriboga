@@ -356,6 +356,19 @@ var CardRenderer = {
         uMD.h,
         uMD.r
       );
+      // Full-size rounded masks for zoomed/uncropped cards
+      this.fullMask = new PIXI.Graphics()
+        .beginFill(0xffffff)
+        .drawRoundedRect(uMD.x, uMD.y, uMD.w, uMD.h, 15)
+        .endFill();
+      this.fullMask.visible = false;
+      this.sprite.addChild(this.fullMask);
+      this.dummyFullMask = new PIXI.Graphics()
+        .beginFill(0xffffff)
+        .drawRoundedRect(uMD.x, uMD.y, uMD.w, uMD.h, 15)
+        .endFill();
+      this.dummyFullMask.visible = false;
+      this.dummy.addChild(this.dummyFullMask);
 
 	  //text for type/subtype (currently assumes ice only)
 	  this.typeText = new PIXI.Text("", typeTextStyle);
@@ -799,6 +812,8 @@ var CardRenderer = {
           dummyMaskToUse.visible = true;
           dummyMaskToUse.x = maskOffset.x;
           dummyMaskToUse.y = maskOffset.y;
+          if (this.fullMask) this.fullMask.visible = false;
+          if (this.dummyFullMask) this.dummyFullMask.visible = false;
 
           var hAD = hitDimensionsToUse;
           this.sprite.hitArea = new PIXI.RoundedRectangle(
@@ -860,9 +875,11 @@ var CardRenderer = {
               this.strengthText.rotation = 0;
             }
           }
-          //update mask
-          this.sprite.mask = null;
-          this.dummy.mask = null;
+          //update mask: apply rounded corners when zoomed/encountered
+          this.sprite.mask = this.fullMask;
+          this.dummy.mask = this.dummyFullMask;
+          this.fullMask.visible = true;
+          this.dummyFullMask.visible = true;
           this.defaultMask.visible = false;
           this.dummyDefaultMask.visible = false;
           var hAD = this.unmaskedDimensions;
