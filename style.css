@@ -361,7 +361,8 @@ canvas {
  scrollbar-width:thin;
  scrollbar-color:#33ff33 #0a100a;
  background:transparent; /* keep wrapper transparent so expanded padding doesn't cover screen */
- border-left:1px solid #184e18;
+ border:none;
+ box-shadow:none;
  /* shade and glow live on #history itself to avoid full-width overlay */
  transition: padding-left .18s ease, margin-left .18s ease;
  will-change: padding-left, margin-left;
