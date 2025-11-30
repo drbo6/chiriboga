@@ -35,6 +35,14 @@
       echo '<script src="' . $preconFile . '?' . filemtime($preconFile) . '"></script>';
     }
   }
+  // Determine user IP (respect X-Forwarded-For if present)
+  $ip = '';
+  if (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+    $parts = explode(',', $_SERVER['HTTP_X_FORWARDED_FOR']);
+    $ip = trim($parts[0]);
+  } else {
+    $ip = $_SERVER['REMOTE_ADDR'] ?? '';
+  }
   ?>
 </head>
 <body>
@@ -68,22 +76,47 @@
           <div class="meta-stack">
             <div class="version">BUILD 0.1.0-ALPHA // 2077.<?php echo date('m.d'); ?></div>
             <div class="status-bar">
-              <span class="status-item">MEM: 64KB FREE</span>
-              <span class="status-item">NET: CONNECTED</span>
-              <span class="status-item">ICE: NOMINAL</span>
+              <span class="status-item" style="cursor:pointer;" onclick="openCredits()">CREDITS</span>
+              <span class="status-item" id="fullscreen-status" style="cursor:pointer;" onclick="toggleFullscreen()">FULL SCREEN: FALSE</span>
+              <span class="status-item">IP: <?php echo htmlspecialchars($ip); ?></span>
             </div>
           </div>
         </div>
 
         <div class="menu-items">
           <div class="menu-layout">
-            <div class="menu-buttons">
+            <div class="menu-buttons" id="menu-buttons">
               <div class="menu-item" onclick="handleMenu('quick')">QUICK GAME</div>
               <div class="menu-item" onclick="handleMenu('custom')">CUSTOM GAME</div>
               <div class="menu-item" onclick="handleMenu('tournament')">GAUNTLET</div>
               <div class="menu-item" onclick="handleMenu('tutorial')">TUTORIAL</div>
               <div class="menu-item" onclick="handleMenu('achievements')">ACHIEVEMENTS <span class="achievement-percent">[0%]</span></div>
               <div class="menu-item" onclick="handleMenu('settings')">SETTINGS</div>
+            </div>
+            <div class="credits-panel" id="credits-panel" style="display:none;">
+              <div class="credits-header-row">
+                <div class="credits-title">CREDITS</div>
+                <button class="credits-back" onclick="closeCredits()">BACK</button>
+              </div>
+              <div class="credits-scroll">
+                <h3>About Chiriboga</h3>
+                <p><strong>Chiriboga</strong> is a Netrunner engine originally developed by <a href="https://github.com/bobtheuberfish" target="_blank" rel="noopener">bobtheuberfish</a>. It implements <em>Android: Netrunner</em> gameplay with an AI opponent. Original source: <a href="https://github.com/bobtheuberfish/chiriboga1" target="_blank" rel="noopener">github.com/bobtheuberfish/chiriboga1</a>.</p>
+                <p>Includes cards from Null Signal Games' <em>System Gateway</em> and <em>System Update 2021</em>. Card art & symbols are property of Null Signal Games; certain icons used under <a href="https://creativecommons.org/licenses/by-nd/4.0/" target="_blank" rel="noopener">CC BY-ND 4.0</a>. Fan implementation; not endorsed by NSG.</p>
+                <h3>Playtest & QA</h3>
+                <ul class="tester-list">
+                  <li>BadEpsilon</li><li>bowlsley</li><li>D-Smith</li><li>eniteris</li><li>Kwaice</li><li>Mentlegen</li><li>olompumpa</li><li>R41B</li><li>saff</li><li>Saintis</li><li>Ysengrin</li>
+                </ul>
+                <p class="aside">"...but who ordered him to wear that hat?"</p>
+                <h3>Solo Mode</h3>
+                <p>Solo Mode extensions by <a href="https://github.com/drbo6" target="_blank" rel="noopener">DrBo6</a> add refined interface and modes. Source: <a href="https://github.com/NEU-DrBo6/chiriboga" target="_blank" rel="noopener">github.com/NEU-DrBo6/chiriboga</a>.</p>
+                <h3>Pre‑constructed Decks</h3>
+                <p>Girometics precons designed by <strong>Girometics</strong>, curated by <a href="https://github.com/drbo6" target="_blank" rel="noopener">DrBo6</a>.</p>
+                <p>Browse: <a href="https://netrunnerdb.com/en/decklists/find?faction=&sort=popularity&rotation_id=&author=Girometics&title=&is_legal=&mwl_code=&packs%5B%5D=su21&packs%5B%5D=sg" target="_blank" rel="noopener">Girometics Decklists</a></p>
+                <h3>Legal & Attribution</h3>
+                <p><em>Netrunner</em> and <em>Android</em> are trademarks of Fantasy Flight Publishing, Inc. and/or Wizards of the Coast LLC. Not affiliated with FFG, WotC, or NSG.</p>
+                <p>All trademarks, card imagery, and faction symbols remain property of their respective owners.</p>
+                <p class="tiny-note">Open source spirit: Contributions and feedback welcome.</p>
+              </div>
             </div>
             
             <div class="match-preview" onclick="rerollDecks()">
@@ -300,6 +333,63 @@
     
     // Start the random glitch cycle after initial delay
     setTimeout(triggerGlitch, 2000);
+
+    // Fullscreen helpers
+    function isFullscreenActive(){
+      return document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement;
+    }
+    function syncFullscreenStatus(){
+      var el = document.getElementById('fullscreen-status');
+      if (!el) return;
+      el.textContent = 'FULL SCREEN: ' + (isFullscreenActive() ? 'TRUE' : 'FALSE');
+    }
+    function toggleFullscreen(){
+      if (isFullscreenActive()) {
+        if (document.exitFullscreen) document.exitFullscreen();
+        else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+        else if (document.mozCancelFullScreen) document.mozCancelFullScreen();
+        else if (document.msExitFullscreen) document.msExitFullscreen();
+      } else {
+        var elem = document.documentElement;
+        if (elem.requestFullscreen) elem.requestFullscreen();
+        else if (elem.webkitRequestFullscreen) elem.webkitRequestFullscreen();
+        else if (elem.mozRequestFullScreen) elem.mozRequestFullScreen();
+        else if (elem.msRequestFullscreen) elem.msRequestFullscreen();
+      }
+    }
+    document.addEventListener('fullscreenchange', syncFullscreenStatus);
+    document.addEventListener('webkitfullscreenchange', syncFullscreenStatus);
+    document.addEventListener('mozfullscreenchange', syncFullscreenStatus);
+    document.addEventListener('MSFullscreenChange', syncFullscreenStatus);
+    // Initial label
+    syncFullscreenStatus();
+
+    // Credits toggle
+    function openCredits(){
+      var menu = document.getElementById('menu-buttons');
+      var panel = document.getElementById('credits-panel');
+      // If already open, act like back button
+      if (menu.style.display === 'none' && panel.style.display === 'flex') {
+        closeCredits();
+        return;
+      }
+      // Capture current width of menu buttons before hiding
+      var rect = menu.getBoundingClientRect();
+      var w = rect.width;
+      var h = rect.height; // match visual height
+      menu.style.display='none';
+      panel.style.width = w + 'px';
+      panel.style.height = h + 'px';
+      panel.style.display='flex';
+    }
+    function closeCredits(){
+      document.getElementById('credits-panel').style.display='none';
+      document.getElementById('menu-buttons').style.display='flex';
+      // Clear explicit width so menu layout can adapt on resize
+      var p = document.getElementById('credits-panel');
+      p.style.width='';
+      p.style.height='';
+    }
   </script>
 </body>
 </html>

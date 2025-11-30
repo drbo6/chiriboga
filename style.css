@@ -1390,6 +1390,20 @@ body { background: #0a0a0a; min-height: 100vh; display: flex; align-items: cente
 .menu-items { display: flex; flex-direction: column; gap: 4px; padding: 15px; margin-top: 20px; }
 .menu-layout { display: flex; align-items: stretch; gap: 15px; }
 .menu-buttons { display: flex; flex-direction: column; gap: 4px; flex: 1; border: 1px solid #33ff3344; padding: 15px; justify-content: center; }
+.credits-panel { flex:1; border:1px solid #33ff3344; padding:15px; display:flex; flex-direction:column; gap:10px; overflow:hidden; }
+.credits-header-row { display:flex; justify-content:space-between; align-items:center; margin-bottom:4px; }
+.credits-title { font-size:14px; letter-spacing:4px; opacity:0.8; }
+.credits-back { background:#0a100a; color:#33ff33; border:1px solid #184e18; padding:6px 12px; font-size:10px; letter-spacing:2px; cursor:pointer; }
+.credits-back:hover { background:#33ff33; color:#0a100a; }
+.credits-scroll { overflow-y:auto; flex:1 1 auto; display:block; padding-right:6px; }
+.credits-scroll h3 { font-size:12px; margin:14px 0 6px; letter-spacing:2px; text-shadow:0 0 4px #33ff33; }
+.credits-scroll p, .credits-scroll li { font-size:11px; line-height:1.4; color:#b8fbb8; }
+.tester-list { list-style:none; padding:0; margin:6px 0 4px; display:flex; flex-wrap:wrap; gap:6px 14px; }
+.tester-list li { flex:0 1 110px; }
+.aside { font-style:italic; color:#7fdc7f; }
+.tiny-note { font-size:10px; color:#7fdc7f; margin-top:8px; }
+.credits-scroll a { color:#66ff99; text-decoration:none; }
+.credits-scroll a:hover { text-decoration:underline; }
 .match-preview { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; border: 1px solid #33ff3344; padding: 15px; }
 .preview-title { font-size: 10px; color: #33ff33; letter-spacing: 3px; opacity: 0.7; margin-bottom: 8px; }
 .portrait-label { position: absolute; bottom: 3px; right: 3px; font-size: 8px; color: #33ff33; letter-spacing: 1px; background: rgba(0, 0, 0, 0.8); padding: 2px 4px; z-index: 5; border: 1px solid #33ff3366; }
@@ -1454,6 +1468,7 @@ body { background: #0a0a0a; min-height: 100vh; display: flex; align-items: cente
 	/* Force equal height so meta stack sits roughly at menu bottom */
 	.screen-content { align-items:stretch; }
 	.menu-buttons { flex: 1 1 33%; display: flex; flex-direction: column; gap: 6px; min-width: 320px;}
+	#credits-panel.credits-panel { flex: 1 1 33%; display:flex; flex-direction:column; gap:6px; min-width:320px; }
 	.menu-buttons .menu-item { width: 100%; font-size: 12px}
 	.match-preview { flex: 1 1 33%; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; margin-top: 0; max-width: 120px; }
 	/* Tighten portrait stack so height constraint keeps all visible */
