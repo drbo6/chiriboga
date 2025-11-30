@@ -1485,7 +1485,7 @@ body { background: #0a0a0a; min-height: 100vh; display: flex; align-items: cente
 	}	
 	.terminal-frame {
 		background: none;
-		padding: 10px;
+		padding: 10px 5px;
 		box-shadow: none;
 		border-radius: 0;
 	}
@@ -1493,7 +1493,7 @@ body { background: #0a0a0a; min-height: 100vh; display: flex; align-items: cente
 		display: none;
 	}
 	.screen {
-		padding: 20px 15px;
+		padding: 20px 10px;
 	}
 	.menu-layout {
 		flex-direction: column;
@@ -1510,7 +1510,14 @@ body { background: #0a0a0a; min-height: 100vh; display: flex; align-items: cente
 	}
 	.landscape-only {
 		display: none !important;
+	}
+	.status-bar {
+		width: 400px;
+		margin-left: auto;
+		margin-right: auto;
 	}		
+	.game-title h1 { font-size: 42px; }
+	.game-title h2 { font-size: 28px; }	
 }
 
 @media (min-height: 769px) and (min-width: 679px) {
