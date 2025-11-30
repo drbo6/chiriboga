@@ -332,6 +332,37 @@
 			$(document).on('click','#lightbox-close',HideLightbox);
 			$(document).on('click','#lightbox',function(e){ if(e.target.id==='lightbox') HideLightbox(); });
 
+			// Lightbox navigation over currently visible cards (respects filters)
+			function GetVisibleCardIds() {
+				var ids = [];
+				$('#cardcontainer .card-item:visible .count-badge').each(function(){
+					var id = parseInt($(this).attr('data-id'));
+					if (!isNaN(id)) ids.push(id);
+				});
+				return ids;
+			}
+
+			function NavigateLightbox(delta) {
+				if (typeof window.currentLightboxCardId === 'undefined' || window.currentLightboxCardId === null) return;
+				var visible = GetVisibleCardIds();
+				if (!visible.length) return;
+				var idx = visible.indexOf(window.currentLightboxCardId);
+				if (idx === -1) idx = 0; else idx = (idx + delta + visible.length) % visible.length;
+				var nextId = visible[idx];
+				if (typeof nextId !== 'undefined') {
+					ShowLightbox(nextId);
+				}
+			}
+
+			$(document).on('click', '#lightbox-prev', function(e){ e.stopPropagation(); NavigateLightbox(-1); });
+			$(document).on('click', '#lightbox-next', function(e){ e.stopPropagation(); NavigateLightbox(1); });
+			$(document).on('keydown', function(e){
+				if (!$('#lightbox').hasClass('active')) return;
+				if (e.key === 'ArrowLeft') { e.preventDefault(); NavigateLightbox(-1); }
+				else if (e.key === 'ArrowRight') { e.preventDefault(); NavigateLightbox(1); }
+				else if (e.key === 'Escape') { e.preventDefault(); HideLightbox(); }
+			});
+
 			var showingOnlySelected = false;
 			var currentFilter = 'all'; // 'all', 'systemgateway', 'systemupdate2021'
 
@@ -1432,6 +1463,8 @@
 		<div id="lightbox">
 			<div id="lightbox-content">
 				<span id="lightbox-close">[CLOSE]</span>
+				<span id="lightbox-prev" aria-label="Previous">&#8249;</span>
+				<span id="lightbox-next" aria-label="Next">&#8250;</span>
 				<div id="lightbox-body">
 					<img id="lightbox-img" src="" alt="Card"/>
 					<div id="lightbox-text"></div>

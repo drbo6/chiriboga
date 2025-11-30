@@ -816,14 +816,18 @@ body::-webkit-scrollbar-track {
 }
 #lightbox.active { display:flex; }
 #lightbox-content { 
-	max-width:90%; 
-	max-height:90%; 
-	position:relative; 
-  background:#0a100a; 
-  border:1px solid #184e18;
-	border-radius:10px;
-	padding:20px 24px;
-	box-shadow:0 0 16px rgba(0,255,0,0.08), inset 0 0 14px rgba(31,109,31,0.2);
+	max-width:95vw; 
+	max-height:95vh; 
+	min-width:860px; 
+		position:relative; 
+		display:flex;
+		flex-direction:column;
+	overflow:visible; /* allow nav arrows to sit outside without clipping */
+		background:#0a100a; 
+		border:1px solid #184e18;
+		border-radius:10px;
+		padding:20px 24px;
+		box-shadow:0 0 16px rgba(0,255,0,0.08), inset 0 0 14px rgba(31,109,31,0.2);
 }
 #lightbox-content::after {
 	content:"";
@@ -842,25 +846,30 @@ body::-webkit-scrollbar-track {
 	display: flex;
 	gap: 20px;
 	align-items: flex-start;
-		margin: 6px 4px;
+	margin: 6px 4px;
+	overflow: auto;
+	max-height: calc(95vh - 40px);
 }
 #lightbox-img { 
 	max-width: 450px; 
-	max-height: 90vh; 
+	max-height: 100%; 
+	height: auto;
 	border-radius: 13px; 
 	box-shadow: 0 0 30px rgba(0,0,0,0.8); 
-	flex-shrink: 0;
+	flex-shrink: 1;
+	object-fit: contain;
 }
 #lightbox-text {
 	color: #33ff33;
 	max-width: 400px;
 	overflow-y: auto;
-	max-height: 90vh;
+	max-height: 100%;
 	padding-right: 12px;
 }
 
 /* Responsive layout for thin resolutions */
-@media (max-width: 900px) {
+@media (max-width: 860px) {
+	#lightbox-content { min-width: 0; width: 95vw; }
 	#lightbox-body {
 		flex-direction: column;
 		align-items: center;
@@ -869,6 +878,9 @@ body::-webkit-scrollbar-track {
 		max-width: 100%;
 		width: 100%;
 	}
+	/* Keep nav arrows inside on small viewports */
+	#lightbox-prev { left: 6px; }
+	#lightbox-next { right: 6px; }
 }
 
 .card-text-info h2 {
@@ -918,15 +930,44 @@ body::-webkit-scrollbar-track {
 }
 #lightbox-close { 
 	position:absolute; 
-	top:-40px; 
-	right:0; 
+	top:8px; 
+	right:12px; 
 	font-size:14px; 
-	color:#33ff33; 
+	color:#8fdc8f; 
 	cursor:pointer; 
 	font-weight:800; 
 	letter-spacing:0.12em;
 }
-#lightbox-close:hover { color:#66ff66; }
+#lightbox-close:hover { color:#b8fbb8; }
+
+/* Lightbox navigation buttons */
+#lightbox-prev, #lightbox-next {
+	position: absolute;
+	top: 50%;
+	transform: translateY(-50%);
+	width: 28px;
+	height: 44px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	color: #66aa66;
+	border: none;
+	background: transparent;
+	border-radius: 6px;
+	cursor: pointer;
+	user-select: none;
+	z-index: 3;
+	opacity: 0.35;
+	transition: opacity .15s ease, color .15s ease, transform .15s ease;
+	text-shadow: 0 0 4px rgba(51,255,51,0.15);
+}
+#lightbox-prev { left: -28px; }
+#lightbox-next { right: -28px; }
+#lightbox-prev:hover, #lightbox-next:hover {
+	color: #b8fbb8;
+	opacity: 0.9;
+	transform: translateY(-50%) scale(1.05);
+}
 
 /* Deck launcher layout - CRT */
 #contentcontainer {
