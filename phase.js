@@ -1668,24 +1668,39 @@ CombineResponseWithPhase(
 
 //due to a limitation of css we need to modify the padding and margin of the history bar
 //in order for the tooltip text to be visible with the history bar scrollable
-function _history_wrapper_expand() {
-  $("#history-wrapper").css("padding-left", "100%");
-  $("#history-wrapper").css("margin-left", "-100%");
+// Floating tooltip to avoid wrapper expansion and flicker
+var _historyHoverEl = null;
+function showHistoryTooltip(el) {
+  _historyHoverEl = el;
+  var $text = $(el).children('.tooltiptext');
+  if ($text.length === 0) return;
+  if ($('#history-tooltip').length === 0) {
+    $('body').append('<pre id="history-tooltip"></pre>');
+  }
+  var rect = el.getBoundingClientRect();
+  $('#history-tooltip')
+    .text($text.text())
+    .css({ top: (rect.top - 16) + 'px' })
+    .show();
 }
-function _history_wrapper_shrink() {
-  $("#history-wrapper").css("padding-left", "0");
-  $("#history-wrapper").css("margin-left", "0");
+function hideHistoryTooltip() {
+  _historyHoverEl = null;
+  $('#history-tooltip').hide();
 }
 $(function () {
-  $("#history").hover(
-    function () {
-      _history_wrapper_expand();
-    },
-    function () {
-      // on mouseout, reset
-      _history_wrapper_shrink();
+  if ($('#history-tooltip').length === 0) {
+    $('body').append('<pre id="history-tooltip" style="display:none;"></pre>');
+  }
+  $('#history').on('mouseenter', '.historyentry', function(){ showHistoryTooltip(this); });
+  $('#history').on('mouseleave', '.historyentry', function(){ hideHistoryTooltip(); });
+  $('#history').on('touchstart', '.historyentry', function(){ showHistoryTooltip(this); });
+  $('#history').on('touchend', '.historyentry', function(){ hideHistoryTooltip(); });
+  $('#history-wrapper').on('scroll', function(){
+    if (_historyHoverEl) {
+      var rect = _historyHoverEl.getBoundingClientRect();
+      $('#history-tooltip').css({ top: (rect.top - 16) + 'px' });
     }
-  );
+  });
 });
 
 //helper function for ChangePhase
@@ -1721,7 +1736,7 @@ function AddHistoryBreakIfRequired(player) {
     $("#history").children().first().css({ opacity: "1" });
     //on desktop you can just hover, on mobile we need this touch start/end code
     $("#history").prepend(
-      '<div ontouchstart="$(this).children(\'.tooltiptext\').show(); _history_wrapper_expand();" ontouchend="$(this).children(\'.tooltiptext\').hide(); _history_wrapper_shrink();" class="tooltip historyentry ' +
+      '<div ontouchstart="showHistoryTooltip(this);" ontouchend="hideHistoryTooltip();" class="tooltip historyentry ' +
         historyClass +
         '"><div class="historycontents"></div><pre class="tooltiptext">' +
         colouredPhaseTitle +
