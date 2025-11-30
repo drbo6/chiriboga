@@ -77,7 +77,7 @@
             <div class="version">BUILD 0.1.0-ALPHA // 2077.<?php echo date('m.d'); ?></div>
             <div class="status-bar">
               <span class="status-item" style="cursor:pointer;" onclick="openCredits()">CREDITS</span>
-              <span class="status-item" id="fullscreen-status" style="cursor:pointer;" onclick="toggleFullscreen()">FULL SCREEN: FALSE</span>
+              <span class="status-item" id="threat-level">THREAT LEVEL: <span id="threat-color">1</span></span>
               <span class="status-item">IP: <?php echo htmlspecialchars($ip); ?></span>
             </div>
           </div>
@@ -143,7 +143,7 @@
           <div class="version">BUILD 0.1.0-ALPHA // 2077.<?php echo date('m.d'); ?></div>
           <div class="status-bar">
             <span class="status-item" style="cursor:pointer;" onclick="openCredits()">CREDITS</span>
-            <span class="status-item" id="fullscreen-status" style="cursor:pointer;" onclick="toggleFullscreen()">FULL SCREEN: FALSE</span>
+            <span class="status-item" id="threat-level-portrait">THREAT LEVEL: <span id="threat-color-portrait">1</span></span>
             <span class="status-item">IP: <?php echo htmlspecialchars($ip); ?></span>
           </div>
         </div>
@@ -341,35 +341,32 @@
     // Start the random glitch cycle after initial delay
     setTimeout(triggerGlitch, 2000);
 
-    // Fullscreen helpers
-    function isFullscreenActive(){
-      return document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement;
+    // Threat level indicator: start GREEN and hold >= 60s, then cycle every 1-10 min
+    var threatLevels = [
+      { name: '1', color: '#33ff33' },
+      { name: '2', color: '#ffff33' },
+      { name: '3', color: '#ff9933' },
+      { name: '4', color: '#ff3333' }
+    ];
+    function setThreat(threat){
+      var el1 = document.getElementById('threat-color');
+      var el2 = document.getElementById('threat-color-portrait');
+      if (el1) { el1.textContent = threat.name; el1.style.color = threat.color; el1.style.textShadow = '0 0 5px ' + threat.color; }
+      if (el2) { el2.textContent = threat.name; el2.style.color = threat.color; el2.style.textShadow = '0 0 5px ' + threat.color; }
     }
-    function syncFullscreenStatus(){
-      var el = document.getElementById('fullscreen-status');
-      if (!el) return;
-      el.textContent = 'FULL SCREEN: ' + (isFullscreenActive() ? 'TRUE' : 'FALSE');
+    function scheduleNextThreatChange(minSec, maxSec){
+      var delay = (minSec + Math.random() * (maxSec - minSec)) * 1000;
+      setTimeout(function(){
+        // pick a random threat (could be same as current; spec allows)
+        var idx = Math.floor(Math.random() * threatLevels.length);
+        setThreat(threatLevels[idx]);
+        // subsequent cycles: 60-600s
+        scheduleNextThreatChange(60, 600);
+      }, delay);
     }
-    function toggleFullscreen(){
-      if (isFullscreenActive()) {
-        if (document.exitFullscreen) document.exitFullscreen();
-        else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
-        else if (document.mozCancelFullScreen) document.mozCancelFullScreen();
-        else if (document.msExitFullscreen) document.msExitFullscreen();
-      } else {
-        var elem = document.documentElement;
-        if (elem.requestFullscreen) elem.requestFullscreen();
-        else if (elem.webkitRequestFullscreen) elem.webkitRequestFullscreen();
-        else if (elem.mozRequestFullScreen) elem.mozRequestFullScreen();
-        else if (elem.msRequestFullscreen) elem.msRequestFullscreen();
-      }
-    }
-    document.addEventListener('fullscreenchange', syncFullscreenStatus);
-    document.addEventListener('webkitfullscreenchange', syncFullscreenStatus);
-    document.addEventListener('mozfullscreenchange', syncFullscreenStatus);
-    document.addEventListener('MSFullscreenChange', syncFullscreenStatus);
-    // Initial label
-    syncFullscreenStatus();
+    // initialize GREEN and hold for at least 60 seconds, then cycle 1-10 minutes
+    setThreat(threatLevels[0]);
+    scheduleNextThreatChange(60, 600);
 
     // Credits toggle
     function openCredits(){
