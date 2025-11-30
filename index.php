@@ -100,21 +100,20 @@
               </div>
               <div class="credits-scroll">
                 <h3>About Chiriboga</h3>
-                <p><strong>Chiriboga</strong> is a Netrunner engine originally developed by <a href="https://github.com/bobtheuberfish" target="_blank" rel="noopener">bobtheuberfish</a>. It implements <em>Android: Netrunner</em> gameplay with an AI opponent. Original source: <a href="https://github.com/bobtheuberfish/chiriboga1" target="_blank" rel="noopener">github.com/bobtheuberfish/chiriboga1</a>.</p>
-                <p>Includes cards from Null Signal Games' <em>System Gateway</em> and <em>System Update 2021</em>. Card art & symbols are property of Null Signal Games; certain icons used under <a href="https://creativecommons.org/licenses/by-nd/4.0/" target="_blank" rel="noopener">CC BY-ND 4.0</a>. Fan implementation; not endorsed by NSG.</p>
-                <h3>Playtest & QA</h3>
-                <ul class="tester-list">
-                  <li>BadEpsilon</li><li>bowlsley</li><li>D-Smith</li><li>eniteris</li><li>Kwaice</li><li>Mentlegen</li><li>olompumpa</li><li>R41B</li><li>saff</li><li>Saintis</li><li>Ysengrin</li>
-                </ul>
+                <p><strong>Chiriboga</strong> is a Netrunner engine originally developed by <a href="https://github.com/bobtheuberfish" target="_blank" rel="noopener">bobtheuberfish</a>. 
+                It implements <em>Android: Netrunner</em> gameplay with an AI opponent. The source is available on <a href="https://github.com/bobtheuberfish/chiriboga" target="_blank" rel="noopener">Github</a>.</p>
+                <p>Special thanks to testers, including: BadEpsilon, bowlsley, D-Smith, eniteris, Kwaice, Mentlegen, olompumpa, R41B, saff, Saintis, Ysengrin.</p>
                 <p class="aside">"...but who ordered him to wear that hat?"</p>
                 <h3>Solo Mode</h3>
-                <p>Solo Mode extensions by <a href="https://github.com/drbo6" target="_blank" rel="noopener">DrBo6</a> add refined interface and modes. Source: <a href="https://github.com/NEU-DrBo6/chiriboga" target="_blank" rel="noopener">github.com/NEU-DrBo6/chiriboga</a>.</p>
+                <p>The Solo Mode extension is developed by <a href="https://github.com/drbo6" target="_blank" rel="noopener">DrBo6</a>. It adds a more refined interface and game modes. 
+                It is available on <a href="https://github.com/NEU-DrBo6/chiriboga" target="_blank" rel="noopener">Github</a> as well.</p>
                 <h3>Pre‑constructed Decks</h3>
-                <p>Girometics precons designed by <strong>Girometics</strong>, curated by <a href="https://github.com/drbo6" target="_blank" rel="noopener">DrBo6</a>.</p>
-                <p>Browse: <a href="https://netrunnerdb.com/en/decklists/find?faction=&sort=popularity&rotation_id=&author=Girometics&title=&is_legal=&mwl_code=&packs%5B%5D=su21&packs%5B%5D=sg" target="_blank" rel="noopener">Girometics Decklists</a></p>
+                <p>Girometics precons designed by <a href="https://netrunnerdb.com/en/decklists/find?faction=&sort=popularity&rotation_id=&author=Girometics&title=&is_legal=&mwl_code=&packs%5B%5D=su21&packs%5B%5D=sg" target="_blank">Girometics</a> and curated by <a href="https://github.com/drbo6" target="_blank" rel="noopener">DrBo6</a>.</p>
                 <h3>Legal & Attribution</h3>
                 <p><em>Netrunner</em> and <em>Android</em> are trademarks of Fantasy Flight Publishing, Inc. and/or Wizards of the Coast LLC. Not affiliated with FFG, WotC, or NSG.</p>
-                <p>All trademarks, card imagery, and faction symbols remain property of their respective owners.</p>
+                <p>Chiriboga includes cards from <a href="https://nullsignal.games" target="_blank">Null Signal's</a> <em>System Gateway</em> and <em>System Update 2021</em>. 
+                Its card art & symbols are property of Null Signal Games and used under <a href="https://creativecommons.org/licenses/by-nd/4.0/" target="_blank" rel="noopener">CC BY-ND 4.0</a>. This is a fan implementation and it is not endorsed by NSG.</p>
+                <p>All trademarks, card imagery, and faction symbols remain property of their respective owners.</p>                                
                 <p class="tiny-note">Open source spirit: Contributions and feedback welcome.</p>
               </div>
             </div>

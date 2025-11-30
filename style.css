@@ -1397,7 +1397,8 @@ body { background: #0a0a0a; min-height: 100vh; display: flex; align-items: cente
 .credits-back:hover { background:#33ff33; color:#0a100a; }
 .credits-scroll { overflow-y:auto; flex:1 1 auto; display:block; padding-right:6px; }
 .credits-scroll h3 { font-size:12px; margin:14px 0 6px; letter-spacing:2px; text-shadow:0 0 4px #33ff33; }
-.credits-scroll p, .credits-scroll li { font-size:11px; line-height:1.4; color:#b8fbb8; }
+.credits-scroll p, .credits-scroll li { font-size:11px; line-height:1.4; color:#b8fbb8; margin:0 0 8px; }
+.tester-list li { margin:0; }
 .tester-list { list-style:none; padding:0; margin:6px 0 4px; display:flex; flex-wrap:wrap; gap:6px 14px; }
 .tester-list li { flex:0 1 110px; }
 .aside { font-style:italic; color:#7fdc7f; }
