@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Netrunner: CH1R180G4</title>
+  <title>Netrunner: Solo Mode</title>
   <link href="images/favicon.ico" rel="icon">
   <link rel="manifest" href="manifest.json">
   <link rel="stylesheet" href="style.css" />
@@ -54,7 +54,7 @@
               <h1>NETRUNNER</h1>
             </div>
             <div class="subtitle-container">
-              <span class="bracket left">[</span><h2>CH1R180G4</h2><span class="bracket right">]</span>
+              <span class="bracket left">[</span><h2>$0LØ MOÐ3</h2><span class="bracket right">]</span>
             </div>
             <div class="hex-decoration">
               <div class="hex"></div>
@@ -80,7 +80,7 @@
             <div class="menu-buttons">
               <div class="menu-item" onclick="handleMenu('quick')">QUICK GAME</div>
               <div class="menu-item" onclick="handleMenu('custom')">CUSTOM GAME</div>
-              <div class="menu-item" onclick="handleMenu('tournament')">TOURNAMENT</div>
+              <div class="menu-item" onclick="handleMenu('tournament')">GAUNTLET</div>
               <div class="menu-item" onclick="handleMenu('tutorial')">TUTORIAL</div>
               <div class="menu-item" onclick="handleMenu('achievements')">ACHIEVEMENTS <span class="achievement-percent">[0%]</span></div>
               <div class="menu-item" onclick="handleMenu('settings')">SETTINGS</div>
@@ -195,13 +195,31 @@
     
     function handleMenu(option) {
       const item = event.target.closest('.menu-item');
+      
+      // Show "COMING SOON" for non-implemented features
+      if (option !== 'quick' && option !== 'custom') {
+        item.innerHTML = 'COMING SOON';
+        setTimeout(() => {
+          const labels = {
+            quick: 'QUICK GAME',
+            custom: 'CUSTOM GAME',
+            tournament: 'GAUNTLET',
+            tutorial: 'TUTORIAL',
+            achievements: 'ACHIEVEMENTS <span class="achievement-percent">[0%]</span>',
+            settings: 'SETTINGS'
+          };
+          item.innerHTML = labels[option];
+        }, 1500);
+        return;
+      }
+      
       item.innerHTML = 'LOADING...';
       
       setTimeout(() => {
         const labels = {
           quick: 'QUICK GAME',
           custom: 'CUSTOM GAME',
-          tournament: 'TOURNAMENT',
+          tournament: 'GAUNTLET',
           tutorial: 'TUTORIAL',
           achievements: 'ACHIEVEMENTS <span class="achievement-percent">[0%]</span>',
           settings: 'SETTINGS'
