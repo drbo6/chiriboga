@@ -1498,6 +1498,12 @@ body { background: #0a0a0a; min-height: 100vh; display: flex; align-items: cente
 	.menu-layout {
 		flex-direction: column;
 	}
+	.menu-buttons {
+		max-height: 400px;
+	}
+	.credits-panel {
+		max-height: 310px;
+	}
 	.match-preview {
 		flex-direction: row;
 		gap: 10px;
