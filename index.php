@@ -138,7 +138,7 @@
 
           </div>
         </div>
-        
+
         <div class="meta-stack portrait-only">
           <div class="version">BUILD 0.1.0-ALPHA // 2077.<?php echo date('m.d'); ?></div>
           <div class="status-bar">
@@ -386,7 +386,7 @@
       var h = rect.height; // match visual height
       menu.style.display='none';
       panel.style.width = w + 'px';
-      panel.style.height = h + 'px';
+      panel.style.maxHeight = h + 'px';
       panel.style.display='flex';
     }
     function closeCredits(){
@@ -395,7 +395,7 @@
       // Clear explicit width so menu layout can adapt on resize
       var p = document.getElementById('credits-panel');
       p.style.width='';
-      p.style.height='';
+      p.style.maxHeight='';
     }
   </script>
 </body>
