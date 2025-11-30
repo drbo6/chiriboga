@@ -57,7 +57,7 @@
 				<input id="command" type="text" value="">
 			</form>
 		</div>
-		<div id="menubar"><button onclick="$('#menu').css('display','flex'); if (document.fullscreen) document.exitFullscreen(); $('.fullscreen-button').show();"><img src="images/chiriboga_withtext.png"></button></div>
+		<div id="menubar"><button class="menu-trigger" onclick="$('#menu').css('display','flex'); if (document.fullscreen) document.exitFullscreen(); $('.fullscreen-button').show();">MENU</button></div>
 		<div id="header"></div>
 		<button class="fullscreen-button" onclick="document.getElementById('body').requestFullscreen({ navigationUI: 'hide' }); $('.fullscreen-button').hide();"></button>
 		<div id="fps"></div>
@@ -72,33 +72,24 @@
 			<div class="modal-content-inactive"><h1 id="loading-text">Deckbuilding...<h1></div>
 		</div>
 		<div id="menu" class="modal">
-			<div id="menucontent" class="modal-content-inactive">
-				<span onclick="$('#menu').css('display','none');" class="close-cross">X</span>
-				<h1>Chiriboga</h1>
-				<button id="exittomenu" onclick="window.location.href='index.php';" class="button">Exit to main menu</button>
-				<button id="editdeck" onclick="window.location.href='decklauncher.php';" class="button">Edit this deck</button>
-				<button id="randomdeck" onclick="window.location.href='decklauncher.php';" class="button">Edit new random deck</button>
-				<div style="float:right;" class="options">
-					<label for="narration"><input type="checkbox" id="narration">Narrate AI</label>
-					&emsp;
-					<label for="slowerai"><input type="checkbox" id="slowerai">Slower AI</label>
-					&emsp;
-					<label for="largerhistory"><input type="checkbox" id="largerhistory">Larger history</label>
+			<div id="menucontent" class="solo-menu">
+				<span id="menu-close" class="menu-close" onclick="$('#menu').css('display','none');">[CLOSE]</span>
+				<div class="solo-logo">
+					<h1 class="logo-text">NETRUNNER</h1>
+					<div class="subtitle-line"><span class="subtitle-text">$0LØ MOÐ3</span></div>
 				</div>
-				<p>Chiriboga implements the game <a href="https://nullsignal.games/about/netrunner/">Android: Netrunner</a> with an AI opponent. Source is <a href="https://github.com/bobtheuberfish/chiriboga">available on GitHub</a>.</p>
-				<p>Includes all cards in Null Signal Games' <a href="https://nullsignal.games/products/system-gateway/">System Gateway</a> and <a href="https://nullsignal.games/products/system-update-2021/">System Update 2021</a> sets.<br/>
-				Card art is the property of Null Signal Games.<br/>
-				Includes <a href="https://nullsignal.games/about/nisei-visual-assets/">game symbols permitted for use by Null Signal Games</a> under CC BY-ND 4.0.<br/>
-				Chiriboga is not endorsed by Null Signal Games.</p>
-				<p class="acknowledgements">Special thanks to testers, including: <em>BadEpsilon, bowlsley, D-Smith, eniteris, Kwaice, Mentlegen, olompumpa, R41B, saff, Saintis, Ysengrin</em>.</p>
-				<p class="disclaimer">Netrunner and Android are trademarks of Fantasy Flight Publishing, Inc. and/or Wizards of the Coast LLC.<br/>
-				Chiriboga is not affiliated with Fantasy Flight Games or Wizards of the Coast.</p>
-				<p><a href="https://netrunnerdb.com/en/card/26098"><em>...but who ordered him to wear that hat?</em></a></p>
-				<button onclick="DownloadCapturedLog();" class="button">Download captured log</button> (for <a href="https://github.com/bobtheuberfish/chiriboga/issues">error reporting</a>)
-				<select id="rewind-select" style="float:right;" disabled>
-					<option value="">Rewind</option>
-				</select>
-				<br/><br/>
+				<div class="menu-options">
+					<button id="exittomenu" onclick="window.location.href='index.php';" class="button">EXIT TO MAIN MENU</button>
+					<button onclick="DownloadCapturedLog();" class="button">DOWNLOAD DEBUG LOG</button>
+					<select id="rewind-select" disabled class="button rewind-select">
+						<option value="">REWIND</option>
+					</select>
+				</div>
+				<div class="toggle-options">
+					<label class="toggle-item"><input type="checkbox" id="narration"> Narrate AI</label>
+					<label class="toggle-item"><input type="checkbox" id="slowerai"> Slower AI</label>
+					<label class="toggle-item"><input type="checkbox" id="largerhistory"> Larger history</label>
+				</div>
 			</div>
 		</div>
 	</body>
