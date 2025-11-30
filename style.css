@@ -1443,7 +1443,7 @@ body { background: #0a0a0a; min-height: 100vh; display: flex; align-items: cente
 	.menu-items, .menu-layout { display: contents !important; }
 	.game-title { flex: 1 1 33%; text-align: left; display:flex; flex-direction:column; }
 	.game-title h1 { font-size: 16px; letter-spacing: 6px; margin:8px; }
-	.game-title h2 { font-size: 10px; letter-spacing: 6px; margin:8px 0 0; }
+	.game-title h2 { font-size: 20px; letter-spacing: 6px; margin:8px 0 0; }
 	.game-title .bracket { font-size: 10px; letter-spacing: 6px; margin:8px 0 0; }
 	.game-title .title-stack { flex:0 0 auto; }
 	.game-title .spacer-grow { flex:1 1 auto; }
@@ -1454,7 +1454,7 @@ body { background: #0a0a0a; min-height: 100vh; display: flex; align-items: cente
 	/* Force equal height so meta stack sits roughly at menu bottom */
 	.screen-content { align-items:stretch; }
 	.menu-buttons { flex: 1 1 33%; display: flex; flex-direction: column; gap: 6px; min-width: 320px;}
-	.menu-buttons .menu-item { width: 100%; }
+	.menu-buttons .menu-item { width: 100%; font-size: 12px}
 	.match-preview { flex: 1 1 33%; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; margin-top: 0; max-width: 120px; }
 	/* Tighten portrait stack so height constraint keeps all visible */
 	.match-preview .portrait-container { width: 70px; height: 70px; }
