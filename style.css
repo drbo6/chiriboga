@@ -1437,7 +1437,6 @@ body { background: #0a0a0a; min-height: 100vh; display: flex; align-items: cente
 	Index Responsive Breakpoints
 	========================================================== */
 
-/* Height < 600px: Strip chrome, force 3 functional columns (logo / menu / quick game) */
 @media (max-height: 768px) {
 	.terminal-frame {
 		background: none;
@@ -1450,6 +1449,9 @@ body { background: #0a0a0a; min-height: 100vh; display: flex; align-items: cente
 	}
 	.screen {
 		padding: 20px 30px;
+	}
+	.portrait-only {
+		display: none !important;
 	}
 	/* Hide only the scrolling system header; keep version + status */
 	.system-text { display: none !important; }
@@ -1477,11 +1479,10 @@ body { background: #0a0a0a; min-height: 100vh; display: flex; align-items: cente
 	.vs-text { font-size: 16px; }
 }
 
-/* Height > 600px AND Width < 480px: Remove border, quick game below menu, horizontal pictures */
 @media (min-height: 769px) and (max-width: 678px) {
-	.system-text, .version, .status-bar {
+	.system-text {
 		display: none !important;
-	}
+	}	
 	.terminal-frame {
 		background: none;
 		padding: 10px;
@@ -1507,9 +1508,13 @@ body { background: #0a0a0a; min-height: 100vh; display: flex; align-items: cente
 	.vs-text {
 		align-self: center;
 	}
+	.landscape-only {
+		display: none !important;
+	}		
 }
 
-/* Height > 600px AND Width > 678px: Normal display (no overrides needed) */
 @media (min-height: 769px) and (min-width: 679px) {
-	/* Normal desktop display - all default styles apply */
+	.landscape-only {
+		display: none !important;
+	}	
 }
