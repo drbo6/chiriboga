@@ -1,0 +1,108 @@
+# ------------------------------------------------------------------
+# Basic Hardening & Security Headers for Chiriboga (Apache / PHP)
+# Place this file at the web root (same directory as index.php)
+# ------------------------------------------------------------------
+
+# 1. Prevent directory listings
+Options -Indexes
+
+# 2. Disable execution in upload / data folders (create folders if used)
+# Uncomment and adjust if you later add writable folders
+# <Directory "uploads">
+#   php_admin_flag engine off
+#   Options -ExecCGI
+#   <FilesMatch ".*">
+#     Require all denied
+#   </FilesMatch>
+# </Directory>
+
+# 3. Canonical index
+DirectoryIndex index.php
+
+# 4. Force HTTPS (optional). Uncomment ONLY if you have TLS set up
+# RewriteEngine On
+# RewriteCond %{HTTPS} !=on
+# RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
+
+# 5. Block access to hidden files / version control / environment files
+<FilesMatch "(?i)^(\.env|\.git|\.htaccess|composer\.json|composer\.lock|package\.json|yarn\.lock|Dockerfile|docker-compose\.yml)$">
+    Require all denied
+</FilesMatch>
+
+# 6. Restrict direct access to PHP except known entry points (optional stricter mode)
+# If you only ever hit index.php / engine.php / decklauncher.php, uncomment below.
+# <FilesMatch "(?i)^(?!index\.php$|engine\.php$|decklauncher\.php$).+\.php$">
+#   Require all denied
+# </FilesMatch>
+
+# 7. MIME sniffing / basic security headers
+<IfModule mod_headers.c>
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set X-Frame-Options "SAMEORIGIN"
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+    Header always set X-XSS-Protection "0"  # Modern browsers ignore; left explicit
+    Header always set Permissions-Policy "geolocation=(), microphone=(), camera=()"
+    # Content Security Policy NOTE: site uses inline scripts/styles. A strict CSP would break this.
+    # Adjust when you refactor inline JS/CSS. For now we allow inline to avoid breakage.
+    Header set Content-Security-Policy "default-src 'self'; img-src 'self' data:; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; font-src 'self' data:; connect-src 'self'; object-src 'none'; frame-ancestors 'self';"
+</IfModule>
+
+# 8. Compression (mod_deflate)
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/plain text/html text/xml text/css text/javascript application/javascript application/json application/xml image/svg+xml
+</IfModule>
+
+# 9. Cache static assets (adjust max-age as desired)
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresByType text/css "access plus 7 days"
+    ExpiresByType application/javascript "access plus 7 days"
+    ExpiresByType text/javascript "access plus 7 days"
+    ExpiresByType image/svg+xml "access plus 30 days"
+    ExpiresByType image/png "access plus 30 days"
+    ExpiresByType image/jpeg "access plus 30 days"
+    ExpiresByType image/gif "access plus 30 days"
+    ExpiresDefault "access plus 1 hour"
+</IfModule>
+
+# 10. Remove server signature (may need global Apache config; fallback here)
+ServerSignature Off
+
+# 11. Prevent query string based PHP execution in images or text assets
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    # Block attempts like /image.png/evil.php
+    RewriteCond %{REQUEST_URI} \.(png|jpg|jpeg|gif|svg|css|js)/ [NC]
+    RewriteRule . - [F]
+    # Block direct access to backup/source files
+    RewriteRule ^.*\.(bak|sql|zip|tar|gz)$ - [F]
+</IfModule>
+
+# 12. Fallback to index.php if needed for future routing (disabled for now)
+# <IfModule mod_rewrite.c>
+#   RewriteEngine On
+#   RewriteCond %{REQUEST_FILENAME} !-f
+#   RewriteCond %{REQUEST_FILENAME} !-d
+#   RewriteRule . index.php [L]
+# </IfModule>
+
+# 13. Large file protection (prevent abuse). Uncomment if needed.
+# LimitRequestBody 10485760  # ~10MB
+
+# 14. Tighten SSL (active only under HTTPS)
+<IfModule mod_headers.c>
+    Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains" env=HTTPS
+</IfModule>
+
+# 15. Deny TRACE method
+<IfModule mod_rewrite.c>
+    RewriteCond %{REQUEST_METHOD} TRACE [NC]
+    RewriteRule .* - [F]
+</IfModule>
+
+# 16. Custom 404 (add a 404.php if desired)
+# ErrorDocument 404 /404.php
+
+# ------------------------------------------------------------------
+# END
+# ------------------------------------------------------------------
