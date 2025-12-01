@@ -84,6 +84,7 @@
 			var opponentdeckimg = "";
 			var uid = 0;
 			var preconDecks = []; // List of precon decks loaded from files
+			var deckModified = true; // true when user has edited deck so metadata (name/notes/url) should be stripped from URI
 			
 			// Function to register a precon deck
 			function registerPrecon(deck) {
@@ -166,6 +167,7 @@
 				if (typeof deckCounts[id] === 'undefined') deckCounts[id]=0;
 				deckCounts[id]++;
 				json.cards.push(id);
+				deckModified = true;
 				UpdateDeckTextareaFromCounts();
 				Parse();
 				if (showingOnlySelected) ApplyFilter();
@@ -176,6 +178,7 @@
 				//remove one occurrence from json.cards
 				var idx = json.cards.indexOf(id);
 				if (idx>-1) json.cards.splice(idx,1);
+				deckModified = true;
 				UpdateDeckTextareaFromCounts();
 				Parse();
 				if (showingOnlySelected) ApplyFilter();
@@ -371,6 +374,7 @@
 				deckCounts = {};
 				$("#deck").val('');
 				UpdateCardCountsUI();
+				deckModified = true;
 				Parse();
 			}
 
@@ -574,7 +578,15 @@
 
 			function UpdateLaunchStrings() {
 			  //console.log(json);
-			  var string = JSON.stringify(json);
+			  // Build deck object for URI: include metadata only if deck not modified
+			  var deckForUri;
+			  if (deckModified) {
+				deckForUri = { identity: json.identity, cards: json.cards.slice() };
+			  } else {
+				deckForUri = {};
+				for (var k in json) { if (Object.prototype.hasOwnProperty.call(json,k)) deckForUri[k] = json[k]; }
+			  }
+			  var string = JSON.stringify(deckForUri);
 			  var compressed = LZString.compressToEncodedURIComponent(string);
 			  var launchAddress = "engine.php?p=" + dC + "&" + setStr + opponentdeckstr + dC + "=" + compressed;
 			  // Build address for switching sides. If we already have an opponent deck, make it the active deck; otherwise use random
@@ -768,7 +780,7 @@
 			  }
 			  $("#deck").val(deckText);
 			  $("#deck").prop("rows", numRows); //resize textarea height to fit
-			  $("#deck").on("input propertychange paste", Parse);
+			  $("#deck").on("input propertychange paste", function(){ deckModified = true; Parse(); });
 			  //initial deckCounts from generated deck
 			  deckCounts = {};
 			  for (var i=0;i<playerCards.length;i++) {
@@ -1190,6 +1202,12 @@
 				
 				// Reset dropdown
 				$('#preconselect').val('-1');
+				// Add metadata and mark unmodified so URI includes it
+				json.name = precon.name || '';
+				if (precon.Notes) json.notes = precon.Notes;
+				if (precon.URL) json.url = precon.URL;
+				deckModified = false;
+				UpdateLaunchStrings();
 			}
 			
 			$('#preconselect').off('change').on('change', function() {

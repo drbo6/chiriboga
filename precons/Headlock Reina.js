@@ -4,6 +4,8 @@ registerPrecon({
     identity: "31002",
     default: false,
     deck_set: "none",
+    URL: "https://netrunnerdb.com/en/decklist/f59ec206-691a-4a07-b3e5-69c4d3b06460/-gateway-update-headlock-reina",
+    Notes: "This deck tries to control the Corp’s credits by pressuring servers just enough to force them to rez ice, then using tools like Imp, Docklands Pass, Leech, and derez effects to make those rezzes painful and expensive. It still keeps a solid economy and breaker suite—using cards like Mimic, Buzzsaw, and Corroder supported by Leech—so it can stay active even if the Corp purges or refuses to rez.",
     cards: {
         "30002": 2,  // Wildcat Strike
         "30004": 3,  // Botulus

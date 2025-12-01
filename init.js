@@ -268,8 +268,7 @@ function ShowDeckInfo() {
     if (deckJson.name) {
       html += "<p style='font-weight:bold; color:#66ff66; font-size:18px; margin-bottom:12px;'>" + deckJson.name + "</p>";
     } else {
-      html += "<p style='font-weight:bold; color:#66ff66; margin-bottom:8px;'>PLAYER DECK (";
-      html += (playerSide === "r" ? "RUNNER" : "CORP") + ")</p>";
+      html += "<p style='font-weight:bold; color:#66ff66; font-size:18px; margin-bottom:12px;'>Custom Deck</p>";
     }
     
     // Notes
