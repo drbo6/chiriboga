@@ -154,6 +154,8 @@ var CardRenderer = {
       this.prefix = "";
 	  this.postfix = "";
       this.sprite = new PIXI.Sprite(this.texture);
+      // Dark green tint for icon (darker than text)
+      this.sprite.tint = 0x147014; // hex dark green
       this.sprite.renderer = this;
       this.app.stage.addChild(this.sprite); //add sprite to the stage container (so it renders)
       //include a particle container for effects
@@ -165,7 +167,7 @@ var CardRenderer = {
       // move the counter to the given position
       this.sprite.anchor.set(0.5, 0.5);
 
-      this.richText = new PIXI.Text(this.address[this.key], style);
+      this.richText = new PIXI.Text(this.address[this.key], style); // style already bright green
       this.richText.anchor.set(0.5, 0.5);
       this.app.stage.addChild(this.richText);
 
@@ -1425,9 +1427,9 @@ var CardRenderer = {
         fontFamily: "PlayBoldNisei",
         fontSize: 48,
         fontWeight: "bold",
-        fill: "#ffffff",
-        stroke: "#000000",
-        strokeThickness: 10,
+        fill: "#33ff33", // bright green text
+        stroke: "#0a2d0a", // darker green stroke for contrast
+        strokeThickness: 8,
       });
       this.typeStyle = new PIXI.TextStyle({
         fontFamily: "PlayBoldNisei",
