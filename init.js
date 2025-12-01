@@ -230,6 +230,22 @@ function Init() {
     loader.add("images/Runner_back.png");
     loader.load(Setup); //once back textures are loaded, the GUI can be generated, so this calls Setup
   }
+
+  // If launched via Quick Game, auto-open the deck modal
+  try {
+    if (URIParameter("showdeck") !== "") {
+      ShowDeckInfo();
+      $('#help-modal').css('display','flex');
+    }
+  } catch (e) {
+    // If cardSet not ready yet for some reason, retry shortly
+    setTimeout(function(){
+      if (URIParameter("showdeck") !== "") {
+        ShowDeckInfo();
+        $('#help-modal').css('display','flex');
+      }
+    }, 150);
+  }
 }
 
 //populate help modal with deck information

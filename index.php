@@ -332,7 +332,8 @@
           
           window.location.href = 'engine.php?sets=systemgateway-systemupdate2021-midnightsun&p=' + playerSide + 
                                  '&' + aiSide + '=' + aiCompressed + 
-                                 '&' + playerSide + '=' + playerCompressed;
+                                 '&' + playerSide + '=' + playerCompressed +
+                                 '&showdeck=1';
         }
       }, 500);
 
