@@ -232,6 +232,89 @@ function Init() {
   }
 }
 
+//populate help modal with deck information
+function ShowDeckInfo() {
+  var playerSide = URIParameter("p");
+  var deckParam = playerSide === "c" ? URIParameter("c") : URIParameter("r");
+  var helpContent = $("#help-content");
+  
+  if (!deckParam || deckParam === "") {
+    helpContent.html("<p style='color:#ff4d4d;'>No deck data found in URL.</p>");
+    return;
+  }
+  
+  try {
+    var deckJson = JSON.parse(LZString.decompressFromEncodedURIComponent(deckParam));
+    
+    var html = "<div style='margin-bottom:15px;'>";
+    
+    // Deck name
+    if (deckJson.name) {
+      html += "<p style='font-weight:bold; color:#66ff66; font-size:18px; margin-bottom:12px;'>" + deckJson.name + "</p>";
+    } else {
+      html += "<p style='font-weight:bold; color:#66ff66; margin-bottom:8px;'>PLAYER DECK (";
+      html += (playerSide === "r" ? "RUNNER" : "CORP") + ")</p>";
+    }
+    
+    // Notes
+    if (deckJson.notes) {
+      html += "<p style='margin-bottom:10px; font-size:13px; line-height:1.5; color:#ccffcc; padding:10px; background:rgba(51,255,51,0.08); border-left:2px solid #33ff33;'>" + deckJson.notes + "</p>";
+    }
+    
+    // URL link
+    if (deckJson.url) {
+      html += "<p style='margin-bottom:25px;'><a href='" + deckJson.url + "' target='_blank' style='color:#66ff66; text-decoration:underline;'>More details on NetrunnerDB</a></p>";
+    }
+    
+    // Identity
+    if (deckJson.identity && cardSet[deckJson.identity]) {
+      html += "<p style='margin-bottom:15px;'><span style='color:#ffff66;'>Identity:</span> <a href='https://netrunnerdb.com/en/card/" + deckJson.identity + "' target='_blank' style='color:#33ff33; text-decoration:none;' onmouseover='this.style.textDecoration=\"underline\"' onmouseout='this.style.textDecoration=\"none\"'>" + cardSet[deckJson.identity].title + "</a></p>";
+    }
+    
+    // Count cards
+    var cardCounts = {};
+    if (deckJson.cards && Array.isArray(deckJson.cards)) {
+      for (var i = 0; i < deckJson.cards.length; i++) {
+        var cid = deckJson.cards[i];
+        cardCounts[cid] = (cardCounts[cid] || 0) + 1;
+      }
+      
+      html += "<p style='margin-top:10px; margin-bottom:8px; font-weight:bold;'>Card List:</p>";
+      html += "<div style='font-size:12px; line-height:1.6;'>";
+      
+      // Group by card type
+      var grouped = {};
+      for (var cid in cardCounts) {
+        if (cardSet[cid]) {
+          var ct = cardSet[cid].cardType || 'other';
+          if (!grouped[ct]) grouped[ct] = [];
+          grouped[ct].push({id: cid, count: cardCounts[cid], title: cardSet[cid].title});
+        }
+      }
+      
+      // Display by type
+      var typeOrder = ['agenda', 'asset', 'upgrade', 'operation', 'ice', 'event', 'hardware', 'resource', 'program'];
+      for (var t = 0; t < typeOrder.length; t++) {
+        var type = typeOrder[t];
+        if (grouped[type] && grouped[type].length > 0) {
+          html += "<p style='color:#66ff66; margin-top:8px; margin-bottom:4px; text-transform:uppercase;'>" + type + ":</p>";
+          grouped[type].sort(function(a, b) { return a.title.localeCompare(b.title); });
+          for (var c = 0; c < grouped[type].length; c++) {
+            html += "<p style='margin-left:15px;'>" + grouped[type][c].count + "x <a href='https://netrunnerdb.com/en/card/" + grouped[type][c].id + "' target='_blank' style='color:#33ff33; text-decoration:none;' onmouseover='this.style.textDecoration=\"underline\"' onmouseout='this.style.textDecoration=\"none\"'>" + grouped[type][c].title + "</a></p>";
+          }
+        }
+      }
+      html += "</div>";
+    }
+    
+    html += "</div>";
+    
+    helpContent.html(html);
+  } catch (e) {
+    helpContent.html("<p style='color:#ff4d4d;'>Error decoding deck: " + e.message + "</p>");
+  }
+}
+
 //used for rewinding
 function RenderRewindOptions() {
 	var turnsAgo = 1;
@@ -549,16 +632,16 @@ function Render() {
   var spreadXStep = 100;
   var scoreAreaXStep = 30;
   var spreadYStep = -15;
-  var corpHeaderFooter = 430;
-  var runnerHeaderFooter = 430;
+  var corpHeaderFooter = 480;
+  var runnerHeaderFooter = 480;
   if (viewingPlayer == corp) {
     tightXStep *= -1;
     tightYStep *= -1;
     spreadXStep *= -1;
     scoreAreaXStep *= -1;
     spreadYStep *= -1;
-    corpHeaderFooter = 430;
-    runnerHeaderFooter = 430;
+    corpHeaderFooter = 480;
+    runnerHeaderFooter = 480;
     $("#header").css("width", runnerHeaderFooter + "px");
     $("#footer").css("width", corpHeaderFooter + "px");
   } else {

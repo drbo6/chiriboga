@@ -60,6 +60,7 @@
 		<div id="menubar"><button class="menu-trigger" onclick="$('#menu').css('display','flex'); if (document.fullscreen) document.exitFullscreen(); $('.fullscreen-button').show();">MENU</button></div>
 		<div id="header"></div>
 		<button class="fullscreen-button" onclick="document.getElementById('body').requestFullscreen({ navigationUI: 'hide' });"></button>
+		<button class="help-button" onclick="ShowDeckInfo(); $('#help-modal').css('display','flex');">?</button>
 		<div id="fps"></div>
 		<div id="footer"></div>
 		<div id="modal" class="modal">
@@ -73,7 +74,7 @@
 		</div>
 		<div id="menu" class="modal">
 			<div id="menucontent" class="solo-menu">
-				<span id="menu-close" class="menu-close" onclick="$('#menu').css('display','none');">[CLOSE]</span>
+				<span id="menu-close" class="menu-close" onclick="$('#menu').css('display','none');">✕</span>
 				<div class="solo-logo">
 					<h1 class="logo-text">NETRUNNER</h1>
 					<div class="subtitle-line"><span class="subtitle-text">$0LØ MOÐ3</span></div>
@@ -89,6 +90,17 @@
 					<label class="toggle-item"><input type="checkbox" id="narration"> Narrate AI</label>
 					<label class="toggle-item"><input type="checkbox" id="slowerai"> Slower AI</label>
 					<label class="toggle-item"><input type="checkbox" id="largerhistory"> Larger history</label>
+				</div>
+			</div>
+		</div>
+		<div id="help-modal" class="modal">
+			<div class="solo-menu">
+				<span class="menu-close" onclick="$('#help-modal').css('display','none');">✕</span>
+				<div class="solo-logo">
+					<h1 class="logo-text">DECK INFO</h1>
+				</div>
+				<div id="help-content" style="color:#33ff33; font-family:monospace; font-size:14px; text-align:left; max-height:400px; overflow-y:auto; padding:20px;">
+					<p>Loading deck information...</p>
 				</div>
 			</div>
 		</div>

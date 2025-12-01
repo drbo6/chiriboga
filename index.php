@@ -268,16 +268,24 @@
         
         // Navigate based on option
         if (option === 'custom' && playerDeck && aiDeck) {
-          // Build compressed deck strings
-          var playerJson = {identity: playerDeck.identity, cards: []};
+          // Build compressed deck strings from precon format
+          var playerJson = {identity: parseInt(playerDeck.identity), cards: []};
+          if (playerDeck.Notes) playerJson.notes = playerDeck.Notes;
+          if (playerDeck.name) playerJson.name = playerDeck.name;
+          if (playerDeck.URL) playerJson.url = playerDeck.URL;
           for (var cardId in playerDeck.cards) {
-            for (var i = 0; i < playerDeck.cards[cardId]; i++) {
+            var count = playerDeck.cards[cardId];
+            for (var i = 0; i < count; i++) {
               playerJson.cards.push(parseInt(cardId));
             }
           }
-          var aiJson = {identity: aiDeck.identity, cards: []};
+          var aiJson = {identity: parseInt(aiDeck.identity), cards: []};
+          if (aiDeck.Notes) aiJson.notes = aiDeck.Notes;
+          if (aiDeck.name) aiJson.name = aiDeck.name;
+          if (aiDeck.URL) aiJson.url = aiDeck.URL;
           for (var cardId in aiDeck.cards) {
-            for (var i = 0; i < aiDeck.cards[cardId]; i++) {
+            var count = aiDeck.cards[cardId];
+            for (var i = 0; i < count; i++) {
               aiJson.cards.push(parseInt(cardId));
             }
           }
@@ -293,16 +301,24 @@
                                  '&' + aiSide + '=' + aiCompressed + 
                                  '&' + playerSide + '=' + playerCompressed;
         } else if (option === 'quick' && playerDeck && aiDeck) {
-          // Build compressed deck strings
-          var playerJson = {identity: playerDeck.identity, cards: []};
+          // Build compressed deck strings from precon format
+          var playerJson = {identity: parseInt(playerDeck.identity), cards: []};
+          if (playerDeck.Notes) playerJson.notes = playerDeck.Notes;
+          if (playerDeck.name) playerJson.name = playerDeck.name;
+          if (playerDeck.URL) playerJson.url = playerDeck.URL;
           for (var cardId in playerDeck.cards) {
-            for (var i = 0; i < playerDeck.cards[cardId]; i++) {
+            var count = playerDeck.cards[cardId];
+            for (var i = 0; i < count; i++) {
               playerJson.cards.push(parseInt(cardId));
             }
           }
-          var aiJson = {identity: aiDeck.identity, cards: []};
+          var aiJson = {identity: parseInt(aiDeck.identity), cards: []};
+          if (aiDeck.Notes) aiJson.notes = aiDeck.Notes;
+          if (aiDeck.name) aiJson.name = aiDeck.name;
+          if (aiDeck.URL) aiJson.url = aiDeck.URL;
           for (var cardId in aiDeck.cards) {
-            for (var i = 0; i < aiDeck.cards[cardId]; i++) {
+            var count = aiDeck.cards[cardId];
+            for (var i = 0; i < count; i++) {
               aiJson.cards.push(parseInt(cardId));
             }
           }
