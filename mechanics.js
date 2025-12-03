@@ -20,6 +20,8 @@ function MakeRun(server) {
 	  ChangePhase(phases.runApproachIce);
   }
   else ChangePhase(phases.runDecideContinue); //(Nisei 2021 1.4.2 sends to 4; 4.1 doesn't apply so go directly to 4.2)
+  // Add run-active class to body for red CRT theme
+  document.body.classList.add('run-active');
   Render(); //to update server glow
 }
 

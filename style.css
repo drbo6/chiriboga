@@ -35,6 +35,78 @@
   /* Runner Theme Colors */
   --runner-red: #ff4d4d;
   
+  /* Run Active (Red CRT) Colors */
+  --crt-red: #ff3333;
+  --crt-red-light: #ff6666;
+  --crt-red-muted: #dc8f8f;
+  --crt-red-pale: #fbb8b8;
+  --border-red: #6d1f1f;
+  --border-red-dark: #4e1818;
+  --glow-red: #aa0000;
+  --glow-red-bright: #cc0000;
+  --glow-red-dark: #880000;
+  --text-red-light: #ffe6e6;
+  --text-red-info: #fbb8b8;
+  --text-red-flavor: #dc7f7f;
+  
+  /* RGBA Green colors (for transparency effects) */
+  --green-glow-rgba: rgba(51, 255, 51, 0.15);
+  --green-glow-strong-rgba: rgba(51, 255, 51, 0.4);
+  --green-shadow-rgba: rgba(0, 255, 0, 0.08);
+  --green-glow-medium-rgba: rgba(51, 255, 51, 0.2);
+  --green-glow-soft-rgba: rgba(51, 255, 51, 0.06);
+  --green-selection-rgba: rgba(51, 255, 51, 0.25);
+  --green-scanline-rgba: rgba(51, 255, 51, 0.18);
+  --green-ambient-rgba: rgba(51, 255, 51, 0.22);
+  --green-ambient-dim-rgba: rgba(51, 255, 51, 0.10);
+  --green-scanline-faint-rgba: rgba(51, 255, 51, 0.04);
+  --green-grid-rgba: rgba(0, 255, 0, 0.05);
+  --green-grid-dim-rgba: rgba(0, 255, 0, 0.03);
+  --green-bg-rgba: rgba(51, 255, 51, 0.08);
+  --green-button-shadow: rgba(51, 255, 51, 0.25);
+  --green-button-shadow-hover: rgba(51, 255, 51, 0.45);
+  --green-button-shadow-active: rgba(51, 255, 51, 0.35);
+  --green-shadow-strong-rgba: rgba(51, 255, 51, 0.28);
+  --green-shadow-inset-rgba: rgba(51, 255, 51, 0.16);
+  --green-shadow-medium-rgba: rgba(51, 255, 51, 0.25);
+  --green-shadow-inset-light-rgba: rgba(51, 255, 51, 0.15);
+  --green-shadow-inset-glow-rgba: rgba(0, 255, 0, 0.15);
+  --green-shadow-outer-rgba: rgba(0, 255, 0, 0.1);
+  
+  /* RGBA Red colors (for transparency effects during runs) */
+  --red-glow-rgba: rgba(255, 51, 51, 0.15);
+  --red-glow-strong-rgba: rgba(255, 51, 51, 0.4);
+  --red-shadow-rgba: rgba(255, 0, 0, 0.08);
+  --red-glow-medium-rgba: rgba(255, 51, 51, 0.2);
+  --red-glow-soft-rgba: rgba(255, 51, 51, 0.06);
+  --red-selection-rgba: rgba(255, 51, 51, 0.25);
+  --red-scanline-rgba: rgba(255, 51, 51, 0.18);
+  --red-ambient-rgba: rgba(255, 51, 51, 0.22);
+  --red-ambient-dim-rgba: rgba(255, 51, 51, 0.10);
+  --red-scanline-faint-rgba: rgba(255, 51, 51, 0.04);
+  --red-grid-rgba: rgba(255, 0, 0, 0.05);
+  --red-grid-dim-rgba: rgba(255, 0, 0, 0.03);
+  --red-bg-rgba: rgba(255, 51, 51, 0.08);
+  --red-shadow-strong-rgba: rgba(255, 51, 51, 0.28);
+  --red-shadow-inset-rgba: rgba(255, 51, 51, 0.16);
+  --red-shadow-medium-rgba: rgba(255, 51, 51, 0.25);
+  --red-shadow-inset-light-rgba: rgba(255, 51, 51, 0.15);
+  --red-shadow-inset-glow-rgba: rgba(255, 0, 0, 0.15);
+  --red-shadow-outer-rgba: rgba(255, 0, 0, 0.1);
+  --red-button-shadow: rgba(255, 51, 51, 0.25);
+  --red-button-shadow-hover: rgba(255, 51, 51, 0.45);
+  --red-button-shadow-active: rgba(255, 51, 51, 0.35);
+  
+  /* Background gradient colors */
+  --bg-gradient-center: rgba(0, 64, 0, 0.55);
+  --bg-gradient-mid: rgba(0, 32, 0, 0.75);
+  --bg-gradient-outer: rgba(0, 0, 0, 0.92);
+  
+  /* Background gradient colors (red for runs) */
+  --bg-gradient-center-red: rgba(64, 0, 0, 0.55);
+  --bg-gradient-mid-red: rgba(32, 0, 0, 0.75);
+  --bg-gradient-outer-red: rgba(0, 0, 0, 0.92);
+  
   /* Neutral/UI Colors */
   --modal-bg: #092630BB;
   --modal-border: #7C9396;
@@ -78,8 +150,8 @@
 	border-radius: 6px;
 	color: var(--crt-green) !important;
 	background: rgba(12, 24, 12, 0.7) !important;
-	box-shadow: inset 0 0 10px rgba(0, 255, 0, 0.08), 0 0 6px rgba(51, 255, 51, 0.15); /* reduce glow */
-	text-shadow: 0 0 4px rgba(51, 255, 51, 0.4); /* softer text glow */
+	box-shadow: inset 0 0 10px var(--green-shadow-rgba), 0 0 6px var(--green-glow-rgba); /* reduce glow */
+	text-shadow: 0 0 4px var(--green-glow-strong-rgba); /* softer text glow */
 	font-family: "Share Tech Mono", monospace;
 	position: relative; /* enable scanline overlay positioning */
 	z-index: 2; /* above any background overlays */
@@ -88,7 +160,7 @@
 #opponentid img {
 	max-width: 140px;
 	border: 1px solid var(--border-green); /* match softened border */
-	box-shadow: 0 0 6px rgba(51, 255, 51, 0.2); /* reduce image glow */
+	box-shadow: 0 0 6px var(--green-glow-medium-rgba); /* reduce image glow */
 	display: block;
 	margin: 6px auto 0 auto;
 }
@@ -99,7 +171,7 @@
 	position: absolute;
 	inset: 0;
 	pointer-events: none;
-	background-image: linear-gradient(rgba(0,0,0,0) 95%, rgba(51,255,51,0.06) 100%);
+	background-image: linear-gradient(rgba(0,0,0,0) 95%, var(--green-glow-soft-rgba) 100%);
 	background-size: 100% 4px;
 	/* Avoid unintended color shifts from blending modes */
 	opacity: 0.6;
@@ -150,16 +222,16 @@ input:focus,
 textarea:focus,
 select:focus {
 	outline: 1px solid var(--crt-green);
-	box-shadow: 0 0 0 2px rgba(51,255,51,0.15);
+	box-shadow: 0 0 0 2px var(--green-glow-rgba);
 }
-::selection { background: rgba(51,255,51,0.25); color: var(--bg-dark); }
-::-moz-selection { background: rgba(51,255,51,0.25); color: var(--bg-dark); }
+::selection { background: var(--green-selection-rgba); color: var(--bg-dark); }
+::-moz-selection { background: var(--green-selection-rgba); color: var(--bg-dark); }
 
 /* jQuery UI Autocomplete menu themed to CRT green */
 .ui-autocomplete {
 	background: rgba(12,24,12,0.95);
 	border: 1px solid var(--border-green);
-	box-shadow: 0 0 12px rgba(0,255,0,0.08);
+	box-shadow: 0 0 12px var(--green-shadow-rgba);
 	color: var(--crt-green);
 	font-family: "Share Tech Mono", monospace;
 	z-index: 10000; /* ensure above overlays */
@@ -243,8 +315,8 @@ body::before {
 	z-index: 0;
 	background: repeating-linear-gradient(
 		to bottom,
-		rgba(51,255,51,0.18) 0px,
-		rgba(51,255,51,0.18) 2px,
+		var(--green-scanline-rgba) 0px,
+		var(--green-scanline-rgba) 2px,
 		transparent 4px,
 		transparent 8px
 	);
@@ -260,7 +332,7 @@ body::after {
 	pointer-events: none;
 	z-index: 0;
 	background:
-		radial-gradient(circle at 50% 60%, rgba(51,255,51,0.22) 0%, rgba(51,255,51,0.10) 40%, transparent 80%),
+		radial-gradient(circle at 50% 60%, var(--green-ambient-rgba) 0%, var(--green-ambient-dim-rgba) 40%, transparent 80%),
 		radial-gradient(ellipse at center, rgba(0,0,0,0) 60%, rgba(0,0,0,0.35) 100%);
 	opacity: 1;
 	animation: bgpulse 3.5s ease-in-out infinite;
@@ -275,8 +347,8 @@ body::before {
 	z-index: 0;
 	background: repeating-linear-gradient(
 		to bottom,
-		rgba(51,255,51,0.04) 0px,
-		rgba(51,255,51,0.04) 2px,
+		var(--green-scanline-faint-rgba) 0px,
+		var(--green-scanline-faint-rgba) 2px,
 		transparent 4px,
 		transparent 8px
 	);
@@ -290,7 +362,7 @@ body::after {
 	inset: 0;
 	pointer-events: none;
 	z-index: 0;
-	background: radial-gradient(circle at 50% 60%, rgba(51,255,51,0.10) 0%, rgba(51,255,51,0.04) 40%, transparent 80%);
+	background: radial-gradient(circle at 50% 60%, var(--green-ambient-dim-rgba) 0%, var(--green-scanline-faint-rgba) 40%, transparent 80%);
 	opacity: 0.7;
 	animation: bgpulse 6s ease-in-out infinite;
 }
@@ -317,9 +389,9 @@ img.icon {
 	z-index:-2;
 	display:block;
 	background:
-		radial-gradient(circle at 50% 35%, rgba(0,64,0,0.55) 0%, rgba(0,32,0,0.75) 55%, rgba(0,0,0,0.92) 85%),
-		repeating-linear-gradient(0deg, rgba(0,255,0,0.05) 0px, rgba(0,255,0,0.05) 2px, rgba(0,0,0,0.08) 4px),
-		repeating-linear-gradient(90deg, rgba(0,255,0,0.03) 0px, rgba(0,255,0,0.03) 2px, rgba(0,0,0,0.08) 4px);
+		radial-gradient(circle at 50% 35%, var(--bg-gradient-center) 0%, var(--bg-gradient-mid) 55%, var(--bg-gradient-outer) 85%),
+		repeating-linear-gradient(0deg, var(--green-grid-rgba) 0px, var(--green-grid-rgba) 2px, rgba(0,0,0,0.08) 4px),
+		repeating-linear-gradient(90deg, var(--green-grid-dim-rgba) 0px, var(--green-grid-dim-rgba) 2px, rgba(0,0,0,0.08) 4px);
 	width:100%;
 	height:100%;
 	animation:bgpulse 6s ease-in-out infinite;
@@ -381,7 +453,7 @@ canvas {
  padding:6px 18px;
  border-top-right-radius:12px;
  border:1px solid var(--border-green-dark);
- box-shadow:0 0 14px rgba(51,255,51,0.28), inset 0 0 18px rgba(51,255,51,0.16);
+ box-shadow:0 0 14px var(--green-shadow-strong-rgba), inset 0 0 18px var(--green-shadow-inset-rgba);
  animation:flicker 0.12s infinite;
  overflow:hidden;
  box-sizing:border-box;
@@ -401,7 +473,7 @@ canvas {
  padding:6px 24px 6px 18px;
  border-bottom-left-radius:12px;
  border:1px solid var(--border-green-dark);
- box-shadow:0 0 14px rgba(51,255,51,0.25), inset 0 0 18px rgba(51,255,51,0.15);
+ box-shadow:0 0 14px var(--green-shadow-medium-rgba), inset 0 0 18px var(--green-shadow-inset-light-rgba);
  animation:flicker 0.12s infinite;
  overflow:hidden;
 }
@@ -420,7 +492,7 @@ canvas {
  gap:8px;
  padding:6px;
  border-bottom-right-radius:10px;
- box-shadow:0 0 12px rgba(51,255,51,0.25), inset 0 0 18px rgba(51,255,51,0.15);
+ box-shadow:0 0 12px var(--green-shadow-medium-rgba), inset 0 0 18px var(--green-shadow-inset-light-rgba);
  border:1px solid var(--border-green-dark);
 }
 
@@ -436,7 +508,7 @@ canvas {
 	border:1px solid var(--border-green-dark);
 	border-radius:6px;
 	cursor:pointer;
-	box-shadow: inset 0 0 12px rgba(0,255,0,0.15), 0 0 8px rgba(0,255,0,0.1);
+	box-shadow: inset 0 0 12px var(--green-shadow-inset-glow-rgba), 0 0 8px var(--green-shadow-outer-rgba);
 	transition: all .15s ease;
 	position:relative;
 	overflow:hidden;
@@ -464,7 +536,7 @@ canvas {
 	border:1px solid var(--border-green-dark);
 	border-radius:6px;
 	cursor:pointer;
-	box-shadow: inset 0 0 12px rgba(0,255,0,0.15), 0 0 8px rgba(0,255,0,0.1);
+	box-shadow: inset 0 0 12px var(--green-shadow-inset-glow-rgba), 0 0 8px var(--green-shadow-outer-rgba);
 	transition: all .15s ease;
 	position:relative;
 	overflow:hidden;
@@ -514,7 +586,7 @@ canvas {
 	border:1px solid var(--border-green-dark);
 	border-radius:6px;
 	cursor:pointer;
-	box-shadow: inset 0 0 12px rgba(0,255,0,0.15), 0 0 8px rgba(0,255,0,0.1);
+	box-shadow: inset 0 0 12px var(--green-shadow-inset-glow-rgba), 0 0 8px var(--green-shadow-outer-rgba);
 	transition: all .15s ease;
 	position:relative;
 	overflow:hidden;
@@ -737,8 +809,7 @@ canvas {
 	margin-right:5px;
 	width:44px;
 	height:44px;
-	background:url('images/fullscreen.png') center no-repeat;
-	background-size:70% 70%; /* leave internal padding */
+	background:rgba(12,24,12,0.85);
 	border:1px solid var(--border-green-dark);
 	border-radius:6px;
 	display:flex;
@@ -746,11 +817,46 @@ canvas {
 	justify-content:center;
 	padding:0;
 	cursor:pointer;
-	box-shadow:0 0 8px rgba(51,255,51,0.25);
-	transition:background .15s ease, box-shadow .15s ease, transform .15s ease;
+	box-shadow: inset 0 0 12px var(--green-shadow-inset-glow-rgba), 0 0 8px var(--green-shadow-outer-rgba);
+	transition: all .15s ease;
+	overflow:hidden;
 }
-.fullscreen-button:hover { box-shadow:0 0 12px rgba(51,255,51,0.45); }
-.fullscreen-button:active { transform:scale(.94); box-shadow:0 0 6px rgba(51,255,51,0.35); }
+.fullscreen-button::before {
+	content:"";
+	position:absolute;
+	top:50%;
+	left:50%;
+	transform:translate(-50%, -50%);
+	width:28px;
+	height:28px;
+	background-image:url('images/fullscreen.svg');
+	background-size:contain;
+	background-repeat:no-repeat;
+	background-position:center;
+	filter:brightness(0) saturate(100%) invert(88%) sepia(24%) saturate(2584%) hue-rotate(55deg) brightness(101%) contrast(101%);
+	z-index:2;
+}
+.fullscreen-button::after {
+	content:"";
+	position:absolute;
+	top:0;
+	left:0;
+	width:100%;
+	height:100%;
+	background:repeating-linear-gradient(to bottom, rgba(0,0,0,0) 0px, rgba(0,0,0,0) 2px, rgba(0,0,0,0.15) 3px, rgba(0,0,0,0.15) 4px);
+	pointer-events:none;
+	z-index:1;
+	animation: scanlines 10s linear infinite;
+}
+.fullscreen-button:hover {
+	background:var(--crt-green);
+}
+.fullscreen-button:hover::before {
+	filter:brightness(0) saturate(100%) invert(0%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(5%) contrast(100%);
+}
+.fullscreen-button:active {
+	background:var(--crt-green-light);
+}
 
 .help-button {
 	position:fixed;
@@ -2103,3 +2209,66 @@ body { background: #0a0a0a; min-height: 100vh; display: flex; align-items: cente
 		display: none !important;
 	}	
 }
+
+/* ==========================================================
+	Run Active State - Red CRT Theme Override
+	========================================================== */
+
+body.run-active {
+	/* Override primary CRT colors */
+	--crt-green: var(--crt-red);
+	--crt-green-light: var(--crt-red-light);
+	--crt-green-muted: var(--crt-red-muted);
+	--crt-green-pale: var(--crt-red-pale);
+	
+	/* Override border colors */
+	--border-green: var(--border-red);
+	--border-green-dark: var(--border-red-dark);
+	
+	/* Override glow colors */
+	--glow-green: var(--glow-red);
+	--glow-green-bright: var(--glow-red-bright);
+	--glow-green-dark: var(--glow-red-dark);
+	
+	/* Override text colors */
+	--text-light: var(--text-red-light);
+	--text-info: var(--text-red-info);
+	--text-flavor: var(--text-red-flavor);
+	
+	/* Override RGBA transparency colors */
+	--green-glow-rgba: var(--red-glow-rgba);
+	--green-glow-strong-rgba: var(--red-glow-strong-rgba);
+	--green-shadow-rgba: var(--red-shadow-rgba);
+	--green-glow-medium-rgba: var(--red-glow-medium-rgba);
+	--green-glow-soft-rgba: var(--red-glow-soft-rgba);
+	--green-selection-rgba: var(--red-selection-rgba);
+	--green-scanline-rgba: var(--red-scanline-rgba);
+	--green-ambient-rgba: var(--red-ambient-rgba);
+	--green-ambient-dim-rgba: var(--red-ambient-dim-rgba);
+	--green-scanline-faint-rgba: var(--red-scanline-faint-rgba);
+	--green-grid-rgba: var(--red-grid-rgba);
+	--green-grid-dim-rgba: var(--red-grid-dim-rgba);
+	--green-bg-rgba: var(--red-bg-rgba);
+	--green-shadow-strong-rgba: var(--red-shadow-strong-rgba);
+	--green-shadow-inset-rgba: var(--red-shadow-inset-rgba);
+	--green-shadow-medium-rgba: var(--red-shadow-medium-rgba);
+	--green-shadow-inset-light-rgba: var(--red-shadow-inset-light-rgba);
+	--green-shadow-inset-glow-rgba: var(--red-shadow-inset-glow-rgba);
+	--green-shadow-outer-rgba: var(--red-shadow-outer-rgba);
+	--green-button-shadow: var(--red-button-shadow);
+	--green-button-shadow-hover: var(--red-button-shadow-hover);
+	--green-button-shadow-active: var(--red-button-shadow-active);
+	
+	/* Override background gradient colors */
+	--bg-gradient-center: var(--bg-gradient-center-red);
+	--bg-gradient-mid: var(--bg-gradient-mid-red);
+	--bg-gradient-outer: var(--bg-gradient-outer-red);
+}
+
+/* Red SVG icons during run */
+body.run-active #menubar .deck-info-button::before,
+body.run-active #menubar .rulebook-button::before,
+body.run-active .fullscreen-button::before {
+	filter:brightness(0) saturate(100%) invert(50%) sepia(100%) saturate(5000%) hue-rotate(350deg) brightness(100%) contrast(100%);
+}
+

@@ -161,6 +161,8 @@ phaseTemplates.standardResponse = {
 				if (attackedServer.ice.length == 0 && attackedServer.root.length == 0) {
 					//end the run now, the server is gone
 					attackedServer=null;
+					// Remove run-active class since run is ending
+					document.body.classList.remove('run-active');
 					ChangePhase(phases.runEnds);
 					return;
 				}
@@ -1552,6 +1554,8 @@ phases.runEnds.Resolve.n = function () {
     encountering = false;
     movement = false;
     UnbreakAll(null); //for visual history we've left subroutines broken until now. let's reset them all
+    // Remove run-active class from body to restore green CRT theme
+    document.body.classList.remove('run-active');
   });
 };
 

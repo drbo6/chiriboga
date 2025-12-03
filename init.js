@@ -1544,6 +1544,31 @@ function Render() {
 
   //update actual rendered view (this would eventually be done automatically but this can cause issues with hover detection out of sync
   cardRenderer.app.render(cardRenderer.app.stage);
+  
+  //update counter colors based on run state
+  UpdateCounterColors();
+}
+
+//Update counter colors dynamically based on run state
+function UpdateCounterColors() {
+  var isRunActive = document.body.classList.contains('run-active');
+  var textColor = isRunActive ? "#ff3333" : "#33ff33";
+  var strokeColor = isRunActive ? "#2d0a0a" : "#0a2d0a";
+  var tintColor = isRunActive ? 0x701414 : 0x147014;
+  
+  //update all counter objects
+  Object.keys(countersUI).forEach(function(key) {
+    if (countersUI[key].corp && countersUI[key].corp.richText) {
+      countersUI[key].corp.richText.style.fill = textColor;
+      countersUI[key].corp.richText.style.stroke = strokeColor;
+      countersUI[key].corp.sprite.tint = tintColor;
+    }
+    if (countersUI[key].runner && countersUI[key].runner.richText) {
+      countersUI[key].runner.richText.style.fill = textColor;
+      countersUI[key].runner.richText.style.stroke = strokeColor;
+      countersUI[key].runner.sprite.tint = tintColor;
+    }
+  });
 }
 
 var counterList = ["advancement", "credits", "virus", "power", "agenda"]; //used for resetting all counters on a card, setting them up for render, etc.
