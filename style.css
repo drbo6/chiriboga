@@ -371,7 +371,6 @@ body::after {
 	0% { background-position-y: 0; }
 	100% { background-position-y: 8px; }
 }
-}
 
 img.icon {
 	margin-bottom: -2px;
@@ -1004,8 +1003,7 @@ canvas {
 }
 
 .modal-content p:active,
-.modal-content span:active,
- {
+.modal-content span:active {
 		text-decoration: none;
 		background-color: black;
 		cursor: pointer;
