@@ -723,7 +723,7 @@ canvas {
  line-height:50%;
  overflow-y:auto;
  overflow-x:visible;
- scrollbar-width:thin;
+ scrollbar-width:none;
  scrollbar-color:var(--crt-green) var(--bg-dark);
  background:transparent; /* keep wrapper transparent so expanded padding doesn't cover screen */
  border:none;
@@ -731,6 +731,10 @@ canvas {
  /* shade and glow live on #history itself to avoid full-width overlay */
  transition: padding-left .18s ease, margin-left .18s ease;
  will-change: padding-left, margin-left;
+#history-wrapper::-webkit-scrollbar {
+	display: none;
+}
+
 }
 
 /* chrome desktop doesn't yet support thin scrollbar so we need all this */
