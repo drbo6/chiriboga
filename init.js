@@ -229,23 +229,28 @@ function Init() {
     loader.add("images/Corp_back.png");
     loader.add("images/Runner_back.png");
     loader.load(Setup); //once back textures are loaded, the GUI can be generated, so this calls Setup
+
   }
 
-  // If launched via Quick Game, auto-open the deck modal
-  try {
-    if (URIParameter("showdeck") !== "") {
-      ShowDeckInfo();
-      $('#help-modal').css('display','flex');
-    }
-  } catch (e) {
-    // If cardSet not ready yet for some reason, retry shortly
-    setTimeout(function(){
-      if (URIParameter("showdeck") !== "") {
+  // If launched via Quick Game, auto-open the deck modal only after loading overlay is gone
+  (function(){
+    if (URIParameter("showdeck") === "") return; // no request to show
+    var opened = false;
+    var tryOpen = function(){
+      if (opened) return;
+      try {
+        // Wait until the loading modal is hidden (ensures assets/UI are ready)
+        var loadingVisible = $("#loading").is(":visible");
+        if (loadingVisible) { setTimeout(tryOpen, 200); return; }
         ShowDeckInfo();
         $('#help-modal').css('display','flex');
+        opened = true;
+      } catch(e) {
+        setTimeout(tryOpen, 200);
       }
-    }, 150);
-  }
+    };
+    tryOpen();
+  })();
 }
 
 //populate help modal with deck information
