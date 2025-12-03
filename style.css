@@ -394,7 +394,6 @@ canvas {
 .solo-logo .subtitle-text::before, .solo-logo .subtitle-text::after { content:""; }
 .menu-options { display:flex; flex-direction:column; gap:14px; }
 .menu-options .button { width:100%; }
-.rewind-select { text-align:center; }
 .toggle-options { display:flex; flex-wrap:wrap; gap:16px; justify-content:center; }
 .toggle-options .toggle-item { font-size:12px; color:#8fdc8f; letter-spacing:1px; }
 .toggle-options input { margin-right:4px; }
@@ -858,12 +857,11 @@ div.options {
 	box-shadow: inset 0 0 12px rgba(0,255,0,0.1), 0 0 8px rgba(0,255,0,0.05);
 	border-radius:8px;
 	letter-spacing:2px;
-	font-weight:600;
 	cursor:pointer;
 	transition: background .15s ease, color .15s ease, box-shadow .15s ease;
 	font-family:"Lucida Console", Monaco, monospace;
 	text-transform:uppercase;
-	font-size:13px;
+	font-size:16px;
 }
 #rewind-select:hover:not(:disabled) {
 	background:#33ff33;

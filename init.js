@@ -385,7 +385,7 @@ function ShowDeckInfo() {
 function RenderRewindOptions() {
 	var turnsAgo = 1;
 	if (rewindStates.length > 0 && playerTurn == rewindStates[0].turn) turnsAgo=0;
-	var selectOptions = '<option value="">Rewind</option>'+"\n";
+	var selectOptions = '<option value="">Undo</option>'+"\n";
 	for (var i=0; i<rewindStates.length && i<6; i++) {
 		var outStr = PlayerName(rewindStates[i].turn);
 		if (turnsAgo == 0) outStr += " current turn";

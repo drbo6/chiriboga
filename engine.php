@@ -82,8 +82,8 @@
 				<div class="menu-options">
 					<button id="exittomenu" onclick="window.location.href='index.php';" class="button">EXIT TO MAIN MENU</button>
 					<button onclick="DownloadCapturedLog();" class="button">DOWNLOAD DEBUG LOG</button>
-					<select id="rewind-select" disabled class="button rewind-select">
-						<option value="">REWIND</option>
+					<select id="rewind-select" disabled class="button">
+						<option value="">UNDO</option>
 					</select>
 				</div>
 				<div class="toggle-options">
