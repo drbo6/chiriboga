@@ -57,10 +57,12 @@
 				<input id="command" type="text" value="">
 			</form>
 		</div>
-		<div id="menubar"><button class="menu-trigger" onclick="$('#menu').css('display','flex'); if (document.fullscreen) document.exitFullscreen(); $('.fullscreen-button').show();">MENU</button></div>
-		<div id="header"></div>
-		<button class="fullscreen-button" onclick="document.getElementById('body').requestFullscreen({ navigationUI: 'hide' });"></button>
-		<button class="help-button" onclick="ShowDeckInfo(); $('#help-modal').css('display','flex');">?</button>
+	<div id="menubar">
+		<button class="menu-trigger" onclick="$('#menu').css('display','flex'); if (document.fullscreen) document.exitFullscreen(); $('.fullscreen-button').show();">MENU</button>
+		<button class="deck-info-button" onclick="ShowDeckInfo(); $('#help-modal').css('display','flex');"></button>
+	</div>
+	<div id="header"></div>
+	<button class="fullscreen-button" onclick="document.getElementById('body').requestFullscreen({ navigationUI: 'hide' });"></button>
 		<div id="fps"></div>
 		<div id="footer"></div>
 		<div id="modal" class="modal">
