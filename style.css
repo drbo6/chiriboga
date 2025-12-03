@@ -1,5 +1,5 @@
 #footer .button, #footer button {
-	padding-right: 2.2em !important; /* Add extra space on the right for chevron/icon */
+	padding-right: 1.7em !important; /* A few pixels more space on the right for chevron/icon */
 }
 /* --- OVERRIDE: Footer button hover/active text and icon color --- */
 #footer .button:hover, #footer .button:active,
