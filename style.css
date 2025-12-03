@@ -221,7 +221,22 @@
 * {
 	font-family: "Lucida Console", Monaco, monospace;
 	color: var(--crt-green);
-}
+	}
+
+	#footer .button, #footer button {
+		color: var(--crt-green); /* Ensure button text is CRT green */
+	}
+
+	#footer .button .icon, #footer button .icon, #footer .card-icon {
+		color: inherit !important; /* Inherit text color for icons */
+		background-color: currentColor !important; /* For SVG mask icons */
+		-webkit-mask-repeat: no-repeat;
+		mask-repeat: no-repeat;
+		-webkit-mask-position: center;
+		mask-position: center;
+		-webkit-mask-size: contain;
+		mask-size: contain;
+	}
 
 form {
 	background: black;
