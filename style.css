@@ -367,6 +367,20 @@ canvas {
 	cursor:pointer;
 	box-shadow: inset 0 0 12px rgba(0,255,0,0.15), 0 0 8px rgba(0,255,0,0.1);
 	transition: all .15s ease;
+	position:relative;
+	overflow:hidden;
+}
+#menubar .menu-trigger::after {
+	content:"";
+	position:absolute;
+	top:0;
+	left:0;
+	width:100%;
+	height:100%;
+	background:repeating-linear-gradient(to bottom, rgba(0,0,0,0) 0px, rgba(0,0,0,0) 2px, rgba(0,0,0,0.15) 3px, rgba(0,0,0,0.15) 4px);
+	pointer-events:none;
+	z-index:1;
+	animation: scanlines 10s linear infinite;
 }
 #menubar .menu-trigger:hover { background:#33ff33; color:#0a100a; }
 #menubar .menu-trigger:active { background:#66ff66; }
@@ -382,6 +396,7 @@ canvas {
 	box-shadow: inset 0 0 12px rgba(0,255,0,0.15), 0 0 8px rgba(0,255,0,0.1);
 	transition: all .15s ease;
 	position:relative;
+	overflow:hidden;
 }
 #menubar .deck-info-button::before {
 	content:"";
@@ -396,6 +411,19 @@ canvas {
 	background-repeat:no-repeat;
 	background-position:center;
 	filter:brightness(0) saturate(100%) invert(88%) sepia(24%) saturate(2584%) hue-rotate(55deg) brightness(101%) contrast(101%);
+	z-index:2;
+}
+#menubar .deck-info-button::after {
+	content:"";
+	position:absolute;
+	top:0;
+	left:0;
+	width:100%;
+	height:100%;
+	background:repeating-linear-gradient(to bottom, rgba(0,0,0,0) 0px, rgba(0,0,0,0) 2px, rgba(0,0,0,0.15) 3px, rgba(0,0,0,0.15) 4px);
+	pointer-events:none;
+	z-index:1;
+	animation: scanlines 10s linear infinite;
 }
 #menubar .deck-info-button:hover {
 	background:#33ff33;
@@ -418,6 +446,7 @@ canvas {
 	box-shadow: inset 0 0 12px rgba(0,255,0,0.15), 0 0 8px rgba(0,255,0,0.1);
 	transition: all .15s ease;
 	position:relative;
+	overflow:hidden;
 }
 #menubar .rulebook-button::before {
 	content:"";
@@ -432,6 +461,19 @@ canvas {
 	background-repeat:no-repeat;
 	background-position:center;
 	filter:brightness(0) saturate(100%) invert(88%) sepia(24%) saturate(2584%) hue-rotate(55deg) brightness(101%) contrast(101%);
+	z-index:2;
+}
+#menubar .rulebook-button::after {
+	content:"";
+	position:absolute;
+	top:0;
+	left:0;
+	width:100%;
+	height:100%;
+	background:repeating-linear-gradient(to bottom, rgba(0,0,0,0) 0px, rgba(0,0,0,0) 2px, rgba(0,0,0,0.15) 3px, rgba(0,0,0,0.15) 4px);
+	pointer-events:none;
+	z-index:1;
+	animation: scanlines 10s linear infinite;
 }
 #menubar .rulebook-button:hover {
 	background:#33ff33;
@@ -1087,11 +1129,12 @@ body::-webkit-scrollbar-track {
 
 .menu-layout { display:flex; justify-content:center; }
 .menu-buttons { display:grid; grid-template-columns: repeat(2, minmax(240px, 1fr)); gap:16px; max-width:640px; }
-.menu-item, .button { display:block; padding:14px 18px; border:1px solid #1f6d1f; border-radius:8px; color:#33ff33; background: rgba(12,24,12,0.7); text-decoration:none; box-shadow: inset 0 0 12px rgba(0,255,0,0.1), 0 0 8px rgba(0,255,0,0.05); position:relative; cursor:pointer; transition: all 0.1s ease; }
-.menu-item::before, .button::before { content:">"; position:absolute; left:10px; opacity:0; color:#33ff33; transition: all 0.1s ease; }
-.menu-item:hover, .button:hover { background-color:#33ff33; color:#0a100a; text-shadow:none; border-color:#33ff33; }
+.menu-item, .button { display:block; padding:14px 18px 14px 28px; border:1px solid #1f6d1f; border-radius:8px; color:#33ff33; background: rgba(12,24,12,0.7); text-decoration:none; box-shadow: inset 0 0 12px rgba(0,255,0,0.1), 0 0 8px rgba(0,255,0,0.05); position:relative; cursor:pointer; transition: all 0.1s ease; overflow:hidden; }
+.menu-item::before, .button::before { content:"> "; position:absolute; left:10px; opacity:0; color:#33ff33; transition: all 0.1s ease; z-index:2; }
+.menu-item::after, .button::after { content:""; position:absolute; top:0; left:0; width:100%; height:100%; background:repeating-linear-gradient(to bottom, rgba(0,0,0,0) 0px, rgba(0,0,0,0) 2px, rgba(0,0,0,0.15) 3px, rgba(0,0,0,0.15) 4px); pointer-events:none; z-index:1; animation: scanlines 10s linear infinite; }
+.menu-item:hover, .button:hover { background-color:#33ff33; color:#0a100a; text-shadow:none; border-color:#33ff33; box-shadow: 0 0 15px rgba(51,255,51,0.6), inset 0 0 15px rgba(10,16,10,0.3); }
 .menu-item:hover::before, .button:hover::before { opacity:1; color:#0a100a; }
-.menu-item:active, .button:active { background-color:#66ff66; transform: translateY(1px); }
+.menu-item:active, .button:active { background-color:#66ff66; transform: translateY(1px); box-shadow: 0 0 20px rgba(51,255,51,0.8), inset 0 0 20px rgba(10,16,10,0.4); }
 .preview-title { font-size:18px; letter-spacing:2px; }
 .achievement-percent { font-size:11px; opacity:0.75; }
 .button:disabled { opacity:0.5; cursor:not-allowed; }
