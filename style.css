@@ -407,6 +407,42 @@ canvas {
 	background:#66ff66;
 }
 
+#menubar .rulebook-button {
+	display:block;
+	width:56px;
+	height:100%;
+	background:rgba(12,24,12,0.85);
+	border:1px solid #184e18;
+	border-radius:6px;
+	cursor:pointer;
+	box-shadow: inset 0 0 12px rgba(0,255,0,0.15), 0 0 8px rgba(0,255,0,0.1);
+	transition: all .15s ease;
+	position:relative;
+}
+#menubar .rulebook-button::before {
+	content:"";
+	position:absolute;
+	top:50%;
+	left:50%;
+	transform:translate(-50%, -50%);
+	width:32px;
+	height:32px;
+	background-image:url('images/rulebook.svg');
+	background-size:contain;
+	background-repeat:no-repeat;
+	background-position:center;
+	filter:brightness(0) saturate(100%) invert(88%) sepia(24%) saturate(2584%) hue-rotate(55deg) brightness(101%) contrast(101%);
+}
+#menubar .rulebook-button:hover {
+	background:#33ff33;
+}
+#menubar .rulebook-button:hover::before {
+	filter:brightness(0) saturate(100%) invert(0%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(5%) contrast(100%);
+}
+#menubar .rulebook-button:active {
+	background:#66ff66;
+}
+
 /* Solo mode in-game menu */
 .solo-menu {
 	position:relative;
@@ -444,6 +480,8 @@ canvas {
 	#menubar .menu-trigger { font-size:12px; letter-spacing:1px; width:64px; }
 	#menubar .deck-info-button { width:48px; }
 	#menubar .deck-info-button::before { width:28px; height:28px; }
+	#menubar .rulebook-button { width:48px; }
+	#menubar .rulebook-button::before { width:28px; height:28px; }
 }
 
 /* Menu close styled like lightbox close */
