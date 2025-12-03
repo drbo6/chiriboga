@@ -1,3 +1,31 @@
+#footer .button, #footer button {
+	padding-right: 2.2em !important; /* Add extra space on the right for chevron/icon */
+}
+/* --- OVERRIDE: Footer button hover/active text and icon color --- */
+#footer .button:hover, #footer .button:active,
+#footer button:hover, #footer button:active {
+  color: var(--bg-dark) !important;
+}
+#footer .button:hover .icon, #footer .button:active .icon,
+#footer button:hover .icon, #footer button:active .icon,
+#footer .button:hover .card-icon, #footer .button:active .card-icon,
+#footer button:hover .card-icon, #footer button:active .card-icon {
+  color: var(--bg-dark) !important;
+  background-color: var(--bg-dark) !important;
+}
+
+/* --- OVERRIDE: Footer button hover/active text and icon color --- */
+#footer .button:hover, #footer .button:active,
+#footer button:hover, #footer button:active {
+  color: var(--bg-dark) !important;
+}
+#footer .button:hover .icon, #footer .button:active .icon,
+#footer button:hover .icon, #footer button:active .icon,
+#footer .button:hover .card-icon, #footer .button:active .card-icon,
+#footer button:hover .card-icon, #footer button:active .card-icon {
+  color: var(--bg-dark) !important;
+  background-color: var(--bg-dark) !important;
+}
 /* CSS Color Variables */
 :root {
   /* Primary CRT Green */
