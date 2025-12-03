@@ -1812,8 +1812,9 @@ function ChangePhase(src, skipInit = false) {
   activePlayer = currentPhase.player;
   var headerstyle = "";
   var tpstr = TurnPhaseStr();
-  if (tpstr.length > 30) {
-	//the threshold is arbitrary but basically 'lots of text'
+  // Rough estimate: allow up to 2 lines (~60 chars per line at default size)
+  // Only scale down if text would need more than 2 lines
+  if (tpstr.length > 120) {
 	headerstyle = '  style="font-size:110%;"';
   }
   $("#header").html('<h2' + headerstyle + '>' + tpstr + '</h2>');
