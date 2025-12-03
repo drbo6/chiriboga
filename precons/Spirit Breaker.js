@@ -4,6 +4,8 @@ registerPrecon({
     identity: "31001",
     default: false,
     deck_set: "none",
+    URL: "https://netrunnerdb.com/en/decklist/046dca3d-9ba7-4cb1-a029-5e5cb5ec382a/-sg-su21-spirit-breaker",
+    Notes: "This Quetzal deck is built to get into servers as cheaply as possible: Quetzal gives you a free barrier break every turn, and cards like Botulus and Femme Fatale help you bypass the expensive ice that would normally slow you down. With simple support tools like Leech, Ice Carver, and solid economy cards, the deck keeps runs affordable and uses events like Jailbreak and The Maker’s Eye to see extra cards and steal agendas faster.",	
     cards: {
         "30002": 3,  // Wildcat Strike
         "30003": 2,  // Carnivore

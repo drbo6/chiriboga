@@ -70,7 +70,7 @@
 			<div id="history"></div>
 		</div>
 		<div id="loading" class="modal" style="display:flex;">
-			<div class="modal-content-inactive"><h1 id="loading-text">Deckbuilding...<h1></div>
+			<div class="modal-content-inactive"><h1 id="loading-text">DECKBUILDING...</h1></div>
 		</div>
 		<div id="menu" class="modal">
 			<div id="menucontent" class="solo-menu">

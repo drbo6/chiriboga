@@ -754,6 +754,57 @@ canvas {
 		cursor: pointer;
 }
 
+/* Themed loading modal (CRT green) */
+#loading .modal-content-inactive {
+	position: relative;
+	background: #0a100a; /* deep CRT background */
+	border: 1px solid #184e18;
+	color: #33ff33;
+	border-radius: 10px;
+	padding: 28px 48px;
+	box-shadow: 0 0 14px rgba(51,255,51,0.25), inset 0 0 18px rgba(51,255,51,0.12);
+	text-align: center;
+	font-family: "Share Tech Mono", "Courier New", monospace;
+}
+
+#loading .modal-content-inactive::after {
+	content: "";
+	position: absolute;
+	inset: 0;
+	pointer-events: none;
+	background: repeating-linear-gradient(
+		to bottom,
+		rgba(51,255,51,0.10) 0px,
+		rgba(51,255,51,0.10) 2px,
+		rgba(0,0,0,0.18) 3px,
+		rgba(0,0,0,0.18) 4px
+	);
+	opacity: .45;
+	mix-blend-mode: screen;
+}
+
+#loading #loading-text {
+	margin: 0;
+	font-size: 28px;
+	letter-spacing: 6px;
+	color: #33ff33;
+		text-shadow: 0 0 6px #33ff33, 0 0 18px #00aa00, 0 0 32px #008800;
+		animation: loadingTextPulse 2.0s ease-in-out infinite;
+}
+
+@keyframes loadingTextPulse {
+	0%, 100% {
+		opacity: 0.95;
+		text-shadow: 0 0 6px #33ff33, 0 0 18px #00aa00, 0 0 32px #008800;
+		transform: none;
+	}
+	50% {
+		opacity: 1;
+		text-shadow: 0 0 8px #66ff66, 0 0 24px #00cc00, 0 0 40px #00aa00;
+		transform: none;
+	}
+}
+
 .tooltip {
   position: relative;
   display: inline-block;
