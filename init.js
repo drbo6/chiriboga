@@ -94,6 +94,52 @@ function Init() {
 	}
 	eval(rewindStates[0].code);
 	rewinding=false;
+	
+	//recreate renderers for all cards after restoring state
+	var restoredCards = AllCards(null);
+	for (var i=0; i<restoredCards.length; i++) {
+		var card = restoredCards[i];
+		if (typeof card.imageFile !== "undefined" && typeof card.renderer === "undefined") {
+			var cardDef = cardSet[card.cardId];
+			if (typeof cardDef !== "undefined") {
+				//determine back textures based on player
+				var backTextures = (card.player == corp) ? cardBackTexturesCorp : cardBackTexturesRunner;
+				
+				//determine cost texture
+				var costTexture = null;
+				if (card.player == runner) costTexture = strengthTextures.rc;
+				else if (card.cardType == "ice" || card.cardType == "asset" || card.cardType == "upgrade")
+					costTexture = strengthTextures.crc;
+				
+				//determine strength info
+				var strengthInfo = { texture: null, num: 0, ice: false, cost: costTexture };
+				if (typeof card.strength !== "undefined") {
+					if (card.cardType == "ice")
+						strengthInfo = { texture: strengthTextures.ice, num: card.strength, ice: true, brokenTexture: strengthTextures.broken, cost: costTexture };
+					if (card.cardType == "program")
+						strengthInfo = { texture: strengthTextures.ib, num: card.strength, ice: false, cost: costTexture };
+				}
+				
+				//create renderer
+				var frontTexture = cardRenderer.LoadTexture("images/" + ChangeImageFileToJPG(card.imageFile));
+				card.renderer = cardRenderer.CreateCard(card, frontTexture, backTextures, glowTextures, strengthInfo);
+				
+				//recreate counters
+				for (var j = 0; j < counterList.length; j++) {
+					if (typeof card[counterList[j]] !== "undefined") {
+						var counter = cardRenderer.CreateCounter(
+							countersUI[counterList[j]].texture,
+							card,
+							counterList[j],
+							1,
+							true
+						);
+					}
+				}
+			}
+		}
+	}
+	
 	logDisabled = savedLogState;
 	RenderRewindOptions();
 	Render();
