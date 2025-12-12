@@ -50,6 +50,9 @@
 
 	<body id="body" onload="Init();">
 		<div id="contentcontainer" class="content">
+			<div class="netrunner-bg-watermark">NETRUNNER</div>
+			<!-- ...existing code... -->
+			<div id="crt-overlay"></div>
 			<div id="output"></div>
 			<form id="cmdform">
 				<input type="submit" value="Submit">

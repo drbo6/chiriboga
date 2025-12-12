@@ -1,3 +1,25 @@
+/* Watermark for Netrunner background */
+.netrunner-bg-watermark {
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	font-family: var(--watermark-font-family, 'Lucida Console', Monaco, monospace);
+	font-style: var(--watermark-font-style, italic);
+	font-size: var(--watermark-font-size, 6vw);
+	color: var(--watermark-color, var(--crt-green, #33ff33));
+	opacity: var(--watermark-opacity, 0.18);
+	pointer-events: none;
+	user-select: none;
+	z-index: 1;
+	white-space: nowrap;
+	text-shadow:
+		0 0 16px var(--watermark-shadow1, var(--glow-green-bright, #00cc00)),
+		0 0 32px var(--watermark-shadow2, var(--crt-green-light, #66ff66));
+	letter-spacing: var(--watermark-letter-spacing, 0.15em);
+	font-variant: var(--watermark-font-variant, small-caps);
+	text-transform: var(--watermark-text-transform, uppercase);
+}
 #footer .button, #footer button {
 	padding-right: 1.7em !important; /* A few pixels more space on the right for chevron/icon */
 }
@@ -27,7 +49,17 @@
   background-color: var(--bg-dark) !important;
 }
 /* CSS Color Variables */
-:root {
+ :root {
+	--watermark-color: var(--crt-green);
+	--watermark-shadow1: var(--glow-green-bright);
+	--watermark-shadow2: var(--crt-green-light);
+	--watermark-font-family: 'Lucida Console', Monaco, monospace;
+	--watermark-font-style: italic;
+	--watermark-font-size: 6vw;
+	--watermark-opacity: 0.18;
+	--watermark-letter-spacing: 0.15em;
+	--watermark-font-variant: small-caps;
+	--watermark-text-transform: uppercase;
   /* Primary CRT Green */
   --crt-green: #33ff33;
   --crt-green-light: #66ff66;
