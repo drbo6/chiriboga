@@ -2172,6 +2172,14 @@ body { background: #0a0a0a; min-height: 100vh; display: flex; align-items: cente
 .tiny-note { font-size:10px; color:var(--text-flavor); margin-top:8px; }
 .credits-scroll a { color:var(--green-mint); text-decoration:none; }
 .credits-scroll a:hover { text-decoration:underline; }
+
+/* Tutorial panel */
+.tutorial-panel { flex:1; border:1px solid var(--crt-green)44; padding:15px; display:flex; flex-direction:column; gap:10px; overflow:hidden; }
+.tutorial-header-row { display:flex; justify-content:space-between; align-items:center; margin-bottom:4px; }
+.tutorial-title { font-size:14px; letter-spacing:4px; opacity:0.8; }
+.tutorial-back { background:var(--bg-dark); color:var(--crt-green); border:1px solid var(--border-green-dark); padding:6px 12px; font-size:10px; letter-spacing:2px; cursor:pointer; }
+.tutorial-back:hover { background:var(--crt-green); color:var(--bg-dark); }
+
 .match-preview { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; border: 1px solid var(--crt-green)44; padding: 15px; }
 .preview-title { font-size: 10px; color: var(--crt-green); letter-spacing: 3px; opacity: 0.7; margin-bottom: 8px; }
 .portrait-label { position: absolute; bottom: 3px; right: 3px; font-size: 8px; color: var(--crt-green); letter-spacing: 1px; background: rgba(0, 0, 0, 0.8); padding: 2px 4px; z-index: 5; border: 1px solid var(--crt-green)66; }
@@ -2193,6 +2201,93 @@ body { background: #0a0a0a; min-height: 100vh; display: flex; align-items: cente
 .menu-item:active { background-color: #66ff66; }
 .achievement-percent { color: #ff6633; text-shadow: 0 0 5px #ff6633; }
 .menu-item:hover .achievement-percent, .menu-item:active .achievement-percent { color: var(--bg-dark); text-shadow: none; }
+
+/* Tutorial buttons */
+#tutorial-buttons {
+  flex: 1;
+  border: 1px solid var(--crt-green)44;
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  overflow: hidden;
+}
+
+#tutorial-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  flex: 1;
+  min-height: 0;
+}
+
+#tutorial-back-row {
+  display: flex;
+  gap: 8px;
+}
+
+.tutorial-item { 
+	color: var(--crt-green); 
+	padding: 10px 12px 10px 35px; /* extra left room for badge */
+  font-size: 10px; 
+  letter-spacing: 1px; 
+  cursor: pointer; 
+  transition: all 0.1s ease; 
+  -webkit-user-select: none; 
+  user-select: none; 
+  position: relative; 
+  text-align: center;
+  border: 1px solid var(--border-green);
+  border-radius: 4px;
+  background: rgba(12, 24, 12, 0.7);
+  box-shadow: inset 0 0 8px var(--button-glow-inset), 0 0 6px var(--button-glow-outer);
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1.2;
+  overflow: hidden;
+}
+
+.tutorial-number {
+	position: absolute;
+	top: 6px;
+	left: 6px;
+	width: 22px;
+	height: 22px;
+	border-radius: 50%;
+	border: 1px solid var(--crt-green);
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 11px;
+	letter-spacing: 0;
+	background: rgba(51, 255, 51, 0.1);
+	box-shadow: 0 0 10px rgba(51, 255, 51, 0.35), inset 0 0 6px rgba(51, 255, 51, 0.25);
+}
+
+.tutorial-label {
+	display: inline-block;
+	text-align: center;
+}
+
+.tutorial-item:hover {
+  background-color: var(--crt-green);
+  color: var(--bg-dark);
+  text-shadow: none;
+  border-color: var(--crt-green);
+  box-shadow: 0 0 12px var(--button-glow-hover), inset 0 0 12px var(--button-glow-hover-inset);
+}
+
+.tutorial-item:active {
+  background-color: #66ff66;
+  transform: translateY(1px);
+}
+
+#tutorial-back {
+  flex: 1;
+}
+
 
 .version { margin-top: 25px; font-size: 10px; color: var(--crt-green); opacity: 0.5; letter-spacing: 2px; text-align: center; }
 .status-bar { display: flex; justify-content: space-between; margin-top: 20px; padding-top: 15px; border-top: 1px solid var(--crt-green)33; font-size: 9px; opacity: 0.6; }

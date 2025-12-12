@@ -119,6 +119,23 @@
                 <p class="tiny-note">Open source spirit: Contributions and feedback welcome.</p>
               </div>
             </div>
+
+            <div class="tutorial-panel" id="tutorial-panel" style="display:none;">
+              <div class="tutorial-header-row">
+                <div class="tutorial-title">TUTORIAL</div>
+                <button class="tutorial-back" onclick="closeTutorial()">BACK</button>
+              </div>
+              <div id="tutorial-buttons">
+                <div id="tutorial-grid">
+                  <div class="tutorial-item" onclick="startTutorial(0)"><span class="tutorial-number">1</span><span class="tutorial-label">CLICKS & RUNS</span></div>
+                  <div class="tutorial-item" onclick="startTutorial(1)"><span class="tutorial-number">2</span><span class="tutorial-label">CREDITS & CARD TYPES</span></div>
+                  <div class="tutorial-item" onclick="startTutorial(2)"><span class="tutorial-number">3</span><span class="tutorial-label">ICE & ICEBREAKERS</span></div>
+                  <div class="tutorial-item" onclick="startTutorial(3)"><span class="tutorial-number">4</span><span class="tutorial-label">ASSETS & TRASH COSTS</span></div>
+                  <div class="tutorial-item" onclick="startTutorial(4)"><span class="tutorial-number">5</span><span class="tutorial-label">ADVANCING & SCORING</span></div>
+                  <div class="tutorial-item" onclick="startTutorial(5)"><span class="tutorial-number">6</span><span class="tutorial-label">UPGRADES & ROOT</span></div>
+                </div>
+              </div>
+            </div>
             
             <div class="match-preview" onclick="rerollDecks()">
               <div class="preview-title">QUICK GAME<br />INCOMING..</div>
@@ -233,10 +250,19 @@
       
       // Select initial random decks
       selectRandomDecks();
+
+      // Lock menu layout dimensions so panel swaps do not shift the UI
+      lockMenuLayoutDimensions();
     });
     
     function handleMenu(option) {
       const item = event.target.closest('.menu-item');
+      
+      // Handle tutorial
+      if (option === 'tutorial') {
+        openTutorial();
+        return;
+      }
       
       // Show "COMING SOON" for non-implemented features
       if (option !== 'quick' && option !== 'custom') {
@@ -387,6 +413,15 @@
     setThreat(threatLevels[0]);
     scheduleNextThreatChange(60, 600);
 
+    // Keep the menu layout dimensions fixed to avoid layout shifts when toggling panels
+    function lockMenuLayoutDimensions(){
+      var layout = document.querySelector('.menu-layout');
+      if (!layout) return;
+      var rect = layout.getBoundingClientRect();
+      layout.style.width = rect.width + 'px';
+      layout.style.height = rect.height + 'px';
+    }
+
     // Credits toggle
     function openCredits(){
       var menu = document.getElementById('menu-buttons');
@@ -412,6 +447,57 @@
       var p = document.getElementById('credits-panel');
       p.style.width='';
       p.style.maxHeight='';
+    }
+
+    // Tutorial functions
+    var screenContentWidth = null;
+    var screenContentHeight = null;
+
+    function openTutorial(){
+      var menu = document.getElementById('menu-buttons');
+      var panel = document.getElementById('tutorial-panel');
+      var screenContent = document.querySelector('.screen-content');
+      
+      // Lock screen-content dimensions
+      var rect = screenContent.getBoundingClientRect();
+      screenContentWidth = rect.width;
+      screenContentHeight = rect.height;
+      screenContent.style.width = screenContentWidth + 'px';
+      screenContent.style.height = screenContentHeight + 'px';
+      
+      // If already open, act like back button
+      if (menu.style.display === 'none' && panel.style.display === 'flex') {
+        closeTutorial();
+        return;
+      }
+      
+      // Capture current width of menu buttons before hiding
+      var rect = menu.getBoundingClientRect();
+      var w = rect.width;
+      var h = rect.height;
+      menu.style.display='none';
+      panel.style.width = w + 'px';
+      panel.style.maxHeight = h + 'px';
+      panel.style.display='flex';
+    }
+    
+    function closeTutorial(){
+      var screenContent = document.querySelector('.screen-content');
+      document.getElementById('tutorial-panel').style.display='none';
+      document.getElementById('menu-buttons').style.display='flex';
+      // Clear explicit width/height so menu layout can adapt on resize
+      var p = document.getElementById('tutorial-panel');
+      p.style.width='';
+      p.style.maxHeight='';
+      screenContent.style.width='';
+      screenContent.style.height='';
+      screenContentWidth = null;
+      screenContentHeight = null;
+    }
+    
+    function startTutorial(mentorIndex) {
+      var mentorMap = [0, 1, 2, 3, 4, 5];
+      window.location.href = 'engine.php?p=r&mentor=' + mentorMap[mentorIndex];
     }
   </script>
 </body>
