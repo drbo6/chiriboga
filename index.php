@@ -253,6 +253,9 @@
 
       // Lock menu layout dimensions so panel swaps do not shift the UI
       lockMenuLayoutDimensions();
+
+      // Track resolution bucket changes and auto-refresh if we cross breakpoints
+      initResolutionAutoRefresh();
     });
     
     function handleMenu(option) {
@@ -420,6 +423,27 @@
       var rect = layout.getBoundingClientRect();
       layout.style.width = rect.width + 'px';
       layout.style.height = rect.height + 'px';
+    }
+
+    // Auto-refresh when switching between major responsive breakpoints
+    var resolutionBucket = null;
+    var reloadScheduled = false;
+    function getResolutionBucket(){
+      var w = window.innerWidth;
+      var h = window.innerHeight;
+      if (h <= 768) return 'short-height';
+      if (h >= 769 && w <= 678) return 'narrow-width';
+      return 'standard';
+    }
+    function initResolutionAutoRefresh(){
+      resolutionBucket = getResolutionBucket();
+      window.addEventListener('resize', function(){
+        var next = getResolutionBucket();
+        if (next !== resolutionBucket && !reloadScheduled){
+          reloadScheduled = true;
+          setTimeout(function(){ location.reload(); }, 200);
+        }
+      });
     }
 
     // Credits toggle
