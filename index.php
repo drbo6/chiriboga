@@ -526,8 +526,17 @@
     }
     
     function startTutorial(mentorIndex) {
-      var mentorMap = [0, 1, 2, 3, 4, 5];
-      window.location.href = 'engine.php?p=r&mentor=' + mentorMap[mentorIndex];
+      var tutorials = [
+        { side: 'r', mentor: 0 },
+        { side: 'r', mentor: 1 },
+        { side: 'r', mentor: 2 },
+        { side: 'r', mentor: 3 },
+        { side: 'r', mentor: 4 },
+        { side: 'c', mentor: 5 }
+      ];
+      var t = tutorials[mentorIndex];
+      if (!t) return;
+      window.location.href = 'engine.php?p=' + t.side + '&mentor=' + t.mentor;
     }
   </script>
 </body>

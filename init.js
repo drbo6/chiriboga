@@ -297,6 +297,9 @@ function Init() {
     };
     tryOpen();
   })();
+
+  // Hide deck info button when no deck data is present in URL
+  HideDeckInfoButtonIfNoInfo();
 }
 
 //populate help modal with deck information
@@ -378,6 +381,24 @@ function ShowDeckInfo() {
     helpContent.html(html);
   } catch (e) {
     helpContent.html("<p style='color:#ff4d4d;'>Error decoding deck: " + e.message + "</p>");
+  }
+}
+
+// Hide the deck info button if no deck data is available or parseable
+function HideDeckInfoButtonIfNoInfo() {
+  var btn = document.querySelector('.deck-info-button');
+  if (!btn) return;
+  // hide when autoplay/mentor tutorials are running
+  if (URIParameter("ap") !== "" || URIParameter("mentor") !== "") { btn.style.display = 'none'; return; }
+  var playerSide = URIParameter("p");
+  var deckParam = playerSide === "c" ? URIParameter("c") : URIParameter("r");
+  if (!deckParam) { btn.style.display = 'none'; return; }
+  var decoded = LZString.decompressFromEncodedURIComponent(deckParam);
+  if (!decoded) { btn.style.display = 'none'; return; }
+  try {
+    JSON.parse(decoded);
+  } catch (e) {
+    btn.style.display = 'none';
   }
 }
 
