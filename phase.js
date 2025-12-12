@@ -1556,6 +1556,11 @@ phases.runEnds.Resolve.n = function () {
     UnbreakAll(null); //for visual history we've left subroutines broken until now. let's reset them all
     // Remove run-active class from body to restore green CRT theme
     document.body.classList.remove('run-active');
+    // Clear watermark after run ends (successful or not)
+    var watermark = document.querySelector('.netrunner-bg-watermark');
+    if (watermark) {
+      watermark.textContent = '';
+    }
   });
 };
 
