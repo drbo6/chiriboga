@@ -61,6 +61,9 @@
 		<button class="menu-trigger" onclick="$('#menu').css('display','flex'); if (document.fullscreen) document.exitFullscreen(); $('.fullscreen-button').show();">MENU</button>
 		<button class="deck-info-button" onclick="ShowDeckInfo(); $('#help-modal').css('display','flex');"></button>
 		<button class="rulebook-button" onclick="window.open('https://nullsignal.games/players/learn-to-play/', '_blank');"></button>
+		<button class="debug-menu-button" style="display:none; margin-left:6px;" onclick="$('#debug-modal').css('display','flex');">
+			<img src="images/debug.svg" alt="Debug" class="icon" style="width:32px;height:32px;vertical-align:middle;" />
+		</button>
 	</div>
 	<div id="header"></div>
 	<button class="fullscreen-button" onclick="document.getElementById('body').requestFullscreen({ navigationUI: 'hide' });"></button>
@@ -107,5 +110,20 @@
 				</div>
 			</div>
 		</div>
+	<div id="debug-modal" class="modal">
+		<div class="solo-menu">
+			<span class="menu-close" onclick="$('#debug-modal').css('display','none');">✕</span>
+			<div class="solo-logo">
+				<h1 class="logo-text">DEBUG MENU</h1>
+			</div>
+			<div class="menu-options">
+				<button class="button" onclick="debugAddClick()">Add a Click</button>
+				<button class="button" onclick="debugAddCredit()">Add a Credit</button>
+				<button class="button" onclick="debugDrawCard()">Draw Another Card</button>
+				<button class="button" onclick="debugWinGame()">Win the Game</button>
+				<button class="button" onclick="debugLoseGame()">Lose the Game</button>
+			</div>
+		</div>
+	</div>
 	</body>
 </html>

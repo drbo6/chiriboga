@@ -655,8 +655,7 @@ canvas {
 	background:var(--crt-green-light);
 }
 
-#menubar .rulebook-button {
-	display:block;
+#menubar .rulebook-button, #menubar .debug-menu-button {
 	width:56px;
 	height:100%;
 	background:rgba(12,24,12,0.85);
@@ -668,7 +667,7 @@ canvas {
 	position:relative;
 	overflow:hidden;
 }
-#menubar .rulebook-button::before {
+#menubar .rulebook-button::before, #menubar .debug-menu-button::before {
 	content:"";
 	position:absolute;
 	top:50%;
@@ -683,7 +682,10 @@ canvas {
 	filter:brightness(0) saturate(100%) invert(88%) sepia(24%) saturate(2584%) hue-rotate(55deg) brightness(101%) contrast(101%);
 	z-index:2;
 }
-#menubar .rulebook-button::after {
+#menubar .debug-menu-button::before {
+	background-image:url('images/debug.svg');
+}
+#menubar .rulebook-button::after, #menubar .debug-menu-button::after {
 	content:"";
 	position:absolute;
 	top:0;
@@ -695,13 +697,13 @@ canvas {
 	z-index:1;
 	animation: scanlines 10s linear infinite;
 }
-#menubar .rulebook-button:hover {
+#menubar .rulebook-button:hover, #menubar .debug-menu-button:hover {
 	background:var(--crt-green);
 }
-#menubar .rulebook-button:hover::before {
+#menubar .rulebook-button:hover::before, #menubar .debug-menu-button:hover::before {
 	filter:brightness(0) saturate(100%) invert(0%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(5%) contrast(100%);
 }
-#menubar .rulebook-button:active {
+#menubar .rulebook-button:active, #menubar .debug-menu-button:active {
 	background:var(--crt-green-light);
 }
 
@@ -2463,6 +2465,7 @@ body.run-active {
 /* Red SVG icons during run */
 body.run-active #menubar .deck-info-button::before,
 body.run-active #menubar .rulebook-button::before,
+body.run-active #menubar .debug-menu-button::before,
 body.run-active .fullscreen-button::before {
 	filter:brightness(0) saturate(100%) invert(50%) sepia(100%) saturate(5000%) hue-rotate(350deg) brightness(100%) contrast(100%);
 }
@@ -2470,6 +2473,7 @@ body.run-active .fullscreen-button::before {
 /* SVG icons hover to dark background during run (not red) */
 body.run-active #menubar .deck-info-button:hover::before,
 body.run-active #menubar .rulebook-button:hover::before,
+body.run-active #menubar .debug-menu-button::before,
 body.run-active .fullscreen-button:hover::before {
 	filter:brightness(0) saturate(100%) invert(0%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(5%) contrast(100%);
 }

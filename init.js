@@ -1,3 +1,56 @@
+// Debug menu action handlers
+function debugAddClick() {
+  if (viewingPlayer && typeof viewingPlayer.clickTracker === 'number') {
+    viewingPlayer.clickTracker++;
+    Render();
+  }
+}
+function debugAddCredit() {
+  if (viewingPlayer && typeof viewingPlayer.creditPool === 'number') {
+    viewingPlayer.creditPool++;
+    Render();
+  }
+}
+function debugDrawCard() {
+  if (viewingPlayer === runner && runner.stack.length > 0) {
+    runner.grip.push(runner.stack.pop());
+    Render();
+  } else if (viewingPlayer === corp && corp.RnD.cards.length > 0) {
+    corp.HQ.cards.push(corp.RnD.cards.pop());
+    Render();
+  }
+}
+function debugWinGame() {
+  // End the game as a win for the viewing player
+  if (viewingPlayer === runner) {
+    runner.scoreArea = runner.scoreArea.concat(corp.RnD.cards.filter(c => cardSet[c.cardId]?.cardType === 'agenda'));
+    corp.RnD.cards = corp.RnD.cards.filter(c => cardSet[c.cardId]?.cardType !== 'agenda');
+    Log('DEBUG: Runner wins the game!');
+    EndGame(runner);
+  } else if (viewingPlayer === corp) {
+    corp.scoreArea = corp.scoreArea.concat(runner.stack.filter(c => cardSet[c.cardId]?.cardType === 'agenda'));
+    runner.stack = runner.stack.filter(c => cardSet[c.cardId]?.cardType !== 'agenda');
+    Log('DEBUG: Corp wins the game!');
+    EndGame(corp);
+  }
+}
+function debugLoseGame() {
+  // End the game as a loss for the viewing player
+  if (viewingPlayer === runner) {
+    Log('DEBUG: Runner loses the game!');
+    EndGame(corp);
+  } else if (viewingPlayer === corp) {
+    Log('DEBUG: Corp loses the game!');
+    EndGame(runner);
+  }
+}
+// Show debug menu button if enabled
+function ShowDebugMenuButtonIfEnabled() {
+  if (typeof enableDebugMenu !== 'undefined' && enableDebugMenu) {
+    var btn = document.querySelector('.debug-menu-button');
+    if (btn) btn.style.display = 'inline-block';
+  }
+}
 //TECHNICAL NOTE
 //May not run locally due to browser security issues. Use a Wamp.
 //Firefox earlier than v95.0 might run it locally by setting privacy.file_unique_origin to false in about:config
@@ -11,6 +64,8 @@
 //5. Decks
 
 //VARIABLES
+// Set to true to enable the debug menu
+var enableDebugMenu = true;
 var cardRenderer;
 var corp = {};
 var runner = {};
@@ -297,6 +352,9 @@ function Init() {
     };
     tryOpen();
   })();
+
+  // Show debug menu button if enabled
+  ShowDebugMenuButtonIfEnabled();
 
   // Hide deck info button when no deck data is present in URL
   HideDeckInfoButtonIfNoInfo();
