@@ -471,13 +471,16 @@
         return;
       }
       
-      // Capture current width of menu buttons before hiding
+      // Capture current width/height of menu buttons before hiding (for short resolutions)
       var rect = menu.getBoundingClientRect();
       var w = rect.width;
       var h = rect.height;
       menu.style.display='none';
       panel.style.width = w + 'px';
+      panel.style.height = h + 'px';
       panel.style.maxHeight = h + 'px';
+      panel.style.minWidth = w + 'px';
+      panel.style.minHeight = h + 'px';
       panel.style.display='flex';
     }
     
@@ -488,6 +491,9 @@
       // Clear explicit width/height so menu layout can adapt on resize
       var p = document.getElementById('tutorial-panel');
       p.style.width='';
+      p.style.height='';
+      p.style.minWidth='';
+      p.style.minHeight='';
       p.style.maxHeight='';
       screenContent.style.width='';
       screenContent.style.height='';
