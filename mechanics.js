@@ -22,6 +22,11 @@ function MakeRun(server) {
   else ChangePhase(phases.runDecideContinue); //(Nisei 2021 1.4.2 sends to 4; 4.1 doesn't apply so go directly to 4.2)
   // Add run-active class to body for red CRT theme
   document.body.classList.add('run-active');
+  // Change watermark to alert message
+  var watermark = document.querySelector('.netrunner-bg-watermark');
+  if (watermark) {
+    watermark.textContent = 'ALERT! RUN ACTIVE!';
+  }
   Render(); //to update server glow
 }
 
@@ -1260,6 +1265,12 @@ function LoseCredits(player, num) {
  * @method RunUnsuccessful
  */
 function RunUnsuccessful() {
+    // Remove run-active class and clear watermark
+    document.body.classList.remove('run-active');
+    var watermark = document.querySelector('.netrunner-bg-watermark');
+    if (watermark) {
+      watermark.textContent = '';
+    }
   var originalPhase = currentPhase;
   //if the original phase was subroutines, call .n to ensure encounter ends
   if (originalPhase.identifier == "Run Subroutines") {

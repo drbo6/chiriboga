@@ -50,7 +50,7 @@
 
 	<body id="body" onload="Init();">
 		<div id="contentcontainer" class="content">
-			<div class="netrunner-bg-watermark">NETRUNNER</div>
+			<div class="netrunner-bg-watermark"></div> <!-- default watermark text, will be replaced -->
 			<!-- ...existing code... -->
 			<div id="crt-overlay"></div>
 			<div id="output"></div>

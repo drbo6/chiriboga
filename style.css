@@ -2432,6 +2432,10 @@ body.run-active {
 	--crt-green-light: var(--crt-red-light);
 	--crt-green-muted: var(--crt-red-muted);
 	--crt-green-pale: var(--crt-red-pale);
+	/* Watermark explicit red overrides */
+	--watermark-color: var(--crt-red);
+	--watermark-shadow1: var(--glow-red-bright);
+	--watermark-shadow2: var(--crt-red-light);
 	
 	/* Override border colors */
 	--border-green: var(--border-red);
@@ -2499,14 +2503,13 @@ body.run-active #menubar .deck-info-button::before,
 body.run-active #menubar .rulebook-button::before,
 body.run-active #menubar .debug-menu-button::before,
 body.run-active .fullscreen-button::before {
-	filter:brightness(0) saturate(100%) invert(50%) sepia(100%) saturate(5000%) hue-rotate(350deg) brightness(100%) contrast(100%);
+	filter: brightness(0) saturate(100%) invert(23%) sepia(99%) saturate(7492%) hue-rotate(357deg) brightness(102%) contrast(119%);
 }
 
-/* SVG icons hover to dark background during run (not red) */
 body.run-active #menubar .deck-info-button:hover::before,
 body.run-active #menubar .rulebook-button:hover::before,
-body.run-active #menubar .debug-menu-button::before,
+body.run-active #menubar .debug-menu-button:hover::before,
 body.run-active .fullscreen-button:hover::before {
-	filter:brightness(0) saturate(100%) invert(0%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(5%) contrast(100%);
+	filter: brightness(0) saturate(100%) invert(0%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(5%) contrast(100%);
 }
 

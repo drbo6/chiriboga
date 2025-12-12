@@ -985,14 +985,26 @@ function PlayerName(player) {
 function PlayerWin(player, msgstr) {
   //old code from before there was a decisionphase
   /*
-	$("#cmdform").hide();
-	window.clearTimeout(mainLoop);
-	*/
+  $("#cmdform").hide();
+  window.clearTimeout(mainLoop);
+  */
   var winner = player;
 
   var winnerMessage = "";
-  if (winner == corp) winnerMessage = "Corp wins";
-  else winnerMessage = "Runner wins";
+  var watermarkMessage = "";
+  if (winner == corp) {
+    winnerMessage = "Corp wins";
+    watermarkMessage = "CORP WINS!";
+  } else {
+    winnerMessage = "Runner wins";
+    watermarkMessage = "RUNNER WINS!";
+  }
+
+  // Change the watermark text
+  var watermark = document.querySelector('.netrunner-bg-watermark');
+  if (watermark) {
+    watermark.textContent = watermarkMessage;
+  }
 
   var winPhase = {
     Enumerate: {},
@@ -1004,7 +1016,7 @@ function PlayerWin(player, msgstr) {
     requireHumanInput: true,
   };
   winPhase.Enumerate["play again"] = function () {
-	if (debugging && runner.AI && corp.AI) alert("Game completed");
+    if (debugging && runner.AI && corp.AI) alert("Game completed");
     return [{}];
   };
   winPhase.Resolve["play again"] = function () {
