@@ -1,54 +1,3 @@
-// Debug menu action handlers
-function debugAddClick() {
-  if (viewingPlayer && typeof viewingPlayer.clickTracker === 'number') {
-    viewingPlayer.clickTracker++;
-    Render();
-  }
-}
-function debugAddCredit() {
-  if (viewingPlayer && typeof viewingPlayer.creditPool === 'number') {
-    viewingPlayer.creditPool++;
-    Render();
-  }
-}
-function debugDrawCard() {
-  if (viewingPlayer === runner && runner.stack.length > 0) {
-    runner.grip.push(runner.stack.pop());
-    Render();
-  } else if (viewingPlayer === corp && corp.RnD.cards.length > 0) {
-    corp.HQ.cards.push(corp.RnD.cards.pop());
-    Render();
-  }
-}
-function debugWinGame() {
-  // End the game as a win for the viewing player using PlayerWin
-  $('#debug-modal').css('display','none');
-  if (viewingPlayer === runner) {
-    Log('DEBUG: Runner wins the game!');
-    PlayerWin(runner, 'Debug menu: Runner wins');
-  } else if (viewingPlayer === corp) {
-    Log('DEBUG: Corp wins the game!');
-    PlayerWin(corp, 'Debug menu: Corp wins');
-  }
-}
-function debugLoseGame() {
-  // End the game as a loss for the viewing player using PlayerWin for the opponent
-  $('#debug-modal').css('display','none');
-  if (viewingPlayer === runner) {
-    Log('DEBUG: Runner loses the game!');
-    PlayerWin(corp, 'Debug menu: Runner loses');
-  } else if (viewingPlayer === corp) {
-    Log('DEBUG: Corp loses the game!');
-    PlayerWin(runner, 'Debug menu: Corp loses');
-  }
-}
-// Show debug menu button if enabled
-function ShowDebugMenuButtonIfEnabled() {
-  if (typeof enableDebugMenu !== 'undefined' && enableDebugMenu) {
-    var btn = document.querySelector('.debug-menu-button');
-    if (btn) btn.style.display = 'inline-block';
-  }
-}
 //TECHNICAL NOTE
 //May not run locally due to browser security issues. Use a Wamp.
 //Firefox earlier than v95.0 might run it locally by setting privacy.file_unique_origin to false in about:config
@@ -2048,5 +1997,57 @@ function ExecuteChosen(chosenCommand) {
   } else {
     LogError("Null command");
     $("#footer").html("");
+  }
+}
+
+// Debug menu action handlers
+function debugAddClick() {
+  if (viewingPlayer && typeof viewingPlayer.clickTracker === 'number') {
+    viewingPlayer.clickTracker++;
+    Render();
+  }
+}
+function debugAddCredit() {
+  if (viewingPlayer && typeof viewingPlayer.creditPool === 'number') {
+    viewingPlayer.creditPool++;
+    Render();
+  }
+}
+function debugDrawCard() {
+  if (viewingPlayer === runner && runner.stack.length > 0) {
+    runner.grip.push(runner.stack.pop());
+    Render();
+  } else if (viewingPlayer === corp && corp.RnD.cards.length > 0) {
+    corp.HQ.cards.push(corp.RnD.cards.pop());
+    Render();
+  }
+}
+function debugWinGame() {
+  // End the game as a win for the viewing player using PlayerWin
+  $('#debug-modal').css('display','none');
+  if (viewingPlayer === runner) {
+    Log('DEBUG: Runner wins the game!');
+    PlayerWin(runner, 'Debug menu: Runner wins');
+  } else if (viewingPlayer === corp) {
+    Log('DEBUG: Corp wins the game!');
+    PlayerWin(corp, 'Debug menu: Corp wins');
+  }
+}
+function debugLoseGame() {
+  // End the game as a loss for the viewing player using PlayerWin for the opponent
+  $('#debug-modal').css('display','none');
+  if (viewingPlayer === runner) {
+    Log('DEBUG: Runner loses the game!');
+    PlayerWin(corp, 'Debug menu: Runner loses');
+  } else if (viewingPlayer === corp) {
+    Log('DEBUG: Corp loses the game!');
+    PlayerWin(runner, 'Debug menu: Corp loses');
+  }
+}
+// Show debug menu button if enabled
+function ShowDebugMenuButtonIfEnabled() {
+  if (typeof enableDebugMenu !== 'undefined' && enableDebugMenu) {
+    var btn = document.querySelector('.debug-menu-button');
+    if (btn) btn.style.display = 'inline-block';
   }
 }
