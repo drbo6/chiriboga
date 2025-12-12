@@ -11,8 +11,8 @@
 //5. Decks
 
 //VARIABLES
-// Set to true to enable the debug menu
-var enableDebugMenu = true;
+// Set to false to disable the debug menu by default
+var enableDebugMenu = false;
 var cardRenderer;
 var corp = {};
 var runner = {};
@@ -301,6 +301,23 @@ function Init() {
   })();
 
   // Show debug menu button if enabled
+
+  // Set debug menu toggle state in menu
+  $(function() {
+    $('#debugmenu-toggle').prop('checked', enableDebugMenu);
+    $('#debugmenu-toggle').off('change').on('change', function() {
+      enableDebugMenu = this.checked;
+      if (enableDebugMenu) {
+        var btn = document.querySelector('.debug-menu-button');
+        if (btn) btn.style.display = 'inline-block';
+      } else {
+        var btn = document.querySelector('.debug-menu-button');
+        if (btn) btn.style.display = 'none';
+        // Also close debug modal if open
+        $('#debug-modal').css('display','none');
+      }
+    });
+  });
   ShowDebugMenuButtonIfEnabled();
 
   // Hide deck info button when no deck data is present in URL

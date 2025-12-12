@@ -61,7 +61,7 @@
 			</form>
 		</div>
 	<div id="menubar">
-		<button class="menu-trigger" onclick="$('#menu').css('display','flex'); if (document.fullscreen) document.exitFullscreen(); $('.fullscreen-button').show();">MENU</button>
+		<button class="menu-trigger" onclick="$('#menu').css('display','flex'); $('.fullscreen-button').show();">MENU</button>
 		<button class="deck-info-button" onclick="ShowDeckInfo(); $('#help-modal').css('display','flex');"></button>
 		<button class="rulebook-button" onclick="window.open('https://nullsignal.games/players/learn-to-play/', '_blank');"></button>
 		<button class="debug-menu-button" style="display:none; margin-left:6px;" onclick="$('#debug-modal').css('display','flex');">
@@ -95,11 +95,14 @@
 						<option value="">UNDO</option>
 					</select>
 				</div>
-				<div class="toggle-options">
-					<label class="toggle-item"><input type="checkbox" id="narration"> Narrate AI</label>
-					<label class="toggle-item"><input type="checkbox" id="slowerai"> Slower AI</label>
-					<label class="toggle-item"><input type="checkbox" id="largerhistory"> Larger history</label>
-				</div>
+				   <div class="toggle-options">
+					   <div class="toggle-grid">
+						   <label class="toggle-item"><input type="checkbox" id="narration"> Narrate AI</label>
+						   <label class="toggle-item"><input type="checkbox" id="slowerai"> Slower AI</label>
+						   <label class="toggle-item"><input type="checkbox" id="largerhistory"> Larger history</label>
+						   <label class="toggle-item"><input type="checkbox" id="debugmenu-toggle"> Debug Menu</label>
+					   </div>
+				   </div>
 			</div>
 		</div>
 		<div id="help-modal" class="modal">
