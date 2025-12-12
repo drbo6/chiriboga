@@ -21,27 +21,25 @@ function debugDrawCard() {
   }
 }
 function debugWinGame() {
-  // End the game as a win for the viewing player
+  // End the game as a win for the viewing player using PlayerWin
+  $('#debug-modal').css('display','none');
   if (viewingPlayer === runner) {
-    runner.scoreArea = runner.scoreArea.concat(corp.RnD.cards.filter(c => cardSet[c.cardId]?.cardType === 'agenda'));
-    corp.RnD.cards = corp.RnD.cards.filter(c => cardSet[c.cardId]?.cardType !== 'agenda');
     Log('DEBUG: Runner wins the game!');
-    EndGame(runner);
+    PlayerWin(runner, 'Debug menu: Runner wins');
   } else if (viewingPlayer === corp) {
-    corp.scoreArea = corp.scoreArea.concat(runner.stack.filter(c => cardSet[c.cardId]?.cardType === 'agenda'));
-    runner.stack = runner.stack.filter(c => cardSet[c.cardId]?.cardType !== 'agenda');
     Log('DEBUG: Corp wins the game!');
-    EndGame(corp);
+    PlayerWin(corp, 'Debug menu: Corp wins');
   }
 }
 function debugLoseGame() {
-  // End the game as a loss for the viewing player
+  // End the game as a loss for the viewing player using PlayerWin for the opponent
+  $('#debug-modal').css('display','none');
   if (viewingPlayer === runner) {
     Log('DEBUG: Runner loses the game!');
-    EndGame(corp);
+    PlayerWin(corp, 'Debug menu: Runner loses');
   } else if (viewingPlayer === corp) {
     Log('DEBUG: Corp loses the game!');
-    EndGame(runner);
+    PlayerWin(runner, 'Debug menu: Corp loses');
   }
 }
 // Show debug menu button if enabled
