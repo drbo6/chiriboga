@@ -210,13 +210,13 @@
         // Update player portrait
         var playerImg = document.querySelector('#player-portrait .portrait');
         if (playerIdentity) {
-          playerImg.src = 'https://chiriboga-nsg.cronbach.com/images/' + playerIdentity.imageFile.replace('.png', '.jpg');
+          playerImg.src = 'images/' + playerIdentity.imageFile.replace('.png', '.jpg');
         }
         
         // Update AI portrait
         var aiImg = document.querySelector('#ai-portrait .portrait');
         if (aiIdentity) {
-          aiImg.src = 'https://chiriboga-nsg.cronbach.com/images/' + aiIdentity.imageFile.replace('.png', '.jpg');
+          aiImg.src = 'images/' + aiIdentity.imageFile.replace('.png', '.jpg');
         }
       }
     }
