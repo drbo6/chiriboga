@@ -64,7 +64,7 @@
 		<button class="menu-trigger" onclick="$('#menu').css('display','flex'); $('.fullscreen-button').show();">MENU</button>
 		<button class="deck-info-button" onclick="ShowDeckInfo(); $('#help-modal').css('display','flex');"></button>
 		<button class="rulebook-button" onclick="window.open('https://nullsignal.games/players/learn-to-play/', '_blank');"></button>
-		<button class="debug-menu-button" style="display:none; margin-left:6px;" onclick="$('#debug-modal').css('display','flex');">
+		<button class="debug-menu-button" ... onclick="debugPopulateCardDropdown(); $('#debug-modal').css('display','flex');">
 			<img src="images/debug.svg" alt="Debug" class="icon" style="width:32px;height:32px;vertical-align:middle;" />
 		</button>
 	</div>
@@ -128,6 +128,10 @@
 				<button class="button" onclick="debugDrawCard()">Draw Another Card</button>
 				<button class="button" onclick="debugWinGame()">Win the Game</button>
 				<button class="button" onclick="debugLoseGame()">Lose the Game</button>
+				<select id="debug-card-select" class="button" style="width:100%; text-align:left; text-align-last:left;">
+					<option value="">-- Select a card --</option>
+				</select>
+				<button class="button" onclick="debugAddCardToHand()">Add Selected Card to Hand</button>
 			</div>
 		</div>
 	</div>

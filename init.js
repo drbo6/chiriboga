@@ -2035,7 +2035,7 @@ function debugDrawCard() {
     runner.grip.push(runner.stack.pop());
     Render();
   } else if (viewingPlayer === corp && corp.RnD.cards.length > 0) {
-    corp.HQ.cards.push(corp.RnD.cards.pop());
+    corp.HQ.cards.paush(corp.RnD.cards.pop());
     Render();
   }
 }
@@ -2067,4 +2067,156 @@ function ShowDebugMenuButtonIfEnabled() {
     var btn = document.querySelector('.debug-menu-button');
     if (btn) btn.style.display = 'inline-block';
   }
+}
+
+// Populate the debug card dropdown with cards for the viewing player
+function debugPopulateCardDropdown() {
+  var dropdown = document.getElementById('debug-card-select');
+  if (!dropdown) return;
+  
+  // Clear existing options
+  dropdown.innerHTML = '<option value="">-- Select a card --</option>';
+  
+  // Collect cards for the viewing player (excluding identities)
+  var cards = [];
+  for (var id in cardSet) {
+    var def = cardSet[id];
+    if (def && def.player === viewingPlayer && def.cardType !== 'identity' && def.title) {
+      cards.push({ id: id, title: def.title, cardType: def.cardType });
+    }
+  }
+  
+  // Sort alphabetically by title
+  cards.sort(function(a, b) {
+    return a.title.localeCompare(b.title);
+  });
+  
+  // Add options to dropdown
+  for (var i = 0; i < cards.length; i++) {
+    var option = document.createElement('option');
+    option.value = cards[i].id;
+    option.textContent = cards[i].title + ' (' + cards[i].cardType + ')';
+    dropdown.appendChild(option);
+  }
+}
+
+// Add the selected card to the viewing player's hand
+function debugAddCardToHand() {
+  var dropdown = document.getElementById('debug-card-select');
+  if (!dropdown || !dropdown.value) {
+    Log('DEBUG: Please select a card first.');
+    return;
+  }
+  
+  var cardId = parseInt(dropdown.value);
+  var cardDef = cardSet[cardId];
+  if (!cardDef) {
+    Log('DEBUG: Card not found.');
+    return;
+  }
+  
+  // Create new card - use shallow copy with special handling for arrays/subroutines
+  var newCard = {};
+  
+  // Properties to skip (these are object references that shouldn't be copied)
+  var skipProperties = ['player', 'renderer', 'cardLocation'];
+  
+  for (var prop in cardDef) {
+    if (skipProperties.indexOf(prop) !== -1) {
+      continue; // Skip these, we'll set them manually
+    }
+    
+    var val = cardDef[prop];
+    
+    if (typeof val === 'function') {
+      // Functions are shared, not copied
+      newCard[prop] = val;
+    } else if (prop === 'subroutines' && Array.isArray(val)) {
+      // Deep copy subroutines array (each subroutine has text and Resolve function)
+      newCard.subroutines = [];
+      for (var i = 0; i < val.length; i++) {
+        var subCopy = {};
+        for (var sp in val[i]) {
+          subCopy[sp] = val[i][sp];
+        }
+        // Ensure broken flag is reset
+        subCopy.broken = false;
+        newCard.subroutines.push(subCopy);
+      }
+    } else if (prop === 'abilities' && Array.isArray(val)) {
+      // Deep copy abilities array
+      newCard.abilities = [];
+      for (var i = 0; i < val.length; i++) {
+        var abilityCopy = {};
+        for (var ap in val[i]) {
+          abilityCopy[ap] = val[i][ap];
+        }
+        newCard.abilities.push(abilityCopy);
+      }
+    } else if (prop === 'subTypes' && Array.isArray(val)) {
+      // Copy subTypes array
+      newCard.subTypes = val.slice();
+    } else if (Array.isArray(val)) {
+      // Generic array copy
+      newCard[prop] = val.slice();
+    } else if (typeof val === 'object' && val !== null) {
+      // Shallow copy other objects (like response triggers)
+      newCard[prop] = {};
+      for (var op in val) {
+        newCard[prop][op] = val[op];
+      }
+    } else {
+      // Primitives (string, number, boolean, null, undefined)
+      newCard[prop] = val;
+    }
+  }
+  
+  // Set required runtime properties
+  newCard.cardId = cardId;
+  newCard.player = cardDef.player; // Direct reference to corp or runner
+  newCard.faceUp = false;
+  
+  // Determine destination (hand)
+  var destination = (viewingPlayer === runner) ? runner.grip : corp.HQ.cards;
+  newCard.cardLocation = destination;
+  
+  // Create renderer (based on rewind code pattern)
+  var backTextures = (newCard.player == corp) ? cardBackTexturesCorp : cardBackTexturesRunner;
+  var costTexture = null;
+  if (newCard.player == runner) costTexture = strengthTextures.rc;
+  else if (newCard.cardType == "ice" || newCard.cardType == "asset" || newCard.cardType == "upgrade")
+    costTexture = strengthTextures.crc;
+  
+  var strengthInfo = { texture: null, num: 0, ice: false, cost: costTexture };
+  if (typeof newCard.strength !== "undefined") {
+    if (newCard.cardType == "ice")
+      strengthInfo = { texture: strengthTextures.ice, num: newCard.strength, ice: true, brokenTexture: strengthTextures.broken, cost: costTexture };
+    if (newCard.cardType == "program")
+      strengthInfo = { texture: strengthTextures.ib, num: newCard.strength, ice: false, cost: costTexture };
+  }
+  
+  var frontTexture = cardRenderer.LoadTexture("images/" + ChangeImageFileToJPG(newCard.imageFile));
+  newCard.renderer = cardRenderer.CreateCard(newCard, frontTexture, backTextures, glowTextures, strengthInfo);
+  
+  // Create counters for the card if it has any counter properties
+  for (var j = 0; j < counterList.length; j++) {
+    if (typeof newCard[counterList[j]] !== "undefined") {
+      cardRenderer.CreateCounter(
+        countersUI[counterList[j]].texture,
+        newCard,
+        counterList[j],
+        1,
+        true
+      );
+    }
+  }
+  
+  // Add to hand
+  destination.push(newCard);
+  
+  Log('DEBUG: Added ' + newCard.title + ' to hand');
+  Render();
+  
+  // Reset dropdown
+  dropdown.value = '';
 }
