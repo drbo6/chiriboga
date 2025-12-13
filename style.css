@@ -1281,7 +1281,11 @@ div.options {
 	font-family:"Lucida Console", Monaco, monospace;
 	text-transform:uppercase;
 	font-size:16px;
+	text-align: center;
+	text-align-last: center;
+	-moz-text-align-last: center;	
 }
+
 #rewind-select:hover:not(:disabled) {
 	background:var(--crt-green);
 	color:var(--bg-dark); /* ensure options text remains legible */
@@ -1297,6 +1301,9 @@ div.options {
 }
 #rewind-select option { background:var(--bg-dark); color:var(--crt-green); }
 #rewind-select option { text-transform:uppercase; }
+#rewind-select option {
+  text-align: center;
+}
 
 /* Custom green CRT checkboxes in menu modal */
 .toggle-options input[type=checkbox] {
@@ -2618,4 +2625,8 @@ body.run-active .fullscreen-button:hover::before {
 .menu-options select.button option {
   background-color: var(--bg-dark);
   color: var(--crt-green);
+}
+
+#debug-modal .button::before {
+  display: none;
 }
