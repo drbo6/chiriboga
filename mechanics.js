@@ -1283,12 +1283,38 @@ function RunUnsuccessful() {
 }
 
 /**
+//DRBO6 - Replacing this version of EndTheRun with one that allows prevention effects
  * Ends the run, counts as unsuccessful run.<br/>No checks are performed or payments made.<br/>Logs the result.
  *
  * @method EndTheRun
  */
-function EndTheRun() {
-  RunUnsuccessful();
+//function EndTheRun() {
+//  RunUnsuccessful();
+//}
+/**
+ * Ends the run, counts as unsuccessful run.
+ * Checks for prevention effects first.
+ *
+ * @method EndTheRun
+ * @param {boolean} [canBePrevented=true] whether this can be prevented
+ */
+function EndTheRun(canBePrevented = true) {
+  intended.endRun = true;
+  
+  function applyEndRun() {
+    if (intended.endRun) {
+      intended.endRun = false;
+      RunUnsuccessful();
+    }
+  }
+  
+  if (canBePrevented && attackedServer !== null) {
+    OpportunityForAvoidPrevent(runner, "responsePreventableEndRun", [], function () {
+      applyEndRun();
+    }, "About to End Run");
+  } else {
+    applyEndRun();
+  }
 }
 
 /**
