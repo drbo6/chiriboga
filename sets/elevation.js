@@ -38,10 +38,9 @@ cardSet[35005] = {
       this.usedThisRun = true;
       var cardsInRoot = attackedServer.root.length;
       
-      //if no cards in root, just prevent the end (Corp can't pay the "cost")
+      //if no cards in root, X=0, Corp trivially satisfies condition by trashing nothing
       if (cardsInRoot === 0) {
-        Log("Shred prevents the run from ending");
-        intended.endRun = false;
+        //intended.endRun stays true, run ends normally
         return;
       }
       
@@ -211,8 +210,8 @@ cardSet[35034] = {
       var creditsToTake = this.credits;
       Log("Side Hustle pays out " + creditsToTake + " credits");
       TakeCredits(runner, this, creditsToTake);
-      //Trash cannot be prevented since it's part of the triggered effect
-      Trash(this, true, function(cardsTrashed) {
+      //Trash is unpreventable since it's part of the mandatory triggered effect
+      Trash(this, false, function(cardsTrashed) {
         Draw(runner, 1);
       }, this);
     }
