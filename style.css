@@ -2519,3 +2519,103 @@ body.run-active .fullscreen-button:hover::before {
 	filter: brightness(0) saturate(100%) invert(0%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(5%) contrast(100%);
 }
 
+/* Debug menu card selector group - visually connects dropdown to its button */
+.debug-card-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  border: 1px solid var(--border-green);
+  border-radius: 8px;
+  overflow: hidden;
+  background: rgba(12,24,12,0.7);
+  box-shadow: inset 0 0 12px var(--button-glow-inset), 0 0 8px var(--button-glow-outer);
+}
+
+.debug-card-group label {
+  font-size: 11px;
+  color: var(--crt-green-muted);
+  padding: 6px 12px 4px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  border-bottom: 1px solid var(--border-green-dark);
+  text-align: center;  /* ADD THIS */
+}
+
+.debug-card-group select {
+  width: 100%;
+  padding: 10px 30px 10px 12px;  /* More right padding to balance the arrow */
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--border-green-dark);
+  color: var(--crt-green);
+  font-family: inherit;
+  font-size: 13px;
+  cursor: pointer;
+  outline: none;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2333ff33' d='M2 4l4 4 4-4z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  text-align: center;
+  text-align-last: center;
+  -moz-text-align-last: center;  /* Firefox prefix */
+  text-align: center !important;
+  text-align-last: center !important;
+}
+
+.debug-card-group select option {
+  background-color: var(--bg-dark);
+  color: var(--crt-green);
+  padding: 8px;
+  text-align: center;  /* Center the options in the dropdown list */
+}
+
+.debug-card-group select:focus {
+  background-color: rgba(51, 255, 51, 0.1);
+}
+
+.debug-card-group select option:hover,
+.debug-card-group select option:focus,
+.debug-card-group select option:checked {
+  background-color: var(--bg-dark-secondary);
+  color: var(--crt-green-light);
+}
+
+/* Button within the group - no border radius since it's inside the group */
+.debug-card-group .button {
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  margin: 0;
+}
+
+.debug-card-group .button::after {
+  border-radius: 0;
+}
+
+/* Standalone dropdown styling (if used outside group) */
+#debug-card-select {
+  text-align: left;
+  text-align-last: left;
+}
+
+/* Override bright green hover for select elements in menus */
+.solo-menu select.button,
+.menu-options select.button {
+  text-align: left;
+  text-align-last: left;
+}
+
+.solo-menu select.button:hover,
+.menu-options select.button:hover {
+  background-color: rgba(51, 255, 51, 0.15);
+  color: var(--crt-green);
+}
+
+.solo-menu select.button option,
+.menu-options select.button option {
+  background-color: var(--bg-dark);
+  color: var(--crt-green);
+}
