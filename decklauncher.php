@@ -69,7 +69,7 @@
 		<?php
 		echo '<script src="utility.js?' . filemtime('utility.js') . '"></script>';
 		
-		$sets = ["systemgateway","systemupdate2021","midnightsun"];
+		$sets = ["systemgateway","systemupdate2021","midnightsun","elevation"];
 		if (isset($_GET['sets'])) {
 			$sets = explode("-",preg_replace( "/[^a-zA-Z0-9-]/", "", $_GET['sets'] )); 
 		}
@@ -564,7 +564,7 @@
 			if (URIParameter("sets") !== "") {
 				setStr = "sets="+URIParameter("sets")+"&";
 			} else {
-				setStr = "sets=systemgateway-systemupdate2021-midnightsun&";
+				setStr = "sets=systemgateway-systemupdate2021-midnightsun-elevation&";
 			}
 
 			var playerIdentities = [];

@@ -22,7 +22,7 @@
   <?php
   // Load card sets
   echo '<script src="utility.js?' . filemtime('utility.js') . '"></script>';
-  $sets = ["systemgateway","systemupdate2021","midnightsun"];
+  $sets = ["systemgateway","systemupdate2021","midnightsun","elevation"];
   foreach ($sets as $set) {
     echo '<script src="sets/'.$set.'.js?' . filemtime('sets/'.$set.'.js') . '"></script>';
   }
@@ -328,7 +328,7 @@
           var playerSide = (cardSet[playerDeck.identity].player === runner) ? 'r' : 'c';
           var aiSide = (cardSet[aiDeck.identity].player === runner) ? 'r' : 'c';
           
-          window.location.href = 'decklauncher.php?sets=systemgateway-systemupdate2021-midnightsun&p=' + playerSide + 
+          window.location.href = 'decklauncher.php?sets=systemgateway-systemupdate2021-midnightsun-elevation&p=' + playerSide + 
                                  '&' + aiSide + '=' + aiCompressed + 
                                  '&' + playerSide + '=' + playerCompressed;
         } else if (option === 'quick' && playerDeck && aiDeck) {
@@ -361,7 +361,7 @@
           var playerSide = (cardSet[playerDeck.identity].player === runner) ? 'r' : 'c';
           var aiSide = (cardSet[aiDeck.identity].player === runner) ? 'r' : 'c';
           
-          window.location.href = 'engine.php?sets=systemgateway-systemupdate2021-midnightsun&p=' + playerSide + 
+          window.location.href = 'engine.php?sets=systemgateway-systemupdate2021-midnightsun-elevation&p=' + playerSide + 
                                  '&' + aiSide + '=' + aiCompressed + 
                                  '&' + playerSide + '=' + playerCompressed +
                                  '&showdeck=1';
