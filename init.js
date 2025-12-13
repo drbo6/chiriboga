@@ -2216,6 +2216,7 @@ function debugAddCardToHand() {
   
   Log('DEBUG: Added ' + newCard.title + ' to hand');
   Render();
+  EnumeratePhase();
   
   // Reset dropdown
   dropdown.value = '';
