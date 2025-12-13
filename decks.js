@@ -710,6 +710,7 @@ function LoadDecks() {
 
   // // PASTE REPLICATION CODE HERE (and/or customise code below)
   // // Uncommenting (CTRL+/ in VS Code) this will set up a test field for debugging
+  // // Set p = r or c in the URL to view as runner or corp respectively
   // debugging = true; //set true to log extra details and pause execution on error
   // viewAllFronts = true; //set true to see all card fronts (for testing)
   // mainLoopDelay = 50; //for speedy AI vs AI testing (any faster than this and funny things happen at end-of-game)
@@ -733,31 +734,31 @@ function LoadDecks() {
 	// 	[], //scored
 	// 	cardBackTexturesCorp,glowTextures,strengthTextures);
   
-  // //corp.archives.ice[0].rezzed=true;
-  // //corp.RnD.ice[0].rezzed=true;
-  // //corp.HQ.ice[0].rezzed=true;
-  // //corp.remoteServers[0].ice[0].rezzed=true;
-  // //corp.remoteServers[0].ice[1].rezzed=true;
-  // //corp.remoteServers[0].root[0].knownToRunner=true;
+  // corp.archives.ice[0].rezzed=true;
+  // corp.RnD.ice[0].rezzed=true;
+  // corp.HQ.ice[0].rezzed=true;
+  // corp.remoteServers[0].ice[0].rezzed=true;
+  // corp.remoteServers[0].ice[1].rezzed=true;
+  // corp.remoteServers[0].root[0].knownToRunner=true;
   
-  // //corp.archives.ice[0].rezzed=true;
+  // corp.archives.ice[0].rezzed=true;
   
-  // //corp.remoteServers[0].root[0].advancement=2;
-  // //corp.remoteServers[1].root[0].advancement=2;
+  // corp.remoteServers[0].root[0].advancement=2;
+  // corp.remoteServers[1].root[0].advancement=2;
   // GainCredits(runner,25);
   // GainCredits(corp,25);
   // ChangePhase(phases.runnerStartResponse);
-  // //ChangePhase(phases.corpStartDraw);
+  // ChangePhase(phases.corpStartDraw);
   
-  // //ChangePhase(phases.runnerEndOfTurn);
-  // //AddTags(2);
-  // //runner.clickTracker = 1;
-  // //corp.clickTracker = 2;
-  // //ChangePhase(phases.corpActionMain);
-  // //ChangePhase(phases.corpDiscardStart);
-  // //MakeRun(corp.remoteServers[0]);
-  // //attackedServer = corp.RnD;
-  // //ChangePhase(phases.runApproachServer); //i.e. skip all the ice
+  // ChangePhase(phases.runnerEndOfTurn);
+  // AddTags(2);
+  // runner.clickTracker = 1;
+  // corp.clickTracker = 2;
+  // ChangePhase(phases.corpActionMain);
+  // ChangePhase(phases.corpDiscardStart);
+  // MakeRun(corp.remoteServers[0]);
+  // attackedServer = corp.RnD;
+  // ChangePhase(phases.runApproachServer); //i.e. skip all the ice
  
   // // To play a Shred automatically at the start of the runner's turn, uncomment and customize the following:
   // runner.AI.preferred = { 

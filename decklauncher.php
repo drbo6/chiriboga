@@ -385,6 +385,9 @@
 				} else if (currentFilter === 'systemgateway') {
 					currentFilter = 'systemupdate2021';
 					$('#filterdeck').html('FILTER:<br>SU21');
+				} else if (currentFilter === 'systemupdate2021') {
+					currentFilter = 'elevation';
+					$('#filterdeck').html('FILTER:<br>ELEV');
 				} else {
 					currentFilter = 'all';
 					$('#filterdeck').html('FILTER:<br>ALL CARDS');
@@ -419,6 +422,8 @@
 							$(this).show();
 						} else if (currentFilter === 'systemupdate2021' && packCode === 'su21') {
 							$(this).show();
+						} else if (currentFilter === 'elevation' && packCode === 'elev') {
+							$(this).show();							
 						} else {
 							$(this).hide();
 						}

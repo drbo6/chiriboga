@@ -192,3 +192,105 @@ cardSet[35011] = {
     return 0; //do install
   },
 };
+
+cardSet[35034] = {
+  title: "Side Hustle",
+  imageFile: "35034.png",
+  player: runner,
+  faction: "Neutral",
+  influence: 0,
+  cardType: "resource",
+  subTypes: ["Job"],
+  installCost: 2,
+  //When you install this resource and whenever a run begins, place 1[credit] on this resource.
+  //When there are 6 or more hosted credits, take all credits from this resource, trash it, and draw 1 card.
+  
+  //Helper function to check and trigger the 6+ credits condition
+  checkAndTriggerPayout: function() {
+    if (Counters(this, "credits") >= 6) {
+      var creditsToTake = this.credits;
+      Log("Side Hustle pays out " + creditsToTake + " credits");
+      TakeCredits(runner, this, creditsToTake);
+      //Trash cannot be prevented since it's part of the triggered effect
+      Trash(this, true, function(cardsTrashed) {
+        Draw(runner, 1);
+      }, this);
+    }
+  },
+  
+  automaticOnInstall: {
+    Resolve: function (card) {
+      if (card == this) {
+        PlaceCredits(this, 1);
+        this.checkAndTriggerPayout();
+      }
+    },
+  },
+  
+  automaticOnRunBegins: {
+    Resolve: function (server) {
+      PlaceCredits(this, 1);
+      this.checkAndTriggerPayout();
+    },
+  },
+  
+  AIEconomyInstall: function() {
+    //Good early game economy card
+    return 2; //priority 2 (moderate - it takes time to pay off but is efficient)
+  },
+  AIWorthKeeping: function (installedRunnerCards, spareMU) {
+    //Worth keeping if we plan to run a lot
+    //Check if we already have one installed
+    for (var i = 0; i < runner.rig.resources.length; i++) {
+      if (runner.rig.resources[i].title == "Side Hustle") {
+        return false; //already have one, don't need another in hand
+      }
+    }
+    return true;
+  },
+  AIPreferredInstallChoice: function (choices) {
+    //Good to install early, but not on last click
+    if (runner.clickTracker < 2) return -1; //don't install
+    return 0; //do install
+  },
+};
+
+cardSet[35079] = {
+  title: "Flyswatter",
+  imageFile: "35079.png",
+  player: corp,
+  faction: "Neutral",
+  influence: 0,
+  cardType: "ice",
+  subTypes: ["Code Gate"],
+  rezCost: 2,
+  strength: 0,
+  //When you rez this ice during a run against this server, purge virus counters.
+  responseOnRez: {
+    Enumerate: function (card) {
+      if (card == this) {
+        if (attackedServer !== null) {
+          if (attackedServer == GetServer(this)) return [{}];
+        }
+      }
+      return [];
+    },
+    Resolve: function (params) {
+      Purge();
+    },
+  },
+  //Subroutine: End the run.
+  subroutines: [
+    {
+      text: "End the run.",
+      Resolve: function () {
+        EndTheRun();
+      },
+      visual: { y: 102, h: 16 },
+    },
+  ],
+  AIImplementIce: function(rc, result, maxCorpCred, incomplete) {
+    result.sr = [[["endTheRun"]]];
+    return result;
+  },
+};
