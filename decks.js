@@ -712,50 +712,40 @@ function LoadDecks() {
   // // UNCOMMENTING (use CTRL+/ in VS Code) THE CODE BELOW WILL SET UP A TEST FIELD
   // // SET P=R OR P=C IN THE URL TO VIEW AS RUNNER OR CORP RESPECTIVELY
   // // ----------------------------------------------------------------------------
-  // debugging = true; //set true to log extra details and pause execution on error
-  // viewAllFronts = true; //set true to see all card fronts (for testing)
+  debugging = true; //set true to log extra details and pause execution on error
+  viewAllFronts = true; //set true to see all card fronts (for testing)
   // mainLoopDelay = 50; //for speedy AI vs AI testing (any faster than this and funny things happen at end-of-game)
 
-  // // SET UP THE MAIN STATES FOR THE RUNNER
-  // // -------------------------------------
-	// RunnerTestField(31002, //identity
-	// 	[30032], //heapCards
-	// 	[35005,35005,35005,35005], //stackCards
-	// 	[35005, 35005, 35005, 35005, 35005, 35005, 35005, 35034], //gripCards
-	// 	[30007,30014,31008], //installed
-	// 	[], //stolen
-	// 	cardBackTexturesRunner,glowTextures,strengthTextures);
+  // // SET UP THE MAIN STATES FOR THE RUNNER AND CORP
+  // // ----------------------------------------------
+	RunnerTestField(31026, //identity
+		[30032], //heapCards
+		[35005,35005,35005,35005], //stackCards
+		[35014, 35030, 35005, 35005, 35005, 35005, 35005, 35034], //gripCards
+		[30007,30014,31008], //installed
+		[], //stolen
+		cardBackTexturesRunner,glowTextures,strengthTextures
+  );
 
-  // // SET UP THE MAIN STATES FOR THE CORP
-  // // -----------------------------------
-	// CorpTestField(30035, //identity
-	// 	[], //archivesCards
-	// 	[30073,30072,30047,30073,30073,30039], //rndCards
-	// 	[30065,31061,30039,30066,30071], //hqCards
-	// 	[], //archivesInstalled
-	// 	[31067], //rndInstalled
-	// 	[31067], //hqInstalled
-	// 	[[30067,35079,35079]], //remotes (array of arrays)
-	// 	[], //scored
-	// 	cardBackTexturesCorp,glowTextures,strengthTextures);
-  
-  // // GIVE EVERYONE SOME CREDITS TO START WITH
-  // // ----------------------------------------
-  // GainCredits(runner,25);
-  // GainCredits(corp,25);
-
-  // // SET THE PHASE TO START OF RUNNER TURN
-  // // -------------------------------------
-  // ChangePhase(phases.runnerStartResponse); // Runner starts turn
-  // ChangePhase(phases.corpStartDraw);
+	CorpTestField(30035, //identity
+		[], //archivesCards
+		[30073,30072,30047,30073,30073,30039], //rndCards
+		[30065,31061,30039,30066,30071], //hqCards
+		[], //archivesInstalled
+		[31067], //rndInstalled
+		[31067], //hqInstalled
+		[[30067,30072,30072]], //remotes (array of arrays)
+		[], //scored
+		cardBackTexturesCorp,glowTextures,strengthTextures
+  );
 
   // // REZ ICE
   // // -------
   // corp.archives.ice[0].rezzed=true;
   // corp.RnD.ice[0].rezzed=true;
   // corp.HQ.ice[0].rezzed=true;
-  // corp.remoteServers[0].ice[0].rezzed=true;
-  // corp.remoteServers[0].ice[1].rezzed=true;
+  corp.remoteServers[0].ice[0].rezzed=true;
+  corp.remoteServers[0].ice[1].rezzed=true;
   // corp.remoteServers[0].root[0].knownToRunner=true;
   // corp.archives.ice[0].rezzed=true;
   
@@ -763,6 +753,11 @@ function LoadDecks() {
   // // ----------------
   // corp.remoteServers[0].root[0].advancement=2;
   // corp.remoteServers[1].root[0].advancement=2;
+  
+  // // GIVE EVERYONE SOME CREDITS TO START WITH
+  // // ----------------------------------------
+  GainCredits(runner,25);
+  // GainCredits(corp,25);
   
   // // OTHER STUFF
   // // -----------
@@ -776,6 +771,11 @@ function LoadDecks() {
   // MakeRun(corp.remoteServers[0]);
   // attackedServer = corp.RnD;
   // ChangePhase(phases.runApproachServer); //i.e. skip all the ice
+
+  // // SET THE PHASE TO START OF RUNNER TURN
+  // // -------------------------------------
+  // ChangePhase(phases.runnerStartResponse); // Runner starts turn
+  // ChangePhase(phases.corpStartDraw);    
  
   // // TO FORCE THE AI TO PLAY CARDS / MAKE DECISIONS, set preferred property on runner.AI or corp.AI
   // // ----------------------------------------------------------------------------------------------

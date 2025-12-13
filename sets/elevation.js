@@ -77,9 +77,15 @@ cardSet[35005] = {
               return;
             }
             Reveal(cardsToTrash[index], function() {
-              Trash(cardsToTrash[index], false, function() {
+              //Check card is still in HQ before trashing (could have moved due to another effect)
+              if (corp.HQ.cards.includes(cardsToTrash[index])) {
+                Trash(cardsToTrash[index], false, function() {
+                  revealAndTrashNext(index + 1);
+                }, cardRef);
+              } else {
+                //Card already moved, continue to next
                 revealAndTrashNext(index + 1);
-              }, cardRef);
+              }
             }, cardRef);
           };
           revealAndTrashNext(0);
@@ -291,5 +297,103 @@ cardSet[35079] = {
   AIImplementIce: function(rc, result, maxCorpCred, incomplete) {
     result.sr = [[["endTheRun"]]];
     return result;
+  },
+};
+
+cardSet[35014] = {
+  title: "Clean Getaway",
+  imageFile: "35014.png",
+  player: runner,
+  faction: "Criminal",
+  influence: 2,
+  cardType: "event",
+  subTypes: ["Run"],
+  playCost: 3,
+  //Run any server. If successful, gain 6[credit].
+  Enumerate: function () {
+    return ChoicesExistingServers();
+  },
+  Resolve: function (params) {
+    MakeRun(params.server);
+  },
+  responseOnRunSuccessful: {
+    Resolve: function () {
+      GainCredits(runner, 6);
+    },
+    automatic: true,
+  },
+  //AI: use for easy runs where success is likely
+  AIRunEventExtraPotential: function(server, potential) {
+    //Requires successful run - don't use if Crisium Grid is known
+    if (runner.AI._rootKnownToContainCopyOfCard(server, "Crisium Grid")) return 0;
+    //Only use if there are no unrezzed ice (to ensure success)
+    for (var i = 0; i < server.ice.length; i++) {
+      if (!server.ice[i].rezzed) return 0; //unrezzed ice might end the run
+    }
+    //Net gain is 3 credits (pay 3, gain 6) - slightly better than Dirty Laundry
+    return 0.6; //slightly higher than Dirty Laundry's 0.5
+  },
+};
+
+cardSet[35030] = {
+  title: "Chromatophores",
+  imageFile: "35030.png",
+  player: runner,
+  faction: "Shaper",
+  influence: 2,
+  cardType: "program",
+  subTypes: ["Trojan"],
+  installCost: 1,
+  memoryCost: 1,
+  //Install only on a piece of ice.
+  installOnlyOn: function (card) {
+    if (!CheckCardType(card, ["ice"])) return false;
+    return true;
+  },
+  //Host ice gains barrier, code gate, and sentry
+  modifySubTypes: {
+    Resolve: function (card) {
+      if (card == this.host) return { add: ["Barrier", "Code Gate", "Sentry"] };
+      return {}; //no modification to subtypes
+    },
+    automatic: true,
+  },
+  AIPreferredInstallChoice: function (choices) {
+    //Prefer to install on ice that we can't currently break
+    var iceToExclude = [];
+    var installedCards = InstalledCards(corp);
+    for (var i = 0; i < installedCards.length; i++) {
+      var iceCard = installedCards[i];
+      if (CheckCardType(iceCard, ["ice"]) && PlayerCanLook(runner, iceCard)) {
+        //Exclude ice we can already break
+        if (runner.AI._matchingBreakerInstalled(iceCard, [this])) {
+          iceToExclude.push(iceCard);
+        }
+      }
+    }
+    
+    //Target the highest threat ice that doesn't already have a special breaker hosted
+    var htsi = runner.AI._highestThreatScoreIce([this].concat(runner.AI._iceHostingSpecialBreakers()).concat(iceToExclude));
+    if (htsi) {
+      //Find it in the choices list
+      for (var i = 0; i < choices.length; i++) {
+        if (htsi == choices[i].host) return i;
+      }
+    }
+    return -1; //don't install
+  },
+  //Acts like an icebreaker but doesn't have that subtype
+  AISpecialBreaker: true,
+  AIOkToTrash: function() {
+    //Ok to trash if it has lost its abilities
+    if (this.host) {
+      if (this.host.AIDisablesHostedPrograms) return true;
+    }
+    //Trash if a matching breaker exists without Chromatophores' help
+    var storedModifySubTypes = this.modifySubTypes;
+    this.modifySubTypes = { Resolve: function (card) { return {}; }, automatic: true };
+    var ret = runner.AI._matchingBreakerInstalled(this.host, [this]);
+    this.modifySubTypes = storedModifySubTypes;
+    return ret;
   },
 };

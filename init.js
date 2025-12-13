@@ -2022,21 +2022,25 @@ function debugAddClick() {
   if (viewingPlayer && typeof viewingPlayer.clickTracker === 'number') {
     viewingPlayer.clickTracker++;
     Render();
+    EnumeratePhase();
   }
 }
 function debugAddCredit() {
   if (viewingPlayer && typeof viewingPlayer.creditPool === 'number') {
     viewingPlayer.creditPool++;
     Render();
+    EnumeratePhase();
   }
 }
 function debugDrawCard() {
   if (viewingPlayer === runner && runner.stack.length > 0) {
     runner.grip.push(runner.stack.pop());
     Render();
+    EnumeratePhase();
   } else if (viewingPlayer === corp && corp.RnD.cards.length > 0) {
     corp.HQ.cards.paush(corp.RnD.cards.pop());
     Render();
+    EnumeratePhase();
   }
 }
 function debugWinGame() {
