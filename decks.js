@@ -711,48 +711,55 @@ function LoadDecks() {
   // // PASTE REPLICATION CODE HERE (and/or customise code below)
   // // Uncommenting (CTRL+/ in VS Code) this will set up a test field for debugging
   // // Set p = r or c in the URL to view as runner or corp respectively
-  // debugging = true; //set true to log extra details and pause execution on error
-  // viewAllFronts = true; //set true to see all card fronts (for testing)
-  // mainLoopDelay = 50; //for speedy AI vs AI testing (any faster than this and funny things happen at end-of-game)
+  debugging = true; //set true to log extra details and pause execution on error
+  viewAllFronts = true; //set true to see all card fronts (for testing)
+  //mainLoopDelay = 50; //for speedy AI vs AI testing (any faster than this and funny things happen at end-of-game)
 
-	// RunnerTestField(31002, //identity
-	// 	[30032], //heapCards
-	// 	[35005,35005,35005,35005], //stackCards
-	// 	[35005, 35005, 35005, 35005, 35005, 35005, 35005, 35005], //gripCards
-	// 	[30014,31008], //installed
-	// 	[], //stolen
-	// 	cardBackTexturesRunner,glowTextures,strengthTextures);
+	RunnerTestField(31002, //identity
+		[30032], //heapCards
+		[35005,35005,35005,35005], //stackCards
+		[35005, 35005, 35005, 35005, 35005, 35005, 35005, 35034], //gripCards
+		[30007,30014,31008], //installed
+		[], //stolen
+		cardBackTexturesRunner,glowTextures,strengthTextures);
 	
-	// CorpTestField(30035, //identity
-	// 	[], //archivesCards
-	// 	[30073,30072,30047,30073,30073,30039], //rndCards
-	// 	[30065,31061,30039,30066,30071], //hqCards
-	// 	[], //archivesInstalled
-	// 	[31067], //rndInstalled
-	// 	[31067], //hqInstalled
-	// 	[[30067,30042,31043,31043]], //remotes (array of arrays)
-	// 	[], //scored
-	// 	cardBackTexturesCorp,glowTextures,strengthTextures);
+	CorpTestField(30035, //identity
+		[], //archivesCards
+		[30073,30072,30047,30073,30073,30039], //rndCards
+		[30065,31061,30039,30066,30071], //hqCards
+		[], //archivesInstalled
+		[31067], //rndInstalled
+		[31067], //hqInstalled
+		[[30067,35079,35079]], //remotes (array of arrays)
+		[], //scored
+		cardBackTexturesCorp,glowTextures,strengthTextures);
   
+  // Give everyone some credits
+  GainCredits(runner,25);
+  GainCredits(corp,25);
+
+  // Rez some ice
   // corp.archives.ice[0].rezzed=true;
   // corp.RnD.ice[0].rezzed=true;
   // corp.HQ.ice[0].rezzed=true;
   // corp.remoteServers[0].ice[0].rezzed=true;
   // corp.remoteServers[0].ice[1].rezzed=true;
   // corp.remoteServers[0].root[0].knownToRunner=true;
-  
   // corp.archives.ice[0].rezzed=true;
   
+  // Set advancements
   // corp.remoteServers[0].root[0].advancement=2;
   // corp.remoteServers[1].root[0].advancement=2;
-  // GainCredits(runner,25);
-  // GainCredits(corp,25);
-  // ChangePhase(phases.runnerStartResponse);
+
+  // Set the phase to start testing from
+  ChangePhase(phases.runnerStartResponse); // Runner starts turn
   // ChangePhase(phases.corpStartDraw);
   
+  // Other stuff
   // ChangePhase(phases.runnerEndOfTurn);
   // AddTags(2);
-  // runner.clickTracker = 1;
+  // runner.clickTracker = 1;  
+  runner.rig.programs[0].virus = 3;
   // corp.clickTracker = 2;
   // ChangePhase(phases.corpActionMain);
   // ChangePhase(phases.corpDiscardStart);
@@ -760,13 +767,13 @@ function LoadDecks() {
   // attackedServer = corp.RnD;
   // ChangePhase(phases.runApproachServer); //i.e. skip all the ice
  
-  // // To play a Shred automatically at the start of the runner's turn, uncomment and customize the following:
-  // runner.AI.preferred = { 
-  //   command: "play",
-  //   cardToPlay: runner.grip[0],
-  //   nextPrefs: {
-  //     chooseServer: corp.remoteServers[0]
-  //   }
-  // }
+  // To play a Shred automatically at the start of the runner's turn, uncomment and customize the following:
+  runner.AI.preferred = { 
+    command: "play",
+    cardToPlay: runner.grip[0],
+    nextPrefs: {
+      chooseServer: corp.remoteServers[0]
+    }
+  }
   
 }
