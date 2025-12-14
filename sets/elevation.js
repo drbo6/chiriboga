@@ -1163,11 +1163,22 @@ cardSet[35022] = {
         TakeCredits(runner, this, 1);
         //When it is empty, trash it
         if (!CheckCounters(this, "credits", 1)) {
-          Trash(this, true);
+          Trash(this, false);
         }
       }
     },
     automatic: true,
+  },
+  //When it is empty, trash it.
+  //This catches credits being spent via canUseCredits (SpendCredits doesn't fire triggers)
+  automaticOnAnyChange: {
+    Resolve: function() {
+      //Check if empty and still installed (avoid double-trash)
+      if (!CheckInstalled(this)) return;
+      if (typeof this.credits === 'undefined' || this.credits <= 0) {
+        Trash(this, false);
+      }
+    },
   },
   AIEconomyInstall: function() {
     //Good drip economy, especially if you have Connection/Job resources to install
@@ -1185,6 +1196,201 @@ cardSet[35022] = {
   },
   AIWorthKeeping: function(installedRunnerCards, spareMU) {
     //Worth keeping as economy
+    return true;
+  },
+};
+
+cardSet[35027] = {
+  title: "GAMEDRAGON™ Pro",
+  imageFile: "35027.png",
+  player: runner,
+  faction: "Shaper",
+  influence: 2,
+  cardType: "hardware",
+  subTypes: ["Mod"],
+  installCost: 2,
+  unique: true,
+  //When you install this hardware and when your turn begins, you may host this hardware 
+  //on an installed non-AI icebreaker. Host icebreaker gets +1 strength. Abilities that 
+  //increase its strength last for the remainder of the run (instead of any shorter duration).
+  
+  //Store reference to original host trigger so we can restore it
+  originalHostEncounterEnd: null,
+  
+  //Helper: Get valid icebreaker hosts
+  getValidHosts: function() {
+    var validHosts = [];
+    for (var i = 0; i < runner.rig.programs.length; i++) {
+      var prog = runner.rig.programs[i];
+      if (CheckSubType(prog, "Icebreaker") && !CheckSubType(prog, "AI")) {
+        validHosts.push(prog);
+      }
+    }
+    return validHosts;
+  },
+  
+  //Helper: Set up the strength preservation on a host
+  setupHostOverride: function() {
+    if (!this.host) return;
+    if (!this.host.responseOnEncounterEnds) return;
+    
+    //Save original trigger if not already saved
+    if (!this.originalHostEncounterEnd) {
+      this.originalHostEncounterEnd = this.host.responseOnEncounterEnds;
+    }
+    
+    //Replace with no-op for strength reset (strength will be preserved)
+    //Keep automatic: true so the trigger system handles it the same way
+    this.host.responseOnEncounterEnds = {
+      Resolve: function() {
+        //Don't reset strengthBoost - GAMEDRAGON preserves it
+      },
+      automatic: true,
+    };
+  },
+  
+  //Helper: Restore original host trigger and reset strength
+  cleanupHostOverride: function() {
+    if (!this.host) return;
+    
+    //Restore original trigger
+    if (this.originalHostEncounterEnd) {
+      this.host.responseOnEncounterEnds = this.originalHostEncounterEnd;
+      this.originalHostEncounterEnd = null;
+    }
+    
+    //Reset strength boost (the original duration has expired)
+    if (typeof this.host.strengthBoost !== 'undefined') {
+      this.host.strengthBoost = 0;
+    }
+  },
+  
+  //Helper: Offer hosting choice
+  offerHostingChoice: function() {
+    var validHosts = this.getValidHosts();
+    if (validHosts.length === 0) return;
+    
+    var choices = [{ id: -1, label: "Decline", button: "Decline" }];
+    for (var i = 0; i < validHosts.length; i++) {
+      choices.push({
+        id: i,
+        host: validHosts[i],
+        label: "Host on " + GetTitle(validHosts[i]),
+        button: GetTitle(validHosts[i]),
+      });
+    }
+    
+    var cardRef = this;
+    
+    //**AI code
+    if (runner.AI != null) {
+      //Prefer to host on the icebreaker with lowest base strength (benefits most from +1)
+      var bestHost = null;
+      var lowestStr = 999;
+      for (var i = 0; i < validHosts.length; i++) {
+        var baseStr = validHosts[i].strength || 0;
+        if (baseStr < lowestStr) {
+          lowestStr = baseStr;
+          bestHost = validHosts[i];
+        }
+      }
+      if (bestHost) {
+        for (var i = 0; i < choices.length; i++) {
+          if (choices[i].host === bestHost) {
+            choices = [choices[i]];
+            break;
+          }
+        }
+      }
+    }
+    
+    DecisionPhase(
+      runner,
+      choices,
+      function(decision) {
+        if (decision.id >= 0 && decision.host) {
+          //Clean up old host if any
+          if (cardRef.host) {
+            cardRef.cleanupHostOverride();
+          }
+          //Move to new host
+          MoveCard(cardRef, decision.host.hostedCards);
+          cardRef.host = decision.host;
+          Log(GetTitle(cardRef) + " hosted on " + GetTitle(decision.host));
+          //Set up the strength preservation
+          cardRef.setupHostOverride();
+        }
+      },
+      "GAMEDRAGON™ Pro",
+      "Host on icebreaker?",
+      this
+    );
+  },
+  
+  //When you install this hardware, may host on icebreaker
+  responseOnInstall: {
+    Enumerate: function(card) {
+      if (card !== this) return [];
+      if (this.getValidHosts().length === 0) return [];
+      return [{}];
+    },
+    Resolve: function(params) {
+      this.offerHostingChoice();
+    },
+  },
+  
+  //When your turn begins, may host on icebreaker
+  responseOnRunnerTurnBegins: {
+    Enumerate: function() {
+      //Only offer if not already hosted, or if we want to switch hosts
+      if (this.getValidHosts().length === 0) return [];
+      return [{}];
+    },
+    Resolve: function() {
+      this.offerHostingChoice();
+    },
+    //Not automatic - player should choose whether to rehost
+  },
+  
+  //Host icebreaker gets +1 strength
+  modifyStrength: {
+    Resolve: function(card) {
+      if (this.host && card === this.host) {
+        return 1; //+1 strength
+      }
+      return 0;
+    },
+    automatic: true,
+  },
+  
+  //At run end, reset host's strengthBoost (the "remainder of the run" has ended)
+  responseOnRunEnds: {
+    Resolve: function() {
+      if (this.host && typeof this.host.strengthBoost !== 'undefined') {
+        this.host.strengthBoost = 0;
+      }
+    },
+    automatic: true,
+  },
+  
+  //When trashed, restore original host behavior
+  automaticOnTrash: {
+    Resolve: function(cards) {
+      if (cards.includes(this)) {
+        this.cleanupHostOverride();
+      }
+    },
+    automatic: true,
+    availableWhenInactive: true,
+  },
+  
+  AIPreferredInstallChoice: function(choices) {
+    //Install if we have icebreakers to host on
+    if (this.getValidHosts().length > 0) return 0;
+    return -1; //wait until we have icebreakers
+  },
+  AIWorthKeeping: function(installedRunnerCards, spareMU) {
+    //Worth keeping if we have or might get icebreakers
     return true;
   },
 };
