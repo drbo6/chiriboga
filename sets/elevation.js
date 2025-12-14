@@ -571,13 +571,15 @@ cardSet[35004] = {
     Resolve: function(params) {
       this.pendingAddToStack = false;
       //Set up and switch to our custom phase
+      //Set player dynamically to avoid circular reference issues
+      this.AddToStackPhase.player = runner;
       this.AddToStackPhase.next = currentPhase;
       ChangePhase(this.AddToStackPhase);
     },
     availableWhenInactive: true,
   },
   AddToStackPhase: {
-    player: runner,
+    //player: runner, //set dynamically to avoid "too much recursion" error
     title: "Scrounge",
     identifier: "Scrounge Add to Stack",
     Enumerate: {
