@@ -13,24 +13,28 @@ cardSet[35005] = {
   //Run any server. The first time the Corp would end that run, prevent the run from ending 
   //unless the Corp reveals and trashes X cards from HQ at random. X is equal to the number 
   //of cards in the root of the attacked server.
+  runningWithThis: false,
   usedThisRun: false,
   Enumerate: function () {
     return ChoicesExistingServers();
   },
   Resolve: function (params) {
+    this.runningWithThis = true;
     this.usedThisRun = false;
     MakeRun(params.server);
   },
   responseOnRunEnds: {
     Resolve: function () {
+      this.runningWithThis = false;
       this.usedThisRun = false;
     },
     automatic: true,
-    availableWhenInactive: true,
   },
   responsePreventableEndRun: {
     Enumerate: function () {
-      //only fire once per run, and only if there's an attacked server
+      //only fire for the Shred that initiated this run
+      if (!this.runningWithThis) return [];
+      //only fire once per run
       if (this.usedThisRun) return [];
       if (attackedServer === null) return [];
       return [{}];
@@ -136,7 +140,6 @@ cardSet[35005] = {
         corp.AI.preferred = { title: "Shred", option: choice };
       }
     },
-    availableWhenInactive: true,
   },
   //AI: consider this for runs on remote servers with cards in root
   AIRunEventExtraPotential: function(server, potential) {
@@ -312,18 +315,26 @@ cardSet[35014] = {
   subTypes: ["Run"],
   playCost: 3,
   //Run any server. If successful, gain 6[credit].
+  runningWithThis: false,
   Enumerate: function () {
     return ChoicesExistingServers();
   },
   Resolve: function (params) {
+    this.runningWithThis = true;
     MakeRun(params.server);
   },
   responseOnRunSuccessful: {
     Resolve: function () {
+      if (!this.runningWithThis) return;
       GainCredits(runner, 6);
     },
     automatic: true,
-    availableWhenInactive: true,
+  },
+  responseOnRunEnds: {
+    Resolve: function () {
+      this.runningWithThis = false;
+    },
+    automatic: true,
   },
   //AI: use for easy runs where success is likely
   AIRunEventExtraPotential: function(server, potential) {
@@ -433,21 +444,18 @@ cardSet[35016] = {
       attackedServer = corp.HQ;
       //Phase continues - now approaching HQ (HQ ice is skipped)
     },
-    availableWhenInactive: true,
   },
   responseOnRunEnds: {
     Resolve: function () {
       this.runningWithThis = false;
     },
     automatic: true,
-    availableWhenInactive: true,
   },
   responseOnRunUnsuccessful: {
     Resolve: function () {
       this.runningWithThis = false;
     },
     automatic: true,
-    availableWhenInactive: true,
   },
   //AI: use when HQ has higher potential than Archives and/or HQ is better protected
   AIRunEventExtraPotential: function(server, potential) {
@@ -992,7 +1000,7 @@ cardSet[35007] = {
   //Access → [trash]: Trash the non-agenda card you are accessing. If you do, draw 1 card.
   abilities: [
     {
-      text: "Access → [trash]: Trash the non-agenda card you are accessing. If you do, draw 1 card.",
+      text: "Trash Gourmand: Trash the non-agenda card you are accessing. If you do, draw 1 card.",
       Enumerate: function () {
         if (!CheckAccessing()) return [];
         //Must be accessing a non-agenda card
@@ -1044,5 +1052,139 @@ cardSet[35007] = {
     //But only for non-agenda cards
     if (CheckCardType(card, ["agenda"])) return 0;
     return TrashCost(card);
+  },
+};
+
+cardSet[35015] = {
+  title: "Lie Low",
+  imageFile: "35015.png",
+  player: runner,
+  faction: "Criminal",
+  influence: 1,
+  cardType: "event",
+  subTypes: ["Double"],
+  playCost: 1,
+  //As an additional cost to play this event, spend [click].
+  //Resolve 1 of the following:
+  //• Draw 4 cards.
+  //• Remove up to 2 tags.
+  Enumerate: function () {
+    //Can always play if you have the clicks (even if 0 tags, draw is always valid)
+    return [{}];
+  },
+  Resolve: function (params) {
+    var choices = [
+      { id: 0, label: "Draw 4 cards", button: "Draw 4 cards" }
+    ];
+    
+    //Only offer tag removal if tagged
+    if (runner.tags >= 1) {
+      if (runner.tags >= 2) {
+        choices.push({ id: 2, label: "Remove 2 tags", button: "Remove 2 tags" });
+      }
+      choices.push({ id: 1, label: "Remove 1 tag", button: "Remove 1 tag" });
+    }
+    
+    //**AI code
+    if (runner.AI != null) {
+      //Prefer removing tags if tagged, otherwise draw
+      if (runner.tags >= 2) {
+        choices = [{ id: 2, label: "Remove 2 tags", button: "Remove 2 tags" }];
+      } else if (runner.tags >= 1) {
+        choices = [{ id: 1, label: "Remove 1 tag", button: "Remove 1 tag" }];
+      } else {
+        choices = [choices[0]]; //draw 4
+      }
+    }
+    
+    DecisionPhase(
+      runner,
+      choices,
+      function(decision) {
+        if (decision.id === 0) {
+          Draw(runner, 4);
+        } else if (decision.id === 1) {
+          RemoveTags(1);
+        } else if (decision.id === 2) {
+          RemoveTags(2);
+        }
+      },
+      "Lie Low",
+      "Lie Low",
+      this
+    );
+  },
+  AIWouldPlay: function() {
+    //Play if tagged (to remove tags) or if need cards
+    if (runner.tags >= 1) return true;
+    //Check overdraw for 4 cards
+    if (runner.AI._currentOverDraw() + 2 < runner.AI._maxOverDraw()) return true;
+    return false;
+  },
+  AIPlayToDraw: 3, //priority 3 (good draw potential)
+  AIPlayToRemoveTags: function() {
+    if (runner.tags < 1) return 0;
+    if (runner.tags >= 2) return 2; //removes 2 tags
+    return 1; //removes 1 tag
+  },
+};
+
+cardSet[35022] = {
+  title: "Open Market",
+  imageFile: "35022.png",
+  player: runner,
+  faction: "Criminal",
+  influence: 2,
+  cardType: "resource",
+  subTypes: ["Job", "Location"],
+  installCost: 2,
+  //When you install this resource, load 6 credits onto it. When it is empty, trash it.
+  automaticOnInstall: {
+    Resolve: function (card) {
+      if (card == this) LoadCredits(this, 6);
+    },
+  },
+  //You can spend hosted credits to install connection and job resources.
+  canUseCredits: function (doing, card) {
+    if (!card) return false;
+    if (doing == "installing") {
+      if (CheckCardType(card, ["resource"])) {
+        if (CheckSubType(card, "Connection") || CheckSubType(card, "Job")) {
+          return true;
+        }
+      }
+    }
+    return false;
+  },
+  //When your turn begins, take 1 credit from this resource.
+  responseOnRunnerTurnBegins: {
+    Resolve: function () {
+      if (CheckCounters(this, "credits", 1)) {
+        TakeCredits(runner, this, 1);
+        //When it is empty, trash it
+        if (!CheckCounters(this, "credits", 1)) {
+          Trash(this, true);
+        }
+      }
+    },
+    automatic: true,
+  },
+  AIEconomyInstall: function() {
+    //Good drip economy, especially if you have Connection/Job resources to install
+    var connectionOrJobInGrip = false;
+    for (var i = 0; i < runner.grip.length; i++) {
+      if (CheckCardType(runner.grip[i], ["resource"])) {
+        if (CheckSubType(runner.grip[i], "Connection") || CheckSubType(runner.grip[i], "Job")) {
+          connectionOrJobInGrip = true;
+          break;
+        }
+      }
+    }
+    if (connectionOrJobInGrip) return 2; //priority 2 (moderate - good synergy)
+    return 1; //priority 1 (still provides drip)
+  },
+  AIWorthKeeping: function(installedRunnerCards, spareMU) {
+    //Worth keeping as economy
+    return true;
   },
 };

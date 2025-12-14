@@ -26,28 +26,27 @@
 /* --- OVERRIDE: Footer button hover/active text and icon color --- */
 #footer .button:hover, #footer .button:active,
 #footer button:hover, #footer button:active {
-  color: var(--bg-dark) !important;
+  color: black !important;
 }
 #footer .button:hover .icon, #footer .button:active .icon,
 #footer button:hover .icon, #footer button:active .icon,
 #footer .button:hover .card-icon, #footer .button:active .card-icon,
 #footer button:hover .card-icon, #footer button:active .card-icon {
-  color: var(--bg-dark) !important;
-  background-color: var(--bg-dark) !important;
+  filter: brightness(0);
 }
 
 /* --- OVERRIDE: Footer button hover/active text and icon color --- */
 #footer .button:hover, #footer .button:active,
 #footer button:hover, #footer button:active {
-  color: var(--bg-dark) !important;
+  color: black !important;
 }
 #footer .button:hover .icon, #footer .button:active .icon,
 #footer button:hover .icon, #footer button:active .icon,
 #footer .button:hover .card-icon, #footer .button:active .card-icon,
 #footer button:hover .card-icon, #footer button:active .card-icon {
-  color: var(--bg-dark) !important;
-  background-color: var(--bg-dark) !important;
+  filter: brightness(0);
 }
+/* duplicate */
 /* CSS Color Variables */
  :root {
 	--watermark-color: var(--crt-green);
@@ -288,14 +287,16 @@
 	}
 
 	#footer .button .icon, #footer button .icon, #footer .card-icon {
-		color: inherit !important; /* Inherit text color for icons */
-		background-color: currentColor !important; /* For SVG mask icons */
-		-webkit-mask-repeat: no-repeat;
-		mask-repeat: no-repeat;
-		-webkit-mask-position: center;
-		mask-position: center;
-		-webkit-mask-size: contain;
-		mask-size: contain;
+		/* Default (outside runs): tint white icons to CRT green */
+		filter: invert(69%) sepia(84%) saturate(475%) hue-rotate(67deg) brightness(105%) contrast(100%);
+		transition: filter 120ms linear;
+	}
+
+	body.run #footer .button .icon,
+	body.run #footer button .icon,
+	body.run #footer .card-icon {
+		/* In-run: tint white icons to red */
+		filter: invert(18%) sepia(100%) saturate(600%) hue-rotate(345deg) brightness(100%) contrast(100%);
 	}
 
 form {

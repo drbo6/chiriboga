@@ -853,7 +853,7 @@ function MakeChoice() {
 			i +
 			');">' +
 			Iconify(validOptions[i].button, true) +
-			"</button>"; //the true inverts to black
+			"</button>"; //the false uses white icons
 		} else nonButtonOptions.push(validOptions[i]);
 	  }
 

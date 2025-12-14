@@ -1846,6 +1846,11 @@ function ChangePhase(src, skipInit = false) {
   else $("#rewind-select").prop("disabled",false);
 
   activePlayer = currentPhase.player;
+  if (currentPhase.identifier.toLowerCase().includes("run")) {
+    $("body").addClass("run");
+  } else {
+    $("body").removeClass("run");
+  }
   var headerstyle = "";
   var tpstr = TurnPhaseStr();
   // Rough estimate: allow up to 2 lines (~60 chars per line at default size)
