@@ -404,11 +404,21 @@ phaseTemplates.globalTriggers = {
     }
     //end of encounter needs to...end the encounter
     if (currentPhase.identifier == "Run EncounterEnd") encountering = false;
-    //log approach to server
+    
+    //START DRBO6 - EDIT FOR MAINTENANCE ACCESS
+    // //log approach to server
+    // if (currentPhase.identifier == "Run 4.6.2") {
+    //   Log("Approaching " + attackedServer.serverName);
+    //   approachIce = -1;
+    // }
     if (currentPhase.identifier == "Run 4.6.2") {
+      //fire any pre-approach triggers that might redirect the run
+      AutomaticTriggers("automaticOnWouldApproachServer", [attackedServer]);
       Log("Approaching " + attackedServer.serverName);
       approachIce = -1;
     }
+    //END DRBO6 - EDIT FOR MAINTENANCE ACCESS
+
     //log successful run
     if (currentPhase.identifier == "Run 5.1") {
 	  //first check if run can be "declared successful"

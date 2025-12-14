@@ -397,3 +397,73 @@ cardSet[35030] = {
     return ret;
   },
 };
+
+cardSet[35016] = {
+  title: "Maintenance Access",
+  imageFile: "35016.png",
+  player: runner,
+  faction: "Criminal",
+  influence: 3,
+  cardType: "event",
+  subTypes: ["Run", "Double"],
+  playCost: 0,
+  //As an additional cost to play this event, spend [click].
+  //Run Archives. When you would approach Archives (after passing all ice), 
+  //instead change the attacked server to HQ and approach HQ.
+  runningWithThis: false,
+  Enumerate: function () {
+    return [{}];
+  },
+  Resolve: function (params) {
+    this.runningWithThis = true;
+    MakeRun(corp.archives);
+  },
+  //Redirect happens BEFORE approach server step (like Sneakdoor's redirect before success)
+  //This allows HQ approach triggers (Manegarm) to fire, while Archives ones don't
+  automaticOnWouldApproachServer: {
+    Resolve: function (server) {
+      if (!this.runningWithThis) return;
+      if (server !== corp.archives) return;
+      
+      this.runningWithThis = false;
+      Log("Attacked server changed to HQ");
+      attackedServer = corp.HQ;
+      //Phase continues - now approaching HQ (HQ ice is skipped)
+    },
+  },
+  responseOnRunEnds: {
+    Resolve: function () {
+      this.runningWithThis = false;
+    },
+    automatic: true,
+  },
+  responseOnRunUnsuccessful: {
+    Resolve: function () {
+      this.runningWithThis = false;
+    },
+    automatic: true,
+  },
+  //AI: use when HQ has higher potential than Archives and/or HQ is better protected
+  AIRunEventExtraPotential: function(server, potential) {
+    //Only works when targeting Archives
+    if (server !== corp.archives) return 0;
+    
+    //Check for Crisium Grid on Archives - doesn't prevent redirect (happens before success)
+    //But if HQ has Crisium, success won't be declared there
+    if (runner.AI._rootKnownToContainCopyOfCard(corp.HQ, "Crisium Grid")) return 0;
+    
+    //Get HQ potential
+    var HQpotential = runner.AI._getCachedPotential(corp.HQ);
+    
+    //Valuable if HQ has higher potential than Archives
+    if (HQpotential > potential) {
+      //Extra bonus if Archives has less ice than HQ (we're bypassing HQ's protection)
+      var bonus = 0.1;
+      if (corp.archives.ice.length < corp.HQ.ice.length) {
+        bonus += 0.2 * (corp.HQ.ice.length - corp.archives.ice.length);
+      }
+      return HQpotential - potential + bonus;
+    }
+    return 0;
+  },
+};
