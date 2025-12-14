@@ -467,3 +467,159 @@ cardSet[35016] = {
     return 0;
   },
 };
+
+cardSet[35026] = {
+  title: "Ritual",
+  imageFile: "35026.png",
+  player: runner,
+  faction: "Shaper",
+  influence: 2,
+  cardType: "event",
+  playCost: 0,
+  //Draw 1 card for each [click] you have remaining.
+  Resolve: function (params) {
+    var clicksRemaining = runner.clickTracker;
+    if (clicksRemaining > 0) {
+      Draw(runner, clicksRemaining);
+    } else {
+      Log("No clicks remaining; no cards drawn");
+    }
+  },
+  AIWorthKeeping: function (installedRunnerCards, spareMU) {
+    //Keep if need card draw
+    if (runner.grip.length < 3) return true;
+    return false;
+  },
+  AIWouldPlay: function() {
+    //Only play if we have clicks remaining (otherwise draws nothing)
+    if (runner.clickTracker < 1) return false;
+    //Strongly prefer playing first click (draws 3) over later clicks
+    //Don't play on last click unless desperate for cards
+    if (runner.clickTracker == 1 && runner.grip.length > 1) return false;
+    //Check overdraw - drawing clickTracker cards
+    var cardsToDraw = runner.clickTracker;
+    if (runner.AI._currentOverDraw() + (cardsToDraw - 2) < runner.AI._maxOverDraw()) return true;
+    return false;
+  },
+  AIPlayToDraw: 3, //priority 3 (excellent draw when played first click)
+};
+
+cardSet[35004] = {
+  title: "Scrounge",
+  imageFile: "35004.png",
+  player: runner,
+  faction: "Anarch",
+  influence: 1,
+  cardType: "event",
+  subTypes: ["Double"],
+  playCost: 1,
+  //As an additional cost to play this event, spend [click].
+  //Install 1 program from your heap. You may add 1 program from your heap to the bottom of your stack.
+  Enumerate: function () {
+    //Must have at least one program in heap that can be installed
+    var installablePrograms = ChoicesArrayInstall(runner.heap, false, function(card) {
+      return CheckCardType(card, ["program"]);
+    });
+    if (installablePrograms.length < 1) return [];
+    return [{}];
+  },
+  Resolve: function (params) {
+    var cardRef = this;
+    //Step 1: Choose and install a program from heap
+    var installChoices = ChoicesArrayInstall(runner.heap, false, function(card) {
+      return CheckCardType(card, ["program"]);
+    });
+    
+    //**AI code for install choice
+    if (runner.AI != null && installChoices.length > 1) {
+      var preferredCard = runner.AI._icebreakerInPileNotInHandOrArray(runner.heap, InstalledCards(runner));
+      if (preferredCard) {
+        for (var i = 0; i < installChoices.length; i++) {
+          if (installChoices[i].card == preferredCard) {
+            installChoices = [installChoices[i]];
+            break;
+          }
+        }
+      }
+    }
+    
+    DecisionPhase(
+      runner,
+      installChoices,
+      function(installParams) {
+        //Install the chosen program (paying costs)
+        Install(installParams.card, installParams.host, false, null, true, function() {
+          //Step 2: Optionally add another program from heap to bottom of stack
+          cardRef.offerAddToStack();
+        }, cardRef);
+      },
+      "Scrounge",
+      "Install program from heap",
+      this,
+      "install"
+    );
+  },
+  offerAddToStack: function() {
+    var programsInHeap = ChoicesArrayCards(runner.heap, function(card) {
+      return CheckCardType(card, ["program"]);
+    });
+    
+    //Add option to decline
+    programsInHeap.push({ card: null, label: "Done", button: "Done" });
+    
+    //**AI code for add-to-stack choice
+    if (runner.AI != null) {
+      //Look for valuable programs to save
+      var preferredCard = runner.AI._icebreakerInPileNotInHandOrArray(runner.heap, InstalledCards(runner).concat(runner.grip));
+      if (preferredCard) {
+        for (var i = 0; i < programsInHeap.length; i++) {
+          if (programsInHeap[i].card == preferredCard) {
+            programsInHeap = [programsInHeap[i]];
+            break;
+          }
+        }
+      } else {
+        //No valuable card, decline
+        programsInHeap = [{ card: null, label: "Done", button: "Done" }];
+      }
+    }
+    
+    DecisionPhase(
+      runner,
+      programsInHeap,
+      function(addParams) {
+        if (addParams.card === null) {
+          //Done, no card added
+          return;
+        }
+        //Add chosen card to bottom of stack (position 0)
+        var cardTitle = GetTitle(addParams.card);
+        MoveCard(addParams.card, runner.stack, 0);
+        Log(cardTitle + " added to bottom of stack");
+      },
+      "Scrounge",
+      "Add program to bottom of stack?",
+      this
+    );
+  },
+  AIWouldPlay: function() {
+    //Play if there's a valuable program in heap worth installing
+    var installedRunnerCards = InstalledCards(runner);
+    var targetCard = runner.AI._icebreakerInPileNotInHandOrArray(runner.heap, installedRunnerCards);
+    if (targetCard) {
+      //Check if we can afford it
+      var installCost = InstallCost(targetCard);
+      if (Credits(runner) >= installCost + 1) { //+1 for Scrounge's cost
+        return true;
+      }
+    }
+    return false;
+  },
+  AIWorthKeeping: function(installedRunnerCards, spareMU) {
+    //Worth keeping if there's something valuable in heap
+    if (runner.AI._icebreakerInPileNotInHandOrArray(runner.heap, installedRunnerCards)) {
+      return true;
+    }
+    return false;
+  },
+};
