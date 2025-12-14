@@ -734,7 +734,7 @@ function LoadDecks() {
 		[], //archivesInstalled
 		[], //rndInstalled
 		[], //hqInstalled
-		[[30037,30072,30072,30055],[30037,30047,30073,31065],[30037,30074,30074]], //remotes (array of arrays)
+		[[30037,30072,30072,30055],[30037,30047,30073,31075],[30037,30074,30074]], //remotes (array of arrays)
 		[], //scored
 		cardBackTexturesCorp,glowTextures,strengthTextures
   );
@@ -746,8 +746,8 @@ function LoadDecks() {
   // corp.HQ.ice[0].rezzed=true;
   // corp.remoteServers[0].ice[0].rezzed=true;
   // corp.remoteServers[0].ice[1].rezzed=true;
-  // corp.remoteServers[1].ice[0].rezzed=true;
-  // corp.remoteServers[1].ice[1].rezzed=true;
+  corp.remoteServers[1].ice[0].rezzed=true;
+  corp.remoteServers[1].ice[2].rezzed=true;
   // corp.remoteServers[2].ice[0].rezzed=true;
   // corp.remoteServers[2].ice[1].rezzed=true;
   // corp.remoteServers[0].root[0].knownToRunner=true;
@@ -760,7 +760,7 @@ function LoadDecks() {
   
   // // GIVE EVERYONE SOME CREDITS TO START WITH
   // // ----------------------------------------
-   GainCredits(runner,2);
+  GainCredits(runner,25);
   // GainCredits(corp,25);
   
   // // OTHER STUFF

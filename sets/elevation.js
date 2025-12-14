@@ -1217,18 +1217,6 @@ cardSet[35027] = {
   //Store reference to original host trigger so we can restore it
   originalHostEncounterEnd: null,
   
-  //Helper: Get valid icebreaker hosts
-  getValidHosts: function() {
-    var validHosts = [];
-    for (var i = 0; i < runner.rig.programs.length; i++) {
-      var prog = runner.rig.programs[i];
-      if (CheckSubType(prog, "Icebreaker") && !CheckSubType(prog, "AI")) {
-        validHosts.push(prog);
-      }
-    }
-    return validHosts;
-  },
-  
   //Helper: Set up the strength preservation on a host
   setupHostOverride: function() {
     if (!this.host) return;
@@ -1240,7 +1228,6 @@ cardSet[35027] = {
     }
     
     //Replace with no-op for strength reset (strength will be preserved)
-    //Keep automatic: true so the trigger system handles it the same way
     this.host.responseOnEncounterEnds = {
       Resolve: function() {
         //Don't reset strengthBoost - GAMEDRAGON preserves it
@@ -1265,20 +1252,19 @@ cardSet[35027] = {
     }
   },
   
-  //Helper: Offer hosting choice
+  //Helper: Offer hosting choice using card selection
   offerHostingChoice: function() {
-    var validHosts = this.getValidHosts();
+    var validHosts = ChoicesInstalledCards(runner, function(card) {
+      if (CheckSubType(card, "Icebreaker") && !CheckSubType(card, "AI")) {
+        return true;
+      }
+      return false;
+    });
+    
     if (validHosts.length === 0) return;
     
-    var choices = [{ id: -1, label: "Decline", button: "Decline" }];
-    for (var i = 0; i < validHosts.length; i++) {
-      choices.push({
-        id: i,
-        host: validHosts[i],
-        label: "Host on " + GetTitle(validHosts[i]),
-        button: GetTitle(validHosts[i]),
-      });
-    }
+    //Add decline option
+    validHosts.push({ card: null, label: "Decline", button: "Decline" });
     
     var cardRef = this;
     
@@ -1288,42 +1274,58 @@ cardSet[35027] = {
       var bestHost = null;
       var lowestStr = 999;
       for (var i = 0; i < validHosts.length; i++) {
-        var baseStr = validHosts[i].strength || 0;
-        if (baseStr < lowestStr) {
-          lowestStr = baseStr;
-          bestHost = validHosts[i];
+        if (validHosts[i].card) {
+          var baseStr = validHosts[i].card.strength || 0;
+          if (baseStr < lowestStr) {
+            lowestStr = baseStr;
+            bestHost = validHosts[i];
+          }
         }
       }
       if (bestHost) {
-        for (var i = 0; i < choices.length; i++) {
-          if (choices[i].host === bestHost) {
-            choices = [choices[i]];
-            break;
-          }
-        }
+        validHosts = [bestHost];
       }
     }
     
     DecisionPhase(
       runner,
-      choices,
+      validHosts,
       function(decision) {
-        if (decision.id >= 0 && decision.host) {
+        if (decision.card) {
           //Clean up old host if any
           if (cardRef.host) {
             cardRef.cleanupHostOverride();
+            //Remove from old host's hostedCards
+            if (cardRef.host.hostedCards) {
+              var idx = cardRef.host.hostedCards.indexOf(cardRef);
+              if (idx > -1) cardRef.host.hostedCards.splice(idx, 1);
+            }
           }
-          //Move to new host
-          MoveCard(cardRef, decision.host.hostedCards);
-          cardRef.host = decision.host;
-          Log(GetTitle(cardRef) + " hosted on " + GetTitle(decision.host));
+          
+          //Initialize hostedCards on new host if needed
+          if (typeof decision.card.hostedCards === 'undefined') {
+            decision.card.hostedCards = [];
+          }
+          
+          //Remove from hardware rig if still there
+          var hwIdx = runner.rig.hardware.indexOf(cardRef);
+          if (hwIdx > -1) runner.rig.hardware.splice(hwIdx, 1);
+          
+          //Add to new host's hostedCards and update cardLocation
+          decision.card.hostedCards.push(cardRef);
+          cardRef.cardLocation = decision.card.hostedCards;
+          cardRef.host = decision.card;
+          
+          Log(GetTitle(cardRef) + " hosted on " + GetTitle(decision.card));
+          
           //Set up the strength preservation
           cardRef.setupHostOverride();
         }
       },
       "GAMEDRAGON™ Pro",
       "Host on icebreaker?",
-      this
+      this,
+      "host"
     );
   },
   
@@ -1331,7 +1333,14 @@ cardSet[35027] = {
   responseOnInstall: {
     Enumerate: function(card) {
       if (card !== this) return [];
-      if (this.getValidHosts().length === 0) return [];
+      //Check if there are valid hosts
+      var validHosts = ChoicesInstalledCards(runner, function(c) {
+        if (CheckSubType(c, "Icebreaker") && !CheckSubType(c, "AI")) {
+          return true;
+        }
+        return false;
+      });
+      if (validHosts.length === 0) return [];
       return [{}];
     },
     Resolve: function(params) {
@@ -1342,14 +1351,19 @@ cardSet[35027] = {
   //When your turn begins, may host on icebreaker
   responseOnRunnerTurnBegins: {
     Enumerate: function() {
-      //Only offer if not already hosted, or if we want to switch hosts
-      if (this.getValidHosts().length === 0) return [];
+      //Check if there are valid hosts
+      var validHosts = ChoicesInstalledCards(runner, function(c) {
+        if (CheckSubType(c, "Icebreaker") && !CheckSubType(c, "AI")) {
+          return true;
+        }
+        return false;
+      });
+      if (validHosts.length === 0) return [];
       return [{}];
     },
     Resolve: function() {
       this.offerHostingChoice();
     },
-    //Not automatic - player should choose whether to rehost
   },
   
   //Host icebreaker gets +1 strength
@@ -1360,7 +1374,6 @@ cardSet[35027] = {
       }
       return 0;
     },
-    automatic: true,
   },
   
   //At run end, reset host's strengthBoost (the "remainder of the run" has ended)
@@ -1378,6 +1391,12 @@ cardSet[35027] = {
     Resolve: function(cards) {
       if (cards.includes(this)) {
         this.cleanupHostOverride();
+        //Remove from host's hostedCards
+        if (this.host && this.host.hostedCards) {
+          var idx = this.host.hostedCards.indexOf(this);
+          if (idx > -1) this.host.hostedCards.splice(idx, 1);
+        }
+        this.host = null;
       }
     },
     automatic: true,
@@ -1386,7 +1405,13 @@ cardSet[35027] = {
   
   AIPreferredInstallChoice: function(choices) {
     //Install if we have icebreakers to host on
-    if (this.getValidHosts().length > 0) return 0;
+    var validHosts = ChoicesInstalledCards(runner, function(c) {
+      if (CheckSubType(c, "Icebreaker") && !CheckSubType(c, "AI")) {
+        return true;
+      }
+      return false;
+    });
+    if (validHosts.length > 0) return 0;
     return -1; //wait until we have icebreakers
   },
   AIWorthKeeping: function(installedRunnerCards, spareMU) {
