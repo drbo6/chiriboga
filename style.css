@@ -296,7 +296,7 @@
 	body.run #footer button .icon,
 	body.run #footer .card-icon {
 		/* In-run: tint white icons to red */
-		filter: invert(18%) sepia(100%) saturate(600%) hue-rotate(345deg) brightness(100%) contrast(100%);
+		filter: invert(18%) sepia(100%) saturate(520%) hue-rotate(345deg) brightness(100%) contrast(100%);
 	}
 
 form {
@@ -2517,7 +2517,7 @@ body.run-active #menubar .deck-info-button::before,
 body.run-active #menubar .rulebook-button::before,
 body.run-active #menubar .debug-menu-button::before,
 body.run-active .fullscreen-button::before {
-	filter: brightness(0) saturate(100%) invert(23%) sepia(99%) saturate(7492%) hue-rotate(357deg) brightness(102%) contrast(119%);
+	filter: brightness(0) saturate(100%) invert(23%) sepia(99%) saturate(600%) hue-rotate(357deg) brightness(102%) contrast(119%);
 }
 
 body.run-active #menubar .deck-info-button:hover::before,

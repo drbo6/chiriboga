@@ -712,32 +712,32 @@ function LoadDecks() {
   // // UNCOMMENTING (use CTRL+/ in VS Code) THE CODE BELOW WILL SET UP A TEST FIELD
   // // SET P=R OR P=C IN THE URL TO VIEW AS RUNNER OR CORP RESPECTIVELY
   // // ----------------------------------------------------------------------------
-  debugging = true; //set true to log extra details and pause execution on error
-  viewAllFronts = true; //set true to see all card fronts (for testing)
-  mainLoopDelay = 50; //for speedy AI vs AI testing (any faster than this and funny things happen at end-of-game)
+  // debugging = true; //set true to log extra details and pause execution on error
+  // viewAllFronts = true; //set true to see all card fronts (for testing)
+  // mainLoopDelay = 50; //for speedy AI vs AI testing (any faster than this and funny things happen at end-of-game)
 
   // SET UP THE MAIN STATES FOR THE RUNNER AND CORP
   // ----------------------------------------------
-	RunnerTestField(31026, //identity
-		[30032, 30032, 35009, 35008], //heapCards
-		[35014, 35030, 35005, 35016, 35034, 35004, 35010, 35009, 35008, 35029, 35007,35005,35005,35005,35005], //stackCards
-		[35015, 35022, 35022, 30033, 30009, 30018, 31011, 35027], //gripCards
-		[35010, 30007,30014,31008,30015,30016,35009], //installed
-		[], //stolen
-		cardBackTexturesRunner,glowTextures,strengthTextures
-  );
+	// RunnerTestField(31026, //identity
+	// 	[30032, 30032, 35009, 35008], //heapCards
+	// 	[35014, 35030, 35005, 35016, 35034, 35004, 35010, 35009, 35008, 35029, 35007,35005,35005,35005,35005], //stackCards
+	// 	[35015, 35022, 35022, 30033, 30009, 30018, 31011, 35027], //gripCards
+	// 	[35010, 30007,30014,31008,30015,30016,35009], //installed
+	// 	[], //stolen
+	// 	cardBackTexturesRunner,glowTextures,strengthTextures
+  // );
 
-	CorpTestField(30035, //identity
-		[30072], //archivesCards
-		[30073,30072,30047,30073,30073,30039,30039,30039,30039,30039,30039,30039,30039,30039,30039,30039,30039,30039,30039,30039], //rndCards
-		[30065,31061,30039,30066], //hqCards
-		[], //archivesInstalled
-		[], //rndInstalled
-		[], //hqInstalled
-		[[30037,30072,30072,30055],[30037,30047,30073,31075],[30037,30074,30074]], //remotes (array of arrays)
-		[], //scored
-		cardBackTexturesCorp,glowTextures,strengthTextures
-  );
+	// CorpTestField(30035, //identity
+	// 	[30072], //archivesCards
+	// 	[30073,30072,30047,30073,30073,30039,30039,30039,30039,30039,30039,30039,30039,30039,30039,30039,30039,30039,30039,30039], //rndCards
+	// 	[30065,31061,30039,30066], //hqCards
+	// 	[], //archivesInstalled
+	// 	[], //rndInstalled
+	// 	[], //hqInstalled
+	// 	[[30037,30072,30072,30055],[30037,30047,30073,31075],[30037,30074,30074]], //remotes (array of arrays)
+	// 	[], //scored
+	// 	cardBackTexturesCorp,glowTextures,strengthTextures
+  // );
 
   // // REZ ICE
   // // -------
@@ -746,8 +746,8 @@ function LoadDecks() {
   // corp.HQ.ice[0].rezzed=true;
   // corp.remoteServers[0].ice[0].rezzed=true;
   // corp.remoteServers[0].ice[1].rezzed=true;
-  corp.remoteServers[1].ice[0].rezzed=true;
-  corp.remoteServers[1].ice[2].rezzed=true;
+  // corp.remoteServers[1].ice[0].rezzed=true;
+  // corp.remoteServers[1].ice[2].rezzed=true;
   // corp.remoteServers[2].ice[0].rezzed=true;
   // corp.remoteServers[2].ice[1].rezzed=true;
   // corp.remoteServers[0].root[0].knownToRunner=true;
@@ -760,7 +760,7 @@ function LoadDecks() {
   
   // // GIVE EVERYONE SOME CREDITS TO START WITH
   // // ----------------------------------------
-  GainCredits(runner,25);
+  // GainCredits(runner,25);
   // GainCredits(corp,25);
   
   // // OTHER STUFF
