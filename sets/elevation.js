@@ -979,3 +979,70 @@ cardSet[35009] = {
     return result;
   },
 };
+
+cardSet[35007] = {
+  title: "Gourmand",
+  imageFile: "35007.png",
+  player: runner,
+  faction: "Anarch",
+  influence: 2,
+  cardType: "program",
+  memoryCost: 1,
+  installCost: 0,
+  //Access → [trash]: Trash the non-agenda card you are accessing. If you do, draw 1 card.
+  abilities: [
+    {
+      text: "Access → [trash]: Trash the non-agenda card you are accessing. If you do, draw 1 card.",
+      Enumerate: function () {
+        if (!CheckAccessing()) return [];
+        //Must be accessing a non-agenda card
+        if (CheckCardType(accessingCard, ["agenda"])) return [];
+        //Card must be trashable
+        if (!CheckTrash(accessingCard)) return [];
+        return [{}];
+      },
+      Resolve: function (params) {
+        var cardRef = this;
+        var cardToTrash = accessingCard; //store reference before trashing Gourmand
+        //Trash Gourmand as the cost (unpreventable)
+        Trash(this, false, function(gourmandTrashed) {
+          //Now trash the accessed card (preventable)
+          if (PlayerCanLook(corp, cardToTrash)) cardToTrash.faceUp = true;
+          SetHistoryThumbnail(cardToTrash.imageFile, "Trash");
+          Trash(cardToTrash, true, function(cardsTrashed) {
+            //Check if the accessed card was actually trashed ("If you do")
+            if (cardsTrashed.includes(cardToTrash)) {
+              Draw(runner, 1);
+            }
+            ResolveAccess();
+          }, cardRef);
+        }, this);
+      },
+    },
+  ],
+  AIPreferredInstallChoice: function(choices) {
+    //Install if we have spare MU - cheap program to have around
+    if (MemoryUnits() - InstalledMemoryCost() >= 1) return 0;
+    return -1;
+  },
+  AIInstallBeforeRun: function(server, potential, useRunEvent, runCreditCost, runClickCost) {
+    //Install before run - it's free and might be useful
+    return 1;
+  },
+  AIAccessTriggerPriority: function(optionList) {
+    //Use Gourmand if:
+    //1. No trash cost option available, OR
+    //2. Trash cost is high (more than 3 credits)
+    //Don't use if card has low trash cost - save Gourmand for expensive cards
+    if (!optionList.includes("trash")) return 3; //priority > 2: preferred over paying
+    if (TrashCost(accessingCard) > 3) return 3;
+    //Otherwise, prefer paying trash cost to preserve Gourmand
+    return 0;
+  },
+  AIReducesTrashCost: function(card) {
+    //Gourmand can effectively reduce trash cost to 0 by sacrificing itself
+    //But only for non-agenda cards
+    if (CheckCardType(card, ["agenda"])) return 0;
+    return TrashCost(card);
+  },
+};
