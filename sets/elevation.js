@@ -26,6 +26,7 @@ cardSet[35005] = {
       this.usedThisRun = false;
     },
     automatic: true,
+    availableWhenInactive: true,
   },
   responsePreventableEndRun: {
     Enumerate: function () {
@@ -135,6 +136,7 @@ cardSet[35005] = {
         corp.AI.preferred = { title: "Shred", option: choice };
       }
     },
+    availableWhenInactive: true,
   },
   //AI: consider this for runs on remote servers with cards in root
   AIRunEventExtraPotential: function(server, potential) {
@@ -321,6 +323,7 @@ cardSet[35014] = {
       GainCredits(runner, 6);
     },
     automatic: true,
+    availableWhenInactive: true,
   },
   //AI: use for easy runs where success is likely
   AIRunEventExtraPotential: function(server, potential) {
@@ -430,18 +433,21 @@ cardSet[35016] = {
       attackedServer = corp.HQ;
       //Phase continues - now approaching HQ (HQ ice is skipped)
     },
+    availableWhenInactive: true,
   },
   responseOnRunEnds: {
     Resolve: function () {
       this.runningWithThis = false;
     },
     automatic: true,
+    availableWhenInactive: true,
   },
   responseOnRunUnsuccessful: {
     Resolve: function () {
       this.runningWithThis = false;
     },
     automatic: true,
+    availableWhenInactive: true,
   },
   //AI: use when HQ has higher potential than Archives and/or HQ is better protected
   AIRunEventExtraPotential: function(server, potential) {
@@ -844,10 +850,9 @@ cardSet[35008] = {
     //Calculate how many virus counters needed for strength
     var virusCounters = Counters(this, "virus");
     var strengthNeeded = iceStrength - cardStrength;
-    var virusNeeded = Math.ceil(strengthNeeded / 2);
+    var virusNeeded = Math.max(0, Math.ceil(strengthNeeded / 2)); //ensure non-negative
     if (virusNeeded > virusCounters) return result; //Can't boost enough
     
-    var boostCost = 0; //virus counters don't cost credits
     var breakCost = iceAI.numSubs; //1 credit per sub
     
     if (creditsLeft >= breakCost) {
@@ -955,20 +960,12 @@ cardSet[35009] = {
     automatic: true,
   },
   AIImplementBreaker: function(rc, result, point, server, cardStrength, iceAI, iceStrength, clicksLeft, creditsLeft) {
-    //Calculate heap bonus
-    var heapBonus = 0;
-    for (var i = 0; i < runner.heap.length; i++) {
-      if (CheckSubType(runner.heap[i], "Fracter")) {
-        heapBonus++;
-      }
-    }
-    var effectiveStrength = cardStrength + heapBonus;
-    
+    //cardStrength already includes heap bonus via modifyStrength, so use it directly
     result = result.concat(
       rc.ImplementIcebreaker(
         point,
         this,
-        effectiveStrength,
+        cardStrength,
         iceAI,
         iceStrength,
         ["Barrier"],

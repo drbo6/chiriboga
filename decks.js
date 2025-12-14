@@ -718,26 +718,26 @@ function LoadDecks() {
 
   // // SET UP THE MAIN STATES FOR THE RUNNER AND CORP
   // // ----------------------------------------------
-	RunnerTestField(31026, //identity
-		[30032, 30032, 30032], //heapCards
-		[35005,35005,35005,35005], //stackCards
-		[35014, 35030, 35005, 35016, 35034, 35004, 35010], //gripCards
-		[35010, 30007,30014,31008], //installed
-		[], //stolen
-		cardBackTexturesRunner,glowTextures,strengthTextures
-  );
+	// RunnerTestField(31026, //identity
+	// 	[30032, 30032, 35009, 35008], //heapCards
+	// 	[35005,35005,35005,35005], //stackCards
+	// 	[35014, 35030, 35005, 35016, 35034, 35004, 35010, 35009, 35008, 35029], //gripCards
+	// 	[35010, 30007,30014,31008], //installed
+	// 	[], //stolen
+	// 	cardBackTexturesRunner,glowTextures,strengthTextures
+  // );
 
-	CorpTestField(30035, //identity
-		[30072], //archivesCards
-		[30073,30072,30047,30073,30073,30039], //rndCards
-		[30065,31061,30039,30066,30071], //hqCards
-		[], //archivesInstalled
-		[], //rndInstalled
-		[], //hqInstalled
-		[[30067,30072,30072]], //remotes (array of arrays)
-		[], //scored
-		cardBackTexturesCorp,glowTextures,strengthTextures
-  );
+	// CorpTestField(30035, //identity
+	// 	[30072], //archivesCards
+	// 	[30073,30072,30047,30073,30073,30039], //rndCards
+	// 	[30065,31061,30039,30066,30071], //hqCards
+	// 	[], //archivesInstalled
+	// 	[], //rndInstalled
+	// 	[], //hqInstalled
+	// 	[[30067,30072,30072],[30067,30047,30073],[30067,30074,30074]], //remotes (array of arrays)
+	// 	[], //scored
+	// 	cardBackTexturesCorp,glowTextures,strengthTextures
+  // );
 
   // // REZ ICE
   // // -------
@@ -746,6 +746,10 @@ function LoadDecks() {
   // corp.HQ.ice[0].rezzed=true;
   // corp.remoteServers[0].ice[0].rezzed=true;
   // corp.remoteServers[0].ice[1].rezzed=true;
+  // corp.remoteServers[1].ice[0].rezzed=true;
+  // corp.remoteServers[1].ice[1].rezzed=true;
+  // corp.remoteServers[2].ice[0].rezzed=true;
+  // corp.remoteServers[2].ice[1].rezzed=true;
   // corp.remoteServers[0].root[0].knownToRunner=true;
   // corp.archives.ice[0].rezzed=true;
   
@@ -756,15 +760,15 @@ function LoadDecks() {
   
   // // GIVE EVERYONE SOME CREDITS TO START WITH
   // // ----------------------------------------
-  GainCredits(runner,25);
+  // GainCredits(runner,25);
   //GainCredits(corp,25);
   
   // // OTHER STUFF
   // // -----------
   // ChangePhase(phases.runnerEndOfTurn);
   // AddTags(2);
-  runner.clickTracker = 10;  
-  runner.rig.resources[0].power = 4;
+  // runner.clickTracker = 10;  
+  // runner.rig.resources[0].power = 4;
   // corp.clickTracker = 2;
   // ChangePhase(phases.corpActionMain);
   // ChangePhase(phases.corpDiscardStart);
@@ -774,7 +778,7 @@ function LoadDecks() {
 
   // // SET THE PHASE TO START OF RUNNER TURN
   // // -------------------------------------
-  ChangePhase(phases.runnerStartResponse); // Runner starts turn
+  // ChangePhase(phases.runnerStartResponse); // Runner starts turn
   // ChangePhase(phases.corpStartDraw);    
  
   // // TO FORCE THE AI TO PLAY CARDS / MAKE DECISIONS, set preferred property on runner.AI or corp.AI
