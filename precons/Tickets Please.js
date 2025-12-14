@@ -1,7 +1,7 @@
 // Exported preconstructed deck
 registerPrecon({
-    name: "Tickets Please",
-    identity: "34001", // Zahya Sadeghi: Versatile Smuggler
+    name: "Tickets, Please",
+    identity: "30010", // Zahya Sadeghi: Versatile Smuggler
     default: false,
     deck_set: "Girometics NSG Core",
     URL: "https://netrunnerdb.com/en/decklist/96ef311d-5a55-43e3-be41-28b072994e30/-nsg-core-tickets-please",

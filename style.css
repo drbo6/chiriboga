@@ -2631,3 +2631,54 @@ body.run-active .fullscreen-button:hover::before {
 #debug-modal .button::before {
   display: none;
 }
+/* ==========================================================
+   Red Play Deck Button Styling
+   ========================================================== */
+
+/* Red button variant for Play Deck */
+.button.button-red {
+    background: linear-gradient(135deg, #1a0808 0%, #2d0a0a 50%, #1a0808 100%);
+    border: 1px solid var(--border-red, #6d1f1f);
+    color: var(--crt-red, #ff3333);
+    box-shadow: 
+        0 0 10px rgba(255, 51, 51, 0.25) inset, 
+        0 0 6px rgba(255, 51, 51, 0.35),
+        0 0 12px rgba(255, 0, 0, 0.15);
+    text-shadow: 0 0 6px rgba(255, 51, 51, 0.5);
+}
+
+.button.button-red:hover {
+    background: linear-gradient(135deg, #2d0a0a 0%, #4a1010 50%, #2d0a0a 100%);
+    border-color: var(--crt-red, #ff3333);
+    color: var(--crt-red-light, #ff6666);
+    box-shadow: 
+        0 0 14px rgba(255, 51, 51, 0.45) inset, 
+        0 0 10px rgba(255, 51, 51, 0.55),
+        0 0 18px rgba(255, 0, 0, 0.25);
+    text-shadow: 0 0 8px rgba(255, 51, 51, 0.7);
+}
+
+.button.button-red:active {
+    background: linear-gradient(135deg, #3a0c0c 0%, #5a1414 50%, #3a0c0c 100%);
+    box-shadow: 
+        0 0 10px rgba(255, 51, 51, 0.55) inset, 
+        0 0 8px rgba(255, 51, 51, 0.45);
+}
+
+.button.button-red:disabled {
+    background: linear-gradient(135deg, #120505 0%, #1a0808 50%, #120505 100%);
+    border-color: var(--border-red-dark, #4e1818);
+    color: var(--crt-red-muted, #dc8f8f);
+    opacity: 0.6;
+    box-shadow: 
+        0 0 6px rgba(255, 51, 51, 0.15) inset, 
+        0 0 4px rgba(255, 51, 51, 0.2);
+    text-shadow: none;
+    cursor: default;
+}
+
+/* Deck launcher specific button styling enhancements */
+#launch.button-red {
+    font-weight: 700;
+    letter-spacing: 2px;
+}

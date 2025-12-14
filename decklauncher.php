@@ -184,6 +184,131 @@
 				if (showingOnlySelected) ApplyFilter();
 			}
 
+			// Sort state and functions
+			var currentSort = 'id'; // 'id', 'name', 'type', 'faction'
+
+			function GetFactionOrder(cardId) {
+				var card = cardSet[cardId];
+				if (!card) return 999;
+				var faction = (card.faction || '').toLowerCase();
+				
+				if (deckPlayer === runner) {
+					// Runner faction order: Anarch->Criminal->Shaper->Neutral
+					if (faction === 'anarch') return 0;
+					if (faction === 'criminal') return 1;
+					if (faction === 'shaper') return 2;
+					if (faction === 'neutral' || faction === 'neutral-runner') return 3;
+				} else {
+					// Corp faction order: HB->Jinteki->NBN->Weyland->Neutral
+					if (faction === 'haas-bioroid' || faction === 'hb') return 0;
+					if (faction === 'jinteki') return 1;
+					if (faction === 'nbn') return 2;
+					if (faction === 'weyland-consortium' || faction === 'weyland') return 3;
+					if (faction === 'neutral' || faction === 'neutral-corp') return 4;
+				}
+				return 999;
+			}
+
+			function GetTypeOrder(cardId) {
+				var card = cardSet[cardId];
+				if (!card) return 999;
+				var cardType = (card.cardType || '').toLowerCase();
+				
+				if (deckPlayer === runner) {
+					// Runner type order: Event->Program->Hardware->Resource
+					if (cardType === 'event') return 0;
+					if (cardType === 'program') return 1;
+					if (cardType === 'hardware') return 2;
+					if (cardType === 'resource') return 3;
+				} else {
+					// Corp type order: agenda->asset->ice->operation->upgrade
+					if (cardType === 'agenda') return 0;
+					if (cardType === 'asset') return 1;
+					if (cardType === 'ice') return 2;
+					if (cardType === 'operation') return 3;
+					if (cardType === 'upgrade') return 4;
+				}
+				return 999;
+			}
+
+			function SortCardContainer() {
+				var $container = $('#cardcontainer');
+				var $cards = $container.children('.card-item').detach();
+				
+				$cards.sort(function(a, b) {
+					var idA = parseInt($(a).attr('data-id'));
+					var idB = parseInt($(b).attr('data-id'));
+					var cardA = cardSet[idA];
+					var cardB = cardSet[idB];
+					
+					if (!cardA || !cardB) return 0;
+					
+					if (currentSort === 'id') {
+						return idA - idB;
+					} else if (currentSort === 'name') {
+						return (cardA.title || '').localeCompare(cardB.title || '');
+					} else if (currentSort === 'type') {
+						var typeOrderA = GetTypeOrder(idA);
+						var typeOrderB = GetTypeOrder(idB);
+						if (typeOrderA !== typeOrderB) return typeOrderA - typeOrderB;
+						// Alphabetical within type
+						return (cardA.title || '').localeCompare(cardB.title || '');
+					} else if (currentSort === 'faction') {
+						var factionOrderA = GetFactionOrder(idA);
+						var factionOrderB = GetFactionOrder(idB);
+						if (factionOrderA !== factionOrderB) return factionOrderA - factionOrderB;
+						// Alphabetical within faction
+						return (cardA.title || '').localeCompare(cardB.title || '');
+					}
+					return 0;
+				});
+				
+				$container.append($cards);
+			}
+
+			function CycleSort() {
+				if (currentSort === 'id') {
+					currentSort = 'name';
+					$('#sortdeck').html('SORT BY:<br>NAME');
+				} else if (currentSort === 'name') {
+					currentSort = 'type';
+					$('#sortdeck').html('SORT BY:<br>TYPE');
+				} else if (currentSort === 'type') {
+					currentSort = 'faction';
+					$('#sortdeck').html('SORT BY:<br>FACTION');
+				} else {
+					currentSort = 'id';
+					$('#sortdeck').html('SORT BY:<br>ID');
+				}
+				SortCardContainer();
+			}
+
+			// Random Deck function
+			function GenerateRandomDeck() {
+				// Use the existing DeckBuild function from utility.js to generate a valid random deck
+				var cardsChosen = DeckBuild(cardSet[json.identity]);
+				
+				// Clear current deck
+				json.cards = [];
+				deckCounts = {};
+				
+				// Convert generated deck into counts
+				for (var i = 0; i < cardsChosen.length; i++) {
+					var cardId = cardsChosen[i];
+					if (typeof deckCounts[cardId] === 'undefined') {
+						deckCounts[cardId] = 1;
+					} else {
+						deckCounts[cardId]++;
+					}
+					json.cards.push(cardId);
+				}
+				
+				deckModified = true;
+				UpdateDeckTextareaFromCounts();
+				Parse();
+				UpdateCardCountsUI();
+			}
+
 			function RenderAllCardsList() {
 				$("#cardcontainer").empty();
 				allCardIdsForPlayer = [];
@@ -205,6 +330,8 @@
 				}
 				AttachCardListEvents();
 				UpdateCardCountsUI();
+				// Apply current sort after rendering
+				SortCardContainer();
 			}
 
 			function AttachCardListEvents() {
@@ -1454,9 +1581,11 @@
 					</div>
 				</div>
 			<div class="leftrow buttons">
-				<button id="launch" class="button" onclick="window.location.href=$(this).prop('href');">PLAY<br>DECK</button>
+				<button id="launch" class="button button-red" onclick="window.location.href=$(this).prop('href');">PLAY<br>DECK</button>
 				<button id="opponent" class="button" onclick="window.location.href=$(this).prop('href');">SET AS OPPONENT</button>
+				<button id="randomdeck" onclick="GenerateRandomDeck();" class="button">RANDOM<br>DECK</button>
 				<button id="cleardeck" onclick="ClearDeck();" class="button">CLEAR<br>DECK</button>
+				<button id="sortdeck" onclick="CycleSort();" class="button">SORT BY:<br>ID</button>
 				<button id="filterdeck" onclick="CycleFilter();" class="button">FILTER:<br>ALL CARDS</button>
 				<button id="togglecards" onclick="ToggleOtherCards();" class="button">HIDE UNSELECTED</button>
 				<button id="exittomenu" onclick="window.location.href='index.php';" class="button">BACK TO MENU</button>
