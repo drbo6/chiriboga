@@ -1589,11 +1589,28 @@ phases.runnerPostAction.Enumerate.n = function () {
   }
   return [{}];
 };
+
+// START DRBO6 - EDIT FOR CACOPHONY 1/2
+// phases.runnerPostAction.Resolve.n = function () {
+//   if (runner.clickTracker < 1) {
+//     ChangePhase(phases.runnerDiscardStart);
+//   } else IncrementPhase();
+// }; //if out of clicks, time to move on
 phases.runnerPostAction.Resolve.n = function () {
   if (runner.clickTracker < 1) {
-    ChangePhase(phases.runnerDiscardStart);
+    ChangePhase(phases.runnerActionPhaseEnds);
   } else IncrementPhase();
 }; //if out of clicks, time to move on
+//"When your action phase ends" triggers fire (Nisei 2021 1.4)
+phases.runnerActionPhaseEnds = CreatePhaseFromTemplate(
+  phaseTemplates.globalTriggers,
+  runner,
+  "Runner's Action Phase Ends",
+  "Runner 1.4",
+  null
+);
+phases.runnerActionPhaseEnds.triggerCallbackName = "responseOnRunnerActionPhaseEnds";
+// END DRBO6 - EDIT FOR CACOPHONY 1/2
 
 //Start of Discard Phase
 phases.runnerDiscardStart = CreatePhaseFromTemplate(
@@ -1664,6 +1681,10 @@ phases.runBreachServer.next = phases.runAccessingCard; //"Run 5.2"
 phases.runAccessingCard.next = phases.runEnds; //"Run Accessing"
 phases.runUnsuccessful.next = phases.runEnds; //"Run 6.3"
 phases.runEnds.next = phases.runnerPostAction; //"Run 6.4"
+
+// START DRBO6 - EDIT FOR CACOPHONY 2/2
+phases.runnerActionPhaseEnds.next = phases.runnerDiscardStart;
+// END DRBO6 - EDIT FOR CACOPHONY 2/2
 
 //for usability when human playing Corp
 CombineResponseWithPhase(

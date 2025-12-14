@@ -515,6 +515,7 @@ cardSet[35004] = {
   playCost: 1,
   //As an additional cost to play this event, spend [click].
   //Install 1 program from your heap. You may add 1 program from your heap to the bottom of your stack.
+  pendingAddToStack: false,
   Enumerate: function () {
     //Must have at least one program in heap that can be installed
     var installablePrograms = ChoicesArrayInstall(runner.heap, false, function(card) {
@@ -547,11 +548,10 @@ cardSet[35004] = {
       runner,
       installChoices,
       function(installParams) {
+        //Mark that we need to do add-to-stack after install
+        cardRef.pendingAddToStack = true;
         //Install the chosen program (paying costs)
-        Install(installParams.card, installParams.host, false, null, true, function() {
-          //Step 2: Optionally add another program from heap to bottom of stack
-          cardRef.offerAddToStack();
-        }, cardRef);
+        Install(installParams.card, installParams.host, false, null, true);
       },
       "Scrounge",
       "Install program from heap",
@@ -559,48 +559,66 @@ cardSet[35004] = {
       "install"
     );
   },
-  offerAddToStack: function() {
-    var programsInHeap = ChoicesArrayCards(runner.heap, function(card) {
-      return CheckCardType(card, ["program"]);
-    });
-    
-    //Add option to decline
-    programsInHeap.push({ card: null, label: "Done", button: "Done" });
-    
-    //**AI code for add-to-stack choice
-    if (runner.AI != null) {
-      //Look for valuable programs to save
-      var preferredCard = runner.AI._icebreakerInPileNotInHandOrArray(runner.heap, InstalledCards(runner).concat(runner.grip));
-      if (preferredCard) {
-        for (var i = 0; i < programsInHeap.length; i++) {
-          if (programsInHeap[i].card == preferredCard) {
-            programsInHeap = [programsInHeap[i]];
-            break;
-          }
-        }
-      } else {
-        //No valuable card, decline
-        programsInHeap = [{ card: null, label: "Done", button: "Done" }];
+  //Use responseOnInstall to trigger the add-to-stack phase
+  //Non-automatic so the trigger system handles phases properly
+  responseOnInstall: {
+    Enumerate: function(card) {
+      if (this.pendingAddToStack) {
+        return [{}];
       }
-    }
-    
-    DecisionPhase(
-      runner,
-      programsInHeap,
-      function(addParams) {
-        if (addParams.card === null) {
+      return [];
+    },
+    Resolve: function(params) {
+      this.pendingAddToStack = false;
+      //Set up and switch to our custom phase
+      this.AddToStackPhase.next = currentPhase;
+      ChangePhase(this.AddToStackPhase);
+    },
+    availableWhenInactive: true,
+  },
+  AddToStackPhase: {
+    player: runner,
+    title: "Scrounge",
+    identifier: "Scrounge Add to Stack",
+    Enumerate: {
+      add: function() {
+        var programsInHeap = ChoicesArrayCards(runner.heap, function(card) {
+          return CheckCardType(card, ["program"]);
+        });
+        //Add option to decline
+        programsInHeap.push({ card: null, label: "Done", button: "Done" });
+        
+        //**AI code for add-to-stack choice
+        if (runner.AI != null) {
+          var preferredCard = runner.AI._icebreakerInPileNotInHandOrArray(runner.heap, InstalledCards(runner).concat(runner.grip));
+          if (preferredCard) {
+            for (var i = 0; i < programsInHeap.length; i++) {
+              if (programsInHeap[i].card == preferredCard) {
+                return [programsInHeap[i]];
+              }
+            }
+          }
+          //No valuable card, decline
+          return [{ card: null, label: "Done", button: "Done" }];
+        }
+        return programsInHeap;
+      },
+    },
+    Resolve: {
+      add: function(params) {
+        if (params.card === null) {
           //Done, no card added
+          IncrementPhase();
           return;
         }
         //Add chosen card to bottom of stack (position 0)
-        var cardTitle = GetTitle(addParams.card);
-        MoveCard(addParams.card, runner.stack, 0);
+        var cardTitle = GetTitle(params.card);
+        MoveCard(params.card, runner.stack, 0);
         Log(cardTitle + " added to bottom of stack");
+        IncrementPhase();
       },
-      "Scrounge",
-      "Add program to bottom of stack?",
-      this
-    );
+    },
+    questionText: "Add program to bottom of stack?",
   },
   AIWouldPlay: function() {
     //Play if there's a valuable program in heap worth installing
@@ -621,5 +639,97 @@ cardSet[35004] = {
       return true;
     }
     return false;
+  },
+};
+
+cardSet[35010] = {
+  title: "Cacophony",
+  imageFile: "35010.png",
+  player: runner,
+  faction: "Anarch",
+  influence: 4,
+  cardType: "resource",
+  subTypes: ["Virtual"],
+  installCost: 3,
+  unique: true,
+  //The first time each turn you steal or trash a Corp card, place 1 power counter on this resource.
+  //When your action phase ends, you may remove 2 hosted power counters to sabotage 3.
+  placedCounterThisTurn: false,
+  responseOnRunnerTurnBegins: {
+    Resolve: function () {
+      this.placedCounterThisTurn = false;
+    },
+    automatic: true,
+  },
+  //Track stealing - checks must be in Resolve for automatic triggers
+  responseOnStolen: {
+    Resolve: function (params) {
+      if (this.placedCounterThisTurn) return;
+      this.placedCounterThisTurn = true;
+      AddCounters(this, "power", 1);
+      Log("Cacophony gains 1 power counter");
+    },
+    automatic: true,
+  },
+  //Track trashing Corp cards (only when Runner trashes during access, not Corp self-trash)
+  //Checks must be in Resolve for automatic triggers
+  //Note: automatic triggers don't receive parameters, so we check the global accessingCard
+  responseOnTrash: {
+    Resolve: function () {
+      if (this.placedCounterThisTurn) return;
+      //Only trigger if this is during an access (Runner trashing, not Corp self-trashing like Sabotage)
+      //accessingCard is a global that's set when accessing a card
+      if (typeof accessingCard === 'undefined' || accessingCard === null) return;
+      //Verify it's a corp card being accessed/trashed
+      if (accessingCard.player !== corp) return;
+      this.placedCounterThisTurn = true;
+      AddCounters(this, "power", 1);
+      Log("Cacophony gains 1 power counter");
+    },
+    automatic: true,
+  },
+  //When action phase ends, may sabotage
+  //NOTE: Requires phase.js modification to add responseOnRunnerActionPhaseEnds
+  //Alternative: Use responseOnRunnerDiscardEnds (fires after discard phase instead)
+  responseOnRunnerActionPhaseEnds: {
+    Enumerate: function () {
+      if (CheckCounters(this, "power", 2)) return [{}];
+      return [];
+    },
+    Resolve: function (params) {
+      var cardRef = this;
+      var choices = [
+        { id: 0, label: "Sabotage 3", button: "Sabotage 3" },
+        { id: 1, label: "Decline", button: "Decline" }
+      ];
+      
+      //**AI code
+      if (runner.AI != null) {
+        //Usually want to sabotage if we can
+        choices = [choices[0]];
+      }
+      
+      DecisionPhase(
+        runner,
+        choices,
+        function(decision) {
+          if (decision.id === 0) {
+            RemoveCounters(cardRef, "power", 2);
+            Sabotage(3);
+          }
+        },
+        "Cacophony",
+        "Cacophony",
+        this
+      );
+    },
+  },
+  AIEconomyInstall: function() {
+    //Not really economy, but install if we plan to run and trash/steal
+    return 1;
+  },
+  AIWorthKeeping: function(installedRunnerCards, spareMU) {
+    //Worth keeping if we're aggressive
+    return true;
   },
 };
