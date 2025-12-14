@@ -735,3 +735,250 @@ cardSet[35010] = {
     return true;
   },
 };
+
+cardSet[35029] = {
+  title: "Azimat",
+  imageFile: "35029.png",
+  player: runner,
+  faction: "Shaper",
+  influence: 1,
+  cardType: "program",
+  memoryCost: 2,
+  installCost: 1,
+  //2 recurring credits. You can spend hosted credits to pay trash costs.
+  recurringCredits: 2,
+  canUseCredits: function (doing, card) {
+    if (doing == "paying trash costs") return true;
+    return false;
+  },
+  AIInstallBeforeRun: function(server, potential, useRunEvent, runCreditCost, runClickCost) {
+    //Install before run if we might want to trash
+    return 1;
+  },
+  AIReducesTrashCost: function(card) {
+    var cardTC = TrashCost(card);
+    if (cardTC < this.credits) return cardTC;
+    return this.credits;
+  },
+  AIPreferredInstallChoice: function(choices) {
+    //Install if we have spare MU
+    if (MemoryUnits() - InstalledMemoryCost() >= 2) return 0;
+    return -1;
+  },
+};
+
+cardSet[35008] = {
+  title: "Hantu",
+  imageFile: "35008.png",
+  player: runner,
+  faction: "Anarch",
+  influence: 2,
+  cardType: "program",
+  subTypes: ["Icebreaker", "Killer", "Virus"],
+  memoryCost: 1,
+  installCost: 3,
+  strength: 2,
+  //When you install this program, place 2 virus counters on it.
+  //Interface → 1 credit: Break 1 sentry subroutine.
+  //Hosted virus counter: +2 strength.
+  strengthBoost: 0,
+  automaticOnInstall: {
+    Resolve: function(card) {
+      if (card == this) {
+        AddCounters(this, "virus", 2);
+      }
+    },
+  },
+  modifyStrength: {
+    Resolve: function (card) {
+      if (card == this) return this.strengthBoost;
+      return 0;
+    },
+  },
+  abilities: [
+    {
+      text: "Break 1 sentry subroutine",
+      Enumerate: function () {
+        if (!CheckEncounter()) return [];
+        if (!CheckSubType(attackedServer.ice[approachIce], "Sentry")) return [];
+        if (!CheckCredits(runner, 1, "using", this)) return [];
+        if (!CheckStrength(this)) return [];
+        return ChoicesEncounteredSubroutines();
+      },
+      Resolve: function (params) {
+        SpendCredits(
+          runner,
+          1,
+          "using",
+          this,
+          function () {
+            Break(params.subroutine);
+          },
+          this
+        );
+      },
+    },
+    {
+      text: "+2 strength (spend virus counter)",
+      Enumerate: function () {
+        if (!CheckEncounter()) return [];
+        if (CheckStrength(this)) return [];
+        if (!CheckUnbrokenSubroutines()) return [];
+        if (!CheckSubType(attackedServer.ice[approachIce], "Sentry")) return [];
+        if (!CheckCounters(this, "virus", 1)) return [];
+        return [{}];
+      },
+      Resolve: function (params) {
+        RemoveCounters(this, "virus", 1);
+        BoostStrength(this, 2);
+      },
+    },
+  ],
+  responseOnEncounterEnds: {
+    Resolve: function () {
+      this.strengthBoost = 0;
+    },
+    automatic: true,
+  },
+  AIImplementBreaker: function(rc, result, point, server, cardStrength, iceAI, iceStrength, clicksLeft, creditsLeft) {
+    //Calculate how many virus counters needed for strength
+    var virusCounters = Counters(this, "virus");
+    var strengthNeeded = iceStrength - cardStrength;
+    var virusNeeded = Math.ceil(strengthNeeded / 2);
+    if (virusNeeded > virusCounters) return result; //Can't boost enough
+    
+    var boostCost = 0; //virus counters don't cost credits
+    var breakCost = iceAI.numSubs; //1 credit per sub
+    
+    if (creditsLeft >= breakCost) {
+      result = result.concat(
+        rc.ImplementIcebreaker(
+          point,
+          this,
+          cardStrength + (virusNeeded * 2),
+          iceAI,
+          iceStrength,
+          ["Sentry"],
+          0, //costToUpStr (using counters instead)
+          2, //amtToUpStr
+          1, //costToBreak
+          1, //amtToBreak
+          creditsLeft
+        )
+      );
+    }
+    return result;
+  },
+};
+
+cardSet[35009] = {
+  title: "Rising Tide",
+  imageFile: "35009.png",
+  player: runner,
+  faction: "Anarch",
+  influence: 2,
+  cardType: "program",
+  subTypes: ["Icebreaker", "Fracter"],
+  memoryCost: 1,
+  installCost: 1,
+  strength: 1,
+  //This program gets +1 strength for each fracter in your heap.
+  //Interface → 1 credit: Break 1 barrier subroutine.
+  //1 credit: +1 strength.
+  strengthBoost: 0,
+  modifyStrength: {
+    Resolve: function (card) {
+      if (card == this) {
+        //Count fracters in heap
+        var heapBonus = 0;
+        for (var i = 0; i < runner.heap.length; i++) {
+          if (CheckSubType(runner.heap[i], "Fracter")) {
+            heapBonus++;
+          }
+        }
+        return this.strengthBoost + heapBonus;
+      }
+      return 0;
+    },
+  },
+  abilities: [
+    {
+      text: "Break 1 barrier subroutine",
+      Enumerate: function () {
+        if (!CheckEncounter()) return [];
+        if (!CheckSubType(attackedServer.ice[approachIce], "Barrier")) return [];
+        if (!CheckCredits(runner, 1, "using", this)) return [];
+        if (!CheckStrength(this)) return [];
+        return ChoicesEncounteredSubroutines();
+      },
+      Resolve: function (params) {
+        SpendCredits(
+          runner,
+          1,
+          "using",
+          this,
+          function () {
+            Break(params.subroutine);
+          },
+          this
+        );
+      },
+    },
+    {
+      text: "+1 strength",
+      Enumerate: function () {
+        if (!CheckEncounter()) return [];
+        if (CheckStrength(this)) return [];
+        if (!CheckUnbrokenSubroutines()) return [];
+        if (!CheckSubType(attackedServer.ice[approachIce], "Barrier")) return [];
+        if (!CheckCredits(runner, 1, "using", this)) return [];
+        return [{}];
+      },
+      Resolve: function (params) {
+        SpendCredits(
+          runner,
+          1,
+          "using",
+          this,
+          function () {
+            BoostStrength(this, 1);
+          },
+          this
+        );
+      },
+    },
+  ],
+  responseOnEncounterEnds: {
+    Resolve: function () {
+      this.strengthBoost = 0;
+    },
+    automatic: true,
+  },
+  AIImplementBreaker: function(rc, result, point, server, cardStrength, iceAI, iceStrength, clicksLeft, creditsLeft) {
+    //Calculate heap bonus
+    var heapBonus = 0;
+    for (var i = 0; i < runner.heap.length; i++) {
+      if (CheckSubType(runner.heap[i], "Fracter")) {
+        heapBonus++;
+      }
+    }
+    var effectiveStrength = cardStrength + heapBonus;
+    
+    result = result.concat(
+      rc.ImplementIcebreaker(
+        point,
+        this,
+        effectiveStrength,
+        iceAI,
+        iceStrength,
+        ["Barrier"],
+        1, //costToUpStr
+        1, //amtToUpStr
+        1, //costToBreak
+        1, //amtToBreak
+        creditsLeft
+      )
+    );
+    return result;
+  },
+};

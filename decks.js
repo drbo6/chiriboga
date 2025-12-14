@@ -722,7 +722,7 @@ function LoadDecks() {
 		[30032, 30032, 30032], //heapCards
 		[35005,35005,35005,35005], //stackCards
 		[35014, 35030, 35005, 35016, 35034, 35004, 35010], //gripCards
-		[30007,30014,31008], //installed
+		[35010, 30007,30014,31008], //installed
 		[], //stolen
 		cardBackTexturesRunner,glowTextures,strengthTextures
   );
@@ -764,7 +764,7 @@ function LoadDecks() {
   // ChangePhase(phases.runnerEndOfTurn);
   // AddTags(2);
   runner.clickTracker = 10;  
-  // runner.rig.programs[0].virus = 3;
+  runner.rig.resources[0].power = 4;
   // corp.clickTracker = 2;
   // ChangePhase(phases.corpActionMain);
   // ChangePhase(phases.corpDiscardStart);
