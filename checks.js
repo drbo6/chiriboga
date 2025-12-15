@@ -426,6 +426,10 @@ function CheckScore(card,ignoreRequirement=false) {
  * @returns {Boolean} true if card is installed, false otherwise
  */
 function CheckInstalled(card) {
+  // DRBO6 START - cards marked notInstalled are never considered installed (e.g. cards hosted on Detente)
+  if (card.notInstalled) return false;
+  // DRBO6 END (this line is new)
+
   var ret = false;
   if (typeof card.host !== "undefined") {
     //hosted cards are assumed to be installed by default

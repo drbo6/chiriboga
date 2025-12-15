@@ -1606,7 +1606,7 @@ cardSet[35003] = {
       return [{}];
     },
     Resolve: function() {
-      //Find rezzed cards that match accessed titles
+      //Find rezzed cards that match accessed titles - clickable cards, no footer buttons
       var choices = [];
       var installedCorpCards = InstalledCards(corp);
       for (var i = 0; i < installedCorpCards.length; i++) {
@@ -1614,13 +1614,13 @@ cardSet[35003] = {
         if (card.rezzed) {
           var title = GetTitle(card);
           if (this.accessedTitlesThisRun.indexOf(title) !== -1) {
-            choices.push({ card: card, label: "Trash " + GetTitle(card, true), button: GetTitle(card) });
+            choices.push({ card: card, label: "Trash " + GetTitle(card, true) });
           }
         }
       }
       
-      //Add decline option
-      choices.push({ card: null, label: "Decline", button: "Decline" });
+      //Add decline option - only this shows in footer
+      choices.push({ card: null, label: "Decline", button: "Decline Charm Offensive" });
       
       DecisionPhase(
         runner,
@@ -1682,5 +1682,311 @@ cardSet[35003] = {
     }
     //No good targets, but Archives run is still free economy info
     return 1;
+  },
+};
+
+//Detente
+//+1 MU
+//The first time each turn you make a successful run on HQ, you may host 1 card 
+//from HQ at random faceup on this hardware. (It is not installed or rezzed.)
+//[click], add 2 hosted cards to HQ: The Runner may access 1 card in HQ at random. 
+//Any player can use this ability.
+//Limit 1 console per player.
+cardSet[35018] = {
+  title: "Detente",
+  imageFile: "35018.png",
+  player: runner,
+  faction: "Criminal",
+  influence: 3,
+  cardType: "hardware",
+  subTypes: ["Console"],
+  installCost: 3,
+  unique: true,
+  memoryUnits: 1,
+  
+  //Tracking for "first time each turn"
+  usedThisTurn: false,
+  
+  //Initialize hostedCards on install (not at card definition level to avoid persistence between games)
+  //Cards hosted on Detente use the notInstalled flag so engine doesn't treat them as installed
+  automaticOnInstall: {
+    Resolve: function(card) {
+      if (card === this) {
+        this.hostedCards = [];
+      }
+    },
+  },
+  
+  //When Detente is trashed, return held cards to HQ
+  automaticOnTrash: {
+    Resolve: function(card) {
+      if (card === this && this.hostedCards && this.hostedCards.length > 0) {
+        for (var i = 0; i < this.hostedCards.length; i++) {
+          var heldCard = this.hostedCards[i];
+          heldCard.faceUp = false;
+          heldCard.notInstalled = false; //clear the flag
+          heldCard.host = null;
+          corp.HQ.cards.push(heldCard);
+          heldCard.cardLocation = corp.HQ.cards;
+          Log(GetTitle(heldCard, true) + " returned to HQ");
+        }
+        this.hostedCards = [];
+      }
+    },
+  },
+  
+  //Reset at runner turn begin
+  responseOnRunnerTurnBegins: {
+    Resolve: function() {
+      this.usedThisTurn = false;
+    },
+    automatic: true,
+  },
+  
+  //The first time each turn you make a successful run on HQ, 
+  //you may host 1 card from HQ at random faceup
+  responseOnRunSuccessful: {
+    Enumerate: function() {
+      if (this.usedThisTurn) return [];
+      if (attackedServer !== corp.HQ) return [];
+      if (corp.HQ.cards.length === 0) return [];
+      return [{}];
+    },
+    Resolve: function() {
+      this.usedThisTurn = true;
+      
+      //Ask runner if they want to host a card
+      var cardRef = this;
+      var choices = [
+        { id: 0, label: "Host 1 card from HQ", button: "Host on Detente" },
+        { id: 1, label: "Decline", button: "Decline" }
+      ];
+      
+      //**AI code
+      if (runner.AI != null) {
+        //Always host if possible - builds up for the ability
+        choices = [choices[0]];
+      }
+      
+      DecisionPhase(
+        runner,
+        choices,
+        function(params) {
+          if (params.id === 0 && corp.HQ.cards.length > 0) {
+            //Pick random card from HQ
+            var randomIndex = Math.floor(Math.random() * corp.HQ.cards.length);
+            var cardToHost = corp.HQ.cards[randomIndex];
+            
+            //Initialize hostedCards if needed (safety check)
+            if (typeof cardRef.hostedCards === 'undefined') {
+              cardRef.hostedCards = [];
+            }
+            
+            //Move card to hostedCards (faceup but NOT installed or rezzed per card text)
+            var idx = corp.HQ.cards.indexOf(cardToHost);
+            if (idx > -1) corp.HQ.cards.splice(idx, 1);
+            cardRef.hostedCards.push(cardToHost);
+            cardToHost.cardLocation = cardRef.hostedCards;
+            cardToHost.faceUp = true;
+            cardToHost.rezzed = false;
+            cardToHost.notInstalled = true; //engine flag to exclude from InstalledCards()
+            cardToHost.host = cardRef;
+            
+            Log(GetTitle(cardToHost, true) + " hosted on " + GetTitle(cardRef));
+            
+            //AI learns about this card
+            if (runner.AI != null) {
+              runner.AI.LoseInfoAboutHQCards(cardToHost);
+            }
+          }
+        },
+        "Detente",
+        "Host 1 card from HQ at random?",
+        this
+      );
+    },
+    text: "Host 1 card from HQ at random",
+  },
+  
+  //[click], add 2 hosted cards to HQ: The Runner may access 1 card in HQ at random.
+  //Any player can use this ability.
+  activeForOpponent: true, //allows corp to see and use abilities on this card
+  abilities: [
+    {
+      //Runner's version
+      text: "Add 2 hosted cards to HQ: Access 1 card in HQ",
+      Enumerate: function() {
+        if (typeof this.hostedCards === 'undefined' || this.hostedCards.length < 2) return [];
+        if (!CheckActionClicks(runner, 1)) return [];
+        return [{}];
+      },
+      Resolve: function(params) {
+        this.resolveDetente(runner);
+      },
+    },
+    {
+      //Corp's version
+      text: "Add 2 hosted cards to HQ: Runner accesses 1 card in HQ",
+      opponentOnly: true,
+      Enumerate: function() {
+        if (typeof this.hostedCards === 'undefined' || this.hostedCards.length < 2) return [];
+        if (!CheckActionClicks(corp, 1)) return [];
+        return [{}];
+      },
+      Resolve: function(params) {
+        this.resolveDetente(corp);
+      },
+    },
+  ],
+  
+  //Shared resolve function for both abilities
+  resolveDetente: function(spendingPlayer) {
+    var cardRef = this;
+    SpendClicks(spendingPlayer, 1);
+    
+    //Return 2 hosted cards to HQ
+    var cardsToReturn = cardRef.hostedCards.splice(0, 2);
+    for (var i = 0; i < cardsToReturn.length; i++) {
+      cardsToReturn[i].faceUp = false;
+      cardsToReturn[i].notInstalled = false; //clear the flag
+      cardsToReturn[i].host = null;
+      corp.HQ.cards.push(cardsToReturn[i]);
+      cardsToReturn[i].cardLocation = corp.HQ.cards;
+      Log(GetTitle(cardsToReturn[i], true) + " returned to HQ");
+    }
+    
+    //Runner may access 1 card in HQ at random
+    if (corp.HQ.cards.length === 0) {
+      Log("HQ is empty, no card to access");
+      return;
+    }
+    
+    //Ask runner if they want to access
+    var accessChoices = [
+      { id: 0, label: "Access 1 card in HQ at random", button: "Access" },
+      { id: 1, label: "Decline", button: "Decline" }
+    ];
+    
+    //**AI code
+    if (runner.AI != null) {
+      //Always access
+      accessChoices = [accessChoices[0]];
+    }
+    
+    DecisionPhase(
+      runner,
+      accessChoices,
+      function(decision) {
+        if (decision.id === 0 && corp.HQ.cards.length > 0) {
+          //Pick random card from HQ
+          var randomIndex = Math.floor(Math.random() * corp.HQ.cards.length);
+          var cardToAccess = corp.HQ.cards[randomIndex];
+          
+          //Show the card
+          cardToAccess.renderer.canView = true;
+          cardToAccess.renderer.ToggleZoom();
+          Log("Accessing " + GetTitle(cardToAccess, true) + " from HQ");
+          
+          //Fire "on access" triggers (for ambushes like Snare!, Urtica, etc.)
+          AutomaticTriggers("automaticOnAccess", [cardToAccess]);
+          
+          //Use TriggeredResponsePhase for "when accessed" abilities (like Snare!'s optional damage)
+          TriggeredResponsePhase(corp, "responseOnAccess", [cardToAccess], function() {
+            //After access triggers resolve, let runner decide what to do
+            cardRef.resolveDetenteAccess(cardToAccess);
+          }, "Accessed");
+        }
+      },
+      "Detente",
+      "Access 1 card in HQ at random?",
+      cardRef
+    );
+  },
+  
+  //Helper function to resolve the access after triggers
+  resolveDetenteAccess: function(cardToAccess) {
+    var cardRef = this;
+    
+    //Check if card is still in HQ (might have been trashed by ambush, etc.)
+    if (corp.HQ.cards.indexOf(cardToAccess) === -1) {
+      cardToAccess.renderer.canView = false;
+      return;
+    }
+    
+    //Build choices for what to do with the accessed card
+    var actionChoices = [];
+    
+    //Can steal if it's an agenda and stealing is allowed (CheckSteal handles Film Critic, etc.)
+    //Temporarily set accessingCard for CheckSteal to work properly
+    var oldAccessingCard = accessingCard;
+    accessingCard = cardToAccess;
+    
+    if (CheckSteal()) {
+      actionChoices.push({ id: "steal", card: cardToAccess, label: "Steal " + GetTitle(cardToAccess, true), button: "Steal" });
+    }
+    
+    //Can trash if it has a trash cost and runner can afford
+    if (typeof cardToAccess.trashCost !== "undefined" && CheckTrash(cardToAccess)) {
+      var trashCost = TrashCost(cardToAccess);
+      if (CheckCredits(runner, trashCost, "paying trash costs", cardToAccess)) {
+        actionChoices.push({ id: "trash", card: cardToAccess, cost: trashCost, label: "Trash for " + trashCost + "[c]", button: "Trash (" + trashCost + "[c])" });
+      }
+    }
+    
+    //Restore accessingCard
+    accessingCard = oldAccessingCard;
+    
+    //Can always continue (unless it's an agenda that must be stolen)
+    if (actionChoices.length === 0 || actionChoices[0].id !== "steal" || !CheckCardType(cardToAccess, ["agenda"])) {
+      actionChoices.push({ id: "continue", card: cardToAccess, label: "Continue", button: "Continue" });
+    }
+    
+    //**AI code
+    if (runner.AI != null) {
+      //Steal agendas, trash expensive assets, otherwise continue
+      for (var i = 0; i < actionChoices.length; i++) {
+        if (actionChoices[i].id === "steal") {
+          actionChoices = [actionChoices[i]];
+          break;
+        }
+      }
+    }
+    
+    DecisionPhase(
+      runner,
+      actionChoices,
+      function(action) {
+        if (action.id === "steal") {
+          SetHistoryThumbnail(action.card.imageFile, "Steal");
+          MoveCard(action.card, runner.scoreArea);
+          action.card.faceUp = true;
+          if (runner.AI != null) runner.AI.LoseInfoAboutHQCards(action.card);
+          Log(GetTitle(action.card, true) + " stolen");
+          action.card.renderer.canView = false;
+          //Fire stolen triggers
+          TriggeredResponsePhase(playerTurn, "responseOnStolen", [], function() {
+            action.card.advancement = 0;
+          }, "Stolen");
+        } else if (action.id === "trash") {
+          SpendCredits(runner, action.cost, "paying trash costs", action.card, function() {
+            SetHistoryThumbnail(action.card.imageFile, "Trash");
+            Trash(action.card, true);
+            action.card.renderer.canView = false;
+          }, cardRef);
+        } else {
+          //Continue - just hide the card
+          action.card.renderer.canView = false;
+        }
+      },
+      "Detente: Access",
+      "Accessed " + GetTitle(cardToAccess, true),
+      cardRef
+    );
+  },
+  
+  //**AI code
+  AIWorthKeeping: function(installedRunnerCards) {
+    //Console that provides MU - always worth keeping
+    return true;
   },
 };

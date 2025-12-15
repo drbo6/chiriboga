@@ -1647,6 +1647,9 @@ function InstalledCards(player=null) {
     //if you want to implement e.g. Scheherazade or Dinosaurus you would need to implement recursion
     if (typeof initialCards[i].hostedCards !== "undefined") {
       for (var j = 0; j < initialCards[i].hostedCards.length; j++) {
+        // DRBO6 START - Skip cards marked as notInstalled (e.g. cards hosted on Detente are not installed per card text)
+        if (initialCards[i].hostedCards[j].notInstalled) continue;
+        // DRBO6 END
         if (initialCards[i].hostedCards[j].player == player || player == null)
           ret.push(initialCards[i].hostedCards[j]);
       }
