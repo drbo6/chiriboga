@@ -1419,3 +1419,125 @@ cardSet[35027] = {
     return true;
   },
 };
+
+//Ryō "Phoenix" Ōno: Out of the Ashes
+//The first time each turn a run becomes successful after a subroutine resolved 
+//during that run, gain 1 credit and the Corp trashes 1 card from HQ.
+cardSet[35001] = {
+  title: "Ryō \"Phoenix\" Ōno: Out of the Ashes",
+  imageFile: "35001.png",
+  player: runner,
+  faction: "Anarch",
+  cardType: "identity",
+  deckSize: 45,
+  influenceLimit: 17,
+  subTypes: ["G-mod"],
+  link: 0,
+  
+  //Tracking flags
+  usedThisTurn: false,
+  subroutineResolvedThisRun: false,
+  
+  //Reset "first time each turn" at turn begin
+  responseOnRunnerTurnBegins: {
+    Resolve: function() {
+      this.usedThisTurn = false;
+    },
+    automatic: true,
+  },
+  
+  //Reset subroutine tracking at run begin
+  automaticOnRunBegins: {
+    Resolve: function(server) {
+      this.subroutineResolvedThisRun = false;
+    },
+  },
+  
+  //Track when subroutines resolve by detecting entry into subroutine phase
+  //with unbroken subroutines. By the time we're in "Run Subroutines" phase,
+  //the runner has had their chance to break - any unbroken subs WILL fire.
+  //This avoids false positives from bypassed ice (bypass skips this phase).
+  automaticOnAnyChange: {
+    Resolve: function() {
+      //Skip if already tracked or not in a run
+      if (this.subroutineResolvedThisRun) return;
+      if (!attackedServer) return;
+      
+      //Check if we're in the subroutine resolution phase
+      if (currentPhase && currentPhase.identifier === "Run Subroutines") {
+        //Check if there are any unbroken subroutines on the encountered ice
+        if (typeof approachIce !== 'undefined' && approachIce >= 0 && 
+            attackedServer.ice && approachIce < attackedServer.ice.length) {
+          var ice = attackedServer.ice[approachIce];
+          if (ice && ice.subroutines) {
+            for (var i = 0; i < ice.subroutines.length; i++) {
+              if (!ice.subroutines[i].broken) {
+                //Found an unbroken subroutine - it will resolve
+                this.subroutineResolvedThisRun = true;
+                return;
+              }
+            }
+          }
+        }
+      }
+    },
+  },
+  
+  //Trigger on successful run if a subroutine resolved during this run
+  responseOnRunSuccessful: {
+    Enumerate: function() {
+      if (this.usedThisTurn) return [];
+      if (!this.subroutineResolvedThisRun) return [];
+      return [{}];
+    },
+    Resolve: function() {
+      this.usedThisTurn = true;
+      
+      //Gain 1 credit
+      GainCredits(runner, 1);
+      
+      //Corp trashes 1 card from HQ
+      if (corp.HQ.cards.length > 0) {
+        var choices = ChoicesArrayCards(corp.HQ.cards);
+        DecisionPhase(
+          corp,
+          choices,
+          function(params) {
+            Trash(params.card, false); //unpreventable
+          },
+          "Ryō \"Phoenix\" Ōno",
+          "Trash 1 card from HQ",
+          this,
+          "discard"
+        );
+        
+        //**AI code
+        if (corp.AI != null) {
+          //Trash lowest value card (prefer operations, then non-ice)
+          var bestChoice = choices[0];
+          var bestValue = 999;
+          for (var i = 0; i < choices.length; i++) {
+            var card = choices[i].card;
+            var value = 10; //default
+            if (CheckCardType(card, ["operation"])) value = 3;
+            else if (CheckCardType(card, ["asset", "upgrade"])) value = 5;
+            else if (CheckCardType(card, ["ice"])) value = 7;
+            else if (CheckCardType(card, ["agenda"])) value = 15; //never trash agendas if avoidable
+            if (value < bestValue) {
+              bestValue = value;
+              bestChoice = choices[i];
+            }
+          }
+          corp.AI.preferred = { title: "Ryō \"Phoenix\" Ōno", option: bestChoice };
+        }
+      }
+    },
+    text: "Gain 1 credit, Corp trashes 1 card from HQ",
+  },
+  
+  //**AI code for runner - this identity benefits from successful runs through ice
+  AIPerformRun: function(server) {
+    //No special run behavior - standard run logic applies
+    return null;
+  },
+};
