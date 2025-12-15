@@ -465,14 +465,7 @@ function RenderCards(cards, modifier) {
     RenderCard(cards[i], modifier, i);
     if (typeof cards[i].hostedCards !== "undefined") {
       for (var j = 0; j < cards[i].hostedCards.length; j++) {
-        // DRBO6 START = cards marked notInstalled (e.g. on Detente) should render as normal cards, not rotated ice
-        // Old: RenderCard(cards[i].hostedCards[j], FaceUpNoTint, i); //assuming this is what we want for all hosted cards...could change this later
-        if (cards[i].hostedCards[j].notInstalled) {
-          RenderCard(cards[i].hostedCards[j], PiRotationNoTint, i); //180 rotation for corp cards to show right-side up
-        } else {
-          RenderCard(cards[i].hostedCards[j], FaceUpNoTint, i); //assuming this is what we want for all hosted cards...could change this later
-        }
-        // DRBO6 END        
+        RenderCard(cards[i].hostedCards[j], FaceUpNoTint, i); //assuming this is what we want for all hosted cards...could change this later      
       }
     }
     if (typeof cards[i].setAsideCards !== "undefined") {
