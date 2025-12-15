@@ -1541,3 +1541,146 @@ cardSet[35001] = {
     return null;
   },
 };
+
+//Charm Offensive
+//Run Archives. When that run ends, you may trash 1 rezzed copy of a card 
+//you accessed in Archives during that run.
+cardSet[35003] = {
+  title: "Charm Offensive",
+  imageFile: "35003.png",
+  player: runner,
+  faction: "Anarch",
+  influence: 2,
+  cardType: "event",
+  subTypes: ["Run"],
+  playCost: 0,
+  
+  //Tracking
+  runningWithThis: false,
+  accessedTitlesThisRun: [],
+  
+  //Run Archives
+  Enumerate: function() {
+    return [{ server: corp.archives, label: "Archives" }];
+  },
+  Resolve: function(params) {
+    this.runningWithThis = true;
+    this.accessedTitlesThisRun = [];
+    MakeRun(corp.archives);
+  },
+  
+  //Track accessed card titles during this run (only in Archives)
+  automaticOnAccess: {
+    Resolve: function(card) {
+      if (!this.runningWithThis) return;
+      //Only track cards accessed from Archives
+      if (attackedServer === corp.archives) {
+        var title = GetTitle(card);
+        if (this.accessedTitlesThisRun.indexOf(title) === -1) {
+          this.accessedTitlesThisRun.push(title);
+        }
+      }
+    },
+  },
+  
+  //When that run ends, may trash 1 rezzed copy
+  responseOnRunEnds: {
+    Enumerate: function() {
+      if (!this.runningWithThis) return [];
+      if (this.accessedTitlesThisRun.length === 0) return [];
+      
+      //Find rezzed cards that match accessed titles
+      var validTargets = [];
+      var installedCorpCards = InstalledCards(corp);
+      for (var i = 0; i < installedCorpCards.length; i++) {
+        var card = installedCorpCards[i];
+        if (card.rezzed) {
+          var title = GetTitle(card);
+          if (this.accessedTitlesThisRun.indexOf(title) !== -1) {
+            validTargets.push(card);
+          }
+        }
+      }
+      
+      if (validTargets.length === 0) return [];
+      return [{}];
+    },
+    Resolve: function() {
+      //Find rezzed cards that match accessed titles
+      var choices = [];
+      var installedCorpCards = InstalledCards(corp);
+      for (var i = 0; i < installedCorpCards.length; i++) {
+        var card = installedCorpCards[i];
+        if (card.rezzed) {
+          var title = GetTitle(card);
+          if (this.accessedTitlesThisRun.indexOf(title) !== -1) {
+            choices.push({ card: card, label: "Trash " + GetTitle(card, true), button: GetTitle(card) });
+          }
+        }
+      }
+      
+      //Add decline option
+      choices.push({ card: null, label: "Decline", button: "Decline" });
+      
+      DecisionPhase(
+        runner,
+        choices,
+        function(params) {
+          if (params.card) {
+            //Trash the card (ability effect, not paying trash cost)
+            Trash(params.card, true);
+          }
+        },
+        "Charm Offensive",
+        "Trash 1 rezzed copy?",
+        this,
+        "trash"
+      );
+      
+      //**AI code
+      if (runner.AI != null) {
+        //Prefer trashing ice, then upgrades, then assets
+        var bestChoice = choices[choices.length - 1]; //decline by default
+        var bestValue = 0;
+        for (var i = 0; i < choices.length - 1; i++) {
+          var card = choices[i].card;
+          var value = 1;
+          if (CheckCardType(card, ["ice"])) value = 5; //ice is high value target
+          else if (CheckCardType(card, ["upgrade"])) value = 3;
+          else if (CheckCardType(card, ["asset"])) value = 2;
+          if (value > bestValue) {
+            bestValue = value;
+            bestChoice = choices[i];
+          }
+        }
+        runner.AI.preferred = { title: "Charm Offensive", option: bestChoice };
+      }
+    },
+    text: "Trash 1 rezzed copy of an accessed card",
+  },
+  
+  //Reset flag when run ends
+  automaticOnRunEnds: {
+    Resolve: function() {
+      this.runningWithThis = false;
+    },
+  },
+  
+  //**AI code
+  AIPlayPriority: function() {
+    //Check if there are any cards in Archives that have rezzed copies
+    for (var i = 0; i < corp.archives.cards.length; i++) {
+      var archivedTitle = GetTitle(corp.archives.cards[i]);
+      var installedCorpCards = InstalledCards(corp);
+      for (var j = 0; j < installedCorpCards.length; j++) {
+        if (installedCorpCards[j].rezzed && GetTitle(installedCorpCards[j]) === archivedTitle) {
+          //Found a potential target - especially good if it's ice
+          if (CheckCardType(installedCorpCards[j], ["ice"])) return 3;
+          return 2;
+        }
+      }
+    }
+    //No good targets, but Archives run is still free economy info
+    return 1;
+  },
+};
