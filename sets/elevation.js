@@ -2009,7 +2009,7 @@ cardSet[35039] = {
     {
       text: "[click][click][click], [trash]: Gain 4[c] and draw 3 cards. Install up to 2 cards. You may play 1 operation.",
       Enumerate: function() {
-        if (!CheckRezzed(this)) return [];
+        if (!this.rezzed) return [];
         if (!CheckActionClicks(corp, 3)) return [];
         if (!CheckTrash(this)) return [];
         return [{}];
@@ -2017,17 +2017,19 @@ cardSet[35039] = {
       Resolve: function() {
         var cardRef = this;
         SpendClicks(corp, 3);
-        Trash(this, false);
         
-        //Gain 4 credits
-        GainCredits(corp, 4, "gaining", this);
+        //Gain 4 credits immediately (before trash/draw so they can be used)
+        GainCredits(corp, 4);
         Log(GetTitle(cardRef) + " gains Corp 4[c]");
         
-        //Draw 3 cards
-        Draw(corp, 3);
-        
-        //Now install up to 2 cards (one at a time) then optionally play operation
-        humanoidResourcesInstall(cardRef, 0);
+        //Trash is async, put rest in callback (false = cannot prevent)
+        Trash(this, false, function(cardsTrashed) {
+          //Draw 3 cards, then proceed to installs
+          Draw(corp, 3, function() {
+            //Now install up to 2 cards (one at a time) then optionally play operation
+            humanoidResourcesInstall(cardRef, 0);
+          }, cardRef);
+        }, this);
       },
     },
   ],
@@ -2081,12 +2083,14 @@ function humanoidResourcesPlayOp(cardRef) {
     if (card.cardType === "operation") {
       //Check if playable (cost check)
       if (AvailableCredits(corp, "playing", card) >= PlayCost(card)) {
-        opChoices.push({ card: card, label: card.title, button: card.title });
+        //No button property - card will show as clickable card, not footer button
+        opChoices.push({ card: card, label: card.title });
       }
     }
   }
   
-  opChoices.push({ card: null, label: "Skip", button: "Skip" });
+  //Only Skip appears in footer
+  opChoices.push({ card: null, label: "Skip Playing 1 Operation from HQ", button: "Skip Playing 1 Operation from HQ" });
   
   DecisionPhase(
     corp,
@@ -2181,3 +2185,114 @@ cardSet[35042] = {
     return { facecheck: true, etr: true };
   },
 };
+
+//Card 23: Project Ingatan
+//Haas-Bioroid Agenda - Research
+//Advancement: 3, Points: 2
+//Dividends 1 (When you score this agenda, place 1 agenda counter on it for each excess advancement counter.)
+//When your discard phase ends, you may remove 1 hosted agenda counter to install 1 card from Archives, ignoring all costs.
+cardSet[35038] = {
+  title: "Project Ingatan",
+  imageFile: "35038.png",
+  player: corp,
+  faction: "Haas-Bioroid",
+  cardType: "agenda",
+  subTypes: ["Research"],
+  agendaPoints: 2,
+  advancementRequirement: 3,
+  
+  //Dividends 1: When scored, place 1 agenda counter for each excess advancement
+  responseOnScored: {
+    Resolve: function() {
+      //Calculate excess advancement (advancement - requirement)
+      var excess = this.advancement - this.advancementRequirement;
+      if (excess > 0) {
+        //Dividends 1 means 1 counter per excess
+        AddCounters(this, "agenda", excess);
+        Log(GetTitle(this) + " places " + excess + " agenda counter" + (excess > 1 ? "s" : "") + " (Dividends)");
+      }
+    },
+    automatic: true,
+  },
+  
+  //When your discard phase ends, may remove 1 agenda counter to install from Archives
+  responseOnCorpDiscardEnds: {
+    Enumerate: function() {
+      //Need at least 1 agenda counter
+      if (!CheckCounters(this, "agenda", 1)) return [];
+      //Need installable cards in Archives (use ChoicesArrayCards since we're ignoring costs)
+      var archivesChoices = [];
+      for (var i = 0; i < corp.archives.cards.length; i++) {
+        var card = corp.archives.cards[i];
+        //Can install assets, upgrades, ice, and agendas (not operations)
+        if (card.cardType !== "operation") {
+          archivesChoices.push({ card: card, label: card.title });
+        }
+      }
+      if (archivesChoices.length === 0) return [];
+      return [{}];
+    },
+    Resolve: function() {
+      var cardRef = this;
+      
+      //Build choices list for installable cards
+      var archivesChoices = [];
+      for (var i = 0; i < corp.archives.cards.length; i++) {
+        var card = corp.archives.cards[i];
+        if (card.cardType !== "operation") {
+          archivesChoices.push({ card: card, label: card.title });
+        }
+      }
+      
+      //Add decline option
+      archivesChoices.push({ card: null, label: "Decline", button: "Decline" });
+      
+      DecisionPhase(
+        corp,
+        archivesChoices,
+        function(params) {
+          if (params.card !== null) {
+            //Pass cardRef to helper so it can remove counter after install
+            projectIngatanInstall(cardRef, params.card);
+          }
+        },
+        "Project Ingatan",
+        "Install card from Archives? (ignoring all costs)",
+        cardRef
+      );
+    },
+    text: "Remove 1 agenda counter to install 1 card from Archives",
+  },
+  
+  //**AI code
+  AIOverAdvance: function() {
+    //Worth over-advancing for the dividend counters
+    return 2; //up to 2 extra advancements
+  },
+};
+
+//Helper function for Project Ingatan - install with server selection
+function projectIngatanInstall(cardRef, cardToInstall) {
+  //Get valid install choices (includes server selection)
+  var installChoices = ChoicesCardInstall(cardToInstall, true); //true = ignore costs for choice filtering
+  
+  if (installChoices.length === 0) {
+    Log("No valid install destination for " + GetTitle(cardToInstall));
+    return;
+  }
+  
+  DecisionPhase(
+    corp,
+    installChoices,
+    function(params) {
+      //Remove the agenda counter now that install is confirmed
+      RemoveCounters(cardRef, "agenda", 1);
+      //Install with ignoreAllCosts = true
+      Install(params.card, params.server, true);
+    },
+    "Project Ingatan",
+    "Choose where to install " + cardToInstall.title,
+    cardRef,
+    "install"
+  );
+}
