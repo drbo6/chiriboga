@@ -1990,3 +1990,194 @@ cardSet[35018] = {
     return true;
   },
 };
+
+//Card 21: Humanoid Resources
+//Haas-Bioroid Asset
+//Cost: 1, Trash: 1
+//[click][click][click], [trash]: Gain 4 credits and draw 3 cards. Install up to 2 cards from HQ (one at a time). You may play 1 operation from HQ.
+cardSet[35039] = {
+  title: "Humanoid Resources",
+  imageFile: "35039.png",
+  player: corp,
+  faction: "Haas-Bioroid",
+  influence: 2,
+  cardType: "asset",
+  rezCost: 1,
+  trashCost: 1,
+  
+  abilities: [
+    {
+      text: "[click][click][click], [trash]: Gain 4[c] and draw 3 cards. Install up to 2 cards. You may play 1 operation.",
+      Enumerate: function() {
+        if (!CheckRezzed(this)) return [];
+        if (!CheckActionClicks(corp, 3)) return [];
+        if (!CheckTrash(this)) return [];
+        return [{}];
+      },
+      Resolve: function() {
+        var cardRef = this;
+        SpendClicks(corp, 3);
+        Trash(this, false);
+        
+        //Gain 4 credits
+        GainCredits(corp, 4, "gaining", this);
+        Log(GetTitle(cardRef) + " gains Corp 4[c]");
+        
+        //Draw 3 cards
+        Draw(corp, 3);
+        
+        //Now install up to 2 cards (one at a time) then optionally play operation
+        humanoidResourcesInstall(cardRef, 0);
+      },
+    },
+  ],
+};
+
+//Helper function for Humanoid Resources - chained installation
+function humanoidResourcesInstall(cardRef, installCount) {
+  var installChoices = ChoicesHandInstall(corp); //respect install costs
+  
+  //Build choice list
+  var choices = [];
+  for (var i = 0; i < installChoices.length; i++) {
+    choices.push(installChoices[i]);
+  }
+  
+  var skipLabel = installCount < 2 ? "Skip install" : "Done installing";
+  choices.push({ card: null, label: skipLabel, button: skipLabel });
+  
+  DecisionPhase(
+    corp,
+    choices,
+    function(params) {
+      if (params.card !== null) {
+        Install(params.card, params.server);
+        installCount++;
+        //If less than 2 installed, offer to install another
+        if (installCount < 2) {
+          humanoidResourcesInstall(cardRef, installCount);
+        } else {
+          //Done installing, now offer to play operation
+          humanoidResourcesPlayOp(cardRef);
+        }
+      } else {
+        //Skipped install, move to operation
+        humanoidResourcesPlayOp(cardRef);
+      }
+    },
+    "Humanoid Resources",
+    "Install card from HQ (" + installCount + "/2 installed)",
+    cardRef,
+    "install"
+  );
+}
+
+//Helper function for Humanoid Resources - play operation
+function humanoidResourcesPlayOp(cardRef) {
+  //Build list of operations in HQ
+  var opChoices = [];
+  for (var i = 0; i < corp.HQ.cards.length; i++) {
+    var card = corp.HQ.cards[i];
+    if (card.cardType === "operation") {
+      //Check if playable (cost check)
+      if (AvailableCredits(corp, "playing", card) >= PlayCost(card)) {
+        opChoices.push({ card: card, label: card.title, button: card.title });
+      }
+    }
+  }
+  
+  opChoices.push({ card: null, label: "Skip", button: "Skip" });
+  
+  DecisionPhase(
+    corp,
+    opChoices,
+    function(params) {
+      if (params.card !== null) {
+        //Play the operation
+        var opCard = params.card;
+        SpendCredits(corp, PlayCost(opCard), "playing", opCard, function() {
+          Play(opCard);
+        }, cardRef);
+      }
+      //Otherwise done
+    },
+    "Humanoid Resources",
+    "Play operation from HQ?",
+    cardRef
+  );
+}
+
+//Card 22: Scatter Field
+//Haas-Bioroid Ice - Code Gate
+//Cost: 3, Strength: 0
+//While this ice is the only piece of ice protecting this server, it gets +4 strength.
+//↳ You may install 1 card from HQ.
+//↳ End the run.
+cardSet[35042] = {
+  title: "Scatter Field",
+  imageFile: "35042.png",
+  player: corp,
+  faction: "Haas-Bioroid",
+  influence: 2,
+  cardType: "ice",
+  subTypes: ["Code Gate"],
+  rezCost: 3,
+  strength: 0,
+  
+  //While this ice is the only piece of ice protecting this server, it gets +4 strength.
+  modifyStrength: {
+    Resolve: function(card) {
+      if (card === this) {
+        var server = GetServer(this);
+        if (server && server.ice && server.ice.length === 1) {
+          return 4;
+        }
+      }
+      return 0;
+    },
+  },
+  
+  subroutines: [
+    {
+      text: "You may install 1 card from HQ.",
+      Resolve: function() {
+        var installChoices = ChoicesHandInstall(corp); //respect install costs
+        
+        if (installChoices.length === 0) {
+          Log("No cards to install from HQ");
+          return;
+        }
+        
+        //Add decline option
+        installChoices.push({ card: null, label: "Decline", button: "Decline" });
+        
+        DecisionPhase(
+          corp,
+          installChoices,
+          function(params) {
+            if (params.card !== null) {
+              Install(params.card, params.server);
+            }
+          },
+          "Scatter Field",
+          "Install card from HQ?",
+          this,
+          "install"
+        );
+      },
+      visual: { y: 72, h: 22 },
+    },
+    {
+      text: "End the run.",
+      Resolve: function() {
+        EndTheRun();
+      },
+      visual: { y: 94, h: 17 },
+    },
+  ],
+  
+  //**AI code
+  AIRezReasons: function() {
+    return { facecheck: true, etr: true };
+  },
+};
