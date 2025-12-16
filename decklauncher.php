@@ -235,33 +235,36 @@
 				var $container = $('#cardcontainer');
 				var $cards = $container.children('.card-item').detach();
 				
-				$cards.sort(function(a, b) {
-					var idA = parseInt($(a).attr('data-id'));
-					var idB = parseInt($(b).attr('data-id'));
-					var cardA = cardSet[idA];
-					var cardB = cardSet[idB];
-					
-					if (!cardA || !cardB) return 0;
-					
-					if (currentSort === 'id') {
-						return idA - idB;
-					} else if (currentSort === 'name') {
-						return (cardA.title || '').localeCompare(cardB.title || '');
-					} else if (currentSort === 'type') {
-						var typeOrderA = GetTypeOrder(idA);
-						var typeOrderB = GetTypeOrder(idB);
-						if (typeOrderA !== typeOrderB) return typeOrderA - typeOrderB;
-						// Alphabetical within type
-						return (cardA.title || '').localeCompare(cardB.title || '');
-					} else if (currentSort === 'faction') {
-						var factionOrderA = GetFactionOrder(idA);
-						var factionOrderB = GetFactionOrder(idB);
-						if (factionOrderA !== factionOrderB) return factionOrderA - factionOrderB;
-						// Alphabetical within faction
-						return (cardA.title || '').localeCompare(cardB.title || '');
-					}
-					return 0;
-				});
+				   $cards.sort(function(a, b) {
+					   var idA = parseInt($(a).attr('data-id'));
+					   var idB = parseInt($(b).attr('data-id'));
+					   var cardA = cardSet[idA];
+					   var cardB = cardSet[idB];
+					   if (!cardA || !cardB) return 0;
+					   if (currentSort === 'id') {
+						   return idA - idB;
+					   } else if (currentSort === 'name') {
+						   return (cardA.title || '').localeCompare(cardB.title || '');
+					   } else if (currentSort === 'type') {
+						   var typeOrderA = GetTypeOrder(idA);
+						   var typeOrderB = GetTypeOrder(idB);
+						   if (typeOrderA !== typeOrderB) return typeOrderA - typeOrderB;
+						   // Secondary: subtype (array or string, fallback to empty string)
+						   var subA = (cardA.subTypes && cardA.subTypes.length) ? cardA.subTypes.join(',') : (cardA.subtype || '');
+						   var subB = (cardB.subTypes && cardB.subTypes.length) ? cardB.subTypes.join(',') : (cardB.subtype || '');
+						   if (subA < subB) return -1;
+						   if (subA > subB) return 1;
+						   // Tertiary: alphabetical by title
+						   return (cardA.title || '').localeCompare(cardB.title || '');
+					   } else if (currentSort === 'faction') {
+						   var factionOrderA = GetFactionOrder(idA);
+						   var factionOrderB = GetFactionOrder(idB);
+						   if (factionOrderA !== factionOrderB) return factionOrderA - factionOrderB;
+						   // Alphabetical within faction
+						   return (cardA.title || '').localeCompare(cardB.title || '');
+					   }
+					   return 0;
+				   });
 				
 				$container.append($cards);
 			}
