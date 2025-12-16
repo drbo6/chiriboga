@@ -728,13 +728,13 @@ function LoadDecks() {
   );
 
 	CorpTestField(30035, //identity
-		[30072, 30047], //archivesCards
+		[30072, 30047,30073,30072,30047,30073,30073], //archivesCards
 		[30073,30072,30047,30073,30073,30039,30039,30039,30039,30039,30039,30039,30039,30039,30039,30039,30039,30039,30039,30039], //rndCards
-		[30075, 30075, 35039, 35039], //hqCards
+		[30075], //hqCards
 		[], //archivesInstalled
 		[], //rndInstalled
 		[35042], //hqInstalled
-		[[30037,30072,30072,30055],[30037,30047,30073,31075],[30037,30074,30074]], //remotes (array of arrays)
+		[[35038,30072,30072,30055],[30037,30047,30073,31075],[30037,30074,30074]], //remotes (array of arrays)
 		[], //scored
 		cardBackTexturesCorp,glowTextures,strengthTextures
   );
@@ -755,7 +755,7 @@ function LoadDecks() {
   
   // // SET ADVANCEMENTS
   // // ----------------
-  // corp.remoteServers[0].root[0].advancement=2;
+  corp.remoteServers[0].root[0].advancement=5;
   // corp.remoteServers[1].root[0].advancement=2;
   
   // // GIVE EVERYONE SOME CREDITS TO START WITH
@@ -769,7 +769,7 @@ function LoadDecks() {
   // AddTags(1);
   // runner.clickTracker = 10;  
   // runner.rig.resources[0].power = 4;
-   corp.clickTracker = 8;
+   corp.clickTracker = 1;
   // ChangePhase(phases.corpActionMain);
   // ChangePhase(phases.corpDiscardStart);
   // MakeRun(corp.remoteServers[0]);
