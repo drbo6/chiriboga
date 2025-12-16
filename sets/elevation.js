@@ -2260,7 +2260,7 @@ cardSet[35038] = {
         cardRef
       );
     },
-    text: "Remove 1 agenda counter to install 1 card from Archives",
+    text: "Remove 1 agenda counter, install 1 Archived card",
   },
   
   //**AI code
