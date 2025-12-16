@@ -1856,11 +1856,11 @@ function ChangePhase(src, skipInit = false) {
   // Rough estimate: allow up to 2 lines (~60 chars per line at default size)
   // Reduce font size if text would need more than 2 lines
   if (tpstr.length > 120) {
-	headerstyle = ' style="font-size:120%;"';
+	headerstyle = ' style="font-size:120% !important;"';
   } else if (tpstr.length > 100) {
-	headerstyle = ' style="font-size:130%;"';
+	headerstyle = ' style="font-size:130% !important;"';
   } else {
-	headerstyle = ' style="font-size:150%;"';
+	headerstyle = ' style="font-size:150% !important;"';
   }
   $("#header").html('<h2' + headerstyle + '>' + tpstr + '</h2>');
   if (skipInit !== true) {

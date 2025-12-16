@@ -728,9 +728,9 @@ function LoadDecks() {
   );
 
 	CorpTestField(30035, //identity
-		[30072, 30047,30073,30072,30047,30073,30073], //archivesCards
+		[30037, 30047,30073,30072,30047,30073,30073], //archivesCards
 		[30073,30072,30047,30073,30073,30039,30039,30039,30039,30039,30039,30039,30039,30039,30039,30039,30039,30039,30039,30039], //rndCards
-		[30075], //hqCards
+		[30037], //hqCards
 		[], //archivesInstalled
 		[], //rndInstalled
 		[35042], //hqInstalled

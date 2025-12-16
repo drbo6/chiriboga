@@ -2055,11 +2055,10 @@ function humanoidResourcesInstall(cardRef, installCount) {
       if (params.card !== null) {
         Install(params.card, params.server);
         installCount++;
-        //If less than 2 installed, offer to install another
+        //Continue to next install or operation
         if (installCount < 2) {
           humanoidResourcesInstall(cardRef, installCount);
         } else {
-          //Done installing, now offer to play operation
           humanoidResourcesPlayOp(cardRef);
         }
       } else {
@@ -2273,26 +2272,59 @@ cardSet[35038] = {
 
 //Helper function for Project Ingatan - install with server selection
 function projectIngatanInstall(cardRef, cardToInstall) {
-  //Get valid install choices (includes server selection)
-  var installChoices = ChoicesCardInstall(cardToInstall, true); //true = ignore costs for choice filtering
+  //Build server choices based on card type
+  var serverChoices = [];
   
-  if (installChoices.length === 0) {
-    Log("No valid install destination for " + GetTitle(cardToInstall));
-    return;
+  if (cardToInstall.cardType === "ice") {
+    //Ice can protect any server including new remotes
+    serverChoices.push({ server: corp.HQ, label: "HQ" });
+    serverChoices.push({ server: corp.RnD, label: "R&D" });
+    serverChoices.push({ server: corp.archives, label: "Archives" });
+    for (var j = 0; j < corp.remoteServers.length; j++) {
+      serverChoices.push({
+        server: corp.remoteServers[j],
+        label: corp.remoteServers[j].serverName
+      });
+    }
+    serverChoices.push({ server: null, label: "New remote server", button: "New remote" });
+  } else if (cardToInstall.cardType === "upgrade") {
+    //Upgrades can go in root of any server or new remote
+    serverChoices.push({ server: corp.HQ, label: "HQ" });
+    serverChoices.push({ server: corp.RnD, label: "R&D" });
+    serverChoices.push({ server: corp.archives, label: "Archives" });
+    for (var j = 0; j < corp.remoteServers.length; j++) {
+      serverChoices.push({
+        server: corp.remoteServers[j],
+        label: corp.remoteServers[j].serverName
+      });
+    }
+    serverChoices.push({ server: null, label: "New remote server", button: "New remote" });
+  } else {
+    //Assets and agendas go in remotes only
+    for (var j = 0; j < corp.remoteServers.length; j++) {
+      serverChoices.push({
+        server: corp.remoteServers[j],
+        label: corp.remoteServers[j].serverName
+      });
+    }
+    serverChoices.push({ server: null, label: "New remote server", button: "New remote" });
   }
   
   DecisionPhase(
     corp,
-    installChoices,
+    serverChoices,
     function(params) {
       //Remove the agenda counter now that install is confirmed
       RemoveCounters(cardRef, "agenda", 1);
+      //Create new server if needed, otherwise Install handles it
+      var targetServer = params.server;
       //Install with ignoreAllCosts = true
-      Install(params.card, params.server, true);
+      //Pass null for new remote - Install will create the server and trigger responseOnCreateServer
+      Install(cardToInstall, targetServer, true);
     },
     "Project Ingatan",
     "Choose where to install " + cardToInstall.title,
     cardRef,
-    "install"
+    "server"
   );
 }
