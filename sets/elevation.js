@@ -2361,8 +2361,8 @@ cardSet[35075] = {
   //The Runner cannot trash this ice (while it is rezzed)
   modifyCannot: {
     Resolve: function(str, card) {
-      //Only protect this specific ice, only while rezzed
-      if (str === "trash" && card === this && this.rezzed) {
+      //Only protect this specific ice, only while rezzed, only from Runner
+      if (str === "trash" && card === this && this.rezzed && activePlayer === runner) {
         return true; //cannot trash
       }
       return false;
