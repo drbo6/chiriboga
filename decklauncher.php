@@ -438,8 +438,10 @@
 			if (cardInfo.text) {
 				var cardText = cardInfo.text.replace(/\[([^\]]+)\]/g, function(match, word) {
 					var iconName = word.toUpperCase();
-					// Special case: [trash] maps to TRASH_ABILITY
+					// Special case: Reformat the text for NSG icons
 					if (iconName === 'TRASH') iconName = 'TRASH_ABILITY';
+					if (iconName === 'RECURRING-CREDIT' || iconName === 'RECURRING_CREDIT') iconName = 'RECURRING_CREDIT';
+					if (iconName === 'BAD-PUBLICITY' || iconName === 'BAD_PUBLICITY') iconName = 'BAD_PUBLICITY';
 					return '<img src="images/nsg/NSG_' + iconName + '.svg" class="card-icon" alt="' + word + '">';
 				});
 				// Replace newlines with <br> tags (handle both literal \n and actual newlines)
