@@ -712,9 +712,9 @@ function LoadDecks() {
   // // UNCOMMENTING (use CTRL+/ in VS Code) THE CODE BELOW WILL SET UP A TEST FIELD
   // // SET P=R OR P=C IN THE URL TO VIEW AS RUNNER OR CORP RESPECTIVELY
   // // ----------------------------------------------------------------------------
-  // debugging = true; //set true to log extra details and pause execution on error
-  // viewAllFronts = true; //set true to see all card fronts (for testing)
-  // mainLoopDelay = 50; //for speedy AI vs AI testing (any faster than this and funny things happen at end-of-game)
+  debugging = true; //set true to log extra details and pause execution on error
+  viewAllFronts = true; //set true to see all card fronts (for testing)
+  mainLoopDelay = 50; //for speedy AI vs AI testing (any faster than this and funny things happen at end-of-game)
 
   // SET UP THE MAIN STATES FOR THE RUNNER AND CORP
   // ----------------------------------------------
@@ -734,7 +734,7 @@ function LoadDecks() {
 		[], //archivesInstalled
 		[], //rndInstalled
 		[35042], //hqInstalled
-		[[35038,30072,30072,30055],[30037,30047,30073,31075],[30037,30074,30074]], //remotes (array of arrays)
+		[[35038,30072,30072,30055],[35038,35042],[30037,30074,30074]], //remotes (array of arrays)
 		[], //scored
 		cardBackTexturesCorp,glowTextures,strengthTextures
   );
@@ -755,7 +755,7 @@ function LoadDecks() {
   
   // // SET ADVANCEMENTS
   // // ----------------
-  corp.remoteServers[0].root[0].advancement=5;
+  // corp.remoteServers[0].root[0].advancement=5;
   // corp.remoteServers[1].root[0].advancement=2;
   
   // // GIVE EVERYONE SOME CREDITS TO START WITH
@@ -765,7 +765,7 @@ function LoadDecks() {
   
   // // OTHER STUFF
   // // -----------
-  // ChangePhase(phases.runnerEndOfTurn);
+  ChangePhase(phases.runnerEndOfTurn);
   // AddTags(1);
   // runner.clickTracker = 10;  
   // runner.rig.resources[0].power = 4;
