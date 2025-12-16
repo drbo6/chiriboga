@@ -1595,6 +1595,12 @@ cardSet[35003] = {
       for (var i = 0; i < installedCorpCards.length; i++) {
         var card = installedCorpCards[i];
         if (card.rezzed) {
+          //Check if card's modifyCannot prevents trashing
+          if (card.modifyCannot && typeof card.modifyCannot.Resolve === "function") {
+            if (card.modifyCannot.Resolve.call(card, "trash", card)) {
+              continue; //skip this card
+            }
+          }
           var title = GetTitle(card);
           if (this.accessedTitlesThisRun.indexOf(title) !== -1) {
             validTargets.push(card);
@@ -1612,6 +1618,12 @@ cardSet[35003] = {
       for (var i = 0; i < installedCorpCards.length; i++) {
         var card = installedCorpCards[i];
         if (card.rezzed) {
+          //Check if card's modifyCannot prevents trashing
+          if (card.modifyCannot && typeof card.modifyCannot.Resolve === "function") {
+            if (card.modifyCannot.Resolve.call(card, "trash", card)) {
+              continue; //skip this card
+            }
+          }
           var title = GetTitle(card);
           if (this.accessedTitlesThisRun.indexOf(title) !== -1) {
             choices.push({ card: card, label: "Trash " + GetTitle(card, true) });
@@ -2260,7 +2272,7 @@ cardSet[35038] = {
         cardRef
       );
     },
-    text: "Remove 1 agenda counter, install 1 Archived card",
+    text: "Remove 1 agenda counter to install 1 card from Archives",
   },
   
   //**AI code
@@ -2328,3 +2340,55 @@ function projectIngatanInstall(cardRef, cardToInstall) {
     "server"
   );
 }
+
+//Card 24: Kessleroid
+//Weyland Ice - Barrier
+//Cost: 2, Strength: 1
+//The Runner cannot trash this ice (while it is rezzed).
+//↳ End the run.
+//↳ End the run.
+cardSet[35075] = {
+  title: "Kessleroid",
+  imageFile: "35075.png",
+  player: corp,
+  faction: "Weyland Consortium",
+  influence: 1,
+  cardType: "ice",
+  subTypes: ["Barrier"],
+  rezCost: 2,
+  strength: 1,
+  
+  //The Runner cannot trash this ice (while it is rezzed)
+  modifyCannot: {
+    Resolve: function(str, card) {
+      //Only protect this specific ice, only while rezzed
+      if (str === "trash" && card === this && this.rezzed) {
+        return true; //cannot trash
+      }
+      return false;
+    },
+    availableWhenInactive: true,
+  },
+  
+  subroutines: [
+    {
+      text: "End the run.",
+      Resolve: function() {
+        EndTheRun();
+      },
+      visual: { y: 89, h: 17 },
+    },
+    {
+      text: "End the run.",
+      Resolve: function() {
+        EndTheRun();
+      },
+      visual: { y: 106, h: 17 },
+    },
+  ],
+  
+  //**AI code
+  AIRezReasons: function() {
+    return { facecheck: true, etr: true };
+  },
+};

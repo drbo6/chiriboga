@@ -728,13 +728,13 @@ function LoadDecks() {
   );
 
 	CorpTestField(30035, //identity
-		[30037, 30047,30073,30072,30047,30073,30073], //archivesCards
+		[30037, 30047,30073,35075], //archivesCards
 		[30073,30072,30047,30073,30073,30039,30039,30039,30039,30039,30039,30039,30039,30039,30039,30039,30039,30039,30039,30039], //rndCards
 		[30037], //hqCards
 		[], //archivesInstalled
 		[], //rndInstalled
 		[35042], //hqInstalled
-		[[35038,30072,30072,30055],[35038,35042],[30037,30074,30074]], //remotes (array of arrays)
+		[[35038,30072,30072,35075],[35038,35042],[30037,30074,30074]], //remotes (array of arrays)
 		[], //scored
 		cardBackTexturesCorp,glowTextures,strengthTextures
   );
@@ -746,9 +746,10 @@ function LoadDecks() {
   // corp.HQ.ice[0].rezzed=true;
   // corp.remoteServers[0].ice[0].rezzed=true;
   // corp.remoteServers[0].ice[1].rezzed=true;
+  corp.remoteServers[0].ice[2].rezzed=true;
   // corp.remoteServers[1].ice[0].rezzed=true;
   // corp.remoteServers[1].ice[2].rezzed=true;
-  // corp.remoteServers[2].ice[0].rezzed=true;
+  corp.remoteServers[2].ice[0].rezzed=true;
   // corp.remoteServers[2].ice[1].rezzed=true;
   // corp.remoteServers[0].root[0].knownToRunner=true;
   // corp.archives.ice[0].rezzed=true;
