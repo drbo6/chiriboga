@@ -2392,3 +2392,156 @@ cardSet[35075] = {
     return { facecheck: true, etr: true };
   },
 };
+
+//Card 25: Bumi 1.0
+//Haas-Bioroid Ice - Sentry - Bioroid - AP - Destroyer
+//Cost: 3, Strength: 3
+//When you rez this ice during a run against this server, you may trash 1 installed trojan program.
+//Lose [click]: Break 1 subroutine on this ice. Only the Runner can use this ability.
+//↳ Trash 1 installed program.
+//↳ Do 1 core damage.
+cardSet[35041] = {
+  title: "Bumi 1.0",
+  imageFile: "35041.png",
+  player: corp,
+  faction: "Haas-Bioroid",
+  influence: 1,
+  cardType: "ice",
+  subTypes: ["Sentry", "Bioroid", "AP", "Destroyer"],
+  rezCost: 3,
+  strength: 3,
+  
+  //When you rez this ice during a run against this server, you may trash 1 installed trojan program
+  responseOnRez: {
+    //Helper to find all trojan programs (including those hosted on ice)
+    _findTrojans: function() {
+      var trojans = [];
+      //Check runner's rig
+      for (var i = 0; i < runner.rig.programs.length; i++) {
+        var card = runner.rig.programs[i];
+        if (CheckSubType(card, "Trojan") && CheckTrash(card)) {
+          trojans.push(card);
+        }
+      }
+      //Check programs hosted on corp ice (like Botulus, Chisel, etc.)
+      var allIce = corp.HQ.ice.concat(corp.RnD.ice).concat(corp.archives.ice);
+      for (var i = 0; i < corp.remoteServers.length; i++) {
+        allIce = allIce.concat(corp.remoteServers[i].ice);
+      }
+      for (var i = 0; i < allIce.length; i++) {
+        if (typeof allIce[i].hostedCards !== "undefined") {
+          for (var j = 0; j < allIce[i].hostedCards.length; j++) {
+            var card = allIce[i].hostedCards[j];
+            if (card.player === runner && CheckCardType(card, ["program"]) && CheckSubType(card, "Trojan") && CheckTrash(card)) {
+              trojans.push(card);
+            }
+          }
+        }
+      }
+      return trojans;
+    },
+    Enumerate: function(card) {
+      if (card !== this) return [];
+      //Must be during a run against this server
+      if (attackedServer === null) return [];
+      if (attackedServer !== GetServer(this)) return [];
+      //Check for installed trojan programs
+      var trojans = this.responseOnRez._findTrojans();
+      if (trojans.length === 0) return [];
+      return [{}];
+    },
+    Resolve: function(params) {
+      var cardRef = this;
+      //Get trojan programs
+      var trojans = this.responseOnRez._findTrojans();
+      var choices = [];
+      for (var i = 0; i < trojans.length; i++) {
+        choices.push({ card: trojans[i], label: "Trash " + trojans[i].title });
+      }
+      choices.push({ label: "Decline", button: "Decline" });
+      
+      DecisionPhase(
+        corp,
+        choices,
+        function(chosenParams) {
+          if (chosenParams.card) {
+            Trash(chosenParams.card, true); //true = can be prevented
+          }
+        },
+        "Bumi 1.0",
+        "You may trash 1 installed trojan program",
+        cardRef
+      );
+    },
+    text: "Trash 1 installed trojan program",
+  },
+  
+  //Lose [click]: Break 1 subroutine on this ice. Only the Runner can use this ability.
+  abilities: [
+    {
+      text: "Break 1 subroutine on this ice",
+      Enumerate: function() {
+        if (!CheckClicks(runner, 1)) return [];
+        if (activePlayer !== runner) return [];
+        if (!encountering) return [];
+        if (GetApproachEncounterIce() !== this) return [];
+        var choices = [];
+        for (var i = 0; i < this.subroutines.length; i++) {
+          var subroutine = this.subroutines[i];
+          if (!subroutine.broken) {
+            choices.push({
+              subroutine: subroutine,
+              label: 'Lose [click]: Break "' + subroutine.text + '"',
+            });
+          }
+        }
+        return choices;
+      },
+      Resolve: function(params) {
+        SpendClicks(runner, 1);
+        Break(params.subroutine);
+      },
+      opponentOnly: true,
+    },
+  ],
+  activeForOpponent: true,
+  
+  subroutines: [
+    {
+      text: "Trash 1 installed program.",
+      Resolve: function() {
+        var choices = ChoicesInstalledCards(runner, function(card) {
+          return CheckCardType(card, ["program"]) && CheckTrash(card);
+        });
+        if (choices.length === 0) {
+          Log("No programs to trash");
+          return;
+        }
+        DecisionPhase(
+          corp,
+          choices,
+          function(params) {
+            Trash(params.card, true); //true = can be prevented
+          },
+          "Bumi 1.0",
+          "Trash 1 installed program",
+          this,
+          "trash"
+        );
+      },
+      visual: { y: 89, h: 17 },
+    },
+    {
+      text: "Do 1 core damage.",
+      Resolve: function() {
+        Damage("core", 1, true); //true = can be prevented
+      },
+      visual: { y: 106, h: 17 },
+    },
+  ],
+  
+  //**AI code
+  AIRezReasons: function() {
+    return { facecheck: true, program_trash: true, damage: true };
+  },
+};

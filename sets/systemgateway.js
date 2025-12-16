@@ -185,7 +185,7 @@ cardSet[30004] = {
   faction: "Anarch",
   influence: 3,
   cardType: "program",
-  subTypes: ["Virus"],
+  subTypes: ["Virus", "Trojan"],
   installCost: 2,
   memoryCost: 1,
   //Install only on a piece of ice.
@@ -1426,7 +1426,7 @@ cardSet[30017] = {
   faction: "Criminal",
   influence: 3,
   cardType: "program",
-  subTypes: ["Virus"],
+  subTypes: ["Virus", "Trojan"],
   installCost: 2,
   memoryCost: 1,
   //Install only on a piece of ice.

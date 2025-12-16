@@ -714,7 +714,7 @@ function LoadDecks() {
   // // ----------------------------------------------------------------------------
   debugging = true; //set true to log extra details and pause execution on error
   viewAllFronts = true; //set true to see all card fronts (for testing)
-  mainLoopDelay = 50; //for speedy AI vs AI testing (any faster than this and funny things happen at end-of-game)
+  // mainLoopDelay = 50; //for speedy AI vs AI testing (any faster than this and funny things happen at end-of-game)
 
   // SET UP THE MAIN STATES FOR THE RUNNER AND CORP
   // ----------------------------------------------
@@ -732,7 +732,7 @@ function LoadDecks() {
 		[30073,30072,30047,30073,30073,30039,30039,30039,30039,30039,30039,30039,30039,30039,30039,30039,30039,30039,30039,30039], //rndCards
 		[30037], //hqCards
 		[], //archivesInstalled
-		[], //rndInstalled
+		[35041], //rndInstalled
 		[35042], //hqInstalled
 		[[35038,30072,30072,35075],[35038,35042],[30037,30074,30074]], //remotes (array of arrays)
 		[], //scored
@@ -761,21 +761,27 @@ function LoadDecks() {
   
   // // GIVE EVERYONE SOME CREDITS TO START WITH
   // // ----------------------------------------
-  GainCredits(runner,25);
+  // GainCredits(runner,25);
   GainCredits(corp,25);
   
   // // OTHER STUFF
   // // -----------
-  ChangePhase(phases.runnerEndOfTurn);
+  // ChangePhase(phases.runnerEndOfTurn);
   // AddTags(1);
-  // runner.clickTracker = 10;  
+  // runner.clickTracker = 0;  
   // runner.rig.resources[0].power = 4;
-   corp.clickTracker = 1;
+  corp.clickTracker = 1;
   // ChangePhase(phases.corpActionMain);
   // ChangePhase(phases.corpDiscardStart);
   // MakeRun(corp.remoteServers[0]);
+  MakeRun(corp.RnD);
   // attackedServer = corp.RnD;
   // ChangePhase(phases.runApproachServer); //i.e. skip all the ice
+
+  // // INSTALL TROJAN (requires setting it on the ice and then hosting it)
+  // // -------------------------------------------------------------------
+  corp.remoteServers[0].ice[2].hostedCards = [];
+  InstanceCardsPush(30004, corp.remoteServers[0].ice[2].hostedCards, 1, cardBackTexturesCorp, glowTextures, strengthTextures)[0].host = corp.remoteServers[0].ice[2];
 
   // // SET THE PHASE TO START OF RUNNER TURN
   // // -------------------------------------
