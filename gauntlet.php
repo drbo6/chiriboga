@@ -79,18 +79,15 @@
 		
 		?>
 		<script>
-			var json = {};
+			var json = { cards: [] }; // Start with empty deck for gauntlet
 			var opponentdeckstr = "";
 			var opponentdeckimg = "";
 			var uid = 0;
 			var preconDecks = []; // List of precon decks loaded from files
 			var deckModified = true; // true when user has edited deck so metadata (name/notes/url) should be stripped from URI
-			
-			// Function to register a precon deck
-			function registerPrecon(deck) {
-				preconDecks.push(deck);
-			}
-		</script>
+		// DRBO6: Gauntlet Mode variables
+		var gauntletCardIds = []; // Set of 40 different runner cards available in gauntlet
+		var gauntletCardCounts = {}; // Count of each card in gauntlet (typically 3 or 1)
 		<?php
 		// Load preconstructed decks
 		$preconDir = 'precons';
@@ -312,20 +309,24 @@
 			function RenderAllCardsList() {
 				$("#cardcontainer").empty();
 				allCardIdsForPlayer = [];
-				for (var i=0;i<cardSet.length;i++) {
-					if (typeof cardSet[i] !== 'undefined' && cardSet[i].player == deckPlayer && cardSet[i].cardType !== 'identity') {
-						allCardIdsForPlayer.push(i);
-						var imgSrc = 'images/'+ChangeImageFileToJPG(cardSet[i].imageFile);
-						var cardHtml = '<div class="card-item" data-id="'+i+'">'
-							+'<div class="count-badge" data-id="'+i+'">0</div>'
-							+'<img class="card-image" loading="lazy" src="'+imgSrc+'" alt="'+cardSet[i].title+'" />'
-							+'<div class="card-title">'+cardSet[i].title+'</div>'
-							+'<div class="card-controls">'
-								+'<button type="button" class="remove-btn" data-id="'+i+'">-</button>'
-								+'<button type="button" class="add-btn" data-id="'+i+'">+</button>'
-							+'</div>'
-						+'</div>';
-						$("#cardcontainer").append(cardHtml);
+			// DRBO6: In gauntlet mode, only show cards available in gauntlet
+			var cardsToShow = gauntletCardIds.length > 0 ? gauntletCardIds : [];
+			for (var i=0;i<cardsToShow.length;i++) {
+				var cardId = cardsToShow[i];
+				if (typeof cardSet[cardId] !== 'undefined' && cardSet[cardId].player == deckPlayer && cardSet[cardId].cardType !== 'identity') {
+					allCardIdsForPlayer.push(cardId);
+					var imgSrc = 'images/'+ChangeImageFileToJPG(cardSet[cardId].imageFile);
+					var gauntletQty = gauntletCardCounts[cardId] || 0;
+					var deckQty = deckCounts[cardId] || 0;
+					// Show both quantities: gauntlet on left, deck on right
+					var cardHtml = '<div class="card-item" data-id="'+cardId+'">'
+						+'<div class="count-badge gauntlet-available" data-id="'+cardId+'">'+gauntletQty+'</div>'
+						+'<div class="count-badge deck-count" data-id="'+cardId+'">'+deckQty+'</div>'
+						+'<img class="card-image" loading="lazy" src="'+imgSrc+'" alt="'+cardSet[cardId].title+'" />'
+						+'<div class="card-title">'+cardSet[cardId].title+'</div>'
+						+'<div class="card-controls">'
+							+'<button type="button" class="remove-btn" data-id="'+cardId+'">-</button>'
+							+'<button type="button" class="add-btn" data-id="'+cardId+'">+</button>'
 					}
 				}
 				AttachCardListEvents();
@@ -345,23 +346,28 @@
 			}
 
 			function UpdateCardCountsUI() {
-				$("#cardcontainer .count-badge").each(function(){
-					var id = parseInt($(this).attr('data-id'));
-					var ct = deckCounts[id] || 0;
-					$(this).text(ct);
-					$(this).toggleClass('has-copies', ct>0);
-					// Apply darkening to cards not in deck
-					$(this).closest('.card-item').toggleClass('not-in-deck', ct === 0);
-				});
-				// Keep filters in sync after counts change
-				if (showingOnlySelected) {
-					// Re-apply current pack filter first
-					ApplyFilter();
-					// Then hide any visible cards that have count 0
-					$('#cardcontainer .card-item').each(function(){
-						if ($(this).is(':visible')) {
-							var id = parseInt($(this).find('.count-badge').attr('data-id'));
-							var ct = deckCounts[id] || 0;
+			// DRBO6: Handle dual quantities for gauntlet mode
+			$("#cardcontainer .count-badge.deck-count").each(function(){
+				var id = parseInt($(this).attr('data-id'));
+				var deckCt = deckCounts[id] || 0;
+				$(this).text(deckCt);
+				// Apply darkening to cards not in deck
+				$(this).closest('.card-item').toggleClass('not-in-deck', deckCt === 0);
+			});
+			// Update gauntlet quantity badges
+			$("#cardcontainer .count-badge.gauntlet-available").each(function(){
+				var id = parseInt($(this).attr('data-id'));
+				var gaCt = gauntletCardCounts[id] || 0;
+				$(this).text(gaCt);
+			});
+			// Keep filters in sync after counts change
+			if (showingOnlySelected) {
+				// Re-apply current pack filter first
+				ApplyFilter();
+				// Then hide any visible cards that have count 0
+				$('#cardcontainer .card-item').each(function(){
+					if ($(this).is(':visible')) {
+						var id = parseInt($(this).find('.deck-count').attr('data-id'));
 							if (ct === 0) $(this).hide();
 						}
 					});
@@ -597,8 +603,10 @@
 				opponentdeckimg = "images/"+ChangeImageFileToJPG(cardSet[oppjson.identity].imageFile);
 			}
 
-			var deckPlayer = corp;
-			if (URIParameter("r") !== "" && URIParameter("p") !== "c") {
+			// DRBO6: Gauntlet mode - force runner as the player
+			var deckPlayer = runner;
+			// Disable parameter-based player selection for gauntlet mode
+			if (false && URIParameter("r") !== "" && URIParameter("p") !== "c") {
 				deckPlayer = runner;
 				var uric = URIParameter("c");
 				if (uric) {
@@ -1342,11 +1350,28 @@
 				UpdateLaunchStrings();
 			}
 			
-			$('#preconselect').off('change').on('change', function() {
-				if ($(this).val() !== '-1') {
-					LoadPrecon();
+			// DRBO6: Gauntlet Mode - disable precon dropdown for gauntlet
+			if (false) { // Disabled for gauntlet
+				$('#preconselect').off('change').on('change', function() {
+					if ($(this).val() !== '-1') {
+						LoadPrecon();
 				}
 			});
+			}
+		  // DRBO6: Gauntlet Mode - Build playerIdentities and populate dropdown after card sets load
+		  function PopulateIdentityDropdown() {
+			  // Rebuild playerIdentities for current deckPlayer
+			  playerIdentities = [];
+			  for (var i=0; i<cardSet.length; i++) {
+				  if (typeof cardSet[i] != 'undefined' &&  typeof cardSet[i].faction != 'undefined') {
+					  if (cardSet[i].cardType == 'identity') {
+						  if (deckPlayer == cardSet[i].player) playerIdentities.push(i);
+					  }
+				  }
+			  }
+			  
+			  // Clear and populate the dropdown
+			  $("#identityselect").empty();
 			  for (var i = 0; i < playerIdentities.length; i++) {
 				var fullTitle = cardSet[playerIdentities[i]].title || '';
 				var shortTitle = fullTitle; // fallback
@@ -1366,14 +1391,10 @@
 					"</option>\n"
 				);
 			  }
-			  
-			  // Clicking the identity image opens the lightbox for that identity
-			  $('#identity').off('click').on('click', function() {
-				  if (json && json.identity) {
-					  ShowLightbox(parseInt(json.identity));
-				  }
-			  });
-
+		  }
+		  
+		  // Call it initially (will be called again after setting runner mode)
+		  PopulateIdentityDropdown();
 			  // Hide Export JS Deck by default; reveal via secret gesture
 			  (function(){
 				var exportBtn = document.getElementById('exportjs');
@@ -1400,38 +1421,72 @@
 					}
 				});
 			  })();
+			  // DRBO6: Generate gauntlet card subset (40 different runner cards)
+			  function GenerateGauntletCardSet() {
+				  gauntletCardIds = [];
+				  gauntletCardCounts = {};
+				  var availableCards = [];
+				  // Collect all runner non-identity cards
+				  for (var i = 0; i < cardSet.length; i++) {
+					  if (typeof cardSet[i] !== 'undefined' && cardSet[i].player == runner && cardSet[i].cardType !== 'identity') {
+						  availableCards.push(i);
+					  }
+				  }
+				  // Shuffle and select 40 unique cards
+				  Shuffle(availableCards);
+				  for (var i = 0; i < Math.min(40, availableCards.length); i++) {
+					  var cardId = availableCards[i];
+					  gauntletCardIds.push(cardId);
+					  // Allow 3 copies for most cards, 1 copy for unique cards
+					  gauntletCardCounts[cardId] = (cardSet[cardId].unique) ? 1 : 3;
+				  }
+			  }
+			  
 			  //choose an identity at random, unless a load string was specified
-			  var specifiedPlayerDeck = URIParameter(dC);
-			  if (specifiedPlayerDeck == "" || specifiedPlayerDeck == "random") {
-				var randomIdentity =
-				  playerIdentities[RandomRange(0, playerIdentities.length - 1)];
-				$("#identityselect option[value=" + randomIdentity + "]")
-				  .prop("selected", "selected")
-				  .change(); //calling change also means a deck will be generated
-			  } else GenerateDeck(); //this will recognise the input string and load it
-			  //Render full card list for visual deck building
-			  RenderAllCardsList();
-			  UpdateCardCountsUI();
-			  // After identities and UI are ready, populate precons for current identity
-			  try {
-			    var currentIdSel = $('#identityselect').val();
-			    var effectiveId = currentIdSel || (json && json.identity);
-			    if (effectiveId && typeof window.PopulatePreconDropdownForIdentity === 'function') {
-			      window.PopulatePreconDropdownForIdentity(effectiveId);
-			    }
-			  } catch(e) { /* ignore */ }
-			}
+			  // DRBO6: Generate gauntlet card subset and pick random runner identity
+			  GenerateGauntletCardSet();
+		  
+		  // Rebuild identity dropdown now that deckPlayer is runner
+		  PopulateIdentityDropdown();
+		  
+		  // Pick random runner identity from playerIdentities (now correctly populated)
+		  if (playerIdentities.length > 0) {
+		      var randomIdentity = playerIdentities[RandomRange(0, playerIdentities.length - 1)];
+		      json.identity = randomIdentity;
+		      $("#identityselect").val(randomIdentity);
+		      
+		      // Set identity image - verify cardSet has this identity first
+		      if (cardSet[randomIdentity] && cardSet[randomIdentity].imageFile) {
+		          var imageFile = ChangeImageFileToJPG(cardSet[randomIdentity].imageFile);
+		          $("#identity").prop("src", "images/" + imageFile);
+		      }
+		  } else {
+		      // Fallback: no runner identities found
+		      $("#identity").prop("src", "images/glow_outline.png");
+		  }
+		  
+		  RenderAllCardsList();
+		  UpdateCardCountsUI();
+		  // After identities and UI are ready, populate precons for current identity
+		  try {
+		    var currentIdSel = $('#identityselect').val();
+		    var effectiveId = currentIdSel || (json && json.identity);
+		    if (effectiveId && typeof window.PopulatePreconDropdownForIdentity === 'function') {
+		      window.PopulatePreconDropdownForIdentity(effectiveId);
+		    }
+		  } catch(e) { /* ignore */ }
+		}
 
-			function Normalise(src) {
-				if (!src) return "";
-				try { src = src.normalize ? src.normalize('NFKC') : src; } catch(e) {}
-				// Map smart quotes/apostrophes and whitespace to plain ASCII
-				src = src
-					.replace(/\u2019|\u2032|\u02BC|\uFF07/g, "'") // apostrophes/primes
-					.replace(/\u201C|\u201D|\u2033|\uFF02/g, '"') // double quotes
-					.replace(/\u00A0/g, ' '); // non-breaking space
-				return src.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
-			}
+		function Normalise(src) {
+			if (!src) return "";
+			try { src = src.normalize ? src.normalize('NFKC') : src; } catch(e) {}
+			// Map smart quotes/apostrophes and whitespace to plain ASCII
+			src = src
+				.replace(/\u2019|\u2032|\u02BC|\uFF07/g, "'") // apostrophes/primes
+				.replace(/\u201C|\u201D|\u2033|\uFF02/g, '"') // double quotes
+				.replace(/\u00A0/g, ' '); // non-breaking space
+			return src.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
+		}
 
 			function GetCardIdFromTitle(title) {
 			  var soughtCardTitle = Normalise(title);
@@ -1582,8 +1637,9 @@
 				</div>
 			<div class="leftrow buttons">
 				<button id="launch" class="button button-red" onclick="window.location.href=$(this).prop('href');">PLAY<br>DECK</button>
-				<button id="opponent" class="button" onclick="window.location.href=$(this).prop('href');">SET AS OPPONENT</button>
-				<button id="randomdeck" onclick="GenerateRandomDeck();" class="button">RANDOM<br>DECK</button>
+				<!-- DRBO6: Gauntlet Mode - hide Set as Opponent, Random Deck, Import NRDB, Load Precon -->
+				<button id="opponent" class="button" onclick="window.location.href=$(this).prop('href');" style="display:none;">SET AS OPPONENT</button>
+				<button id="randomdeck" onclick="GenerateRandomDeck();" class="button" style="display:none;">RANDOM<br>DECK</button>
 				<button id="cleardeck" onclick="ClearDeck();" class="button">CLEAR<br>DECK</button>
 				<button id="sortdeck" onclick="CycleSort();" class="button">SORT BY:<br>ID</button>
 				<button id="filterdeck" onclick="CycleFilter();" class="button">FILTER:<br>ALL CARDS</button>
@@ -1594,16 +1650,17 @@
 					<div class="deck-heading">CURRENT DECK:</div>
 					<textarea id="deck" spellcheck="false" cols="30" style="width:100%;"></textarea>
 					<div style="margin-top:8px;">
-						<button id="importdeck" class="button" type="button">Import Deck from NRDB</button>
+						<button id="importdeck" class="button" type="button" style="display:none;">Import Deck from NRDB</button>
 					</div>
-					<div style="margin-top:8px;">
+					<div style="margin-top:8px; display:none;">
 						<select id="preconselect" class="button" style="width:85%; display:block; margin:0 auto;">
 							<option value="-1">Load Precon Deck</option>
 						</select>
 					</div>
-					<div style="margin-top:8px;">
-						<button id="exportjs" class="button" type="button" style="width:85%; display:block; margin:0 auto;">Export JS Deck</button>
-					</div>
+	                <!-- DRBO6: Gauntlet Mode - hide export button -->
+                <div style="margin-top:8px; display:none;">
+                    <button id="exportjs" class="button" type="button" style="width:85%; display:block; margin:0 auto;">Export JS Deck</button>
+                </div>
 					<br/>
 				</div>
 				<br/>
@@ -1625,3 +1682,4 @@
 		</div>
 	</body>
 </html>
+

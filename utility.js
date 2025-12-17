@@ -1022,6 +1022,53 @@ function PlayerWin(player, msgstr) {
   winPhase.Resolve["play again"] = function () {
     location.reload(); //restart game
   };
+  
+  // DRBO6: Add Edit Deck option to winPhase
+  winPhase.Enumerate["edit deck"] = function () {
+    return [{}];
+  };
+  winPhase.Resolve["edit deck"] = function () {
+    // Build deck objects for both player decks
+    var runnerDeckObj = { identity: runner.identityCard.setNumber, cards: [] };
+    var corpDeckObj = { identity: corp.identityCard.setNumber, cards: [] };
+    
+    // Collect runner cards (from stack, grip, installed, rig)
+    var allRunnerCards = runner.stack.concat(runner.grip, runner.installed);
+    for (var i = 0; i < runner.rig.length; i++) {
+      var row = runner.rig[i];
+      for (var j = 0; j < row.length; j++) {
+        allRunnerCards.push(row[j]);
+      }
+    }
+    for (var i = 0; i < allRunnerCards.length; i++) {
+      if (allRunnerCards[i].cardType !== 'identity') {
+        runnerDeckObj.cards.push(allRunnerCards[i].setNumber);
+      }
+    }
+    
+    // Collect corp cards (from RnD, HQ, Archives, installed servers)
+    var allCorpCards = corp.RnD.cards.concat(corp.HQ.cards, corp.archives.cards);
+    for (var i = 0; i < corp.remoteServers.length; i++) {
+      var server = corp.remoteServers[i];
+      allCorpCards = allCorpCards.concat(server.root, server.ice);
+    }
+    // Add central server cards
+    allCorpCards = allCorpCards.concat(corp.HQ.root, corp.HQ.ice, corp.RnD.root, corp.RnD.ice, corp.archives.root, corp.archives.ice);
+    for (var i = 0; i < allCorpCards.length; i++) {
+      if (allCorpCards[i].cardType !== 'identity') {
+        corpDeckObj.cards.push(allCorpCards[i].setNumber);
+      }
+    }
+    
+    // Compress decks for URL parameters
+    var runnerCompressed = LZString.compressToEncodedURIComponent(JSON.stringify(runnerDeckObj));
+    var corpCompressed = LZString.compressToEncodedURIComponent(JSON.stringify(corpDeckObj));
+    
+    // Redirect to decklauncher with both decks loaded
+    // p=r means start with runner deck selected, r= is player deck, c= is opponent deck
+    window.location.href = 'decklauncher.php?p=r&r=' + runnerCompressed + '&c=' + corpCompressed;
+  };
+  
   ChangePhase(winPhase);
   Render();
   SetHistoryThumbnail("", "Game Over");

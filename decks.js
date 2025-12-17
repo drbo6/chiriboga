@@ -739,11 +739,11 @@ function LoadDecks() {
 	CorpTestField(30035, //identity
 		[30037, 30047,30073,35075,30074], //archivesCards
 		[30073,30072,30047,30073,30073,30039,30039,30039,30039,30039,30039,30039,30039,30039,30039,30039,30039,30039,30039,30039], //rndCards
-		[30037,35082,35045], //hqCards
+		[35072,35040,35082,35045, 35043], //hqCards
 		[], //archivesInstalled
 		[35041], //rndInstalled
 		[35042], //hqInstalled
-		[[35038,30072,30072,35075],[35038,35042],[35082,30037]], //remotes (array of arrays)
+		[[35038,30072,30072,35075],[35038,35042],[30037]], //remotes (array of arrays)
 		[], //scored
 		cardBackTexturesCorp,glowTextures,strengthTextures
   );

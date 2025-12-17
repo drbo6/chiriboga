@@ -267,6 +267,12 @@
         return;
       }
       
+      // Handle gauntlet/tournament mode
+      if (option === 'tournament') {
+        window.location.href = 'gauntlet.php?gauntlet=true';
+        return;
+      }
+      
       // Show "COMING SOON" for non-implemented features
       if (option !== 'quick' && option !== 'custom') {
         item.innerHTML = 'COMING SOON';

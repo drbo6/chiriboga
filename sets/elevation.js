@@ -2777,3 +2777,120 @@ cardSet[35045] = {
     return false;
   },
 };
+
+//Card 28: Anthill Excavation Contract
+//Weyland Asset - Industrial
+//Rez: 3, Trash: 1
+//When you rez this asset, load 8 credits onto it. When it is empty, trash it.
+//When your turn begins, take 4 credits from this asset and draw 1 card.
+cardSet[35072] = {
+  title: "Anthill Excavation Contract",
+  imageFile: "35072.png",
+  player: corp,
+  faction: "Weyland Consortium",
+  influence: 2,
+  cardType: "asset",
+  subTypes: ["Industrial"],
+  rezCost: 3,
+  trashCost: 1,
+  
+  //When you rez this asset, load 8 credits onto it.
+  automaticOnRez: {
+    Resolve: function(card) {
+      if (card === this) LoadCredits(this, 8);
+    },
+  },
+  
+  //When your turn begins, take 4 credits from this asset and draw 1 card.
+  responseOnCorpTurnBegins: {
+    Enumerate: function() {
+      //Won't trigger with less than 4 credits (doesn't say "take up to")
+      if (!CheckCounters(this, "credits", 4)) return [];
+      return [{}];
+    },
+    Resolve: function(params) {
+      TakeCredits(corp, this, 4);
+      Draw(corp, 1);
+      //When it is empty, trash it.
+      if (!CheckCounters(this, "credits", 1)) {
+        Trash(this, true); //true = can be prevented
+      }
+    },
+  },
+  
+  //Rez at end of Runner turn for maximum value
+  RezUsability: function() {
+    if (currentPhase.identifier === "Runner 2.2") return true;
+    return false;
+  },
+};
+
+//Card 29: Otto Campaign
+//Haas-Bioroid Asset - Advertisement
+//Rez: 2, Trash: 2
+//When you rez this asset, load 6 credits onto it. When it is empty, trash it and gain [click][click].
+//When your turn begins, take 2 credits from this asset.
+cardSet[35040] = {
+  title: "Otto Campaign",
+  imageFile: "35040.png",
+  player: corp,
+  faction: "Haas-Bioroid",
+  influence: 3,
+  cardType: "asset",
+  subTypes: ["Advertisement"],
+  rezCost: 2,
+  trashCost: 2,
+  
+  //When you rez this asset, load 6 credits onto it.
+  automaticOnRez: {
+    Resolve: function(card) {
+      if (card === this) LoadCredits(this, 6);
+    },
+  },
+  
+  //When your turn begins, take 2 credits from this asset.
+  responseOnCorpTurnBegins: {
+    Enumerate: function() {
+      //Won't trigger with less than 2 credits (doesn't say "take up to")
+      if (!CheckCounters(this, "credits", 2)) return [];
+      return [{}];
+    },
+    Resolve: function(params) {
+      TakeCredits(corp, this, 2);
+      //When it is empty, trash it and gain [click][click].
+      if (!CheckCounters(this, "credits", 1)) {
+        Trash(this, true, function(cardsTrashed) {
+          GainClicks(corp, 2);
+        }, this);
+      }
+    },
+  },
+  
+  //Rez at end of Runner turn for maximum value
+  RezUsability: function() {
+    if (currentPhase.identifier === "Runner 2.2") return true;
+    return false;
+  },
+};
+
+//Card 30: Nanomanagement
+//Haas-Bioroid Operation
+//Cost: 4
+//Gain [click][click].
+cardSet[35043] = {
+  title: "Nanomanagement",
+  imageFile: "35043.png",
+  player: corp,
+  faction: "Haas-Bioroid",
+  influence: 4,
+  cardType: "operation",
+  playCost: 4,
+  
+  //Gain [click][click].
+  Resolve: function(params) {
+    GainClicks(corp, 2);
+  },
+  
+  //**AI code
+  AIFastAdvance: true, //is a card for fast advancing
+};
