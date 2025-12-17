@@ -743,7 +743,7 @@ function LoadDecks() {
 		[], //archivesInstalled
 		[35041], //rndInstalled
 		[35042], //hqInstalled
-		[[35038,30072,30072,35075],[35038,35042],[30037,30074,30074]], //remotes (array of arrays)
+		[[35038,30072,30072,35075],[35038,35042],[35082,30037]], //remotes (array of arrays)
 		[], //scored
 		cardBackTexturesCorp,glowTextures,strengthTextures
   );
@@ -770,7 +770,7 @@ function LoadDecks() {
   
   // // GIVE EVERYONE SOME CREDITS TO START WITH
   // // ----------------------------------------
-  // GainCredits(runner,25);
+  GainCredits(runner,2);
   GainCredits(corp,25);
   
   // // OTHER STUFF
@@ -782,8 +782,8 @@ function LoadDecks() {
   corp.clickTracker = 6;
   // ChangePhase(phases.corpActionMain);
   // ChangePhase(phases.corpDiscardStart);
-  // MakeRun(corp.remoteServers[0]);
-  //MakeRun(corp.RnD);
+  MakeRun(corp.remoteServers[2]);
+  // MakeRun(corp.RnD);
   // attackedServer = corp.RnD;
   // ChangePhase(phases.runApproachServer); //i.e. skip all the ice
 

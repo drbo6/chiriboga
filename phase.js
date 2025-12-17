@@ -1011,6 +1011,30 @@ phases.corpPostAction = CreatePhaseFromTemplate(
   null
 );
 
+// DRBO6 START - Add action phase ends trigger for corp (cards like Mercia B4LL4RD)
+// When corp runs out of clicks, trigger action phase ends callbacks before moving to discard
+var corpPostActionResolveN = phases.corpPostAction.Resolve.n;
+phases.corpPostAction.Resolve.n = function () {
+  if (corp.clickTracker < 1) {
+    ChangePhase(phases.corpActionPhaseEnds);
+  } else {
+    corpPostActionResolveN.call(this);
+  }
+};
+// DRBO6 END
+
+// DRBO6 START - Create corp action phase ends phase (Nisei 2021 2.3)
+// Fires when corp runs out of clicks in action phase, before moving to discard
+phases.corpActionPhaseEnds = CreatePhaseFromTemplate(
+  phaseTemplates.globalTriggers,
+  corp,
+  "Corporation's Action Phase Ends",
+  "Corp 2.3",
+  null
+);
+phases.corpActionPhaseEnds.triggerCallbackName = "responseOnCorpActionPhaseEnds";
+// DRBO6 END
+
 //Start of Discard Phase
 phases.corpDiscardStart = CreatePhaseFromTemplate(
   phaseTemplates.discardStart,
@@ -1042,6 +1066,18 @@ phases.corpEndOfTurn = CreatePhaseFromTemplate(
   null
 );
 phases.corpEndOfTurn.triggerCallbackName = "responseOnCorpDiscardEnds";
+
+// DRBO6 START - Add corp action phase ends phase (Nisei 2021 2.3)
+// Fires when corp runs out of clicks in action phase, before moving to discard
+phases.corpActionPhaseEnds = CreatePhaseFromTemplate(
+  phaseTemplates.globalTriggers,
+  corp,
+  "Corporation's Action Phase Ends",
+  "Corp 2.3",
+  null
+);
+phases.corpActionPhaseEnds.triggerCallbackName = "responseOnCorpActionPhaseEnds";
+// DRBO6 END
 
 //First response part of Runner's Action Phase (analagous to start of Corp's draw phase)
 phases.runnerStartResponse = CreatePhaseFromTemplate(
@@ -1656,6 +1692,9 @@ phases.corpEndDraw.next = phases.corpActionStart; //"Corp 1.3"
 phases.corpActionStart.next = phases.corpActionMain; //"Corp 2.1"
 phases.corpActionMain.next = phases.corpPostAction; //"Corp 2.2"
 phases.corpPostAction.next = phases.corpActionMain; //"Corp 2.2*"
+// DRBO6 START - Link corpActionPhaseEnds into phase chain
+phases.corpActionPhaseEnds.next = phases.corpDiscardStart; //"Corp 2.3"
+// DRBO6 END
 phases.corpDiscardStart.next = phases.corpDiscardResponse; //"Corp 3.1"
 phases.corpDiscardResponse.next = phases.corpEndOfTurn; //"Corp 3.2"
 phases.corpEndOfTurn.next = phases.runnerStartResponse; //"Corp 3.3"
