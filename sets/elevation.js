@@ -2979,40 +2979,51 @@ cardSet[35036] = {
       //Look at top 3 cards of R&D
       var numToLook = Math.min(3, corp.RnD.cards.length);
       var allTopCards = [];
+      var installableCards = [];
       
       for (var i = 0; i < numToLook; i++) {
         //Top card is at length-1, so top 3 are length-1, length-2, length-3
         var card = corp.RnD.cards[corp.RnD.cards.length - 1 - i];
         allTopCards.push(card);
+        //Only ice, assets, upgrades are installable (not agendas or operations)
+        if (!CheckCardType(card, ["agenda", "operation"])) {
+          installableCards.push(card);
+        }
       }
       
-      //Build choices - include ALL cards so they show in viewingGrid
-      //but only installable ones (ice, assets, upgrades) can actually be installed
-      var choices = [];
+      //Show all cards in viewing grid (face up)
       for (var i = 0; i < allTopCards.length; i++) {
-        var card = allTopCards[i];
-        var isInstallable = !CheckCardType(card, ["agenda", "operation"]);
-        choices.push({ 
-          card: card, 
-          label: card.title + (isInstallable ? "" : " (cannot install)"),
-          installable: isInstallable
-        });
+        allTopCards[i].faceUp = true;
+      }
+      viewingGrid = allTopCards.slice(); //copy array
+      
+      //Build choices from installable cards only
+      var choices = [];
+      for (var i = 0; i < installableCards.length; i++) {
+        var card = installableCards[i];
+        choices.push({ card: card, label: card.title });
       }
       choices.push({ skip: true, label: "Decline", button: "Decline" });
       
+      var cardRef = this;
       DecisionPhase(
         corp,
         choices,
         function(choiceParams) {
-          if (!choiceParams.skip && choiceParams.installable) {
+          //Clear viewing grid and restore faceUp status
+          viewingGrid = null;
+          for (var i = 0; i < allTopCards.length; i++) {
+            allTopCards[i].faceUp = false;
+          }
+          
+          if (!choiceParams.skip) {
             //Install the chosen card with server selection
             poetriInstallCard(choiceParams.card);
           }
-          //If they clicked a non-installable card or declined, just continue
         },
         "Poétrï Luxury Brands",
         "Install 1 non-agenda card from top of R&D?",
-        this
+        cardRef
       );
     },
     text: "Look at top 3 cards of R&D, may install 1 non-agenda",

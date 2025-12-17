@@ -1014,21 +1014,17 @@
 				  $("#deck").autocomplete("close");
 			  });
 			  
-			  //identity select will regenerate a deck if changed
+			  //identity select will update stats but keep current deck
 			  $("#identityselect").change(function () {
-								json.identity = $("select#identityselect option:checked").val();
-								$("#identity").prop(
-									"src",
-									"images/" + ChangeImageFileToJPG(cardSet[json.identity].imageFile)
-								);
-								// Update deckPlayer to match selected identity's side
-								deckPlayer = cardSet[json.identity].player;
-								history.pushState(null, "Chiriboga", "decklauncher.php"); //so a random deck is generated
-								GenerateDeck();
-								// Repopulate precon dropdown to only show matching decks (if loaded)
-								if (typeof window.PopulatePreconDropdownForIdentity === 'function') {
-									window.PopulatePreconDropdownForIdentity(json.identity);
-								}
+					json.identity = $("select#identityselect option:checked").val();
+					$("#identity").prop(
+						"src",
+						"images/" + ChangeImageFileToJPG(cardSet[json.identity].imageFile)
+					);
+					// Update deckPlayer to match selected identity's side
+					deckPlayer = cardSet[json.identity].player;
+					// Parse and update deck stats without changing the deck
+					Parse();
 			  });
 
 			  //set up identity select
