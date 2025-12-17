@@ -2894,3 +2894,207 @@ cardSet[35043] = {
   //**AI code
   AIFastAdvance: true, //is a card for fast advancing
 };
+
+//Card 31: Top-Down Solutions
+//Haas-Bioroid Operation
+//Cost: 2
+//Draw 2 cards. Install up to 2 cards from HQ (one at a time).
+cardSet[35044] = {
+  title: "Top-Down Solutions",
+  imageFile: "35044.png",
+  player: corp,
+  faction: "Haas-Bioroid",
+  influence: 2,
+  cardType: "operation",
+  playCost: 2,
+  
+  //Draw 2 cards. Install up to 2 cards from HQ (one at a time).
+  Resolve: function(params) {
+    var cardRef = this;
+    Draw(corp, 2, function() {
+      //Now install up to 2 cards (one at a time)
+      topDownSolutionsInstall(cardRef, 0);
+    }, this);
+  },
+};
+
+//Helper function for Top-Down Solutions - chained installation
+function topDownSolutionsInstall(cardRef, installCount) {
+  var installChoices = ChoicesHandInstall(corp); //respect install costs
+  
+  //Build choice list
+  var choices = [];
+  for (var i = 0; i < installChoices.length; i++) {
+    choices.push(installChoices[i]);
+  }
+  
+  var skipLabel = installCount < 1 ? "Skip remaining installs" : "Done installing";
+  choices.push({ skip: true, label: skipLabel, button: skipLabel });
+  
+  DecisionPhase(
+    corp,
+    choices,
+    function(params) {
+      if (!params.skip) {
+        Install(params.card, params.server);
+        installCount++;
+        //Continue to next install if allowed
+        if (installCount < 2) {
+          topDownSolutionsInstall(cardRef, installCount);
+        }
+        //Otherwise done
+      }
+      //Skipped - done
+    },
+    "Top-Down Solutions",
+    "Install card from HQ (" + installCount + "/2 installed)",
+    cardRef,
+    "install"
+  );
+}
+
+//Card 32: Poétrï Luxury Brands: All the Rage
+//Haas-Bioroid Identity - Division
+//Deck: 45, Influence: 15
+//Whenever you score an agenda, look at the top 3 cards of R&D. You may install 1 non-agenda card from among them.
+//Whenever an agenda is stolen, you may install 1 non-agenda card from HQ.
+cardSet[35036] = {
+  title: "Poétrï Luxury Brands: All the Rage",
+  imageFile: "35036.png",
+  player: corp,
+  faction: "Haas-Bioroid",
+  cardType: "identity",
+  subTypes: ["Division"],
+  deckSize: 45,
+  influenceLimit: 15,
+  
+  //Whenever you score an agenda, look at the top 3 cards of R&D. You may install 1 non-agenda card from among them.
+  responseOnScored: {
+    Enumerate: function() {
+      //Trigger if there are cards in R&D to look at
+      if (corp.RnD.cards.length > 0) return [{}];
+      return [];
+    },
+    Resolve: function(params) {
+      //Look at top 3 cards of R&D
+      var numToLook = Math.min(3, corp.RnD.cards.length);
+      var allTopCards = [];
+      
+      for (var i = 0; i < numToLook; i++) {
+        //Top card is at length-1, so top 3 are length-1, length-2, length-3
+        var card = corp.RnD.cards[corp.RnD.cards.length - 1 - i];
+        allTopCards.push(card);
+      }
+      
+      //Build choices - include ALL cards so they show in viewingGrid
+      //but only installable ones (ice, assets, upgrades) can actually be installed
+      var choices = [];
+      for (var i = 0; i < allTopCards.length; i++) {
+        var card = allTopCards[i];
+        var isInstallable = !CheckCardType(card, ["agenda", "operation"]);
+        choices.push({ 
+          card: card, 
+          label: card.title + (isInstallable ? "" : " (cannot install)"),
+          installable: isInstallable
+        });
+      }
+      choices.push({ skip: true, label: "Decline", button: "Decline" });
+      
+      DecisionPhase(
+        corp,
+        choices,
+        function(choiceParams) {
+          if (!choiceParams.skip && choiceParams.installable) {
+            //Install the chosen card with server selection
+            poetriInstallCard(choiceParams.card);
+          }
+          //If they clicked a non-installable card or declined, just continue
+        },
+        "Poétrï Luxury Brands",
+        "Install 1 non-agenda card from top of R&D?",
+        this
+      );
+    },
+    text: "Look at top 3 cards of R&D, may install 1 non-agenda",
+  },
+  
+  //Whenever an agenda is stolen, you may install 1 non-agenda card from HQ.
+  responseOnStolen: {
+    Enumerate: function() {
+      //Check for installable non-agenda cards in HQ (not operations)
+      for (var i = 0; i < corp.HQ.cards.length; i++) {
+        if (!CheckCardType(corp.HQ.cards[i], ["agenda", "operation"])) {
+          return [{}];
+        }
+      }
+      return [];
+    },
+    Resolve: function(params) {
+      //Build choices from installable non-agenda cards in HQ
+      var choices = [];
+      for (var i = 0; i < corp.HQ.cards.length; i++) {
+        var card = corp.HQ.cards[i];
+        if (!CheckCardType(card, ["agenda", "operation"])) {
+          choices.push({ card: card, label: card.title });
+        }
+      }
+      choices.push({ skip: true, label: "Decline", button: "Decline" });
+      
+      DecisionPhase(
+        corp,
+        choices,
+        function(choiceParams) {
+          if (!choiceParams.skip) {
+            //Install the chosen card with server selection
+            poetriInstallCard(choiceParams.card);
+          }
+        },
+        "Poétrï Luxury Brands",
+        "Install 1 non-agenda card from HQ?",
+        this
+      );
+    },
+    text: "Install 1 non-agenda card from HQ",
+  },
+};
+
+//Helper function for Poétrï - install card with server selection
+function poetriInstallCard(cardToInstall) {
+  //Build server choices based on card type
+  var serverChoices = [];
+  
+  if (cardToInstall.cardType === "ice" || cardToInstall.cardType === "upgrade") {
+    //Ice and upgrades can go on any server
+    serverChoices.push({ server: corp.HQ, label: "HQ" });
+    serverChoices.push({ server: corp.RnD, label: "R&D" });
+    serverChoices.push({ server: corp.archives, label: "Archives" });
+    for (var j = 0; j < corp.remoteServers.length; j++) {
+      serverChoices.push({
+        server: corp.remoteServers[j],
+        label: corp.remoteServers[j].serverName
+      });
+    }
+    serverChoices.push({ server: null, label: "New remote server", button: "New remote" });
+  } else {
+    //Assets go in remotes only
+    for (var j = 0; j < corp.remoteServers.length; j++) {
+      serverChoices.push({
+        server: corp.remoteServers[j],
+        label: corp.remoteServers[j].serverName
+      });
+    }
+    serverChoices.push({ server: null, label: "New remote server", button: "New remote" });
+  }
+  
+  DecisionPhase(
+    corp,
+    serverChoices,
+    function(serverParams) {
+      Install(cardToInstall, serverParams.server);
+    },
+    "Poétrï Luxury Brands",
+    "Choose where to install " + cardToInstall.title,
+    null,
+    "server"
+  );
+}

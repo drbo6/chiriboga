@@ -79,15 +79,21 @@
 		
 		?>
 		<script>
-			var json = { cards: [] }; // Start with empty deck for gauntlet
+			var json = {};
 			var opponentdeckstr = "";
 			var opponentdeckimg = "";
 			var uid = 0;
 			var preconDecks = []; // List of precon decks loaded from files
 			var deckModified = true; // true when user has edited deck so metadata (name/notes/url) should be stripped from URI
-		// DRBO6: Gauntlet Mode variables
-		var gauntletCardIds = []; // Set of 40 different runner cards available in gauntlet
-		var gauntletCardCounts = {}; // Count of each card in gauntlet (typically 3 or 1)
+			// DRBO6: Gauntlet Mode variables
+			var gauntletCardIds = []; // Set of 40 different runner cards available in gauntlet
+			var gauntletCardCounts = {}; // Count of each card in gauntlet (typically 3 or 1)
+			
+			// Function to register a precon deck
+			function registerPrecon(deck) {
+				preconDecks.push(deck);
+			}
+		</script>
 		<?php
 		// Load preconstructed decks
 		$preconDir = 'precons';
