@@ -3142,7 +3142,7 @@ cardSet[35053] = {
     {
       //↳ You may install 1 piece of ice from Archives, ignoring all costs.
       text: "You may install 1 piece of ice from Archives, ignoring all costs.",
-      Enumerate: function() {
+      Resolve: function(params) {
         //Check for ice in Archives
         var iceChoices = [];
         for (var i = 0; i < corp.archives.cards.length; i++) {
@@ -3151,19 +3151,26 @@ cardSet[35053] = {
             iceChoices.push({ card: card, label: card.title });
           }
         }
-        if (iceChoices.length === 0) return [{}]; //subroutine still fires even with no choices
+        if (iceChoices.length === 0) return; //no ice to install
         iceChoices.push({ skip: true, label: "Decline", button: "Decline" });
-        return iceChoices;
-      },
-      Resolve: function(params) {
-        if (params.skip || !params.card) return;
-        mycowebInstallIce(params.card);
+        
+        DecisionPhase(
+          corp,
+          iceChoices,
+          function(iceParams) {
+            if (iceParams.skip) return;
+            mycowebInstallIce(iceParams.card);
+          },
+          "Mycoweb",
+          "Install ice from Archives?",
+          this
+        );
       },
     },
     {
       //↳ You may rez 1 installed piece of ice, paying 2 credits less.
       text: "You may rez 1 installed piece of ice, paying 2[c] less.",
-      Enumerate: function() {
+      Resolve: function(params) {
         var iceChoices = [];
         var installedCards = InstalledCards(corp);
         for (var i = 0; i < installedCards.length; i++) {
@@ -3173,38 +3180,32 @@ cardSet[35053] = {
             var rezCost = RezCost(card) - 2;
             if (rezCost < 0) rezCost = 0;
             if (CheckCredits(corp, rezCost, "rezzing", card)) {
-              iceChoices.push({ card: card, label: card.title + " (rez cost: " + rezCost + "[c])" });
+              iceChoices.push({ card: card, rezCost: rezCost, label: card.title + " (rez cost: " + rezCost + "[c])" });
             }
           }
         }
-        if (iceChoices.length === 0) return [{}]; //subroutine still fires
+        if (iceChoices.length === 0) return; //no ice to rez
         iceChoices.push({ skip: true, label: "Decline", button: "Decline" });
-        return iceChoices;
-      },
-      Resolve: function(params) {
-        if (params.skip || !params.card) return;
-        //Rez with 2 credit discount
-        var rezCost = RezCost(params.card) - 2;
-        if (rezCost < 0) rezCost = 0;
-        SpendCredits(corp, rezCost, "rezzing", params.card, function() {
-          Rez(params.card);
-        });
+        
+        DecisionPhase(
+          corp,
+          iceChoices,
+          function(iceParams) {
+            if (iceParams.skip) return;
+            //Rez with 2 credit discount
+            SpendCredits(corp, iceParams.rezCost, "rezzing", iceParams.card, function() {
+              Rez(iceParams.card);
+            });
+          },
+          "Mycoweb",
+          "Rez ice (paying 2[c] less)?",
+          this
+        );
       },
     },
     {
       //↳ Resolve 1 subroutine on a rezzed sentry.
       text: "Resolve 1 subroutine on a rezzed sentry.",
-      Enumerate: function() {
-        //Check for rezzed sentries with subroutines
-        var sentryChoices = ChoicesInstalledCards(corp, function(card) {
-          if (card.rezzed && CheckSubType(card, "Sentry") && CheckCardType(card, ["ice"])) {
-            if (card.subroutines && card.subroutines.length > 0) return true;
-          }
-          return false;
-        });
-        if (sentryChoices.length === 0) return []; //no sentries, subroutine does nothing
-        return [{}];
-      },
       Resolve: function(params) {
         var cardRef = this;
         mycowebResolveSubroutine(cardRef, "Sentry", false); //false = don't exclude self
@@ -3213,19 +3214,6 @@ cardSet[35053] = {
     {
       //↳ Resolve 1 subroutine on another rezzed code gate.
       text: "Resolve 1 subroutine on another rezzed code gate.",
-      Enumerate: function() {
-        var cardRef = this;
-        //Check for rezzed code gates OTHER than this one with subroutines
-        var gateChoices = ChoicesInstalledCards(corp, function(card) {
-          if (card === cardRef) return false; //exclude self
-          if (card.rezzed && CheckSubType(card, "Code Gate") && CheckCardType(card, ["ice"])) {
-            if (card.subroutines && card.subroutines.length > 0) return true;
-          }
-          return false;
-        });
-        if (gateChoices.length === 0) return []; //no other code gates, subroutine does nothing
-        return [{}];
-      },
       Resolve: function(params) {
         var cardRef = this;
         mycowebResolveSubroutine(cardRef, "Code Gate", true); //true = exclude self

@@ -185,20 +185,44 @@
 				function GenerateGauntletCardSet() {
 					gauntletCardIds = [];
 					gauntletCardCounts = {};
-					var availableCards = [];
-					// Collect all runner non-identity cards
-					for (var i = 0; i < cardSet.length; i++) {
-						if (typeof cardSet[i] !== 'undefined' && cardSet[i].player == runner && cardSet[i].cardType !== 'identity') {
-							availableCards.push(i);
-						}
+					
+					// Fixed card subset for testing gauntlet mode
+					var fixedCards = [
+						// Core 6 cards with 3 copies each
+						30028, // Jailbreak
+						30029, // Overclock
+						30030, // Sure Gamble
+						30033, // Smartware Distributor
+						30034, // Verbal Plasticity
+						30032  // Mayfly
+					];
+					
+					// Add 3 copies of each core card
+					for (var i = 0; i < fixedCards.length; i++) {
+						gauntletCardIds.push(fixedCards[i]);
+						gauntletCardCounts[fixedCards[i]] = 3;
 					}
-					// Shuffle and select 40 unique cards
-					Shuffle(availableCards);
-					for (var i = 0; i < Math.min(40, availableCards.length); i++) {
-						var cardId = availableCards[i];
-						gauntletCardIds.push(cardId);
-						// Allow 3 copies for most cards, 1 copy for unique cards
-						gauntletCardCounts[cardId] = (cardSet[cardId].unique) ? 1 : 3;
+					
+					// Add 3 consoles (can repeat)
+					var consoles = [
+						30003, // Carnivore
+						30014, // Pennyshaver
+						30023  // Pantograph
+					];
+					
+					for (var i = 0; i < 3; i++) {
+						var consoleId = consoles[i % consoles.length]; // Allows repeats
+						gauntletCardIds.push(consoleId);
+						if (typeof gauntletCardCounts[consoleId] === 'undefined') {
+							gauntletCardCounts[consoleId] = 0;
+						}
+						gauntletCardCounts[consoleId]++;
+					}
+					
+					console.log('Gauntlet Mode: Fixed subset of 9 unique cards (21 total):');
+					for (var i = 0; i < gauntletCardIds.length; i++) {
+						var cardId = gauntletCardIds[i];
+						console.log('  ' + (i+1) + '. ' + cardSet[cardId].title + ' (count: ' + gauntletCardCounts[cardId] + ')');
 					}
 				}
 
