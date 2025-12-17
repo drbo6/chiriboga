@@ -528,6 +528,63 @@ var CardRenderer = {
           } else this.costAnimateCountdown -= delta;
         }, this);
       }
+      //icon and text for trash cost, if relevant
+      this.trashCostSprite = null;
+      this.trashCostText = null;
+      if (strengthInfo.trashCost != null) {
+        this.printedTrashCost = 0;
+        if (typeof this.card.trashCost !== "undefined")
+          this.printedTrashCost = this.card.trashCost;
+
+        this.trashCostSprite = new PIXI.Sprite(strengthInfo.trashCost);
+        this.trashCostText = new PIXI.Text(this.printedTrashCost, strengthTextStyle);
+        this.trashCostText.text = this.printedTrashCost;
+        this.sprite.addChild(this.trashCostSprite);
+        this.trashCostSprite.addChild(this.trashCostText);
+        this.trashCostSprite.anchor.set(0.5, 0.5);
+        this.trashCostText.anchor.set(0.5, 0.5);
+        this.trashCostParticleContainer = cardRenderer.CreateParticleContainer();
+        this.trashCostSprite.addChild(this.trashCostParticleContainer);
+        this.trashCostParticleContainer.scale.x =
+          this.trashCostParticleContainer.scale.y = 2.0; //undo sprite scaling for particles
+        this.storedTrashCost = this.printedTrashCost; //known value, even if not up to date in visual display yet due to animation time
+        this.targetTrashCost = this.printedTrashCost; //actual value, ahead of animation
+        this.trashCostIncrementers = []; //for animation
+        this.trashCostAnimateCountdown = 0.0;
+        app.ticker.add(function (delta) {
+          this.targetTrashCost = this.printedTrashCost;
+          if (typeof this.card.trashCost !== "undefined")
+            this.targetTrashCost = TrashCost(this.card);
+          //add incrementers to animate increase/decrease
+          while (this.storedTrashCost < this.targetTrashCost) {
+            this.storedTrashCost++;
+            this.trashCostIncrementers.push(this.storedTrashCost);
+          }
+          while (this.storedTrashCost > this.targetTrashCost) {
+            this.storedTrashCost--;
+            this.trashCostIncrementers.push(this.storedTrashCost);
+          }
+          //animate the incrementers
+          if (this.trashCostAnimateCountdown <= 0.0) {
+            if (this.trashCostIncrementers.length > 0) {
+              var oldValue = 1 * this.trashCostText.text;
+              var newValue = this.trashCostIncrementers.shift();
+              if (newValue > oldValue)
+                cardRenderer.ParticleEffect(
+                  this.trashCostParticleContainer,
+                  particleSystems.costup
+                );
+              else if (newValue < oldValue)
+                cardRenderer.ParticleEffect(
+                  this.trashCostParticleContainer,
+                  particleSystems.costdown
+                );
+              this.trashCostText.text = newValue;
+              this.trashCostAnimateCountdown = 6; //time before next animate
+            }
+          } else this.trashCostAnimateCountdown -= delta;
+        }, this);
+      }
       this.glowSprite = new PIXI.Sprite(this.glowTextures.zoomed);
       this.sprite.glow = this.glowSprite; //for reference in interactive callbacks
       this.app.stage.addChild(this.glowSprite); //add sprite to the stage container (so it renders)
@@ -764,6 +821,25 @@ var CardRenderer = {
               }
             } else this.costSprite.visible = false;
           }
+          if (this.trashCostSprite != null) {
+            if (showFace && 1 * this.trashCostText.text != this.printedTrashCost) {
+              this.trashCostSprite.visible = true;
+              if (this.card.player == runner) {
+                this.trashCostSprite.x = -109;
+                this.trashCostSprite.y = -60;
+              } else {
+                if (CheckInstalled(this.card)) {
+                  this.trashCostSprite.x = 129;
+                  this.trashCostSprite.y = 173;
+                } else {
+                  this.trashCostSprite.x = 129;
+                  this.trashCostSprite.y = 173;
+                }
+              }
+              this.trashCostText.x = 1;
+              this.trashCostText.y = 0;
+            } else this.trashCostSprite.visible = false;
+          }
           if (this.strengthSprite != null) {
             //icebreaker
             this.strengthSprite.x = -108;
@@ -846,6 +922,20 @@ var CardRenderer = {
                 this.costSprite.y = -184;
               }
             } else this.costSprite.visible = false;
+          }
+          if (this.trashCostSprite != null) {
+            if (showFace && 1 * this.trashCostText.text != this.printedTrashCost) {
+              this.trashCostSprite.visible = true;
+              if (this.card.player == runner) {
+                this.trashCostSprite.x = -109;
+                this.trashCostSprite.y = -147;
+              } else {
+                this.trashCostSprite.x = 129;
+                this.trashCostSprite.y = 173;
+              }
+              this.trashCostText.x = 1;
+              this.trashCostText.y = 0;
+            } else this.trashCostSprite.visible = false;
           }
           if (this.strengthSprite != null) {
             //ice or icebreaker
@@ -1204,6 +1294,7 @@ var CardRenderer = {
 		spritesToDestroy.push(this.strengthSprite);
 		spritesToDestroy = spritesToDestroy.concat(this.brokenSprites);
 		spritesToDestroy.push(this.costSprite);
+		spritesToDestroy.push(this.trashCostSprite);
 		spritesToDestroy.push(this.glowSprite);
 		for (var i=0; i<spritesToDestroy.length; i++) {
 			if (spritesToDestroy[i]) spritesToDestroy[i].destroy();

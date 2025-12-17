@@ -2545,3 +2545,113 @@ cardSet[35041] = {
     return { facecheck: true, program_trash: true, damage: true };
   },
 };
+
+//Card 26: Mahkota Langit Grid
+//Neutral Corp Upgrade - Region
+//Cost: 2, Trash: 2
+//2 recurring credits. You can spend hosted credits to rez assets in the root of this server and ice protecting this server.
+//Persistent → The trash cost of each asset in the root of this server is increased by 2 credits.
+//Limit 1 region per server.
+cardSet[35082] = {
+  title: "Mahkota Langit Grid",
+  imageFile: "35082.png",
+  player: corp,
+  faction: "Neutral",
+  influence: 0,
+  cardType: "upgrade",
+  subTypes: ["Region"],
+  rezCost: 2,
+  trashCost: 2,
+  
+  //2 recurring credits - added on rez and refilled before Corp turn
+  credits: 0,
+  
+  //When you rez this upgrade, refill to 2 hosted credits
+  automaticOnRez: {
+    Resolve: function(card) {
+      if (card === this) {
+        this.credits = 2;
+      }
+    },
+  },
+  
+  //Before your turn begins, refill to 2 hosted credits (only fires when rezzed/active)
+  responseOnCorpTurnBegins: {
+    Resolve: function() {
+      this.credits = 2;
+    },
+    automatic: true,
+  },
+  
+  //You can spend hosted credits to rez assets in the root of this server and ice protecting this server
+  canUseCredits: function(doing, card) {
+    if (doing !== "rezzing") return false;
+    if (!card) return false;
+    var myServer = GetServer(this);
+    var cardServer = GetServer(card);
+    if (myServer !== cardServer) return false;
+    //Assets in root or ice protecting this server
+    if (CheckCardType(card, ["asset"]) || CheckCardType(card, ["ice"])) return true;
+    return false;
+  },
+  
+  //Persistent → The trash cost of each asset in the root of this server is increased by 2 credits
+  //Store server in case card is trashed
+  serverThisWasInstalledIn: null,
+  automaticOnRunBegins: {
+    Resolve: function(server) {
+      //Store the server in case this is trashed
+      this.serverThisWasInstalledIn = GetServer(this);
+    },
+    automatic: true,
+    availableWhenInactive: true,
+  },
+  
+  //Persistent: If the runner trashes this card while accessing it, this ability still applies for the remainder of the run
+  automaticOnWouldTrash: {
+    Resolve: function(cards) {
+      if (cards.includes(this) && this.rezzed && this === accessingCard) {
+        this.modifyTrashCost.availableWhenInactive = true;
+      }
+    },
+    automatic: true,
+    availableWhenInactive: true,
+  },
+  
+  modifyTrashCost: {
+    Resolve: function(card) {
+      if (!CheckCardType(card, ["asset"])) return 0;
+      //Check current server, or stored server if trashed
+      var myServer = GetServer(this);
+      if (myServer === null) myServer = this.serverThisWasInstalledIn;
+      var cardServer = GetServer(card);
+      if (myServer === cardServer) return 2;
+      return 0;
+    },
+  },
+  
+  //End persistence after run ends
+  responseOnRunEnds: {
+    Resolve: function(params) {
+      this.modifyTrashCost.availableWhenInactive = false;
+    },
+    automatic: true,
+    availableWhenInactive: true,
+  },
+  
+  //**AI code
+  AIWouldRez: function() {
+    //Rez if we have assets to protect or ice to rez cheaply
+    var myServer = GetServer(this);
+    if (!myServer) return false;
+    //Check if there are assets in root that benefit from protection
+    for (var i = 0; i < myServer.root.length; i++) {
+      if (CheckCardType(myServer.root[i], ["asset"])) return true;
+    }
+    //Check if there's unrezzed ice we might want to rez
+    for (var i = 0; i < myServer.ice.length; i++) {
+      if (!myServer.ice[i].rezzed) return true;
+    }
+    return false;
+  },
+};

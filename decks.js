@@ -71,7 +71,7 @@ function InstanceCard(
   setNumber,
   backTextures,
   glowTextures,
-  strengthTextures = { ice: null, ib: null, broken: null, rc: null, crc: null }
+  strengthTextures = { ice: null, ib: null, broken: null, rc: null, crc: null, ctc: null }
 ) {
   var cardDefinition = cardSet[setNumber];
   if (typeof cardDefinition == 'undefined') {
@@ -90,14 +90,19 @@ function InstanceCard(
   if (card.cardType == "agenda" && typeof card.canBeAdvanced === "undefined")
     card.canBeAdvanced = true; //agendas can be advanced by default
   var costTexture = null;
+  var trashCostTexture = null;
   if (card.player == runner) costTexture = strengthTextures.rc;
   else if (
     card.cardType == "ice" ||
     card.cardType == "asset" ||
     card.cardType == "upgrade"
-  )
+  ) {
     costTexture = strengthTextures.crc;
-  var strengthInfo = { texture: null, num: 0, ice: false, cost: costTexture };
+    // Show trash cost for assets and upgrades if they have a trashCost
+    if ((card.cardType == "asset" || card.cardType == "upgrade") && typeof card.trashCost !== "undefined")
+      trashCostTexture = strengthTextures.ctc;
+  }
+  var strengthInfo = { texture: null, num: 0, ice: false, cost: costTexture, trashCost: trashCostTexture };
   if (typeof (card.strength !== "undefined")) {
     if (card.cardType == "ice")
       strengthInfo = {
@@ -106,6 +111,7 @@ function InstanceCard(
         ice: true,
         brokenTexture: strengthTextures.broken,
         cost: costTexture,
+        trashCost: trashCostTexture,
       };
     if (card.cardType == "program")
       strengthInfo = {
@@ -113,6 +119,7 @@ function InstanceCard(
         num: card.strength,
         ice: false,
         cost: costTexture,
+        trashCost: trashCostTexture,
       };
   }
 
@@ -166,7 +173,7 @@ function InstanceCardsPush(
   num,
   backTextures,
   glowTextures,
-  strengthTextures = { ice: null, ib: null }
+  strengthTextures = { ice: null, ib: null, broken: null, rc: null, crc: null, ctc: null }
 ) {
   var ret = [];
   //push a deep copy num times
@@ -511,12 +518,14 @@ function LoadDecks() {
   var subroutineBrokenTexture = cardRenderer.LoadTexture("images/broken.png");
   var runnerCostTexture = cardRenderer.LoadTexture("images/runner_cost.png");
   var corpRezCostTexture = cardRenderer.LoadTexture("images/corp_rez_cost.png");
+  var corpTrashCostTexture = cardRenderer.LoadTexture("images/trash_cover.png");
   strengthTextures = {
     ice: strengthTextureIce,
     ib: strengthTextureIcebreaker,
     broken: subroutineBrokenTexture,
     rc: runnerCostTexture,
     crc: corpRezCostTexture,
+    ctc: corpTrashCostTexture,
   };
 
   //And glow texture
@@ -730,7 +739,7 @@ function LoadDecks() {
 	CorpTestField(30035, //identity
 		[30037, 30047,30073,35075,30074], //archivesCards
 		[30073,30072,30047,30073,30073,30039,30039,30039,30039,30039,30039,30039,30039,30039,30039,30039,30039,30039,30039,30039], //rndCards
-		[30037], //hqCards
+		[30037,35082], //hqCards
 		[], //archivesInstalled
 		[35041], //rndInstalled
 		[35042], //hqInstalled
@@ -746,10 +755,10 @@ function LoadDecks() {
   // corp.HQ.ice[0].rezzed=true;
   // corp.remoteServers[0].ice[0].rezzed=true;
   // corp.remoteServers[0].ice[1].rezzed=true;
-  corp.remoteServers[0].ice[2].rezzed=true;
+  // corp.remoteServers[0].ice[2].rezzed=true;
   // corp.remoteServers[1].ice[0].rezzed=true;
   // corp.remoteServers[1].ice[2].rezzed=true;
-  corp.remoteServers[2].ice[0].rezzed=true;
+  // corp.remoteServers[2].ice[0].rezzed=true;
   // corp.remoteServers[2].ice[1].rezzed=true;
   // corp.remoteServers[0].root[0].knownToRunner=true;
   // corp.archives.ice[0].rezzed=true;
@@ -770,18 +779,18 @@ function LoadDecks() {
   // AddTags(1);
   // runner.clickTracker = 0;  
   // runner.rig.resources[0].power = 4;
-  corp.clickTracker = 1;
+  corp.clickTracker = 6;
   // ChangePhase(phases.corpActionMain);
   // ChangePhase(phases.corpDiscardStart);
   // MakeRun(corp.remoteServers[0]);
-  MakeRun(corp.RnD);
+  //MakeRun(corp.RnD);
   // attackedServer = corp.RnD;
   // ChangePhase(phases.runApproachServer); //i.e. skip all the ice
 
   // // INSTALL TROJAN (requires setting it on the ice and then hosting it)
   // // -------------------------------------------------------------------
-  corp.remoteServers[0].ice[2].hostedCards = [];
-  InstanceCardsPush(30004, corp.remoteServers[0].ice[2].hostedCards, 1, cardBackTexturesCorp, glowTextures, strengthTextures)[0].host = corp.remoteServers[0].ice[2];
+  // corp.remoteServers[0].ice[2].hostedCards = [];
+  // InstanceCardsPush(30004, corp.remoteServers[0].ice[2].hostedCards, 1, cardBackTexturesCorp, glowTextures, strengthTextures)[0].host = corp.remoteServers[0].ice[2];
 
   // // SET THE PHASE TO START OF RUNNER TURN
   // // -------------------------------------
