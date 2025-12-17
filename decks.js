@@ -738,12 +738,12 @@ function LoadDecks() {
 
 	CorpTestField(35036, //identity
 		[30037, 30047,30073,35075,30074], //archivesCards
-		[30073,30072,30047,30073,30073,30039,30039,30039,30039,30039,30039,30039,30039,30039,30039,30039,30039,30039,30039,30039,35044,35045], //rndCards
+		[30073,30072,30047,30073,30073,30039,30039,30039,30039,30039,30039,30039,30039,30039,30039,30039,30039,30039,30039,30039,35044,35044,35044,35045], //rndCards
 		[35072,35040,35082], //hqCards
 		[], //archivesInstalled
 		[35041], //rndInstalled
 		[35042], //hqInstalled
-		[[35038,30072,30072,35075],[35038,35042],[30037]], //remotes (array of arrays)
+		[[35038,30072,30072,35075],[35038,35042],[30037, 35053]], //remotes (array of arrays)
 		[], //scored
 		cardBackTexturesCorp,glowTextures,strengthTextures
   );
@@ -782,7 +782,7 @@ function LoadDecks() {
   // corp.clickTracker = 6;
   // ChangePhase(phases.corpActionMain);
   // ChangePhase(phases.corpDiscardStart);
-  // MakeRun(corp.remoteServers[2]);
+  MakeRun(corp.remoteServers[2]);
   // MakeRun(corp.RnD);
   // attackedServer = corp.RnD;
   // ChangePhase(phases.runApproachServer); //i.e. skip all the ice

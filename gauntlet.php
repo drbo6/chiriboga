@@ -105,6 +105,41 @@
 		}
 		?>
 		<script>
+			// DRBO6: Gauntlet Mode - Build playerIdentities and populate dropdown after card sets load
+			function PopulateIdentityDropdown() {
+				// Rebuild playerIdentities for current deckPlayer
+				playerIdentities = [];
+				for (var i=0; i<cardSet.length; i++) {
+					if (typeof cardSet[i] != 'undefined' &&  typeof cardSet[i].faction != 'undefined') {
+						if (cardSet[i].cardType == 'identity') {
+							if (deckPlayer == cardSet[i].player) playerIdentities.push(i);
+						}
+					}
+				}
+				
+				// Clear and populate the dropdown
+				$("#identityselect").empty();
+				for (var i = 0; i < playerIdentities.length; i++) {
+					var fullTitle = cardSet[playerIdentities[i]].title || '';
+					var shortTitle = fullTitle; // fallback
+					// Determine shortening based on side: runner before colon, corp after colon+space
+					if (deckPlayer === corp) {
+						var colonIdx = fullTitle.indexOf(': ');
+						if (colonIdx > -1) shortTitle = fullTitle.substring(colonIdx + 2).trim();
+					} else {
+						// Runner
+						if (fullTitle.indexOf(':') > -1) shortTitle = fullTitle.split(':')[0].trim();
+					}
+					$("#identityselect").append(
+					  "<option value=" +
+						playerIdentities[i] +
+						">" +
+						shortTitle +
+						"</option>\n"
+					);
+				}
+			}
+
 			// Load card data from JSON
 			$.getJSON('carddata/carddata.json', function(data) {
 				cardData = data;
@@ -144,6 +179,63 @@
 				} else {
 					$('#preconselect').empty().append('<option value="-1">Load Precon Deck</option>');
 				}
+
+				// DRBO6: Generate gauntlet card subset (40 different runner cards)
+				// This must happen AFTER cardData is loaded so filtering works correctly
+				function GenerateGauntletCardSet() {
+					gauntletCardIds = [];
+					gauntletCardCounts = {};
+					var availableCards = [];
+					// Collect all runner non-identity cards
+					for (var i = 0; i < cardSet.length; i++) {
+						if (typeof cardSet[i] !== 'undefined' && cardSet[i].player == runner && cardSet[i].cardType !== 'identity') {
+							availableCards.push(i);
+						}
+					}
+					// Shuffle and select 40 unique cards
+					Shuffle(availableCards);
+					for (var i = 0; i < Math.min(40, availableCards.length); i++) {
+						var cardId = availableCards[i];
+						gauntletCardIds.push(cardId);
+						// Allow 3 copies for most cards, 1 copy for unique cards
+						gauntletCardCounts[cardId] = (cardSet[cardId].unique) ? 1 : 3;
+					}
+				}
+
+				// Generate the gauntlet card set now that cardData is loaded
+				GenerateGauntletCardSet();
+
+				// Rebuild identity dropdown now that deckPlayer is runner
+				PopulateIdentityDropdown();
+
+				// Pick random runner identity from playerIdentities (now correctly populated)
+				if (playerIdentities.length > 0) {
+					var randomIdentity = playerIdentities[RandomRange(0, playerIdentities.length - 1)];
+					json.identity = randomIdentity;
+					$("#identityselect").val(randomIdentity);
+
+					// Set identity image - verify cardSet has this identity first
+					if (cardSet[randomIdentity] && cardSet[randomIdentity].imageFile) {
+						var imageFile = ChangeImageFileToJPG(cardSet[randomIdentity].imageFile);
+						$("#identity").prop("src", "images/" + imageFile);
+					}
+				} else {
+					// Fallback: no runner identities found
+					$("#identity").prop("src", "images/glow_outline.png");
+				}
+
+				// Render cards after cardData is loaded
+				RenderAllCardsList();
+				UpdateCardCountsUI();
+
+				// After identities and UI are ready, populate precons for current identity
+				try {
+					var currentIdSel = $('#identityselect').val();
+					var effectiveId = currentIdSel || (json && json.identity);
+					if (effectiveId && typeof window.PopulatePreconDropdownForIdentity === 'function') {
+						window.PopulatePreconDropdownForIdentity(effectiveId);
+					}
+				} catch(e) { /* ignore */ }
 			});
 
 			//UTILITY: ensure deckCounts matches json.cards
@@ -316,7 +408,18 @@
 				$("#cardcontainer").empty();
 				allCardIdsForPlayer = [];
 			// DRBO6: In gauntlet mode, only show cards available in gauntlet
-			var cardsToShow = gauntletCardIds.length > 0 ? gauntletCardIds : [];
+			var cardsToShow = [];
+			if (gauntletCardIds.length > 0) {
+				// Gauntlet mode: use the subset
+				cardsToShow = gauntletCardIds;
+			} else {
+				// Fallback: collect all non-identity cards for the current player
+				for (var i=0; i<cardSet.length; i++) {
+					if (typeof cardSet[i] !== 'undefined' && cardSet[i].player == deckPlayer && cardSet[i].cardType !== 'identity') {
+						cardsToShow.push(i);
+					}
+				}
+			}
 			for (var i=0;i<cardsToShow.length;i++) {
 				var cardId = cardsToShow[i];
 				if (typeof cardSet[cardId] !== 'undefined' && cardSet[cardId].player == deckPlayer && cardSet[cardId].cardType !== 'identity') {
@@ -758,7 +861,7 @@
 			  history.replaceState(
 				null,
 				"Chiriboga",
-				"decklauncher.php?" + setStr + opponentdeckstr + dC + "=" + compressed
+				"gauntlet.php?" + setStr + opponentdeckstr + dC + "=" + compressed
 			  );
 			}
 
@@ -1021,8 +1124,9 @@
 						"src",
 						"images/" + ChangeImageFileToJPG(cardSet[json.identity].imageFile)
 					);
-					// Update deckPlayer to match selected identity's side
-					deckPlayer = cardSet[json.identity].player;
+					// In gauntlet mode, keep deckPlayer as runner (don't allow side switching)
+					// The selected identity should always be a runner identity
+					deckPlayer = runner;
 					// Parse and update deck stats without changing the deck
 					Parse();
 			  });
@@ -1360,41 +1464,6 @@
 				}
 			});
 			}
-		  // DRBO6: Gauntlet Mode - Build playerIdentities and populate dropdown after card sets load
-		  function PopulateIdentityDropdown() {
-			  // Rebuild playerIdentities for current deckPlayer
-			  playerIdentities = [];
-			  for (var i=0; i<cardSet.length; i++) {
-				  if (typeof cardSet[i] != 'undefined' &&  typeof cardSet[i].faction != 'undefined') {
-					  if (cardSet[i].cardType == 'identity') {
-						  if (deckPlayer == cardSet[i].player) playerIdentities.push(i);
-					  }
-				  }
-			  }
-			  
-			  // Clear and populate the dropdown
-			  $("#identityselect").empty();
-			  for (var i = 0; i < playerIdentities.length; i++) {
-				var fullTitle = cardSet[playerIdentities[i]].title || '';
-				var shortTitle = fullTitle; // fallback
-				// Determine shortening based on side: runner before colon, corp after colon+space
-				if (deckPlayer === corp) {
-					var colonIdx = fullTitle.indexOf(': ');
-					if (colonIdx > -1) shortTitle = fullTitle.substring(colonIdx + 2).trim();
-				} else {
-					// Runner
-					if (fullTitle.indexOf(':') > -1) shortTitle = fullTitle.split(':')[0].trim();
-				}
-				$("#identityselect").append(
-				  "<option value=" +
-					playerIdentities[i] +
-					">" +
-					shortTitle +
-					"</option>\n"
-				);
-			  }
-		  }
-		  
 		  // Call it initially (will be called again after setting runner mode)
 		  PopulateIdentityDropdown();
 			  // Hide Export JS Deck by default; reveal via secret gesture
@@ -1423,60 +1492,6 @@
 					}
 				});
 			  })();
-			  // DRBO6: Generate gauntlet card subset (40 different runner cards)
-			  function GenerateGauntletCardSet() {
-				  gauntletCardIds = [];
-				  gauntletCardCounts = {};
-				  var availableCards = [];
-				  // Collect all runner non-identity cards
-				  for (var i = 0; i < cardSet.length; i++) {
-					  if (typeof cardSet[i] !== 'undefined' && cardSet[i].player == runner && cardSet[i].cardType !== 'identity') {
-						  availableCards.push(i);
-					  }
-				  }
-				  // Shuffle and select 40 unique cards
-				  Shuffle(availableCards);
-				  for (var i = 0; i < Math.min(40, availableCards.length); i++) {
-					  var cardId = availableCards[i];
-					  gauntletCardIds.push(cardId);
-					  // Allow 3 copies for most cards, 1 copy for unique cards
-					  gauntletCardCounts[cardId] = (cardSet[cardId].unique) ? 1 : 3;
-				  }
-			  }
-			  
-			  //choose an identity at random, unless a load string was specified
-			  // DRBO6: Generate gauntlet card subset and pick random runner identity
-			  GenerateGauntletCardSet();
-		  
-		  // Rebuild identity dropdown now that deckPlayer is runner
-		  PopulateIdentityDropdown();
-		  
-		  // Pick random runner identity from playerIdentities (now correctly populated)
-		  if (playerIdentities.length > 0) {
-		      var randomIdentity = playerIdentities[RandomRange(0, playerIdentities.length - 1)];
-		      json.identity = randomIdentity;
-		      $("#identityselect").val(randomIdentity);
-		      
-		      // Set identity image - verify cardSet has this identity first
-		      if (cardSet[randomIdentity] && cardSet[randomIdentity].imageFile) {
-		          var imageFile = ChangeImageFileToJPG(cardSet[randomIdentity].imageFile);
-		          $("#identity").prop("src", "images/" + imageFile);
-		      }
-		  } else {
-		      // Fallback: no runner identities found
-		      $("#identity").prop("src", "images/glow_outline.png");
-		  }
-		  
-		  RenderAllCardsList();
-		  UpdateCardCountsUI();
-		  // After identities and UI are ready, populate precons for current identity
-		  try {
-		    var currentIdSel = $('#identityselect').val();
-		    var effectiveId = currentIdSel || (json && json.identity);
-		    if (effectiveId && typeof window.PopulatePreconDropdownForIdentity === 'function') {
-		      window.PopulatePreconDropdownForIdentity(effectiveId);
-		    }
-		  } catch(e) { /* ignore */ }
 		}
 
 		function Normalise(src) {

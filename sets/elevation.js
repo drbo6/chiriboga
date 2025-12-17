@@ -2991,13 +2991,12 @@ cardSet[35036] = {
         }
       }
       
-      //Show all cards in viewing grid (face up)
+      //Make all cards face up so they display
       for (var i = 0; i < allTopCards.length; i++) {
         allTopCards[i].faceUp = true;
       }
-      viewingGrid = allTopCards.slice(); //copy array
       
-      //Build choices from installable cards only
+      //Build choices from installable cards only (these will glow)
       var choices = [];
       for (var i = 0; i < installableCards.length; i++) {
         var card = installableCards[i];
@@ -3010,11 +3009,13 @@ cardSet[35036] = {
         corp,
         choices,
         function(choiceParams) {
-          //Clear viewing grid and restore faceUp status
-          viewingGrid = null;
+          //Restore faceUp status for cards still in R&D
           for (var i = 0; i < allTopCards.length; i++) {
-            allTopCards[i].faceUp = false;
+            if (allTopCards[i].cardLocation === corp.RnD.cards) {
+              allTopCards[i].faceUp = false;
+            }
           }
+          viewingGrid = null;
           
           if (!choiceParams.skip) {
             //Install the chosen card with server selection
@@ -3025,6 +3026,15 @@ cardSet[35036] = {
         "Install 1 non-agenda card from top of R&D?",
         cardRef
       );
+      
+      //After DecisionPhase sets up, add non-installable cards to viewingGrid
+      //They will appear but not glow (since they're not in validOptions)
+      if (!viewingGrid) viewingGrid = [];
+      for (var i = 0; i < allTopCards.length; i++) {
+        if (!viewingGrid.includes(allTopCards[i])) {
+          viewingGrid.push(allTopCards[i]);
+        }
+      }
     },
     text: "Look at top 3 cards of R&D, may install 1 non-agenda",
   },
@@ -3107,5 +3117,210 @@ function poetriInstallCard(cardToInstall) {
     "Choose where to install " + cardToInstall.title,
     null,
     "server"
+  );
+}
+
+//Card 33: Mycoweb
+//Jinteki Ice - Code Gate
+//Rez: 8, Strength: 5
+//↳ You may install 1 piece of ice from Archives, ignoring all costs.
+//↳ You may rez 1 installed piece of ice, paying 2 credits less.
+//↳ Resolve 1 subroutine on a rezzed sentry.
+//↳ Resolve 1 subroutine on another rezzed code gate.
+cardSet[35053] = {
+  title: "Mycoweb",
+  imageFile: "35053.png",
+  player: corp,
+  faction: "Jinteki",
+  influence: 2,
+  cardType: "ice",
+  subTypes: ["Code Gate"],
+  rezCost: 8,
+  strength: 5,
+  
+  subroutines: [
+    {
+      //↳ You may install 1 piece of ice from Archives, ignoring all costs.
+      text: "You may install 1 piece of ice from Archives, ignoring all costs.",
+      Enumerate: function() {
+        //Check for ice in Archives
+        var iceChoices = [];
+        for (var i = 0; i < corp.archives.cards.length; i++) {
+          var card = corp.archives.cards[i];
+          if (CheckCardType(card, ["ice"])) {
+            iceChoices.push({ card: card, label: card.title });
+          }
+        }
+        if (iceChoices.length === 0) return [{}]; //subroutine still fires even with no choices
+        iceChoices.push({ skip: true, label: "Decline", button: "Decline" });
+        return iceChoices;
+      },
+      Resolve: function(params) {
+        if (params.skip || !params.card) return;
+        mycowebInstallIce(params.card);
+      },
+    },
+    {
+      //↳ You may rez 1 installed piece of ice, paying 2 credits less.
+      text: "You may rez 1 installed piece of ice, paying 2[c] less.",
+      Enumerate: function() {
+        var iceChoices = [];
+        var installedCards = InstalledCards(corp);
+        for (var i = 0; i < installedCards.length; i++) {
+          var card = installedCards[i];
+          if (CheckCardType(card, ["ice"]) && !card.rezzed) {
+            //Check if Corp can afford with 2 credit discount
+            var rezCost = RezCost(card) - 2;
+            if (rezCost < 0) rezCost = 0;
+            if (CheckCredits(corp, rezCost, "rezzing", card)) {
+              iceChoices.push({ card: card, label: card.title + " (rez cost: " + rezCost + "[c])" });
+            }
+          }
+        }
+        if (iceChoices.length === 0) return [{}]; //subroutine still fires
+        iceChoices.push({ skip: true, label: "Decline", button: "Decline" });
+        return iceChoices;
+      },
+      Resolve: function(params) {
+        if (params.skip || !params.card) return;
+        //Rez with 2 credit discount
+        var rezCost = RezCost(params.card) - 2;
+        if (rezCost < 0) rezCost = 0;
+        SpendCredits(corp, rezCost, "rezzing", params.card, function() {
+          Rez(params.card);
+        });
+      },
+    },
+    {
+      //↳ Resolve 1 subroutine on a rezzed sentry.
+      text: "Resolve 1 subroutine on a rezzed sentry.",
+      Enumerate: function() {
+        //Check for rezzed sentries with subroutines
+        var sentryChoices = ChoicesInstalledCards(corp, function(card) {
+          if (card.rezzed && CheckSubType(card, "Sentry") && CheckCardType(card, ["ice"])) {
+            if (card.subroutines && card.subroutines.length > 0) return true;
+          }
+          return false;
+        });
+        if (sentryChoices.length === 0) return []; //no sentries, subroutine does nothing
+        return [{}];
+      },
+      Resolve: function(params) {
+        var cardRef = this;
+        mycowebResolveSubroutine(cardRef, "Sentry", false); //false = don't exclude self
+      },
+    },
+    {
+      //↳ Resolve 1 subroutine on another rezzed code gate.
+      text: "Resolve 1 subroutine on another rezzed code gate.",
+      Enumerate: function() {
+        var cardRef = this;
+        //Check for rezzed code gates OTHER than this one with subroutines
+        var gateChoices = ChoicesInstalledCards(corp, function(card) {
+          if (card === cardRef) return false; //exclude self
+          if (card.rezzed && CheckSubType(card, "Code Gate") && CheckCardType(card, ["ice"])) {
+            if (card.subroutines && card.subroutines.length > 0) return true;
+          }
+          return false;
+        });
+        if (gateChoices.length === 0) return []; //no other code gates, subroutine does nothing
+        return [{}];
+      },
+      Resolve: function(params) {
+        var cardRef = this;
+        mycowebResolveSubroutine(cardRef, "Code Gate", true); //true = exclude self
+      },
+    },
+  ],
+  
+  //AI code
+  AIRezReasons: function() {
+    return { facecheck: true };
+  },
+};
+
+//Helper function for Mycoweb - install ice from Archives with server selection
+function mycowebInstallIce(iceToInstall) {
+  //Build server choices
+  var serverChoices = [];
+  serverChoices.push({ server: corp.HQ, label: "HQ" });
+  serverChoices.push({ server: corp.RnD, label: "R&D" });
+  serverChoices.push({ server: corp.archives, label: "Archives" });
+  for (var j = 0; j < corp.remoteServers.length; j++) {
+    serverChoices.push({
+      server: corp.remoteServers[j],
+      label: corp.remoteServers[j].serverName
+    });
+  }
+  serverChoices.push({ server: null, label: "New remote server", button: "New remote" });
+  
+  DecisionPhase(
+    corp,
+    serverChoices,
+    function(serverParams) {
+      Install(iceToInstall, serverParams.server, true); //ignoreAllCosts = true
+    },
+    "Mycoweb",
+    "Choose server for " + iceToInstall.title,
+    null,
+    "server"
+  );
+}
+
+//Helper function for Mycoweb - resolve subroutine on rezzed ice of given subtype
+function mycowebResolveSubroutine(cardRef, subtype, excludeSelf) {
+  //Step 1: Choose a rezzed ice of the given subtype
+  var iceChoices = ChoicesInstalledCards(corp, function(card) {
+    if (excludeSelf && card === cardRef) return false;
+    if (card.rezzed && CheckSubType(card, subtype) && CheckCardType(card, ["ice"])) {
+      if (card.subroutines && card.subroutines.length > 0) return true;
+    }
+    return false;
+  });
+  
+  if (iceChoices.length === 0) return;
+  
+  DecisionPhase(
+    corp,
+    iceChoices,
+    function(iceParams) {
+      //Step 2: Choose a subroutine on that ice
+      var subChoices = [];
+      for (var i = 0; i < iceParams.card.subroutines.length; i++) {
+        var sub = iceParams.card.subroutines[i];
+        subChoices.push({
+          card: iceParams.card,
+          subroutine: sub,
+          label: sub.text
+        });
+      }
+      
+      DecisionPhase(
+        corp,
+        subChoices,
+        function(subParams) {
+          //Step 3: Get choices for that subroutine and resolve it
+          var srChoices = ChoicesSubroutine(subParams.card, subParams.subroutine);
+          
+          DecisionPhase(
+            corp,
+            srChoices,
+            function(srParams) {
+              //Fire the chosen subroutine
+              Trigger(srParams.card, srParams.ability, srParams.choice, "Firing");
+            },
+            subParams.card.title,
+            "Choose option for: " + subParams.subroutine.text,
+            subParams.card
+          );
+        },
+        iceParams.card.title,
+        "Choose subroutine to resolve",
+        iceParams.card
+      );
+    },
+    "Mycoweb",
+    "Choose rezzed " + subtype.toLowerCase() + " ice",
+    cardRef
   );
 }
