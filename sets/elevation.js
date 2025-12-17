@@ -2655,3 +2655,125 @@ cardSet[35082] = {
     return false;
   },
 };
+
+//Card 27: Mercia B4LL4RD
+//Haas-Bioroid Upgrade - Bioroid - Academic
+//Cost: 2, Trash: 2, Unique
+//When your action phase ends, you may install 1 piece of ice from HQ, paying 1 credit less.
+//If you do, move this upgrade to the root of the server that piece of ice is protecting.
+cardSet[35045] = {
+  title: "Mercia B4LL4RD",
+  imageFile: "35045.png",
+  player: corp,
+  faction: "Haas-Bioroid",
+  influence: 2,
+  cardType: "upgrade",
+  subTypes: ["Bioroid", "Academic"],
+  rezCost: 2,
+  trashCost: 2,
+  unique: true,
+  
+  //Track which ice we're installing for cost reduction and movement
+  merciaInstallingIce: null,
+  
+  //When your action phase ends, you may install 1 piece of ice from HQ, paying 1 credit less
+  responseOnCorpActionPhaseEnds: {
+    Enumerate: function() {
+      //Return all valid ice+server combinations (like ChoicesCardInstall does)
+      //This allows drag-to-install with both card and server highlighting
+      var choices = [];
+      for (var i = 0; i < corp.HQ.cards.length; i++) {
+        var card = corp.HQ.cards[i];
+        if (CheckCardType(card, ["ice"])) {
+          //Add each server option for this ice, checking affordability per server
+          //Ice install cost = number of existing ice on that server, minus 1 for Mercia's discount
+          
+          //Centrals
+          var servers = [
+            { server: corp.HQ, label: "HQ" },
+            { server: corp.RnD, label: "R&D" },
+            { server: corp.archives, label: "Archives" }
+          ];
+          //Remotes
+          for (var j = 0; j < corp.remoteServers.length; j++) {
+            servers.push({
+              server: corp.remoteServers[j],
+              label: corp.remoteServers[j].serverName
+            });
+          }
+          //New remote (cost = 0 ice, minus 1 = 0)
+          servers.push({ server: null, label: "new server" });
+          
+          for (var k = 0; k < servers.length; k++) {
+            var serverInfo = servers[k];
+            //Calculate install cost for this server (ice cost = number of existing ice)
+            var installCost;
+            if (serverInfo.server === null) {
+              installCost = 0; //new server has no ice
+            } else {
+              installCost = serverInfo.server.ice.length;
+            }
+            //Apply Mercia's -1 discount
+            installCost = installCost - 1;
+            if (installCost < 0) installCost = 0;
+            
+            if (CheckCredits(corp, installCost, "installing", card)) {
+              choices.push({
+                card: card,
+                server: serverInfo.server,
+                label: card.title + " -> " + serverInfo.label
+              });
+            }
+          }
+        }
+      }
+      //Add decline option
+      if (choices.length > 0) {
+        choices.push({ decline: true, label: "Decline", button: "Decline" });
+      }
+      return choices;
+    },
+    Resolve: function(params) {
+      //Check for decline
+      if (params.decline) return;
+      
+      //Mark this ice for cost reduction
+      this.merciaInstallingIce = params.card;
+      
+      //Install the ice to the selected server
+      Install(params.card, params.server, false);
+    },
+    text: "Install 1 piece of ice from HQ, paying 1[c] less",
+  },
+  
+  //Reduce install cost by 1 for ice installed via this card's ability
+  modifyInstallCost: {
+    Resolve: function(card) {
+      if (card === this.merciaInstallingIce) return -1;
+      return 0;
+    },
+  },
+  
+  //After the ice is installed, move Mercia to that server
+  automaticOnInstall: {
+    Resolve: function(installedCard) {
+      if (installedCard === this.merciaInstallingIce) {
+        var targetServer = GetServer(installedCard);
+        if (targetServer !== null) {
+          MoveCard(this, targetServer.root);
+          Log(GetTitle(this) + " moves to " + ServerName(targetServer));
+        }
+        this.merciaInstallingIce = null;
+      }
+    },
+  },
+  
+  //**AI code
+  AIWouldRez: function() {
+    //Rez if we have ice in HQ to install
+    for (var i = 0; i < corp.HQ.cards.length; i++) {
+      if (CheckCardType(corp.HQ.cards[i], ["ice"])) return true;
+    }
+    return false;
+  },
+};

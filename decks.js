@@ -721,8 +721,8 @@ function LoadDecks() {
   // // UNCOMMENTING (use CTRL+/ in VS Code) THE CODE BELOW WILL SET UP A TEST FIELD
   // // SET P=R OR P=C IN THE URL TO VIEW AS RUNNER OR CORP RESPECTIVELY
   // // ----------------------------------------------------------------------------
-  debugging = true; //set true to log extra details and pause execution on error
-  viewAllFronts = true; //set true to see all card fronts (for testing)
+  // debugging = true; //set true to log extra details and pause execution on error
+  // viewAllFronts = true; //set true to see all card fronts (for testing)
   // mainLoopDelay = 50; //for speedy AI vs AI testing (any faster than this and funny things happen at end-of-game)
 
   // SET UP THE MAIN STATES FOR THE RUNNER AND CORP
@@ -739,7 +739,7 @@ function LoadDecks() {
 	CorpTestField(30035, //identity
 		[30037, 30047,30073,35075,30074], //archivesCards
 		[30073,30072,30047,30073,30073,30039,30039,30039,30039,30039,30039,30039,30039,30039,30039,30039,30039,30039,30039,30039], //rndCards
-		[30037,35082], //hqCards
+		[30037,35082,35045], //hqCards
 		[], //archivesInstalled
 		[35041], //rndInstalled
 		[35042], //hqInstalled
@@ -770,7 +770,7 @@ function LoadDecks() {
   
   // // GIVE EVERYONE SOME CREDITS TO START WITH
   // // ----------------------------------------
-  GainCredits(runner,2);
+  // GainCredits(runner,2);
   GainCredits(corp,25);
   
   // // OTHER STUFF
@@ -779,10 +779,10 @@ function LoadDecks() {
   // AddTags(1);
   // runner.clickTracker = 0;  
   // runner.rig.resources[0].power = 4;
-  corp.clickTracker = 6;
+  // corp.clickTracker = 6;
   // ChangePhase(phases.corpActionMain);
   // ChangePhase(phases.corpDiscardStart);
-  MakeRun(corp.remoteServers[2]);
+  // MakeRun(corp.remoteServers[2]);
   // MakeRun(corp.RnD);
   // attackedServer = corp.RnD;
   // ChangePhase(phases.runApproachServer); //i.e. skip all the ice
