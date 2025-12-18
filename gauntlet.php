@@ -140,8 +140,43 @@
 				var modal = document.getElementById('buy-cards-modal');
 				if (!modal) return; // Modal not open
 				
-				// Rebuild the entire modal to maintain proper styling
-				ShowBuyCardsModal();
+				// Find all existing pack buttons and rebuild just the button section
+				var existingButtons = modal.querySelectorAll('button.button');
+				if (existingButtons.length < 2) return; // No modal buttons yet
+				
+				// Rebuild pack button HTML (skip first button which is SELL EXTRA CARDS)
+				var newButtonsHtml = '';
+				newButtonsHtml += '<button class="button" onclick="SellExtraCards();" style="width: 100%;">SELL EXTRA CARDS</button>';
+				
+				// Add buttons for selected packs
+				for (var i = 0; i < selectedShopPacks.length; i++) {
+					var pack = selectedShopPacks[i];
+					newButtonsHtml += '<button class="button" onclick="BuyCardPack(' + i + ');" style="width: 100%;">BUY ' + pack.name.toUpperCase() + ': ' + pack.cost + '<img src="images/nsg/NSG_CREDIT.svg" class="card-icon" alt="credit" style="margin-left: 2px; margin-bottom: 2px; height: 16px; display: inline-block; vertical-align: sub; filter: invert(1) brightness(0.5) sepia(1) saturate(5) hue-rotate(80deg);"></button>';
+				}
+				
+				newButtonsHtml += '<button class="button" onclick="CloseBuyCardsModal();" style="width: 100%;">CLOSE</button>';
+				
+				// Replace button HTML by finding the buttons container
+				// The structure is: modal > solo-menu > button elements at the end
+				var soloMenu = modal.querySelector('.solo-menu');
+				if (soloMenu) {
+					// Get all buttons in the menu
+					var buttons = soloMenu.querySelectorAll('.button');
+					// Remove existing buttons (keep shop-content div)
+					for (var i = buttons.length - 1; i >= 0; i--) {
+						buttons[i].parentNode.removeChild(buttons[i]);
+					}
+					// Create new buttons container
+					var buttonContainer = document.createElement('div');
+					buttonContainer.style.display = 'flex';
+					buttonContainer.style.flexDirection = 'column';
+					buttonContainer.style.justifyContent = 'center';
+					buttonContainer.style.gap = '10px';
+					buttonContainer.style.width = '100%';
+					buttonContainer.style.padding = '20px';
+					buttonContainer.innerHTML = newButtonsHtml;
+					soloMenu.appendChild(buttonContainer);
+				}
 			}
 
 			// Function to show the Buy Cards modal
@@ -289,89 +324,66 @@
 				if (!packConfig) return [];
 				
 				var cards = [];
-				// Note: Each pack purchase should generate different cards, so we don't seed this.
-				// If you want deterministic cards per purchase, seed here with an offset.
 				
-				// Generate cardQuantity cards
+				// Build weighted pool of all eligible cards
+				// Each card's weight = typeWeight * factionWeight
+				var weightedPool = []; // Array of {cardId, weight}
+				
+				for (var cardId = 0; cardId < cardSet.length; cardId++) {
+					var card = cardSet[cardId];
+					if (!card) continue;
+					if (card.player !== runner) continue;
+					if (card.cardType === 'identity') continue;
+					
+					// Check allowed sets
+					if (gauntletAllowedSets && gauntletAllowedSets.length > 0) {
+						var cardSetCode = cardIdToSet[cardId] || '';
+						if (gauntletAllowedSets.indexOf(cardSetCode) === -1) continue;
+					}
+					
+					// Get type weight
+					var cardType = (card.cardType || '').toLowerCase();
+					var typeWeight = packConfig.typeFactors[cardType] || 0;
+					if (typeWeight <= 0) continue;
+					
+					// Get faction weight
+					var cardFaction = (card.faction || '').toLowerCase();
+					var factionKey = null;
+					if (cardFaction === 'anarch' || cardFaction === 'anarch-runner') factionKey = 'anarch';
+					else if (cardFaction === 'criminal' || cardFaction === 'criminal-runner') factionKey = 'criminal';
+					else if (cardFaction === 'shaper' || cardFaction === 'shaper-runner') factionKey = 'shaper';
+					else if (cardFaction === 'neutral' || cardFaction === 'neutral-runner') factionKey = 'neutral';
+					
+					var factionWeight = factionKey ? (packConfig.factionFactors[factionKey] || 0) : 0;
+					if (factionWeight <= 0) continue;
+					
+					// Combined weight
+					var combinedWeight = typeWeight * factionWeight;
+					weightedPool.push({ cardId: cardId, weight: combinedWeight });
+				}
+				
+				if (weightedPool.length === 0) {
+					console.warn("No eligible cards for pack:", packConfig.name);
+					return [];
+				}
+				
+				// Calculate total weight
+				var totalWeight = 0;
+				for (var i = 0; i < weightedPool.length; i++) {
+					totalWeight += weightedPool[i].weight;
+				}
+				
+				// Generate cardQuantity cards using weighted selection
 				for (var cardIndex = 0; cardIndex < packConfig.cardQuantity; cardIndex++) {
-					// Randomly select type based on typeFactors
-					var typeKeys = Object.keys(packConfig.typeFactors);
-					var typeWeights = [];
-					var totalTypeWeight = 0;
+					var roll = Math.random() * totalWeight;
+					var accum = 0;
 					
-					for (var i = 0; i < typeKeys.length; i++) {
-						typeWeights.push(packConfig.typeFactors[typeKeys[i]]);
-						totalTypeWeight += typeWeights[i];
-					}
-					
-					var typeRoll = Math.random() * totalTypeWeight;
-					var typeAccum = 0;
-					var selectedType = '';
-					for (var i = 0; i < typeKeys.length; i++) {
-						typeAccum += typeWeights[i];
-						if (typeRoll <= typeAccum) {
-							selectedType = typeKeys[i];
+					for (var i = 0; i < weightedPool.length; i++) {
+						accum += weightedPool[i].weight;
+						if (roll <= accum) {
+							cards.push(weightedPool[i].cardId);
 							break;
 						}
-					}
-					
-					// Randomly select faction based on factionFactors
-					var factionKeys = Object.keys(packConfig.factionFactors);
-					var factionWeights = [];
-					var totalFactionWeight = 0;
-					
-					for (var i = 0; i < factionKeys.length; i++) {
-						factionWeights.push(packConfig.factionFactors[factionKeys[i]]);
-						totalFactionWeight += factionWeights[i];
-					}
-					
-					var factionRoll = Math.random() * totalFactionWeight;
-					var factionAccum = 0;
-					var selectedFaction = '';
-					for (var i = 0; i < factionKeys.length; i++) {
-						factionAccum += factionWeights[i];
-						if (factionRoll <= factionAccum) {
-							selectedFaction = factionKeys[i];
-							break;
-						}
-					}
-					
-					// Find cards matching type and faction
-					var eligibleCards = [];
-					for (var cardId = 0; cardId < cardSet.length; cardId++) {
-						var card = cardSet[cardId];
-						if (!card) continue;
-						
-						// Check allowed sets
-						if (gauntletAllowedSets && gauntletAllowedSets.length > 0) {
-							var cardSetCode = cardIdToSet[cardId] || '';
-							if (gauntletAllowedSets.indexOf(cardSetCode) === -1) continue;
-						}
-						
-						// Check type match
-						var cardType = (card.cardType || '').toLowerCase();
-						if (cardType !== selectedType) continue;
-						
-						// Check faction match
-						var cardFaction = (card.faction || '').toLowerCase();
-						var factionMatch = false;
-						if (selectedFaction === 'anarch' && (cardFaction === 'anarch' || cardFaction === 'anarch-runner')) factionMatch = true;
-						else if (selectedFaction === 'criminal' && (cardFaction === 'criminal' || cardFaction === 'criminal-runner')) factionMatch = true;
-						else if (selectedFaction === 'shaper' && (cardFaction === 'shaper' || cardFaction === 'shaper-runner')) factionMatch = true;
-						else if (selectedFaction === 'neutral' && (cardFaction === 'neutral' || cardFaction === 'neutral-runner')) factionMatch = true;
-						
-						if (factionMatch) {
-							eligibleCards.push(cardId);
-						}
-					}
-					
-					// Randomly select from eligible cards
-					if (eligibleCards.length > 0) {
-						var randomCard = eligibleCards[Math.floor(Math.random() * eligibleCards.length)];
-						cards.push(randomCard);
-					} else if (cardIndex === 0) {
-						// Only log once per pack to avoid spam
-						console.warn("No eligible cards found. selectedType:", selectedType, "selectedFaction:", selectedFaction, "gauntletAllowedSets:", gauntletAllowedSets);
 					}
 				}
 				

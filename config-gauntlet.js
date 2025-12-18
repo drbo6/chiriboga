@@ -19,7 +19,7 @@ var gauntletConfig = {
       cost: 10,
       cardQuantity: 5,
       factionFactors: {
-        anarch: 2,
+        anarch: 4,
         criminal: 1,
         shaper: 1,
         neutral: 1
@@ -37,7 +37,7 @@ var gauntletConfig = {
       cardQuantity: 5,
       factionFactors: {
         anarch: 1,
-        criminal: 2,
+        criminal: 4,
         shaper: 1,
         neutral: 1
       },
@@ -55,7 +55,7 @@ var gauntletConfig = {
       factionFactors: {
         anarch: 1,
         criminal: 1,
-        shaper: 2,
+        shaper: 4,
         neutral: 1
       },
       typeFactors: {
@@ -76,7 +76,7 @@ var gauntletConfig = {
         neutral: 1
       },
       typeFactors: {
-        event: 2,
+        event: 4,
         resource: 1,
         program: 1,
         hardware: 1
@@ -94,7 +94,7 @@ var gauntletConfig = {
       },
       typeFactors: {
         event: 1,
-        resource: 2,
+        resource: 4,
         program: 1,
         hardware: 1
       }
@@ -112,7 +112,7 @@ var gauntletConfig = {
       typeFactors: {
         event: 1,
         resource: 1,
-        program: 2,
+        program: 4,
         hardware: 1
       }
     },
@@ -130,7 +130,7 @@ var gauntletConfig = {
         event: 1,
         resource: 1,
         program: 1,
-        hardware: 2
+        hardware: 4
       }
     }
   ],
