@@ -334,7 +334,17 @@
 				console.log("Decoded c parameter:", JSON.parse(LZString.decompressFromEncodedURIComponent(decodedC)));
 			}
 			if (decodedG) {
-				console.log("Decoded g parameter:", JSON.parse(LZString.decompressFromEncodedURIComponent(decodedG)));
+				var gauntletState = JSON.parse(LZString.decompressFromEncodedURIComponent(decodedG));
+				console.log("Decoded g parameter:", gauntletState);
+				// Log opponent names
+				if (gauntletState.opponents && gauntletState.opponents.length > 0) {
+					console.log("Gauntlet Opponents:");
+					for (var i = 0; i < gauntletState.opponents.length; i++) {
+						var opponentName = gauntletState.opponents[i].name || 'Unknown Opponent';
+						var opponentFaction = gauntletState.opponents[i].faction || 'Unknown Faction';
+						console.log((i + 1) + ". " + opponentName + " (" + opponentFaction + ")");
+					}
+				}
 			}
 			
 			// Display deck output and opponent info (matching decklauncher.php pattern)

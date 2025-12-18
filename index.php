@@ -291,35 +291,94 @@
         }
       }
       
-      // Select 4 random corp opponents (1 from each faction)
-      var corpFactions = ['Jinteki', 'Haas-Bioroid', 'NBN', 'Weyland Consortium'];
-      // Randomize the order of factions
-      for (var i = corpFactions.length - 1; i > 0; i--) {
-        var j = Math.floor(Math.random() * (i + 1));
-        var temp = corpFactions[i];
-        corpFactions[i] = corpFactions[j];
-        corpFactions[j] = temp;
-      }
+      // Select opponents based on gauntlet configuration
+      var gauntletLength = (gauntletConfig && gauntletConfig.gauntletLength) ? gauntletConfig.gauntletLength : 4;
+      var alternateFactions = (gauntletConfig && typeof gauntletConfig.alternateFactions !== 'undefined') ? gauntletConfig.alternateFactions : true;
       
       var selectedOpponents = [];
       
-      for (var f = 0; f < corpFactions.length; f++) {
-        var faction = corpFactions[f];
+      if (alternateFactions) {
+        // Select opponents cycling through factions, with each faction getting equal representation
+        var allCorpFactions = ['Jinteki', 'Haas-Bioroid', 'NBN', 'Weyland Consortium'];
+        
+        // Randomize the order of factions
+        for (var i = allCorpFactions.length - 1; i > 0; i--) {
+          var j = Math.floor(Math.random() * (i + 1));
+          var temp = allCorpFactions[i];
+          allCorpFactions[i] = allCorpFactions[j];
+          allCorpFactions[j] = temp;
+        }
+        
+        // Build a list of factions to cycle through to reach gauntletLength
+        // Cycles through randomized faction order without repeating until all used
+        var corpFactions = [];
+        for (var i = 0; i < gauntletLength; i++) {
+          corpFactions.push(allCorpFactions[i % allCorpFactions.length]);
+        }
+        
+        for (var f = 0; f < corpFactions.length; f++) {
+          var faction = corpFactions[f];
+          var candidateDecks = preconDecks.filter(function(d) {
+            if (!cardSet[d.identity]) return false;
+            var identity = cardSet[d.identity];
+            return identity.player === corp && identity.faction === faction;
+          });
+          
+          if (candidateDecks.length > 0) {
+            var chosen = candidateDecks[Math.floor(Math.random() * candidateDecks.length)];
+            var chosenIdentity = cardSet[chosen.identity];
+            var opponent = {identity: parseInt(chosen.identity), cards: [], name: chosen.name || 'Unknown Deck', faction: chosenIdentity.faction || 'Unknown'};
+            selectedOpponents.push(opponent);
+            // Populate cards from precon
+            for (var cc in chosen.cards) {
+              if (!chosen.cards.hasOwnProperty(cc)) continue;
+              var qty = chosen.cards[cc];
+              for (var q = 0; q < qty; q++) {
+                opponent.cards.push(parseInt(cc));
+              }
+            }
+          }
+        }
+      } else {
+        // Randomly select opponents from all factions without faction constraint
+        // Allows duplicates only after cycling through all available decks
         var candidateDecks = preconDecks.filter(function(d) {
           if (!cardSet[d.identity]) return false;
           var identity = cardSet[d.identity];
-          return identity.player === corp && identity.faction === faction;
+          return identity.player === corp;
         });
         
-        if (candidateDecks.length > 0) {
-          var chosen = candidateDecks[Math.floor(Math.random() * candidateDecks.length)];
-          selectedOpponents.push({identity: parseInt(chosen.identity), cards: []});
+        // Track which decks have been used to avoid repeating until all are cycled
+        var availableIndices = [];
+        for (var idx = 0; idx < candidateDecks.length; idx++) {
+          availableIndices.push(idx);
+        }
+        
+        for (var o = 0; o < gauntletLength && candidateDecks.length > 0; o++) {
+          // If we've used all available decks, reset the pool
+          if (availableIndices.length === 0) {
+            for (var idx = 0; idx < candidateDecks.length; idx++) {
+              availableIndices.push(idx);
+            }
+          }
+          
+          // Pick a random index from available indices
+          var randomAvailablePos = Math.floor(Math.random() * availableIndices.length);
+          var deckIndex = availableIndices[randomAvailablePos];
+          
+          // Remove this index from available pool
+          availableIndices.splice(randomAvailablePos, 1);
+          
+          var chosen = candidateDecks[deckIndex];
+          var chosenIdentity = cardSet[chosen.identity];
+          var opponent = {identity: parseInt(chosen.identity), cards: [], name: chosen.name || 'Unknown Deck', faction: chosenIdentity.faction || 'Unknown'};
+          selectedOpponents.push(opponent);
           // Populate cards from precon
           for (var cc in chosen.cards) {
             if (!chosen.cards.hasOwnProperty(cc)) continue;
             var qty = chosen.cards[cc];
             for (var q = 0; q < qty; q++) {
-              selectedOpponents[selectedOpponents.length - 1].cards.push(parseInt(cc));
+              opponent.cards.push(parseInt(cc));
             }
           }
         }

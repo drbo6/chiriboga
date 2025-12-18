@@ -2,6 +2,15 @@
 // Define the card subset that is available in gauntlet mode
 
 var gauntletConfig = {
+  // ===== GAUNTLET LENGTH =====
+  // Number of opponents in a gauntlet run (one from each faction)
+  gauntletLength: 4,
+
+  // ===== ALTERNATE FACTIONS =====
+  // If true, each selected precon represents a different faction (one opponent per faction)
+  // If false, randomly selects precons across all factions without faction requirement
+  alternateFactions: true,
+
   // ===== ALLOWED IDENTITIES =====
   // Specify which identities can be used in gauntlet mode
   // Leave empty array to allow all identities
