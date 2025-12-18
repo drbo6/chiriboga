@@ -2,6 +2,27 @@
 // Define the card subset that is available in gauntlet mode
 
 var gauntletConfig = {
+  // ===== ALLOWED IDENTITIES =====
+  // Specify which identities can be used in gauntlet mode
+  // Leave empty array to allow all identities
+  allowedIdentities: {
+    // Runner identities (excluding The Catalyst and Esa Afzali)
+    runnerIds: [
+      35001, // Phoenix
+      30001, // Rene
+      30010, // Zahya
+      30019, // Tao
+      31001, // Quetzal
+      31002, // Reina
+      31013, // Ken
+      31014, // Steve
+      31025, // Ayla
+      31026 // Rielle
+    ],
+    // Corp identities (currently unused)
+    corpIds: []
+  },
+
   // ===== FIXED CARDS =====
   // Specific card IDs with exact quantities
   // Each card object specifies: id (card ID) and quantity (how many copies)

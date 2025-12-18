@@ -331,7 +331,16 @@
       var runnerIdentities = [];
       for (var i = 0; i < cardSet.length; i++) {
         if (cardSet[i] && cardSet[i].cardType === 'identity' && cardSet[i].player === runner) {
-          runnerIdentities.push(i);
+          // Check if this identity is allowed in gauntlet config
+          if (gauntletConfig.allowedIdentities && gauntletConfig.allowedIdentities.runnerIds && gauntletConfig.allowedIdentities.runnerIds.length > 0) {
+            // Only include if in the allowed list
+            if (gauntletConfig.allowedIdentities.runnerIds.indexOf(i) !== -1) {
+              runnerIdentities.push(i);
+            }
+          } else {
+            // No restrictions, include all runners
+            runnerIdentities.push(i);
+          }
         }
       }
       

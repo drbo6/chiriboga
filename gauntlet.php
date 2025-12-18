@@ -444,6 +444,33 @@
 			if (showingOnlySelected) ApplyFilter();
 		}
 
+		function AddNonInfluence() {
+			// Get the player identity's faction
+			var identity = cardSet[json.identity];
+			if (!identity) return;
+			var identityFaction = (identity.faction || '').toLowerCase();
+			
+			// Add all cards from the gauntlet subset that match the faction or are neutral
+			for (var cardId in gauntletCardCounts) {
+				var card = cardSet[parseInt(cardId)];
+				if (!card) continue;
+				
+				var cardFaction = (card.faction || '').toLowerCase();
+				var isNeutral = cardFaction === 'neutral' || cardFaction === 'neutral-runner' || cardFaction === 'neutral-corp';
+				var matchesFaction = cardFaction === identityFaction;
+				
+				// Add cards that are neutral or match the identity faction
+				if (isNeutral || matchesFaction) {
+					// Add up to the maximum available copies
+					var maxCopies = gauntletCardCounts[cardId] || 0;
+					var currentCount = deckCounts[cardId] || 0;
+					for (var i = currentCount; i < maxCopies; i++) {
+						AddCardToDeck(parseInt(cardId));
+					}
+				}
+			}
+		}
+
 		// Sort state and functions
 		var currentSort = 'id'; // 'id', 'name', 'type', 'faction'
 
@@ -1831,7 +1858,7 @@
 				<button id="randomdeck" onclick="GenerateRandomDeck();" class="button" style="display:none;">RANDOM<br>DECK</button>
 				<button id="cleardeck" onclick="ClearDeck();" class="button">CLEAR<br>DECK</button>
 				<button id="sortdeck" onclick="CycleSort();" class="button">SORT BY:<br>ID</button>
-				<button id="filterdeck" onclick="CycleFilter();" class="button">FILTER:<br>ALL CARDS</button>
+				<button id="addnoninfluence" onclick="AddNonInfluence();" class="button">ADD NON-<br>INFLUENCE</button>
 				<button id="togglecards" onclick="ToggleOtherCards();" class="button">HIDE UNSELECTED</button>
 				<button id="exittomenu" onclick="window.location.href='index.php';" class="button">BACK TO MENU</button>
 			</div>
