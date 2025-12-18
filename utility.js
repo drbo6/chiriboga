@@ -1011,64 +1011,123 @@ function PlayerWin(player, msgstr) {
     Resolve: {},
     player: viewingPlayer,
     title: winnerMessage,
+    identifier: "Game Over",
     instruction: "Game Over",
     historyBreak: { title: "Game Over", style: "small" },
     requireHumanInput: true,
   };
-  winPhase.Enumerate["play again"] = function () {
-    if (debugging && runner.AI && corp.AI) alert("Game completed");
-    return [{}];
-  };
-  winPhase.Resolve["play again"] = function () {
-    location.reload(); //restart game
-  };
   
-  // Add Edit Deck option to winPhase
-  winPhase.Enumerate["edit deck"] = function () {
-    return [{}];
-  };
-  winPhase.text = {
-    "play again": "Return to deck builder with the same decks",
-    "edit deck": "Edit the decks in the deck builder"
-  };
-  winPhase.Resolve["edit deck"] = function () {
-    // Build deck objects for both player decks
-    var runnerDeckObj = { identity: runner.identityCard.setNumber, cards: [] };
-    var corpDeckObj = { identity: corp.identityCard.setNumber, cards: [] };
+  // Check if we're in gauntlet mode
+  var gauntletParam = URIParameter("g");
+  var isGauntletMode = gauntletParam !== "";
+  
+  if (isGauntletMode) {
+    // Gauntlet mode - different buttons based on win/loss
+    if (winner == runner) {
+      // Runner won - show "Continue the Gauntlet" button
+      winPhase.Enumerate["continue gauntlet"] = function () {
+        return [{}];
+      };
+      winPhase.text = {
+        "continue gauntlet": "Continue to the next challenge"
+      };
+      winPhase.Resolve["continue gauntlet"] = function () {
+        try {
+          // Parse the gauntlet state
+          var gauntletState = JSON.parse(LZString.decompressFromEncodedURIComponent(gauntletParam));
+          
+          // Increment defeated count
+          gauntletState.defeated = (gauntletState.defeated || 0) + 1;
+          
+          // Compress the updated gauntlet state
+          var updatedGauntlet = LZString.compressToEncodedURIComponent(JSON.stringify(gauntletState));
+          
+          // Get other parameters
+          var runnerDeck = URIParameter("r");
+          var corpDeck = URIParameter("c");
+          var sets = URIParameter("sets");
+          
+          // Build the new URL
+          var newUrl = 'gauntlet.php?r=' + runnerDeck + '&c=' + corpDeck + '&g=' + updatedGauntlet;
+          if (sets !== "") {
+            newUrl += '&sets=' + sets;
+          }
+          
+          window.location.href = newUrl;
+        } catch (e) {
+          console.error("Failed to continue gauntlet:", e);
+          window.location.href = 'index.php';
+        }
+      };
+    } else {
+      // Corp won (runner lost) - show "Back to Menu" button
+      winPhase.Enumerate["back to menu"] = function () {
+        return [{}];
+      };
+      winPhase.text = {
+        "back to menu": "Return to main menu"
+      };
+      winPhase.Resolve["back to menu"] = function () {
+        window.location.href = 'index.php';
+      };
+    }
+  } else {
+    // Normal mode - show "Play Again" and "Edit Deck" buttons
+    winPhase.Enumerate["play again"] = function () {
+      if (debugging && runner.AI && corp.AI) alert("Game completed");
+      return [{}];
+    };
+    winPhase.Resolve["play again"] = function () {
+      location.reload(); //restart game
+    };
     
-    // Collect runner cards (from stack, grip, and rig)
-    var allRunnerCards = runner.stack.concat(runner.grip);
-    allRunnerCards = allRunnerCards.concat(runner.rig.programs, runner.rig.hardware, runner.rig.resources);
-    
-    for (var i = 0; i < allRunnerCards.length; i++) {
-      if (allRunnerCards[i].cardType !== 'identity') {
-        runnerDeckObj.cards.push(allRunnerCards[i].setNumber);
+    // Add Edit Deck option to winPhase
+    winPhase.Enumerate["edit deck"] = function () {
+      return [{}];
+    };
+    winPhase.text = {
+      "play again": "Return to deck builder with the same decks",
+      "edit deck": "Edit the decks in the deck builder"
+    };
+    winPhase.Resolve["edit deck"] = function () {
+      // Build deck objects for both player decks
+      var runnerDeckObj = { identity: runner.identityCard.setNumber, cards: [] };
+      var corpDeckObj = { identity: corp.identityCard.setNumber, cards: [] };
+      
+      // Collect runner cards (from stack, grip, and rig)
+      var allRunnerCards = runner.stack.concat(runner.grip);
+      allRunnerCards = allRunnerCards.concat(runner.rig.programs, runner.rig.hardware, runner.rig.resources);
+      
+      for (var i = 0; i < allRunnerCards.length; i++) {
+        if (allRunnerCards[i].cardType !== 'identity') {
+          runnerDeckObj.cards.push(allRunnerCards[i].setNumber);
+        }
       }
-    }
-    
-    // Collect corp cards (from RnD, HQ, Archives, and installed servers)
-    var allCorpCards = corp.RnD.cards.concat(corp.HQ.cards, corp.archives.cards);
-    for (var i = 0; i < corp.remoteServers.length; i++) {
-      var server = corp.remoteServers[i];
-      allCorpCards = allCorpCards.concat(server.ice);
-    }
-    // Add installed cards in central servers
-    allCorpCards = allCorpCards.concat(corp.HQ.root, corp.HQ.ice, corp.RnD.root, corp.RnD.ice, corp.archives.root, corp.archives.ice);
-    
-    for (var i = 0; i < allCorpCards.length; i++) {
-      if (allCorpCards[i].cardType !== 'identity') {
-        corpDeckObj.cards.push(allCorpCards[i].setNumber);
+      
+      // Collect corp cards (from RnD, HQ, Archives, and installed servers)
+      var allCorpCards = corp.RnD.cards.concat(corp.HQ.cards, corp.archives.cards);
+      for (var i = 0; i < corp.remoteServers.length; i++) {
+        var server = corp.remoteServers[i];
+        allCorpCards = allCorpCards.concat(server.ice);
       }
-    }
-    
-    // Compress decks for URL parameters
-    var runnerCompressed = LZString.compressToEncodedURIComponent(JSON.stringify(runnerDeckObj));
-    var corpCompressed = LZString.compressToEncodedURIComponent(JSON.stringify(corpDeckObj));
-    
-    // Redirect to decklauncher with both decks loaded
-    // p=r means start with runner deck selected, r= is player deck, c= is opponent deck
-    window.location.href = 'decklauncher.php?p=r&r=' + runnerCompressed + '&c=' + corpCompressed;
-  };
+      // Add installed cards in central servers
+      allCorpCards = allCorpCards.concat(corp.HQ.root, corp.HQ.ice, corp.RnD.root, corp.RnD.ice, corp.archives.root, corp.archives.ice);
+      
+      for (var i = 0; i < allCorpCards.length; i++) {
+        if (allCorpCards[i].cardType !== 'identity') {
+          corpDeckObj.cards.push(allCorpCards[i].setNumber);
+        }
+      }
+      
+      // Compress decks for URL parameters
+      var runnerCompressed = LZString.compressToEncodedURIComponent(JSON.stringify(runnerDeckObj));
+      var corpCompressed = LZString.compressToEncodedURIComponent(JSON.stringify(corpDeckObj));
+      
+      // Redirect to decklauncher with both decks loaded
+      // p=r means start with runner deck selected, r= is player deck, c= is opponent deck
+      window.location.href = 'decklauncher.php?p=r&r=' + runnerCompressed + '&c=' + corpCompressed;
+    };
+  }
   
   ChangePhase(winPhase);
   Render();

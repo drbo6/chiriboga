@@ -12,7 +12,7 @@
 
 //VARIABLES
 // Set to false to disable the debug menu by default
-var enableDebugMenu = false;
+var enableDebugMenu = true;
 var cardRenderer;
 var corp = {};
 var runner = {};

@@ -1032,7 +1032,12 @@
 			  }
 			  var string = JSON.stringify(deckForUri);
 			  var compressed = LZString.compressToEncodedURIComponent(string);
+			  var gauntletParam = URIParameter("g");
 			  var launchAddress = "engine.php?p=" + dC + "&" + setStr + opponentdeckstr + dC + "=" + compressed;
+			  // Add gauntlet parameter if present
+			  if (gauntletParam !== "") {
+				launchAddress += "&g=" + gauntletParam;
+			  }
 			  // Build address for switching sides. If we already have an opponent deck, make it the active deck; otherwise use random
 			  var existingOpponentCompressed = "";
 			  if (opponentdeckstr !== "") {
@@ -1053,10 +1058,14 @@
 			  }
 			  $("#launch").prop("href", launchAddress);
 			  $("#opponent").prop("href", opponentAddress);
+			  var historyUrl = "gauntlet.php?" + setStr + opponentdeckstr + dC + "=" + compressed;
+			  if (gauntletParam !== "") {
+				historyUrl += "&g=" + gauntletParam;
+			  }
 			  history.replaceState(
 				null,
 				"Chiriboga",
-				"gauntlet.php?" + setStr + opponentdeckstr + dC + "=" + compressed
+				historyUrl
 			  );
 			}
 

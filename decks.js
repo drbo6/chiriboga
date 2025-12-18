@@ -78,6 +78,10 @@ function InstanceCard(
 	  //maybe it is a tutorial
 	  cardDefinition = tutorial[setNumber];
   }
+  if (typeof cardDefinition == 'undefined') {
+	  //card not found in any set
+	  return null;
+  }
   var player = cardDefinition.player;
   cardDefinition.player = null; //unset to prevent recursion going nuts
   var card = jQuery.extend(true, {}, cardDefinition);
@@ -716,6 +720,32 @@ function LoadDecks() {
   }
   PrintDeck(corp.identityCard, corp.RnD.cards);
 
+  // Log decoded parameters (r, c, g)
+  var decodedR = URIParameter("r");
+  var decodedC = URIParameter("c");
+  var decodedG = URIParameter("g");
+  
+  if (decodedR) {
+    try {
+      console.log("Decoded r parameter:", JSON.parse(LZString.decompressFromEncodedURIComponent(decodedR)));
+    } catch(e) {
+      console.log("Could not decode r parameter");
+    }
+  }
+  if (decodedC) {
+    try {
+      console.log("Decoded c parameter:", JSON.parse(LZString.decompressFromEncodedURIComponent(decodedC)));
+    } catch(e) {
+      console.log("Could not decode c parameter");
+    }
+  }
+  if (decodedG) {
+    try {
+      console.log("Decoded g parameter:", JSON.parse(LZString.decompressFromEncodedURIComponent(decodedG)));
+    } catch(e) {
+      console.log("Could not decode g parameter");
+    }
+  }
 
   // // PASTE REPLICATION CODE HERE (and/or customise code below)
   // // UNCOMMENTING (use CTRL+/ in VS Code) THE CODE BELOW WILL SET UP A TEST FIELD
