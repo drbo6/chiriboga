@@ -185,7 +185,7 @@
 			}
 
 			// Sort state and functions
-			var currentSort = 'id'; // 'id', 'name', 'type', 'faction'
+			var currentSort = 'id'; // 'id', 'name', 'influence', 'type', 'faction'
 
 			function GetFactionOrder(cardId) {
 				var card = cardSet[cardId];
@@ -245,6 +245,12 @@
 						   return idA - idB;
 					   } else if (currentSort === 'name') {
 						   return (cardA.title || '').localeCompare(cardB.title || '');
+					   } else if (currentSort === 'influence') {
+						   var influenceA = cardA.influence || 0;
+						   var influenceB = cardB.influence || 0;
+						   if (influenceA !== influenceB) return influenceA - influenceB;
+						   // Secondary: alphabetical by title
+						   return (cardA.title || '').localeCompare(cardB.title || '');
 					   } else if (currentSort === 'type') {
 						   var typeOrderA = GetTypeOrder(idA);
 						   var typeOrderB = GetTypeOrder(idB);
@@ -274,6 +280,9 @@
 					currentSort = 'name';
 					$('#sortdeck').html('SORT BY:<br>NAME');
 				} else if (currentSort === 'name') {
+					currentSort = 'influence';
+					$('#sortdeck').html('SORT BY:<br>INFLUENCE');
+				} else if (currentSort === 'influence') {
 					currentSort = 'type';
 					$('#sortdeck').html('SORT BY:<br>TYPE');
 				} else if (currentSort === 'type') {

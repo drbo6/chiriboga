@@ -89,6 +89,7 @@
 			// DRBO6: Gauntlet Mode variables
 			var gauntletCardIds = []; // Set of 40 different runner cards available in gauntlet
 			var gauntletCardCounts = {}; // Count of each card in gauntlet (typically 3 or 1)
+			var gauntletCredits = 0; // Credits from gauntlet state
 			
 			// Function to register a precon deck
 			function registerPrecon(deck) {
@@ -374,6 +375,8 @@
 			if (decodedG) {
 				var gauntletState = JSON.parse(LZString.decompressFromEncodedURIComponent(decodedG));
 				console.log("Decoded g parameter:", gauntletState);
+				// Store credits from gauntlet state
+				gauntletCredits = gauntletState.credits || 0;
 				// Log opponent names and URLs
 				if (gauntletState.opponents && gauntletState.opponents.length > 0) {
 					console.log("Gauntlet Opponents:");
@@ -418,6 +421,8 @@
 			// Collection stat - count unique cards in gauntlet subset
 			var collectionSize = Object.keys(gauntletCardCounts).length;
 			validityOutput += '<div class="deck-stat"><span class="stat-label">Collection:</span> '+collectionSize+' unique cards</div>';
+			// Credits stat
+			validityOutput += '<div class="deck-stat"><span class="stat-label">Credits:</span> '+gauntletCredits+'</div>';
 			validityOutput += '</div>';
 			$("#output").html(validityOutput);
 			
@@ -529,53 +534,115 @@
 			}
 		}
 
-		// Type filter state and functions
-		var currentTypeFilter = 'none'; // 'none', 'influence', 'event', 'hardware', 'program', 'resource'
+		// Sort state and functions
+		var currentSort = 'name'; // 'name', 'influence', 'type', 'faction'
 
 		function GetFactionOrder(cardId) {
 			var card = cardSet[cardId];
 			if (!card) return 999;
 			var faction = (card.faction || '').toLowerCase();
-			if (deckPlayer === 'corp') {
+			if (deckPlayer === runner) {
+				// Runner faction order: Anarch->Criminal->Shaper->Neutral
+				if (faction === 'anarch') return 0;
+				if (faction === 'criminal') return 1;
+				if (faction === 'shaper') return 2;
+				if (faction === 'neutral' || faction === 'neutral-runner') return 3;
+			} else {
 				// Corp faction order: HB->Jinteki->NBN->Weyland->Neutral
 				if (faction === 'haas-bioroid' || faction === 'hb') return 0;
 				if (faction === 'jinteki') return 1;
 				if (faction === 'nbn') return 2;
 				if (faction === 'weyland-consortium' || faction === 'weyland') return 3;
 				if (faction === 'neutral' || faction === 'neutral-corp') return 4;
-			} else {
-				// Runner faction order: Anarch->Criminal->Shaper->Neutral
-				if (faction === 'anarch') return 0;
-				if (faction === 'criminal') return 1;
-				if (faction === 'shaper') return 2;
-				if (faction === 'neutral' || faction === 'neutral-runner') return 3;
 			}
 			return 999;
 		}
 
 		function GetTypeOrder(cardId) {
-				var card = cardSet[cardId];
-				if (!card) return 999;
-				var cardType = (card.cardType || '').toLowerCase();
-				
-				if (deckPlayer === runner) {
-					// Runner type order: Event->Program->Hardware->Resource
-					if (cardType === 'event') return 0;
-					if (cardType === 'program') return 1;
-					if (cardType === 'hardware') return 2;
-					if (cardType === 'resource') return 3;
-				} else {
-					// Corp type order: agenda->asset->ice->operation->upgrade
-					if (cardType === 'agenda') return 0;
-					if (cardType === 'asset') return 1;
-					if (cardType === 'ice') return 2;
-					if (cardType === 'operation') return 3;
-					if (cardType === 'upgrade') return 4;
-				}
-				return 999;
+			var card = cardSet[cardId];
+			if (!card) return 999;
+			var cardType = (card.cardType || '').toLowerCase();
+			
+			if (deckPlayer === runner) {
+				// Runner type order: Event->Program->Hardware->Resource
+				if (cardType === 'event') return 0;
+				if (cardType === 'program') return 1;
+				if (cardType === 'hardware') return 2;
+				if (cardType === 'resource') return 3;
+			} else {
+				// Corp type order: agenda->asset->ice->operation->upgrade
+				if (cardType === 'agenda') return 0;
+				if (cardType === 'asset') return 1;
+				if (cardType === 'ice') return 2;
+				if (cardType === 'operation') return 3;
+				if (cardType === 'upgrade') return 4;
 			}
+			return 999;
+		}
 
-			function SortCardContainer() {
+		function SortCardsBySort() {
+			var $container = $('#cardcontainer');
+			var $cards = $container.children('.card-item').detach();
+			
+			   $cards.sort(function(a, b) {
+				   var idA = parseInt($(a).attr('data-id'));
+				   var idB = parseInt($(b).attr('data-id'));
+				   var cardA = cardSet[idA];
+				   var cardB = cardSet[idB];
+				   if (!cardA || !cardB) return 0;
+				   if (currentSort === 'name') {
+					   return (cardA.title || '').localeCompare(cardB.title || '');
+				   } else if (currentSort === 'influence') {
+					   var influenceA = cardA.influence || 0;
+					   var influenceB = cardB.influence || 0;
+					   if (influenceA !== influenceB) return influenceA - influenceB;
+					   // Secondary: alphabetical by title
+					   return (cardA.title || '').localeCompare(cardB.title || '');
+				   } else if (currentSort === 'type') {
+					   var typeOrderA = GetTypeOrder(idA);
+					   var typeOrderB = GetTypeOrder(idB);
+					   if (typeOrderA !== typeOrderB) return typeOrderA - typeOrderB;
+					   // Secondary: subtype (array or string, fallback to empty string)
+					   var subA = (cardA.subTypes && cardA.subTypes.length) ? cardA.subTypes.join(',') : (cardA.subtype || '');
+					   var subB = (cardB.subTypes && cardB.subTypes.length) ? cardB.subTypes.join(',') : (cardB.subtype || '');
+					   if (subA < subB) return -1;
+					   if (subA > subB) return 1;
+					   // Tertiary: alphabetical by title
+					   return (cardA.title || '').localeCompare(cardB.title || '');
+				   } else if (currentSort === 'faction') {
+					   var factionOrderA = GetFactionOrder(idA);
+					   var factionOrderB = GetFactionOrder(idB);
+					   if (factionOrderA !== factionOrderB) return factionOrderA - factionOrderB;
+					   // Alphabetical within faction
+					   return (cardA.title || '').localeCompare(cardB.title || '');
+				   }
+				   return 0;
+			   });
+			
+			$container.append($cards);
+		}
+
+		function CycleSort() {
+			if (currentSort === 'name') {
+				currentSort = 'influence';
+				$('#sortbydeck').html('SORT BY:<br>INFLUENCE');
+			} else if (currentSort === 'influence') {
+				currentSort = 'type';
+				$('#sortbydeck').html('SORT BY:<br>TYPE');
+			} else if (currentSort === 'type') {
+				currentSort = 'faction';
+				$('#sortbydeck').html('SORT BY:<br>FACTION');
+			} else {
+				currentSort = 'name';
+				$('#sortbydeck').html('SORT BY:<br>NAME');
+			}
+			SortCardsBySort();
+		}
+
+		// Type filter state and functions
+		var currentTypeFilter = 'none'; // 'none', 'influence', 'event', 'hardware', 'program', 'resource'
+
+		function SortCardContainer() {
 				var $container = $('#cardcontainer');
 				var $cards = $container.children('.card-item').detach();
 				
@@ -661,7 +728,7 @@
 				$('#sortdeck').html('FILTER:<br>RESOURCE');
 			} else {
 				currentTypeFilter = 'none';
-				$('#sortdeck').html('FILTER:<br>NONE');
+				$('#sortdeck').html('FILTER:<br>ALL');
 			}
 			SortCardContainer();
 			ApplyTypeFilter();
@@ -2008,14 +2075,16 @@
 				</div>
 			<div class="leftrow buttons">
 				<button id="launch" class="button button-red" onclick="if(!$(this).prop('disabled')) window.location.href=$(this).prop('href');">PLAY<br>DECK</button>
+				<button id="buycards" class="button">BUY<br>CARDS</button>
+				<button id="addnoninfluence" onclick="AddNonInfluence();" class="button">ADD IN-<br>FACTION</button>
+				<button id="cleardeck" onclick="ClearDeck();" class="button">CLEAR<br>DECK</button>
+				<button id="sortbydeck" onclick="CycleSort();" class="button">SORT BY:<br>NAME</button>
+				<button id="sortdeck" onclick="CycleTypeFilter();" class="button">FILTER:<br>NONE</button>
+				<button id="togglecards" onclick="ToggleOtherCards();" class="button">HIDE UNSELECTED</button>
+				<button id="exittomenu" onclick="window.location.href='index.php';" class="button">BACK TO MENU</button>
 				<!-- DRBO6: Gauntlet Mode - hide Set as Opponent, Random Deck, Import NRDB, Load Precon -->
 				<button id="opponent" class="button" onclick="window.location.href=$(this).prop('href');" style="display:none;">SET AS OPPONENT</button>
 				<button id="randomdeck" onclick="GenerateRandomDeck();" class="button" style="display:none;">RANDOM<br>DECK</button>
-				<button id="cleardeck" onclick="ClearDeck();" class="button">CLEAR<br>DECK</button>
-				<button id="sortdeck" onclick="CycleTypeFilter();" class="button">FILTER:<br>NONE</button>
-				<button id="addnoninfluence" onclick="AddNonInfluence();" class="button">ADD IN-<br>FACTION</button>
-				<button id="togglecards" onclick="ToggleOtherCards();" class="button">HIDE UNSELECTED</button>
-				<button id="exittomenu" onclick="window.location.href='index.php';" class="button">BACK TO MENU</button>
 			</div>
 				<div class="leftrow toprow">
 					<div class="deck-heading">CURRENT DECK:</div>
