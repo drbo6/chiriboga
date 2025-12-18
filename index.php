@@ -429,7 +429,8 @@
         credits: gauntletConfig && gauntletConfig.startingCredits ? gauntletConfig.startingCredits : 0,
         gauntletLength: gauntletLength,
         allowedSets: gauntletConfig && gauntletConfig.allowedSets ? gauntletConfig.allowedSets : [],
-        seed: seed
+        seed: seed,
+        shopPurchaseCount: 0
       };
       
       // Encode gauntlet state

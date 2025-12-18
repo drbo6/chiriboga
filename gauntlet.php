@@ -135,6 +135,15 @@
 				}
 			}
 
+			// Function to refresh the pack buttons in the modal
+			function RefreshShopPackButtons() {
+				var modal = document.getElementById('buy-cards-modal');
+				if (!modal) return; // Modal not open
+				
+				// Rebuild the entire modal to maintain proper styling
+				ShowBuyCardsModal();
+			}
+
 			// Function to show the Buy Cards modal
 			function ShowBuyCardsModal() {
 				// Packs are already selected on page load
@@ -244,14 +253,15 @@
 			var gauntletSeed = '';
 			var gauntletAllowedSets = [];
 			var selectedShopPacks = [];
+			var shopPurchaseCount = 0; // Track number of purchases for deterministic but varying pack selection
 
 			// Function to select unique random packs
 			function SelectRandomShopPacks() {
 				if (!gauntletConfig || !gauntletConfig.cardPacks) return [];
 				
-				// Seed the RNG using the gauntlet seed with an offset for pack selection
+				// Seed the RNG using the gauntlet seed with purchase count for deterministic but varying results
 				if (gauntletSeed && gauntletSeed.length > 0 && typeof Math.seedrandom === 'function') {
-					var packSelectionSeed = gauntletSeed + '_packs';
+					var packSelectionSeed = gauntletSeed + '_packs_' + shopPurchaseCount;
 					Math.seedrandom(packSelectionSeed);
 				}
 				
@@ -439,6 +449,14 @@
 				// Update the UI
 				UpdateCardCountsUI();
 				RenderAllCardsList();
+				
+				// Re-randomize the three shop packs after purchase
+				shopPurchaseCount++;
+				selectedShopPacks = SelectRandomShopPacks();
+				console.log("Shop packs re-randomized (purchase #" + shopPurchaseCount + "):", selectedShopPacks.map(function(p) { return p.name; }));
+				
+				// Refresh the modal buttons if it's still open
+				RefreshShopPackButtons();
 			}
 		</script>
 		<?php
@@ -722,6 +740,9 @@
 					setBreakdown[setCode] = (setBreakdown[setCode] || 0) + 1;
 				}
 				console.log("Cards per set:", setBreakdown);
+				
+				// Restore shop purchase count from gauntlet state for persistence across reloads
+				shopPurchaseCount = gauntletState.shopPurchaseCount || 0;
 				
 				// Log opponent names and URLs
 				if (gauntletState.opponents && gauntletState.opponents.length > 0) {
