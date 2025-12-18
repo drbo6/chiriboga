@@ -404,13 +404,16 @@
 					var ct = deckCounts[id] || 0;
 					if (ct>0) lines.push(ct+" "+cardSet[id].title);
 				}
-				$("#deck").val(lines.join("\n"));
-				AutoResizeDeckTextarea();
+				$("#deck").text(lines.join("\n"));
 			}
 
 			function AddCardToDeck(id) {
 				if (typeof json.cards === 'undefined') json.cards = [];
 				if (typeof deckCounts[id] === 'undefined') deckCounts[id]=0;
+				// Check if adding another copy would exceed the 3-copy maximum
+				if (deckCounts[id] >= 3) {
+					return; // Cannot add more than 3 copies of the same card
+				}
 				// Check if adding another copy would exceed the gauntlet card limit
 				var maxCopies = gauntletCardCounts[id] || 0;
 				if (deckCounts[id] >= maxCopies) {
@@ -420,7 +423,7 @@
 				json.cards.push(id);
 				deckModified = true;
 				UpdateDeckTextareaFromCounts();
-				Parse();
+				UpdateCardCountsUI();
 				if (showingOnlySelected) ApplyFilter();
 			}
 			function RemoveCardFromDeck(id) {
@@ -432,7 +435,7 @@
 				if (idx>-1) json.cards.splice(idx,1);
 				deckModified = true;
 				UpdateDeckTextareaFromCounts();
-				Parse();
+				UpdateCardCountsUI();
 				if (showingOnlySelected) ApplyFilter();
 			}
 
@@ -557,7 +560,7 @@
 				
 				deckModified = true;
 				UpdateDeckTextareaFromCounts();
-				Parse();
+			UpdateCardCountsUI();
 				UpdateCardCountsUI();
 			}
 
@@ -775,7 +778,7 @@
 			function ClearDeck() {
 				json.cards = [];
 				deckCounts = {};
-				$("#deck").val('');
+				$("#deck").text('');
 				UpdateCardCountsUI();
 				deckModified = true;
 				Parse();
@@ -1031,13 +1034,13 @@
 				//right
 				var id = parseInt($(this).attr("data-id"));
 				var line = parseInt($(this).attr("data-line"));
-				var deckListArray = $("#deck").val().split("\n");
+				var deckListArray = $("#deck").text().split("\n");
 				var thisLineArray = deckListArray[line].split(" ");
 				//if (thisLineArray[0] < 3) //limit to 3 of each
 				//{
 				thisLineArray[0]++;
 				deckListArray[line] = thisLineArray.join(" ");
-				$("#deck").val(deckListArray.join("\n"));
+				$("#deck").text(deckListArray.join("\n"));
 				$(this).append(
 				  '<img src="images/' +
 					ChangeImageFileToJPG(cardSet[id].imageFile) +
@@ -1054,7 +1057,7 @@
 				var id = parseInt($(this).attr("data-id"));
 				var line = parseInt($(this).attr("data-line"));
 				$(this).children().last().remove();
-				var deckListArray = $("#deck").val().split("\n");
+				var deckListArray = $("#deck").text().split("\n");
 				var thisLineArray = deckListArray[line].split(" ");
 				thisLineArray[0]--;
 				if (thisLineArray[0] < 1) {
@@ -1065,7 +1068,7 @@
 				  });
 				  deckListArray.splice(line, 1);
 				} else deckListArray[line] = thisLineArray.join(" ");
-				$("#deck").val(deckListArray.join("\n"));
+				$("#deck").text(deckListArray.join("\n"));
 				json.cards.splice(json.cards.indexOf(id), 1); //remove the first-found is fine
 				Parse();
 			  }
@@ -1178,7 +1181,7 @@
 				}
 			  }
 
-			  //print into textarea
+			  //print into deck display
 			  var deckText = "";
 			  var numRows = 0;
 			  for (var i = 0; i < countSoFar.length; i++) {
@@ -1188,9 +1191,7 @@
 				  numRows++;
 				}
 			  }
-			  $("#deck").val(deckText);
-			  $("#deck").prop("rows", numRows); //resize textarea height to fit
-			  $("#deck").on("input propertychange paste", function(){ deckModified = true; Parse(); });
+			  $("#deck").text(deckText);
 			  //initial deckCounts from generated deck
 			  deckCounts = {};
 			  for (var i=0;i<playerCards.length;i++) {
@@ -1205,20 +1206,7 @@
 			  UpdateCardCountsUI();
 			}
 
-			// Auto-resize deck textarea - globally accessible
-			function AutoResizeDeckTextarea() {
-				var textarea = $("#deck")[0];
-				if (textarea) {
-					textarea.style.height = "auto";
-					var newHeight = Math.min(textarea.scrollHeight, 500);
-					textarea.style.height = newHeight + "px";
-				}
-			}
-			
 			function Init() {
-			  $("#deck").on("input", AutoResizeDeckTextarea);
-			  // Set initial minimum height
-			  AutoResizeDeckTextarea();
 			  
 			  //set up autosuggest
 			  var autoMinLen = 1;
@@ -1415,9 +1403,8 @@
 									var title = info.title.replace(/ʼ/g, "'");
 									lines.push(qty + ' ' + title);
 								}
-									// Fill textarea and trigger parse (this validates without generating new deck)
-									$("#deck").val(lines.join("\n"));
-									$("#deck").prop("rows", lines.length); //resize textarea height to fit
+									// Fill deck display and trigger parse (this validates without generating new deck)
+									$("#deck").text(lines.join("\n"));
 									Parse();
 								} catch(e) {
 									console.error(e);
@@ -1558,7 +1545,7 @@
 															RenderAllCardsList();
 
 															UpdateDeckTextareaFromCounts();
-															Parse();
+			UpdateCardCountsUI();
 															UpdateCardCountsUI();
 															alert('JS deck imported and loaded: ' + deckName);
 														} catch(e) {
@@ -1610,15 +1597,13 @@
 						deckCounts[cardIdx] = qty;
 						for (var j = 0; j < qty; j++) {
 							json.cards.push(cardIdx);
-						}
-						lines.push(qty + ' ' + cardSet[cardIdx].title);
-					}
-				}
-				
-				// Fill textarea and trigger parse
-				$('#deck').val(lines.join('\n'));
-				$('#deck').prop('rows', lines.length);
-				Parse();
+			}
+			lines.push(qty + ' ' + cardSet[cardIdx].title);
+		}
+		}
+		
+		// Fill deck display and trigger parse
+		$('#deck').text(lines.join('\n'));
 				UpdateCardCountsUI();
 				
 				// Reset dropdown
@@ -1711,7 +1696,7 @@
 			  var outputLine = 0;
 			  json.cards = [];
 			  deckCounts = {};
-		  var pre = $("#deck").val();
+		  var pre = $("#deck").text();
 		  // Normalize common apostrophes/quotes in pasted text before parsing
 		  pre = pre
 			.replace(/\u2019|\u2032|\u02BC|\uFF07/g, "'")
@@ -1845,7 +1830,7 @@
 			</div>
 				<div class="leftrow toprow">
 					<div class="deck-heading">CURRENT DECK:</div>
-					<textarea id="deck" spellcheck="false" cols="30" style="width:100%;"></textarea>
+					<div id="deck" style="width:100%; border:1px solid #ccc; padding:10px; min-height:100px; overflow-y:auto; white-space:pre-wrap; word-break:break-word; background-color:#f9f9f9; font-family:monospace;"></div>
 					<div style="margin-top:8px;">
 						<button id="importdeck" class="button" type="button" style="display:none;">Import Deck from NRDB</button>
 					</div>
@@ -1879,4 +1864,8 @@
 		</div>
 	</body>
 </html>
+
+
+
+
 

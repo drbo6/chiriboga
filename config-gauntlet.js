@@ -6,7 +6,7 @@ var gauntletConfig = {
   // Specific card IDs with exact quantities
   // Each card object specifies: id (card ID) and quantity (how many copies)
   fixedCards: [
-    { id: 30028, quantity: 3 },  // Jailbreak
+    { id: 30028, quantity: 10 },  // Jailbreak
     { id: 30029, quantity: 3 },  // Overclock
     { id: 30030, quantity: 3 },  // Sure Gamble
     { id: 30033, quantity: 3 },  // Smartware Distributor
