@@ -758,7 +758,7 @@
 				
 				// Disable identity dropdown if player has already defeated opponents
 				if (gauntletState.defeated > 0) {
-					$("#identityselect").prop("disabled", true);
+					$("#identityselect").prop("disabled", true).prop("title", "You cannot change identities after your first win.");
 				}
 				
 				// Store credits from gauntlet state
