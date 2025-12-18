@@ -1474,19 +1474,23 @@
 					// Parse and update deck stats without changing the deck
 					Parse();
 					UpdatePlayDeckButtonState();
+					// Update influence filter if it's currently active
+					if (currentTypeFilter === 'influence') {
+						ApplyTypeFilter();
+					}
 			  });
 
 			  //set up identity select
-						  // Import deck from NetrunnerDB
-						  function ImportDeckFromNRDB() {
-							var url = prompt('Paste NetrunnerDB deck URL');
-							if (!url) return;
-							var m = url.match(/decklist\/([0-9a-f\-]+)/i);
-							if (!m) { alert('Could not extract deck UUID from URL'); return; }
-							var uuid = m[1];
-							var apiUrl = 'https://netrunnerdb.com/api/2.0/public/decklist/' + uuid;
-							$.getJSON(apiUrl)
-							 .done(function(resp){
+					  // Import deck from NetrunnerDB
+					  function ImportDeckFromNRDB() {
+						var url = prompt('Paste NetrunnerDB deck URL');
+						if (!url) return;
+						var m = url.match(/decklist\/([0-9a-f\-]+)/i);
+						if (!m) { alert('Could not extract deck UUID from URL'); return; }
+						var uuid = m[1];
+						var apiUrl = 'https://netrunnerdb.com/api/2.0/public/decklist/' + uuid;
+						$.getJSON(apiUrl)
+							.done(function(resp){
 								try {
 									console.log('NRDB Response:', resp);
 									var entry = (resp && resp.data && resp.data[0]) ? resp.data[0] : null;
