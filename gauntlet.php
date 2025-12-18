@@ -380,6 +380,7 @@
 			// Render cards from gauntlet subset
 			RenderAllCardsList();
 			UpdateCardCountsUI();
+			UpdateLaunchStrings();
 			
 				try {
 					var currentIdSel = $('#identityselect').val();
