@@ -292,7 +292,15 @@
       }
       
       // Select 4 random corp opponents (1 from each faction)
-      var corpFactions = ['Jinteki', 'HB', 'NBN', 'Weyland'];
+      var corpFactions = ['Jinteki', 'Haas-Bioroid', 'NBN', 'Weyland Consortium'];
+      // Randomize the order of factions
+      for (var i = corpFactions.length - 1; i > 0; i--) {
+        var j = Math.floor(Math.random() * (i + 1));
+        var temp = corpFactions[i];
+        corpFactions[i] = corpFactions[j];
+        corpFactions[j] = temp;
+      }
+      
       var selectedOpponents = [];
       
       for (var f = 0; f < corpFactions.length; f++) {
@@ -361,9 +369,6 @@
 
     // Wait for all scripts to load before selecting decks
     window.addEventListener('load', function() {
-      console.log('Total precon decks loaded:', preconDecks.length);
-      console.log('Sample deck:', preconDecks[0]);
-      
       // Filter Girometics decks by side (case-insensitive)
       giromRunnerDecks = preconDecks.filter(function(d) {
         var isGirometics = d.deck_set && d.deck_set.toLowerCase() === 'girometics';
@@ -377,9 +382,6 @@
         var isCorp = hasIdentity && cardSet[d.identity].player === corp;
         return isGirometics && hasIdentity && isCorp;
       });
-      
-      console.log('Girometics Runner decks:', giromRunnerDecks.length, giromRunnerDecks.map(function(d) { return d.name; }));
-      console.log('Girometics Corp decks:', giromCorpDecks.length, giromCorpDecks.map(function(d) { return d.name; }));
       
       // Select initial random decks
       selectRandomDecks();
@@ -506,8 +508,6 @@
                                  '&showdeck=1';
         }
       }, 500);
-
-      console.log(`> EXECUTING ${option.toUpperCase()}.EXE`);
     }
 
     // Random glitch for CHIRIBOGA
