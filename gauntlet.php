@@ -530,7 +530,7 @@
 		}
 
 		// Type filter state and functions
-		var currentTypeFilter = 'all'; // 'all', 'event', 'hardware', 'program', 'resource'
+		var currentTypeFilter = 'none'; // 'none', 'influence', 'event', 'hardware', 'program', 'resource'
 
 		function GetFactionOrder(cardId) {
 			var card = cardSet[cardId];
@@ -626,7 +626,7 @@
 				
 				var isVisible = false;
 				
-				if (currentTypeFilter === 'all') {
+				if (currentTypeFilter === 'none') {
 					isVisible = true;
 				} else if (currentTypeFilter === 'influence') {
 					// Show cards that are NOT in the identity's faction and NOT neutral
@@ -644,7 +644,10 @@
 		}
 
 		function CycleTypeFilter() {
-			if (currentTypeFilter === 'all') {
+			if (currentTypeFilter === 'none') {
+				currentTypeFilter = 'influence';
+				$('#sortdeck').html('FILTER:<br>INFLUENCE');
+			} else if (currentTypeFilter === 'influence') {
 				currentTypeFilter = 'event';
 				$('#sortdeck').html('FILTER:<br>EVENT');
 			} else if (currentTypeFilter === 'event') {
@@ -656,12 +659,9 @@
 			} else if (currentTypeFilter === 'program') {
 				currentTypeFilter = 'resource';
 				$('#sortdeck').html('FILTER:<br>RESOURCE');
-			} else if (currentTypeFilter === 'resource') {
-				currentTypeFilter = 'influence';
-				$('#sortdeck').html('FILTER:<br>INFLUENCE');
 			} else {
-				currentTypeFilter = 'all';
-				$('#sortdeck').html('FILTER:<br>ALL');
+				currentTypeFilter = 'none';
+				$('#sortdeck').html('FILTER:<br>NONE');
 			}
 			SortCardContainer();
 			ApplyTypeFilter();
@@ -2012,8 +2012,8 @@
 				<button id="opponent" class="button" onclick="window.location.href=$(this).prop('href');" style="display:none;">SET AS OPPONENT</button>
 				<button id="randomdeck" onclick="GenerateRandomDeck();" class="button" style="display:none;">RANDOM<br>DECK</button>
 				<button id="cleardeck" onclick="ClearDeck();" class="button">CLEAR<br>DECK</button>
-				<button id="sortdeck" onclick="CycleTypeFilter();" class="button">FILTER:<br>ALL</button>
-				<button id="addnoninfluence" onclick="AddNonInfluence();" class="button">ADD NON-<br>INFLUENCE</button>
+				<button id="sortdeck" onclick="CycleTypeFilter();" class="button">FILTER:<br>NONE</button>
+				<button id="addnoninfluence" onclick="AddNonInfluence();" class="button">ADD IN-<br>FACTION</button>
 				<button id="togglecards" onclick="ToggleOtherCards();" class="button">HIDE UNSELECTED</button>
 				<button id="exittomenu" onclick="window.location.href='index.php';" class="button">BACK TO MENU</button>
 			</div>
