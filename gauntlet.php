@@ -91,6 +91,7 @@
 			var gauntletCardIds = []; // Set of 40 different runner cards available in gauntlet
 			var gauntletCardCounts = {}; // Count of each card in gauntlet (typically 3 or 1)
 			var gauntletCredits = 0; // Credits from gauntlet state
+			var shopDisplayCardIds = []; // Cards currently displayed in shop modal for lightbox cycling
 			
 			// Function to register a precon deck
 			function registerPrecon(deck) {
@@ -423,18 +424,35 @@
 					return titleA.localeCompare(titleB);
 				});
 				
-				// Build display list
-				var listHtml = '<div style="color: var(--crt-red); font-family: monospace; text-align: center; display: inline-block; margin: 0;">';
-				listHtml += '<p style="margin: 5px 0; color: var(--glow-red); font-weight: bold;">Added from ' + pack.name + ':</p>';
+				// Build display with card thumbnails
+				var listHtml = '<div style="text-align: center;">';
+				listHtml += '<p style="margin: 5px 0; color: var(--glow-red); font-weight: bold; font-size: 14px;">Added from ' + pack.name + ':</p>';
+				listHtml += '<div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin: 15px 0;">';
 				
-				for (var i = 0; i < cardIds.length; i++) {
-					var cardId = cardIds[i];
-					var count = cardCounts[cardId];
+				// Reset shop display cards
+				shopDisplayCardIds = [];
+				
+				// Sort the generated cards for consistent display
+				var sortedCardsGenerated = cardsGenerated.slice().sort(function(a, b) {
+					var titleA = (cardSet[a].title || '').toLowerCase();
+					var titleB = (cardSet[b].title || '').toLowerCase();
+					return titleA.localeCompare(titleB);
+				});
+				
+				// Display each card copy individually
+				for (var i = 0; i < sortedCardsGenerated.length; i++) {
+					var cardId = sortedCardsGenerated[i];
+					shopDisplayCardIds.push(cardId);
 					var cardTitle = cardSet[cardId].title || 'Unknown Card';
-					listHtml += '<p style="margin: 5px 0;">' + count + 'x ' + cardTitle + '</p>';
+					var imgSrc = 'images/' + ChangeImageFileToJPG(cardSet[cardId].imageFile);
+					
+					listHtml += '<div style="position: relative; text-align: center; cursor: pointer;" onclick="ShowLightbox(' + cardId + ');">';
+					listHtml += '<img src="' + imgSrc + '" alt="' + cardTitle + '" style="width: 120px; height: auto; border: 2px solid var(--glow-green); border-radius: 4px; transition: transform 0.2s; opacity: 0.9;" onmouseover="this.style.transform=\'scale(1.05)\'; this.style.opacity=\'1\';" onmouseout="this.style.transform=\'scale(1)\'; this.style.opacity=\'0.9\';">';
+					listHtml += '</div>';
 				}
 				
-				listHtml += '<p style="margin-top: 20px; color: var(--glow-red);"><strong>Purchased for ' + pack.cost + ' <img src="images/nsg/NSG_CREDIT.svg" class="card-icon" alt="credit" style="margin-left: 0px; height: 16px; display: inline-block; vertical-align: sub; filter: invert(1) brightness(0.5) sepia(1) saturate(5) hue-rotate(80deg);"></strong></p>';
+				listHtml += '</div>';
+				listHtml += '<p style="margin-top: 15px; color: var(--glow-red);"><strong>Purchased for ' + pack.cost + ' <img src="images/nsg/NSG_CREDIT.svg" class="card-icon" alt="credit" style="margin-left: 0px; height: 16px; display: inline-block; vertical-align: sub; filter: invert(1) brightness(0.5) sepia(1) saturate(5) hue-rotate(80deg);"></strong></p>';
 				listHtml += '</div>';
 				
 				// Find the buttons container and replace with purchase info and BACK TO SHOP button
@@ -1322,7 +1340,9 @@
 
 			function NavigateLightbox(delta) {
 				if (typeof window.currentLightboxCardId === 'undefined' || window.currentLightboxCardId === null) return;
-				var visible = GetVisibleCardIds();
+				
+				// Use shop cards if viewing from shop, otherwise use main card list
+				var visible = shopDisplayCardIds.length > 0 ? shopDisplayCardIds : GetVisibleCardIds();
 				if (!visible.length) return;
 				var idx = visible.indexOf(window.currentLightboxCardId);
 				if (idx === -1) idx = 0; else idx = (idx + delta + visible.length) % visible.length;
@@ -1332,8 +1352,6 @@
 				}
 			}
 
-			$(document).on('click', '#lightbox-prev', function(e){ e.stopPropagation(); NavigateLightbox(-1); });
-			$(document).on('click', '#lightbox-next', function(e){ e.stopPropagation(); NavigateLightbox(1); });
 			$(document).on('keydown', function(e){
 				if (!$('#lightbox').hasClass('active')) return;
 				if (e.key === 'ArrowLeft') { e.preventDefault(); NavigateLightbox(-1); }
@@ -2478,8 +2496,6 @@
 		<div id="lightbox">
 			<div id="lightbox-content">
 				<span id="lightbox-close">[CLOSE]</span>
-				<span id="lightbox-prev" aria-label="Previous">&#8249;</span>
-				<span id="lightbox-next" aria-label="Next">&#8250;</span>
 				<div id="lightbox-body">
 					<img id="lightbox-img" src="" alt="Card"/>
 					<div id="lightbox-text"></div>
