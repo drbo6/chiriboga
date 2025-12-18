@@ -381,6 +381,7 @@
 			RenderAllCardsList();
 			UpdateCardCountsUI();
 			UpdateLaunchStrings();
+			UpdatePlayDeckButtonState();
 			
 				try {
 					var currentIdSel = $('#identityselect').val();
@@ -430,6 +431,7 @@
 				UpdateCardCountsUI();
 				Parse();
 			if (showingOnlySelected) ApplyFilter();
+			UpdatePlayDeckButtonState();
 			}
 			function RemoveCardFromDeck(id) {
 				if (typeof json.cards === 'undefined') json.cards = [];
@@ -443,6 +445,7 @@
 				UpdateCardCountsUI();
 				Parse();
 			if (showingOnlySelected) ApplyFilter();
+			UpdatePlayDeckButtonState();
 		}
 
 		function AddNonInfluence() {
@@ -814,6 +817,7 @@
 				UpdateCardCountsUI();
 				deckModified = true;
 				Parse();
+				UpdatePlayDeckButtonState();
 			}
 
 			function CycleFilter() {
@@ -1068,6 +1072,41 @@
 				"Chiriboga",
 				historyUrl
 			  );
+			}
+
+			function UpdatePlayDeckButtonState() {
+				// Calculate deck validity based on current state
+				if (!json || !json.identity || !cardSet[json.identity]) {
+					$('#launch').prop('disabled', true).attr('title', 'Select a valid identity first');
+					return;
+				}
+
+				var deckSizeTarget = cardSet[json.identity].deckSize;
+				var influenceLimit = cardSet[json.identity].influenceLimit;
+				var totalCards = json.cards.length;
+				var totalInfluence = 0;
+
+				for (var i = 0; i < json.cards.length; i++) {
+					var cardId = json.cards[i];
+					if (cardSet[cardId].faction !== cardSet[json.identity].faction) {
+						totalInfluence += cardSet[cardId].influence;
+					}
+				}
+
+				var isValid = (totalCards >= deckSizeTarget) && (totalInfluence <= influenceLimit);
+				var tooltipText = '';
+
+				if (!isValid) {
+					if (totalCards < deckSizeTarget) {
+						tooltipText = 'Need ' + (deckSizeTarget - totalCards) + ' more card(s)';
+					}
+					if (totalInfluence > influenceLimit) {
+						if (tooltipText) tooltipText += '\n';
+						tooltipText += 'Over influence by ' + (totalInfluence - influenceLimit);
+					}
+				}
+
+				$('#launch').prop('disabled', !isValid).attr('title', tooltipText);
 			}
 
 			var mouseDownCallback = function (ev) {
@@ -1333,6 +1372,7 @@
 					deckPlayer = runner;
 					// Parse and update deck stats without changing the deck
 					Parse();
+					UpdatePlayDeckButtonState();
 			  });
 
 			  //set up identity select
@@ -1862,7 +1902,7 @@
 					</div>
 				</div>
 			<div class="leftrow buttons">
-				<button id="launch" class="button button-red" onclick="window.location.href=$(this).prop('href');">PLAY<br>DECK</button>
+				<button id="launch" class="button button-red" onclick="if(!$(this).prop('disabled')) window.location.href=$(this).prop('href');">PLAY<br>DECK</button>
 				<!-- DRBO6: Gauntlet Mode - hide Set as Opponent, Random Deck, Import NRDB, Load Precon -->
 				<button id="opponent" class="button" onclick="window.location.href=$(this).prop('href');" style="display:none;">SET AS OPPONENT</button>
 				<button id="randomdeck" onclick="GenerateRandomDeck();" class="button" style="display:none;">RANDOM<br>DECK</button>
