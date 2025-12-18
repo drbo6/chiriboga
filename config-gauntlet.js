@@ -10,6 +10,19 @@ var gauntletConfig = {
   // Number of credits the player starts with in gauntlet mode
   startingCredits: 10,
 
+  // ===== MATCH REWARDS =====
+  // Credits awarded or deducted based on game outcomes
+  // Positive values = credits gained, Negative values = credits lost
+  matchRewards: {
+    victory: 5,                // Credits for winning a match
+    agendaPointStolen: 3,      // Credits per agenda point stolen from corp
+    agendaPointScored: -3,     // Credits per agenda point scored by corp (negative = loss)
+    runSuccessful: 1,          // Credits for successful run
+    runEnded: -1,              // Credits deducted when run ends
+    corpTrashed: -1,           // Credits deducted when corp card is trashed
+    runnerTrashed: 1           // Credits gained when runner card is trashed
+  },
+
   // ===== ALTERNATE FACTIONS =====
   // If true, each selected precon represents a different faction (one opponent per faction)
   // If false, randomly selects precons across all factions without faction requirement

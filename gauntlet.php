@@ -107,7 +107,7 @@
 				welcomeHtml += '<div style="color: var(--crt-red); font-family: monospace; padding: 20px; text-align: center; width: 100%; max-width: 500px;">';
 				welcomeHtml += '<p>In this mode, you will face ' + gauntletLength + ' randomly selected decks.</p>';
 				welcomeHtml += '<p style="margin-top: 20px;">Build a deck from a randomized limited card pool and beat them consecutively to defeat the Gauntlet.</p>';
-				welcomeHtml += '<p style="margin-top: 20px;">Every agenda point that you steal gets you more cards, but every agenda point that the corp scores costs you some of your cards.</p>';
+				welcomeHtml += '<p style="margin-top: 20px;">Every agenda point that you steal wins you more credits, but every agenda point that the corp scores costs you some of those credits.</p>';
 				welcomeHtml += '<p style="margin-top: 20px;">After your first game, you can no longer change your identity.</p>';								
 				welcomeHtml += '<p style="margin-top: 20px;">Good luck!</p>';
 				welcomeHtml += '</div>';
@@ -126,6 +126,39 @@
 				
 				modal.innerHTML = welcomeHtml;
 				modal.style.display = 'flex';
+			}
+
+			function ShowCongratulationsModal(creditsWon) {
+				var congratsHtml = '<div class="solo-menu" style="display: flex; flex-direction: column; align-items: center;">';
+				congratsHtml += '<div class="solo-logo" style="width: 100%;">';
+				congratsHtml += '<h1 class="logo-text" style="color: var(--crt-red); text-shadow: 0 0 5px var(--crt-red), 0 0 15px var(--glow-red), 0 0 35px var(--glow-red-dark);">NICE JOB!</h1>';
+				congratsHtml += '</div>';
+				congratsHtml += '<div style="color: var(--crt-red); font-family: monospace; padding: 20px; text-align: center; width: 100%; max-width: 500px;">';
+				congratsHtml += '<p style="font-size: 18px; font-weight: bold;">You have acquired ' + creditsWon + ' credits</p>';
+				congratsHtml += '</div>';
+				congratsHtml += '<div style="display: flex; justify-content: center; margin-top: 0px; width: 100%;"><button class="button" onclick="CloseCongratulationsModal();">CONTINUE</button></div>';
+				congratsHtml += '</div>';
+
+				var modal = document.getElementById('gauntlet-congratulations-modal');
+				if (!modal) {
+					modal = document.createElement('div');
+					modal.id = 'gauntlet-congratulations-modal';
+					modal.className = 'modal';
+					modal.style.display = 'flex';
+					modal.style.zIndex = '10000';
+					document.body.appendChild(modal);
+				}
+				
+				modal.innerHTML = congratsHtml;
+				modal.style.display = 'flex';
+			}
+
+			// Function to close the congratulations modal and add credits
+			function CloseCongratulationsModal() {
+				var modal = document.getElementById('gauntlet-congratulations-modal');
+				if (modal) {
+					modal.style.display = 'none';
+				}
 			}
 
 			// Function to close the welcome modal
@@ -823,6 +856,12 @@
 				// Show welcome modal if this is the start of a gauntlet (defeated === 0)
 				if (gauntletState.defeated === 0) {
 					ShowGauntletWelcomeModal(gauntletState.gauntletLength);
+				} else if (gauntletState.defeated > 0) {
+					// Show congratulations modal for returning victories
+					var creditsWon = gauntletState.creditsWon || 0;
+					gauntletCredits += creditsWon; // Add won credits to available credits
+					gauntletState.creditsWon = 0; // Reset creditsWon since they've been applied
+					ShowCongratulationsModal(creditsWon);
 				}
 			}
 			
@@ -1647,6 +1686,7 @@
 				  gauntletState.shopPurchaseCount = shopPurchaseCount;
 				  gauntletState.credits = gauntletCredits;
 				  gauntletState.subset = gauntletCardCounts;
+				  gauntletState.creditsWon = 0; // Reset creditsWon after applying to credits
 				  updatedGauntletParam = LZString.compressToEncodedURIComponent(JSON.stringify(gauntletState));
 				} catch (e) {
 				  console.error("Failed to update gauntlet state with shop data:", e);

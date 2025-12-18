@@ -1125,6 +1125,37 @@ function PlayerWin(player, msgstr) {
           // Add corp's agenda points to total
           gauntletState.agendaScored = (gauntletState.agendaScored || 0) + AgendaPoints(corp);
           
+          // Calculate creditsWon for this match
+          // Formula: victory + (agendaPointStolen * runnerAgendaPoints) + (agendaPointScored * corpAgendaPoints)
+          // Note: agendaPointScored is typically negative, so we add it (not subtract)
+          if (typeof gauntletConfig !== 'undefined' && gauntletConfig && gauntletConfig.matchRewards) {
+            try {
+              var rewards = gauntletConfig.matchRewards;
+              var victory = (typeof rewards.victory !== 'undefined') ? rewards.victory : 5;
+              var agendaPointStolen = (typeof rewards.agendaPointStolen !== 'undefined') ? rewards.agendaPointStolen : 0;
+              var agendaPointScored = (typeof rewards.agendaPointScored !== 'undefined') ? rewards.agendaPointScored : 0;
+              
+              var runnerPoints = AgendaPoints(runner);
+              var corpPoints = AgendaPoints(corp);
+              
+              // agendaPointScored is negative, so we add it (not subtract)
+              var creditsThisMatch = victory + (agendaPointStolen * runnerPoints) + (agendaPointScored * corpPoints);
+              
+              // Ensure creditsWon is at least equal to victory
+              creditsThisMatch = Math.max(creditsThisMatch, victory);
+              
+              gauntletState.creditsWon = (gauntletState.creditsWon || 0) + creditsThisMatch;
+              console.log("Credits won this match: " + creditsThisMatch + " (total: " + gauntletState.creditsWon + ")");
+            } catch (rewardError) {
+              console.error("Error calculating credits won:", rewardError);
+              // Just use victory as default if calculation fails
+              gauntletState.creditsWon = (gauntletState.creditsWon || 0) + 5;
+            }
+          } else {
+            // If gauntletConfig is not available, just use default victory bonus
+            gauntletState.creditsWon = (gauntletState.creditsWon || 0) + 5;
+          }
+          
           // Check if gauntlet is complete
           if (gauntletState.defeated >= gauntletState.opponents.length) {
             // Gauntlet complete - show recap modal
