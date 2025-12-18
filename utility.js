@@ -987,7 +987,7 @@ function ShowGauntletRecap(gauntletState) {
   var score = Math.max(0, maxScore - (gauntletState.agendaScored || 0));
   
   // Build opponent list HTML with thumbnails
-  var opponentListHtml = '<div class="gauntlet-recap-opponents" style="overflow-y: auto; max-height: 300px; padding: 10px 0;">';
+  var opponentListHtml = '<div class="gauntlet-recap-opponents" style="overflow-y: auto; max-height: 400px; padding: 10px 0;">';
   
   if (gauntletState.opponents && gauntletState.opponents.length > 0) {
     for (var i = 0; i < gauntletState.opponents.length; i++) {
@@ -1002,8 +1002,15 @@ function ShowGauntletRecap(gauntletState) {
       imageFile = ChangeImageFileToJPG(imageFile);
       var imageSrc = imageFile ? 'images/' + imageFile : '';
       
-      var deckUrl = opponent.URL || '#';
-      opponentListHtml += '<div class="gauntlet-opponent-item" style="display: flex; align-items: center; margin: 8px 0; padding: 5px; border-bottom: 1px solid rgba(51, 255, 51, 0.2); cursor: pointer;" onclick="window.open(\'' + deckUrl + '\', \'_blank\');">';
+      // Build opponent item with optional clickable URL
+      var deckUrl = opponent.URL || '';
+      var itemStyle = 'display: flex; align-items: center; margin: 8px 0; padding: 5px; border-bottom: 1px solid rgba(51, 255, 51, 0.2);';
+      var onclickHandler = '';
+      if (deckUrl) {
+        itemStyle += ' cursor: pointer;';
+        onclickHandler = ' onclick="window.open(\'' + deckUrl + '\', \'_blank\');"';
+      }
+      opponentListHtml += '<div class="gauntlet-opponent-item" style="' + itemStyle + '"' + onclickHandler + '>';
       
       if (imageSrc) {
         opponentListHtml += '<img src="' + imageSrc + '" style="width: 40px; height: 56px; object-fit: cover; margin-right: 10px; border: 1px solid #33ff33;" alt="' + identityTitle + '" />';
@@ -1022,13 +1029,13 @@ function ShowGauntletRecap(gauntletState) {
   opponentListHtml += '</div>';
   
   // Create recap modal content
-  var recapHtml = '<div class="solo-menu">';
-  recapHtml += '<span class="menu-close" onclick="window.location.href=\'index.php\';" style="cursor: pointer;">✕</span>';
-  recapHtml += '<div class="solo-logo">';
+  var recapHtml = '<div class="solo-menu" style="display: flex; flex-direction: column; align-items: center;">';
+  recapHtml += '<span class="menu-close" onclick="window.location.href=\'index.php\';" style="cursor: pointer; align-self: flex-end; margin-right: 10px; margin-top: 10px;">✕</span>';
+  recapHtml += '<div class="solo-logo" style="width: 100%;">';
   recapHtml += '<h1 class="logo-text">GAUNTLET COMPLETE</h1>';
   recapHtml += '</div>';
-  recapHtml += '<div style="color: #33ff33; font-family: monospace; padding: 20px; text-align: center;">';
-  recapHtml += '<div style="margin-bottom: 20px; font-size: 16px;">You have defeated</div>';
+  recapHtml += '<div style="color: #33ff33; font-family: monospace; padding: 20px; text-align: center; width: 100%;">';
+  recapHtml += '<div style="margin-bottom: 20px; font-size: 16px;">You have defeated these decks:</div>';
   recapHtml += opponentListHtml;
   recapHtml += '<div style="margin-top: 20px; padding-top: 20px; border-top: 2px solid #33ff33; font-size: 18px;">';
   recapHtml += '<div style="color: #ffff00; font-weight: bold;">SCORE: ' + score + '</div>';
@@ -1101,13 +1108,13 @@ function PlayerWin(player, msgstr) {
     // Gauntlet mode - different buttons based on win/loss
     if (winner == runner) {
       // Runner won - show "Continue the Gauntlet" button
-      winPhase.Enumerate["continue gauntlet"] = function () {
+      winPhase.Enumerate["Continue Gauntlet"] = function () {
         return [{}];
       };
       winPhase.text = {
-        "continue gauntlet": "Continue to the next challenge"
+        "Continue Gauntlet": "Continue to the next challenge"
       };
-      winPhase.Resolve["continue gauntlet"] = function () {
+      winPhase.Resolve["Continue Gauntlet"] = function () {
         try {
           // Parse the gauntlet state
           var gauntletState = JSON.parse(LZString.decompressFromEncodedURIComponent(gauntletParam));
