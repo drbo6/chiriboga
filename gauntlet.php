@@ -104,7 +104,7 @@
 				welcomeHtml += '<div style="color: var(--crt-red); font-family: monospace; padding: 20px; text-align: center; width: 100%; max-width: 500px;">';
 				welcomeHtml += '<p>In this mode, you will face ' + gauntletLength + ' randomly selected decks.</p>';
 				welcomeHtml += '<p style="margin-top: 20px;">Create a deck from a randomized limited card pool and beat them all consecutively to defeat the Gauntlet.</p>';
-				welcomeHtml += '<p style="margin-top: 20px;">Every stolen agenda point gets you new cards, but every scored agenda costs you cards.</p>';				
+				welcomeHtml += '<p style="margin-top: 20px;">Every agenda point that you steal gets you new cards, but every agenda point that the corp scores costs you some of your cards.</p>';				
 				welcomeHtml += '<p style="margin-top: 20px;">Good luck!</p>';
 				welcomeHtml += '</div>';
 				welcomeHtml += '<div style="display: flex; justify-content: center; margin-top: 20px; width: 100%;"><button class="button" onclick="CloseGauntletWelcomeModal();">CONTINUE</button></div>';
