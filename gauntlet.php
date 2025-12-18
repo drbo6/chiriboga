@@ -94,6 +94,43 @@
 			function registerPrecon(deck) {
 				preconDecks.push(deck);
 			}
+
+			// Function to show gauntlet welcome modal
+			function ShowGauntletWelcomeModal(gauntletLength) {
+				var welcomeHtml = '<div class="solo-menu" style="display: flex; flex-direction: column; align-items: center;">';
+				welcomeHtml += '<div class="solo-logo" style="width: 100%;">';
+				welcomeHtml += '<h1 class="logo-text" style="color: var(--crt-red); text-shadow: 0 0 5px var(--crt-red), 0 0 15px var(--glow-red), 0 0 35px var(--glow-red-dark);">WELCOME TO<br>THE GAUNTLET</h1>';
+				welcomeHtml += '</div>';
+				welcomeHtml += '<div style="color: var(--crt-red); font-family: monospace; padding: 20px; text-align: center; width: 100%; max-width: 500px;">';
+				welcomeHtml += '<p>In this mode, you will face ' + gauntletLength + ' randomly selected decks.</p>';
+				welcomeHtml += '<p style="margin-top: 20px;">Create a deck from a randomized limited card pool and beat them all consecutively to defeat the Gauntlet.</p>';
+				welcomeHtml += '<p style="margin-top: 20px;">Every stolen agenda point gets you new cards, but every scored agenda costs you cards.</p>';				
+				welcomeHtml += '<p style="margin-top: 20px;">Good luck!</p>';
+				welcomeHtml += '</div>';
+				welcomeHtml += '<div style="display: flex; justify-content: center; margin-top: 20px; width: 100%;"><button class="button" onclick="CloseGauntletWelcomeModal();">CONTINUE</button></div>';
+				welcomeHtml += '</div>';
+
+				var modal = document.getElementById('gauntlet-welcome-modal');
+				if (!modal) {
+					modal = document.createElement('div');
+					modal.id = 'gauntlet-welcome-modal';
+					modal.className = 'modal';
+					modal.style.display = 'flex';
+					modal.style.zIndex = '10000';
+					document.body.appendChild(modal);
+				}
+				
+				modal.innerHTML = welcomeHtml;
+				modal.style.display = 'flex';
+			}
+
+			// Function to close the welcome modal
+			function CloseGauntletWelcomeModal() {
+				var modal = document.getElementById('gauntlet-welcome-modal');
+				if (modal) {
+					modal.style.display = 'none';
+				}
+			}
 		</script>
 		<?php
 		// Load preconstructed decks
@@ -345,6 +382,11 @@
 						var opponentURL = gauntletState.opponents[i].URL || 'No URL';
 						console.log((i + 1) + ". " + opponentName + " (" + opponentFaction + ") - URL: " + opponentURL);
 					}
+				}
+				
+				// Show welcome modal if this is the start of a gauntlet (defeated === 0)
+				if (gauntletState.defeated === 0) {
+					ShowGauntletWelcomeModal(gauntletState.gauntletLength);
 				}
 			}
 			
