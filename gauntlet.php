@@ -296,6 +296,7 @@
 				// Update the UI
 				UpdateCardCountsUI();
 				RenderAllCardsList();
+				Parse(); // Update deck stats including credits display
 			}
 
 			// Global variables for shop
@@ -423,6 +424,11 @@
 				// Add cards to deck
 				for (var i = 0; i < cardsGenerated.length; i++) {
 					var cardId = cardsGenerated[i];
+					// Validate card ID
+					if (cardId < 0 || cardId >= cardSet.length || !cardSet[cardId]) {
+						console.error("Invalid card ID generated:", cardId);
+						continue;
+					}
 					if (gauntletCardCounts[cardId]) {
 						gauntletCardCounts[cardId]++;
 					} else {
@@ -493,6 +499,7 @@
 				// Update the UI
 				UpdateCardCountsUI();
 				RenderAllCardsList();
+				Parse(); // Update deck stats including credits display
 				
 				// Re-randomize the three shop packs after purchase
 				shopPurchaseCount++;
@@ -595,13 +602,20 @@
 						try {
 							var gauntletState = JSON.parse(LZString.decompressFromEncodedURIComponent(gauntletParam));
 							if (gauntletState && gauntletState.subset) {
-								gauntletCardCounts = gauntletState.subset;
-								// Rebuild gauntletCardIds from counts
+								gauntletCardCounts = {};
+								// Rebuild gauntletCardIds from counts and validate card IDs
 								gauntletCardIds = [];
-								for (var cardId in gauntletCardCounts) {
-									var qty = gauntletCardCounts[cardId];
-									for (var i = 0; i < qty; i++) {
-										gauntletCardIds.push(parseInt(cardId));
+								for (var cardId in gauntletState.subset) {
+									var cardIdInt = parseInt(cardId);
+									// Validate that this card exists in cardSet
+									if (cardIdInt >= 0 && cardIdInt < cardSet.length && cardSet[cardIdInt]) {
+										var qty = gauntletState.subset[cardId];
+										gauntletCardCounts[cardIdInt] = qty;
+										for (var i = 0; i < qty; i++) {
+											gauntletCardIds.push(cardIdInt);
+										}
+									} else {
+										console.warn("Invalid card ID in gauntlet subset:", cardId, "- skipping");
 									}
 								}
 							}
@@ -1625,14 +1639,16 @@
 			  var gauntletParam = URIParameter("g");
 			  var updatedGauntletParam = gauntletParam;
 			  
-			  // Update gauntletState with current shopPurchaseCount if gauntlet mode is active
+			  // Update gauntletState with current shop state if gauntlet mode is active
 			  if (gauntletParam !== "") {
 				try {
 				  var gauntletState = JSON.parse(LZString.decompressFromEncodedURIComponent(gauntletParam));
 				  gauntletState.shopPurchaseCount = shopPurchaseCount;
+				  gauntletState.credits = gauntletCredits;
+				  gauntletState.subset = gauntletCardCounts;
 				  updatedGauntletParam = LZString.compressToEncodedURIComponent(JSON.stringify(gauntletState));
 				} catch (e) {
-				  console.error("Failed to update gauntlet state with shopPurchaseCount:", e);
+				  console.error("Failed to update gauntlet state with shop data:", e);
 				  // Fall back to original parameter
 				  updatedGauntletParam = gauntletParam;
 				}
@@ -2446,6 +2462,8 @@
 			  // Collection stat - count unique cards in gauntlet subset
 			  var collectionSize = Object.keys(gauntletCardCounts).length;
 			  validityOutput += '<div class="deck-stat"><span class="stat-label">Collection:</span> '+collectionSize+' unique cards</div>';
+			  // Credits stat
+			  validityOutput += '<div class="deck-stat"><span class="stat-label">Credits:</span> '+gauntletCredits+'</div>';
 			  validityOutput += '</div>';
 			  if (validDeck) {
 				$("#output").html(validityOutput);
