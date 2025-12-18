@@ -496,15 +496,15 @@
 				// Update the credits display in the modal
 				document.getElementById('shop-credits').innerHTML = gauntletCredits;
 				
-				// Update the UI
-				UpdateCardCountsUI();
-				RenderAllCardsList();
-				Parse(); // Update deck stats including credits display
-				
-				// Re-randomize the three shop packs after purchase
+				// Re-randomize the three shop packs after purchase (do this BEFORE Parse so it gets saved)
 				shopPurchaseCount++;
 				selectedShopPacks = SelectRandomShopPacks();
 				console.log("Shop packs re-randomized (purchase #" + shopPurchaseCount + "):", selectedShopPacks.map(function(p) { return p.name; }));
+				
+				// Update the UI
+				UpdateCardCountsUI();
+				RenderAllCardsList();
+				Parse(); // Update deck stats including credits display - this saves shopPurchaseCount to URL
 			}
 		</script>
 		<?php
