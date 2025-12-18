@@ -731,11 +731,6 @@
 				$("#identity").prop("src", "images/" + ChangeImageFileToJPG(cardSet[json.identity].imageFile));
 			}
 			
-			// Disable identity dropdown if player has already defeated opponents in this gauntlet
-			if (typeof gauntletState !== 'undefined' && gauntletState !== null && gauntletState.defeated >= 1) {
-				$("#identityselect").prop("disabled", true);
-			}
-			
 			// Load corp deck from URL parameter (c) - the opponent's deck
 			var specifiedCorpDeck = URIParameter("c");
 			if (specifiedCorpDeck != "" && specifiedCorpDeck != "random") {
@@ -760,6 +755,12 @@
 			if (decodedG) {
 				var gauntletState = JSON.parse(LZString.decompressFromEncodedURIComponent(decodedG));
 				console.log("Decoded g parameter:", gauntletState);
+				
+				// Disable identity dropdown if player has already defeated opponents
+				if (gauntletState.defeated > 0) {
+					$("#identityselect").prop("disabled", true);
+				}
+				
 				// Store credits from gauntlet state
 				gauntletCredits = gauntletState.credits || 0;
 				// Store seed from gauntlet state
