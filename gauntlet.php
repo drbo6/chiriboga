@@ -475,8 +475,8 @@
 			}
 		}
 
-		// Sort state and functions
-		var currentSort = 'id'; // 'id', 'name', 'type', 'faction'
+		// Type filter state and functions
+		var currentTypeFilter = 'all'; // 'all', 'event', 'hardware', 'program', 'resource'
 
 		function GetFactionOrder(cardId) {
 			var card = cardSet[cardId];
@@ -533,71 +533,84 @@
 					
 					if (!cardA || !cardB) return 0;
 					
-					if (currentSort === 'id') {
-						return idA - idB;
-					} else if (currentSort === 'name') {
-						return (cardA.title || '').localeCompare(cardB.title || '');
-					} else if (currentSort === 'type') {
-						var typeOrderA = GetTypeOrder(idA);
-						var typeOrderB = GetTypeOrder(idB);
-						if (typeOrderA !== typeOrderB) return typeOrderA - typeOrderB;
-						// Alphabetical within type
-						return (cardA.title || '').localeCompare(cardB.title || '');
-					} else if (currentSort === 'faction') {
-						var factionOrderA = GetFactionOrder(idA);
-						var factionOrderB = GetFactionOrder(idB);
-						if (factionOrderA !== factionOrderB) return factionOrderA - factionOrderB;
-						// Alphabetical within faction
-						return (cardA.title || '').localeCompare(cardB.title || '');
-					}
-					return 0;
-				});
-				
-				$container.append($cards);
-			}
+				// Always sort alphabetically by card title
+				return (cardA.title || '').localeCompare(cardB.title || '');
+			});
+			
+			$container.append($cards);
+		}
 
-			function CycleSort() {
-				if (currentSort === 'id') {
-					currentSort = 'name';
-					$('#sortdeck').html('SORT BY:<br>NAME');
-				} else if (currentSort === 'name') {
-					currentSort = 'type';
-					$('#sortdeck').html('SORT BY:<br>TYPE');
-				} else if (currentSort === 'type') {
-					currentSort = 'faction';
-					$('#sortdeck').html('SORT BY:<br>FACTION');
+		function ApplyTypeFilter() {
+			var $cards = $('#cardcontainer').children('.card-item');
+			
+			$cards.each(function() {
+				var id = parseInt($(this).attr('data-id'));
+				var card = cardSet[id];
+				
+				if (!card) {
+					$(this).hide();
+					return;
+				}
+				
+				var cardType = (card.cardType || '').toLowerCase();
+				var isVisible = false;
+				
+				if (currentTypeFilter === 'all') {
+					isVisible = true;
+				} else if (currentTypeFilter === cardType) {
+					isVisible = true;
+				}
+				
+				$(this).toggle(isVisible);
+			});
+		}
+
+		function CycleTypeFilter() {
+			if (currentTypeFilter === 'all') {
+				currentTypeFilter = 'event';
+				$('#sortdeck').html('FILTER:<br>EVENT');
+			} else if (currentTypeFilter === 'event') {
+				currentTypeFilter = 'hardware';
+				$('#sortdeck').html('FILTER:<br>HARDWARE');
+			} else if (currentTypeFilter === 'hardware') {
+				currentTypeFilter = 'program';
+				$('#sortdeck').html('FILTER:<br>PROGRAM');
+			} else if (currentTypeFilter === 'program') {
+				currentTypeFilter = 'resource';
+				$('#sortdeck').html('FILTER:<br>RESOURCE');
+			} else {
+				currentTypeFilter = 'all';
+				$('#sortdeck').html('FILTER:<br>ALL');
+			}
+			SortCardContainer();
+			ApplyTypeFilter();
+		}
+
+		// Random Deck function
+		function GenerateRandomDeck() {
+			// Use the existing DeckBuild function from utility.js to generate a valid random deck
+			var cardsChosen = DeckBuild(cardSet[json.identity]);
+			
+			// Clear current deck
+			json.cards = [];
+			deckCounts = {};
+			
+			// Convert generated deck into counts
+			for (var i = 0; i < cardsChosen.length; i++) {
+				var cardId = cardsChosen[i];
+				if (typeof deckCounts[cardId] === 'undefined') {
+					deckCounts[cardId] = 1;
 				} else {
-					currentSort = 'id';
-					$('#sortdeck').html('SORT BY:<br>ID');
+					deckCounts[cardId]++;
 				}
-				SortCardContainer();
+				json.cards.push(cardId);
 			}
-
-			// Random Deck function
-			function GenerateRandomDeck() {
-				// Use the existing DeckBuild function from utility.js to generate a valid random deck
-				var cardsChosen = DeckBuild(cardSet[json.identity]);
-				
-				// Clear current deck
-				json.cards = [];
-				deckCounts = {};
-				
-				// Convert generated deck into counts
-				for (var i = 0; i < cardsChosen.length; i++) {
-					var cardId = cardsChosen[i];
-					if (typeof deckCounts[cardId] === 'undefined') {
-						deckCounts[cardId] = 1;
-					} else {
-						deckCounts[cardId]++;
-					}
-					json.cards.push(cardId);
-				}
-				
-				deckModified = true;
-				UpdateDeckTextareaFromCounts();
+			
+			deckModified = true;
+			UpdateDeckTextareaFromCounts();
+			Parse();
 			UpdateCardCountsUI();
-				UpdateCardCountsUI();
-			}
+		}
 
 			function RenderAllCardsList() {
 				$("#cardcontainer").empty();
@@ -1907,7 +1920,7 @@
 				<button id="opponent" class="button" onclick="window.location.href=$(this).prop('href');" style="display:none;">SET AS OPPONENT</button>
 				<button id="randomdeck" onclick="GenerateRandomDeck();" class="button" style="display:none;">RANDOM<br>DECK</button>
 				<button id="cleardeck" onclick="ClearDeck();" class="button">CLEAR<br>DECK</button>
-				<button id="sortdeck" onclick="CycleSort();" class="button">SORT BY:<br>ID</button>
+				<button id="sortdeck" onclick="CycleTypeFilter();" class="button">FILTER:<br>ALL</button>
 				<button id="addnoninfluence" onclick="AddNonInfluence();" class="button">ADD NON-<br>INFLUENCE</button>
 				<button id="togglecards" onclick="ToggleOtherCards();" class="button">HIDE UNSELECTED</button>
 				<button id="exittomenu" onclick="window.location.href='index.php';" class="button">BACK TO MENU</button>
