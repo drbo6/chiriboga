@@ -976,6 +976,82 @@ function PlayerName(player) {
 }
 
 /**
+ * Show gauntlet recap modal when all opponents defeated
+ *
+ * @method ShowGauntletRecap
+ * @param {Object} gauntletState the gauntlet state object
+ */
+function ShowGauntletRecap(gauntletState) {
+  // Calculate score: (7 * gauntletLength) - agendaScored, minimum 0
+  var maxScore = 7 * (gauntletState.gauntletLength || 4);
+  var score = Math.max(0, maxScore - (gauntletState.agendaScored || 0));
+  
+  // Build opponent list HTML with thumbnails
+  var opponentListHtml = '<div class="gauntlet-recap-opponents" style="overflow-y: auto; max-height: 300px; padding: 10px 0;">';
+  
+  if (gauntletState.opponents && gauntletState.opponents.length > 0) {
+    for (var i = 0; i < gauntletState.opponents.length; i++) {
+      var opponent = gauntletState.opponents[i];
+      var identityId = opponent.identity;
+      var identityCard = cardSet[identityId];
+      var identityTitle = identityCard ? GetTitle(identityCard) : 'Unknown Identity';
+      var identityFaction = opponent.faction || 'Unknown';
+      
+      // Get card image if available
+      var imageFile = identityCard && identityCard.imageFile ? identityCard.imageFile : '';
+      imageFile = ChangeImageFileToJPG(imageFile);
+      var imageSrc = imageFile ? 'images/' + imageFile : '';
+      
+      var deckUrl = opponent.URL || '#';
+      opponentListHtml += '<div class="gauntlet-opponent-item" style="display: flex; align-items: center; margin: 8px 0; padding: 5px; border-bottom: 1px solid rgba(51, 255, 51, 0.2); cursor: pointer;" onclick="window.open(\'' + deckUrl + '\', \'_blank\');">';
+      
+      if (imageSrc) {
+        opponentListHtml += '<img src="' + imageSrc + '" style="width: 40px; height: 56px; object-fit: cover; margin-right: 10px; border: 1px solid #33ff33;" alt="' + identityTitle + '" />';
+      } else {
+        opponentListHtml += '<div style="width: 40px; height: 56px; margin-right: 10px; border: 1px solid #33ff33; background: #111; display: flex; align-items: center; justify-content: center; font-size: 10px; color: #33ff33;">No Image</div>';
+      }
+      
+      opponentListHtml += '<div style="flex: 1;">';
+      opponentListHtml += '<div style="color: #33ff33; font-weight: bold;">' + opponent.name + '</div>';
+      opponentListHtml += '<div style="color: #66ff66; font-size: 12px;">' + identityTitle + '</div>';
+      opponentListHtml += '</div>';
+      opponentListHtml += '</div>';
+    }
+  }
+  
+  opponentListHtml += '</div>';
+  
+  // Create recap modal content
+  var recapHtml = '<div class="solo-menu">';
+  recapHtml += '<span class="menu-close" onclick="window.location.href=\'index.php\';" style="cursor: pointer;">✕</span>';
+  recapHtml += '<div class="solo-logo">';
+  recapHtml += '<h1 class="logo-text">GAUNTLET COMPLETE</h1>';
+  recapHtml += '</div>';
+  recapHtml += '<div style="color: #33ff33; font-family: monospace; padding: 20px; text-align: center;">';
+  recapHtml += '<div style="margin-bottom: 20px; font-size: 16px;">You have defeated</div>';
+  recapHtml += opponentListHtml;
+  recapHtml += '<div style="margin-top: 20px; padding-top: 20px; border-top: 2px solid #33ff33; font-size: 18px;">';
+  recapHtml += '<div style="color: #ffff00; font-weight: bold;">SCORE: ' + score + '</div>';
+  recapHtml += '</div>';
+  recapHtml += '<div style="display: flex; justify-content: center; margin-top: 20px;"><button class="button" onclick="window.location.href=\'index.php\';">RETURN TO MENU</button></div>';
+  recapHtml += '</div>';
+  recapHtml += '</div>';
+  
+  // Display recap modal
+  var recapModal = document.getElementById('gauntlet-recap-modal');
+  if (!recapModal) {
+    recapModal = document.createElement('div');
+    recapModal.id = 'gauntlet-recap-modal';
+    recapModal.className = 'modal';
+    recapModal.style.display = 'flex';
+    document.body.appendChild(recapModal);
+  }
+  
+  recapModal.innerHTML = recapHtml;
+  recapModal.style.display = 'flex';
+}
+
+/**
  * Player wins the game (the game ends).<br/>Logs a message and disables command prompt.
  *
  * @method PlayerWin
@@ -1041,6 +1117,13 @@ function PlayerWin(player, msgstr) {
           
           // Add corp's agenda points to total
           gauntletState.agendaScored = (gauntletState.agendaScored || 0) + AgendaPoints(corp);
+          
+          // Check if gauntlet is complete
+          if (gauntletState.defeated >= gauntletState.opponents.length) {
+            // Gauntlet complete - show recap modal
+            ShowGauntletRecap(gauntletState);
+            return;
+          }
           
           // Compress the updated gauntlet state
           var updatedGauntlet = LZString.compressToEncodedURIComponent(JSON.stringify(gauntletState));

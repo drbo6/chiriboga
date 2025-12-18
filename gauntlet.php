@@ -336,13 +336,14 @@
 			if (decodedG) {
 				var gauntletState = JSON.parse(LZString.decompressFromEncodedURIComponent(decodedG));
 				console.log("Decoded g parameter:", gauntletState);
-				// Log opponent names
+				// Log opponent names and URLs
 				if (gauntletState.opponents && gauntletState.opponents.length > 0) {
 					console.log("Gauntlet Opponents:");
 					for (var i = 0; i < gauntletState.opponents.length; i++) {
 						var opponentName = gauntletState.opponents[i].name || 'Unknown Opponent';
 						var opponentFaction = gauntletState.opponents[i].faction || 'Unknown Faction';
-						console.log((i + 1) + ". " + opponentName + " (" + opponentFaction + ")");
+						var opponentURL = gauntletState.opponents[i].URL || 'No URL';
+						console.log((i + 1) + ". " + opponentName + " (" + opponentFaction + ") - URL: " + opponentURL);
 					}
 				}
 			}

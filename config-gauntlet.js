@@ -4,7 +4,7 @@
 var gauntletConfig = {
   // ===== GAUNTLET LENGTH =====
   // Number of opponents in a gauntlet run (one from each faction)
-  gauntletLength: 4,
+  gauntletLength: 2,
 
   // ===== ALTERNATE FACTIONS =====
   // If true, each selected precon represents a different faction (one opponent per faction)

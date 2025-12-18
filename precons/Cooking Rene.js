@@ -4,6 +4,8 @@ registerPrecon({
     identity: "30001",
     default: false,
     deck_set: "none",
+    URL: "https://netrunnerdb.com/en/decklist/15a4982d-512e-4b44-aa12-59e0467bbd71/-sg-su21-cooking-ren-",
+    notes: "This Runner deck focuses on early setup with Cookbook and DZMZ Optimizer to supercharge virus-based tools like Botulus, Fermenter, and Leech, while building a strong economy through Sure Gamble, Liberated Account, and Fermenter. It applies pressure by aggressively trashing Corp cards, leveraging the ID ability for card draw and credits, with Carnivore and Scrubber making even expensive or normally untrashable cards vulnerable. Efficient breakers, multi-access from Docklands Pass and The Maker’s Eye, and sustained R&D pressure close out the game once the Corp starts to falter.",
     cards: {
         "30003": 3,  // Carnivore
         "30004": 3,  // Botulus

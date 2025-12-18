@@ -3,7 +3,9 @@ registerPrecon({
     name: "Duel: Steve vs PE",
     identity: "31014",
     default: false,
-    deck_set: "none",
+    deck_set: "Duel",
+    URL: "https://netrunnerdb.com/en/decklist/688a22ee-f9c3-4a30-b3f8-6a3ae97a8c0b/sg-su21-duel-episode-3-steve-cambridge-vs-pe-",
+    notes: "This Steve Criminal deck focuses on installing breakers quickly, generating economy, and managing cards in hand as a form of health to survive net damage while running aggressively. Early priorities include setting up Earthrise Hotel and Career Fair for card draw, then installing Carmen, Corroder, and Abagnale in that order, using Mutual Favor and Inside Job to tutor breakers and gain early accesses. The deck balances fast and slow economy with Sure Gamble, Creative Commission, Dirty Laundry, Pennyshaver, Liberated Account, and Security Testing, while multi-access tools like Docklands Pass and Jailbreak pressure HQ and protected remotes, all while carefully managing hand size to avoid Snare! or other flatline threats.",
     cards: {
         "30002": 1,  // Wildcat Strike
         "30011": 2,  // Mutual Favor

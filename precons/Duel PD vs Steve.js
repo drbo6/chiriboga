@@ -3,7 +3,9 @@ registerPrecon({
     name: "Duel: PD vs Steve",
     identity: "31050",
     default: false,
-    deck_set: "none",
+    deck_set: "Duel",
+    URL: "https://netrunnerdb.com/en/decklist/988f6c04-55ab-4fa4-bb9c-5d32121d0833/sg-su21-duel-episode-3-personal-evolution-vs-steve-",
+    notes: "This Personal Evolution Jinteki deck focuses on scoring agendas efficiently while using the threat of net damage to slow down the Runner. Early game strategy emphasizes rushing one or two agendas behind cheap End-the-Run ICE, conserving credits to enable Snare! or Karunā, and using Seamless Launch to fast-advance 4/2 agendas. In the mid- and late-game, the deck frustrates the Runner with heavily iced assets like Marilyn Campaign, triggers damage with House of Knives and Hokusai Grid, and leverages Urtica Cipher and Nisei MK II to create taxing scoring windows, ultimately forcing the Runner into difficult choices while advancing toward victory.",
     cards: {
         "30039": 1,  // Brân 1.0
         "30040": 2,  // Seamless Launch

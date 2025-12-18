@@ -4,6 +4,8 @@ registerPrecon({
     identity: "31060",
     default: false,
     deck_set: "none",
+    URL: "https://netrunnerdb.com/en/decklist/c3b4a8d0-7f19-4a30-9867-56399d4fa72d/-sg-su21-fast-advance-hub",
+    notes: "TThis Near-Earth Hub Corp deck focuses on scoring agendas immediately after installation using SanSan City Grid and Biotic Labor, enabling rapid Install/Advance/Advance/Score plays on 3/1 or 3/2 agendas. Early game strategy emphasizes protecting key economy assets like Marilyn Campaign, PAD Campaign, and Regolith Mining License behind minimal End-the-Run ICE, while Daily Business Show helps control draws and locate needed agendas. ICE like Palisade, Ping, Enigma, Tollbooth, Pop-up Window, and Archer balance taxing runs with economy disruption, and License Acquisition provides synergy by rezzing SanSan or recycling economy assets to maintain tempo.",
     cards: {
         "30052": 1,  // Tomorrow's Headline
         "30053": 3,  // Spin Doctor

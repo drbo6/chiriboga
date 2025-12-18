@@ -109,7 +109,7 @@
                 <p>The Solo Mode extension is developed by <a href="https://github.com/drbo6" target="_blank" rel="noopener">DrBo6</a>. It adds a more refined interface and game modes. 
                 It is available on <a href="https://github.com/NEU-DrBo6/chiriboga" target="_blank" rel="noopener">Github</a> as well.</p>
                 <h3>Pre‑constructed Decks</h3>
-                <p>Girometics precons designed by <a href="https://netrunnerdb.com/en/decklists/find?faction=&sort=popularity&rotation_id=&author=Girometics&title=&is_legal=&mwl_code=&packs%5B%5D=su21&packs%5B%5D=sg" target="_blank">Girometics</a> and curated by <a href="https://github.com/drbo6" target="_blank" rel="noopener">DrBo6</a>.</p>
+                <p>Girometics SG+SU21 and NSG Core precons designed by <a href="https://netrunnerdb.com/en/decklists/find?faction=&sort=popularity&rotation_id=&author=Girometics&title=&is_legal=&mwl_code=&packs%5B%5D=su21&packs%5B%5D=sg" target="_blank">Girometics</a>. All other precons curated by <a href="https://github.com/drbo6" target="_blank" rel="noopener">DrBo6</a>. Click on them to see their creators on NetrunnerDB.com.</p>
                 <h3>Legal & Attribution</h3>
                 <p><em>Netrunner</em> and <em>Android</em> are trademarks of Fantasy Flight Publishing, Inc. and/or Wizards of the Coast LLC. Not affiliated with FFG, WotC, or NSG.</p>
                 <p>Chiriboga includes cards from <a href="https://nullsignal.games" target="_blank">Null Signal's</a> <em>System Gateway</em> and <em>System Update 2021</em>. 
@@ -327,7 +327,7 @@
           if (candidateDecks.length > 0) {
             var chosen = candidateDecks[Math.floor(Math.random() * candidateDecks.length)];
             var chosenIdentity = cardSet[chosen.identity];
-            var opponent = {identity: parseInt(chosen.identity), cards: [], name: chosen.name || 'Unknown Deck', faction: chosenIdentity.faction || 'Unknown'};
+            var opponent = {identity: parseInt(chosen.identity), cards: [], name: chosen.name || 'Unknown Deck', faction: chosenIdentity.faction || 'Unknown', URL: chosen.URL || ''};
             selectedOpponents.push(opponent);
             // Populate cards from precon
             for (var cc in chosen.cards) {
@@ -371,7 +371,7 @@
           
           var chosen = candidateDecks[deckIndex];
           var chosenIdentity = cardSet[chosen.identity];
-          var opponent = {identity: parseInt(chosen.identity), cards: [], name: chosen.name || 'Unknown Deck', faction: chosenIdentity.faction || 'Unknown'};
+          var opponent = {identity: parseInt(chosen.identity), cards: [], name: chosen.name || 'Unknown Deck', faction: chosenIdentity.faction || 'Unknown', URL: chosen.URL || ''};
           selectedOpponents.push(opponent);
           // Populate cards from precon
           for (var cc in chosen.cards) {
@@ -389,7 +389,8 @@
         subset: gauntletCardCounts,
         opponents: selectedOpponents,
         defeated: 0,
-        agendaScored: 0
+        agendaScored: 0,
+        gauntletLength: gauntletLength
       };
       
       // Encode gauntlet state

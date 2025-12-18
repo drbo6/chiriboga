@@ -4,6 +4,8 @@ registerPrecon({
     identity: "30059",
     default: false,
     deck_set: "none",
+    URL: "https://netrunnerdb.com/en/decklist/31135b71-454c-4f41-9563-eca5f8b1e1ca/-gateway-update-built-to-occasionally-rush",
+    notes: "This deck is designed to teach new players how to transition from introductory play into broader formats by focusing on two core Corp strategies: Rush and Fast Advance. Early on, it rushes agendas behind minimal End the Run ICE, using cheap remotes and ID and agenda value to score quickly before the Runner is fully set up. In the late game, it pivots to Fast Advance, using advanceable ICE as batteries for Trick of Light to score agendas directly from hand when a scoring remote is no longer safe.",
     cards: {
         "30053": 3,  // Spin Doctor
         "30056": 2,  // Predictive Planogram

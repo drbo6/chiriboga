@@ -3,7 +3,9 @@ registerPrecon({
     name: "Duel: BTL vs Kit",
     identity: "30059",
     default: false,
-    deck_set: "none",
+    deck_set: "Duel",
+    URL: "https://netrunnerdb.com/en/decklist/a29809f2-57e9-4ba8-9bac-a5d05b1ccf26/sg-su21-duel-episode-4-built-to-last-vs-kit-",
+    notes: "This Built to Last Haas-Bioroid deck is highly flexible, capable of winning by normal agenda scoring, advancing a heavily iced Clearinghouse, or flatlining the Runner with Punitive Counterstrike after Send a Message. It balances strong economy with powerful utility and damage cards like Project Atlas, Seamless Launch, Clearinghouse, and Punitive Counterstrike, while upgrades like Corporate Troubleshooter and Malapert Data Vault enhance scoring potential. The ICE suite including cheap and expensive Barriers, End-the-Run Code Gates, and selective Sentries protects remotes and pressures the Runner’s resources, making every server a strategic choice between risking a run or losing tempo.",    
     cards: {
         "30040": 2,  // Seamless Launch
         "30053": 3,  // Spin Doctor
