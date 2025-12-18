@@ -68,6 +68,7 @@
 		</script>
 		<?php
 		echo '<script src="utility.js?' . filemtime('utility.js') . '"></script>';
+		echo '<script src="config-gauntlet.js?' . filemtime('config-gauntlet.js') . '"></script>';
 		
 		$sets = ["systemgateway","systemupdate2021","midnightsun","elevation"];
 		if (isset($_GET['sets'])) {
@@ -180,49 +181,88 @@
 					$('#preconselect').empty().append('<option value="-1">Load Precon Deck</option>');
 				}
 
-				// DRBO6: Generate gauntlet card subset (40 different runner cards)
+				// DRBO6: Generate gauntlet card subset based on config
 				// This must happen AFTER cardData is loaded so filtering works correctly
 				function GenerateGauntletCardSet() {
 					gauntletCardIds = [];
 					gauntletCardCounts = {};
 					
-					// Fixed card subset for testing gauntlet mode
-					var fixedCards = [
-						// Core 6 cards with 3 copies each
-						30028, // Jailbreak
-						30029, // Overclock
-						30030, // Sure Gamble
-						30033, // Smartware Distributor
-						30034, // Verbal Plasticity
-						30032  // Mayfly
-					];
-					
-					// Add 3 copies of each core card
-					for (var i = 0; i < fixedCards.length; i++) {
-						gauntletCardIds.push(fixedCards[i]);
-						gauntletCardCounts[fixedCards[i]] = 3;
-					}
-					
-					// Add 3 consoles (can repeat)
-					var consoles = [
-						30003, // Carnivore
-						30014, // Pennyshaver
-						30023  // Pantograph
-					];
-					
-					for (var i = 0; i < 3; i++) {
-						var consoleId = consoles[i % consoles.length]; // Allows repeats
-						gauntletCardIds.push(consoleId);
-						if (typeof gauntletCardCounts[consoleId] === 'undefined') {
-							gauntletCardCounts[consoleId] = 0;
+					// Helper function to check if a card matches subtype requirements
+					function CardMatchesRequirement(cardId, matchSubtypes, excludeSubtypes) {
+						if (!cardSet[cardId] || !cardSet[cardId].subTypes) return false;
+						
+						var cardSubtypes = cardSet[cardId].subTypes || [];
+						
+						// Check exclude list first
+						if (excludeSubtypes && excludeSubtypes.length > 0) {
+							for (var i = 0; i < excludeSubtypes.length; i++) {
+								if (cardSubtypes.indexOf(excludeSubtypes[i]) !== -1) {
+									return false; // Card has excluded subtype
+								}
+							}
 						}
-						gauntletCardCounts[consoleId]++;
+						
+						// If no match requirements, card passes (not excluded)
+						if (!matchSubtypes || matchSubtypes.length === 0) return true;
+						
+						// Check if card has all required subtypes
+						for (var i = 0; i < matchSubtypes.length; i++) {
+							if (cardSubtypes.indexOf(matchSubtypes[i]) === -1) {
+								return false; // Card missing a required subtype
+							}
+						}
+						return true;
 					}
 					
-					console.log('Gauntlet Mode: Fixed subset of 9 unique cards (21 total):');
-					for (var i = 0; i < gauntletCardIds.length; i++) {
-						var cardId = gauntletCardIds[i];
-						console.log('  ' + (i+1) + '. ' + cardSet[cardId].title + ' (count: ' + gauntletCardCounts[cardId] + ')');
+					// Add fixed cards first
+					if (gauntletConfig && gauntletConfig.fixedCards) {
+						for (var i = 0; i < gauntletConfig.fixedCards.length; i++) {
+							var fixedCard = gauntletConfig.fixedCards[i];
+							var cardId = fixedCard.id;
+							var quantity = fixedCard.quantity || 1;
+							gauntletCardCounts[cardId] = (gauntletCardCounts[cardId] || 0) + quantity;
+							
+							for (var j = 0; j < quantity; j++) {
+								gauntletCardIds.push(cardId);
+							}
+						}
+					}
+					
+					// Add random cards based on config requirements
+					if (gauntletConfig && gauntletConfig.randomCardRequirements) {
+						for (var req = 0; req < gauntletConfig.randomCardRequirements.length; req++) {
+							var requirement = gauntletConfig.randomCardRequirements[req];
+							var quantity = requirement.quantity || 0;
+							var cardType = requirement.cardType;
+							var matchSubtypes = requirement.matchSubtypes || [];
+							var excludeSubtypes = requirement.excludeSubtypes || [];
+							
+							// Find all cards that match this requirement
+							var matchingCards = [];
+							for (var cardId in cardSet) {
+								if (!cardSet[cardId]) continue;
+								if (cardSet[cardId].player !== runner) continue;
+								if (cardSet[cardId].cardType !== cardType) continue;
+								if (cardSet[cardId].cardType === 'identity') continue; // Skip identities
+								if (CardMatchesRequirement(cardId, matchSubtypes, excludeSubtypes)) {
+									matchingCards.push(parseInt(cardId));
+								}
+							}
+							
+							// Randomly select quantity cards from matching pool (cards can be selected multiple times)
+							var selected = 0;
+							while (selected < quantity && matchingCards.length > 0) {
+								var randomIdx = Math.floor(Math.random() * matchingCards.length);
+								var selectedCard = matchingCards[randomIdx];
+								
+								gauntletCardIds.push(selectedCard);
+								// Add 1 copy (increment if card already selected, initialize if first time)
+								gauntletCardCounts[selectedCard] = (gauntletCardCounts[selectedCard] || 0) + 1;
+								
+								// Don't remove from matchingCards - allow same card to be selected again
+								selected++;
+							}
+						}
 					}
 				}
 
@@ -737,7 +777,7 @@
 			}
 
 			// DRBO6: Gauntlet mode - force runner as the player
-			var deckPlayer = runner;
+			deckPlayer = runner;
 			// Disable parameter-based player selection for gauntlet mode
 			if (false && URIParameter("r") !== "" && URIParameter("p") !== "c") {
 				deckPlayer = runner;
@@ -1489,7 +1529,7 @@
 			});
 			}
 		  // Call it initially (will be called again after setting runner mode)
-		  PopulateIdentityDropdown();
+		  // PopulateIdentityDropdown(); // DRBO6: Already called in $.getJSON callback
 			  // Hide Export JS Deck by default; reveal via secret gesture
 			  (function(){
 				var exportBtn = document.getElementById('exportjs');
