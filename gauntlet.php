@@ -587,15 +587,33 @@
 					
 					if (!cardA || !cardB) return 0;
 					
-				// Always sort alphabetically by card title
+				// Sort by influence (ascending) then alphabetically when influence filter is active
+				if (currentTypeFilter === 'influence') {
+					var influenceA = cardA.influence || 0;
+					var influenceB = cardB.influence || 0;
+					if (influenceA !== influenceB) {
+						return influenceA - influenceB;
+					}
+				}
+				
+				// Always sort alphabetically by card title as secondary sort
 				return (cardA.title || '').localeCompare(cardB.title || '');
 			});
 			
 			$container.append($cards);
 		}
-
+		
 		function ApplyTypeFilter() {
 			var $cards = $('#cardcontainer').children('.card-item');
+			
+			// Get the player identity's faction for influence filtering
+			var identityFaction = '';
+			if (currentTypeFilter === 'influence') {
+				var identity = cardSet[json.identity];
+				if (identity) {
+					identityFaction = (identity.faction || '').toLowerCase();
+				}
+			}
 			
 			$cards.each(function() {
 				var id = parseInt($(this).attr('data-id'));
@@ -606,13 +624,19 @@
 					return;
 				}
 				
-				var cardType = (card.cardType || '').toLowerCase();
 				var isVisible = false;
 				
 				if (currentTypeFilter === 'all') {
 					isVisible = true;
-				} else if (currentTypeFilter === cardType) {
-					isVisible = true;
+				} else if (currentTypeFilter === 'influence') {
+					// Show cards that are NOT in the identity's faction and NOT neutral
+					var cardFaction = (card.faction || '').toLowerCase();
+					var isNeutral = cardFaction === 'neutral' || cardFaction === 'neutral-runner' || cardFaction === 'neutral-corp';
+					var matchesFaction = cardFaction === identityFaction;
+					isVisible = !isNeutral && !matchesFaction;
+				} else {
+					var cardType = (card.cardType || '').toLowerCase();
+					isVisible = (currentTypeFilter === cardType);
 				}
 				
 				$(this).toggle(isVisible);
@@ -632,6 +656,9 @@
 			} else if (currentTypeFilter === 'program') {
 				currentTypeFilter = 'resource';
 				$('#sortdeck').html('FILTER:<br>RESOURCE');
+			} else if (currentTypeFilter === 'resource') {
+				currentTypeFilter = 'influence';
+				$('#sortdeck').html('FILTER:<br>INFLUENCE');
 			} else {
 				currentTypeFilter = 'all';
 				$('#sortdeck').html('FILTER:<br>ALL');
@@ -772,6 +799,19 @@
 				var infoHTML = '<div class="card-text-info">';
 				infoHTML += '<h2>' + cardInfo.title + '</h2>';
 				
+				// Faction - special handling for NBN, HB, and neutral
+				var factionDisplay = '';
+				if (cardInfo.faction_code === 'nbn') {
+					factionDisplay = 'NBN';
+				} else if (cardInfo.faction_code === 'hb') {
+					factionDisplay = 'HB';
+				} else if (cardInfo.faction_code === 'neutral-corp' || cardInfo.faction_code === 'neutral-runner') {
+					factionDisplay = 'Neutral';
+				} else {
+					factionDisplay = capitalizeFirst(cardInfo.faction_code || '');
+				}
+				infoHTML += '<p class="card-faction">' + factionDisplay + '</p>';
+
 				// Helper function to capitalize first letter only
 				function capitalizeFirst(str) {
 					if (!str) return '';
@@ -799,18 +839,10 @@
 				
 				infoHTML += '<p class="card-type">' + typeLine + '</p>';
 				
-				// Faction - special handling for NBN, HB, and neutral
-				var factionDisplay = '';
-				if (cardInfo.faction_code === 'nbn') {
-					factionDisplay = 'NBN';
-				} else if (cardInfo.faction_code === 'hb') {
-					factionDisplay = 'HB';
-				} else if (cardInfo.faction_code === 'neutral-corp' || cardInfo.faction_code === 'neutral-runner') {
-					factionDisplay = 'Neutral';
-				} else {
-					factionDisplay = capitalizeFirst(cardInfo.faction_code || '');
+				// Influence - only display if it exists and is greater than 0
+				if (cardInfo.faction_cost !== undefined && cardInfo.faction_cost !== null && cardInfo.faction_cost > 0) {
+					infoHTML += '<p class="card-influence">Influence: ' + cardInfo.faction_cost + '</p>';
 				}
-				infoHTML += '<p class="card-faction">' + factionDisplay + '</p>';
 				
 			// Card text - replace bracketed words with images (NSG SVG format)
 			if (cardInfo.text) {
