@@ -22,6 +22,7 @@
 			var corp = {};
 			var cardSet = []; //prepare to receive card definitions
 			var setIdentifiers = []; //set identifiers
+			var cardIdToSet = {}; //map card IDs to their set codes (populated by each set file)
 			//new globals for visual builder
 			var deckCounts = {}; //cardId -> count
 			var allCardIdsForPlayer = []; //cache of non-identity cards for current side
@@ -136,17 +137,22 @@
 
 			// Function to show the Buy Cards modal
 			function ShowBuyCardsModal() {
+				// Packs are already selected on page load
 				var buycardsHtml = '<div class="solo-menu" style="display: flex; flex-direction: column; align-items: center; width: 600px; max-height: 80vh; overflow-y: auto;">';
-				buycardsHtml += '<h2 style="color: var(--crt-red); text-shadow: 0 0 5px var(--crt-red), 0 0 15px var(--glow-red), 0 0 35px var(--glow-red-dark); margin: 20px 0;">CARD SHOP</h2>';
+				buycardsHtml += '<h2 style="color: var(--crt-red); text-shadow: 0 0 5px var(--crt-red), 0 0 15px var(--glow-red), 0 0 35px var(--glow-red-dark); margin: 20px 0;">AESOP\'S PAWN SHOP</h2>';
 				buycardsHtml += '<div style="color: var(--crt-red); font-family: monospace; padding: 20px; text-align: center; width: 100%;">';
 				buycardsHtml += '<p>Current Credits: <span id="shop-credits">' + gauntletCredits + '</span><img src="images/nsg/NSG_CREDIT.svg" class="card-icon" alt="credit" style="margin-left: 0px; margin-bottom: 2px; height: 16px; display: inline-block; vertical-align: sub; filter: invert(1) brightness(0.5) sepia(1) saturate(5) hue-rotate(80deg);"></p>';
 				buycardsHtml += '</div>';
 				buycardsHtml += '<div id="shop-content" style="width: 100%; padding: 20px; text-align: center;"></div>';
 				buycardsHtml += '<div style="display: flex; flex-direction: column; justify-content: center; gap: 10px; width: 100%; padding: 20px;">';
 				buycardsHtml += '<button class="button" onclick="SellExtraCards();" style="width: 100%;">SELL EXTRA CARDS</button>';
-				buycardsHtml += '<button class="button" onclick="alert(\'Not yet implemented\');" style="width: 100%;">BUY ANARCH PACK: 10<img src="images/nsg/NSG_CREDIT.svg" class="card-icon" alt="credit" style="margin-left: 2px; margin-bottom: 2px; height: 16px; display: inline-block; vertical-align: sub; filter: invert(1) brightness(0.5) sepia(1) saturate(5) hue-rotate(80deg);"></button>';
-				buycardsHtml += '<button class="button" onclick="alert(\'Not yet implemented\');" style="width: 100%;">BUY CRIMINAL PACK: 10<img src="images/nsg/NSG_CREDIT.svg" class="card-icon" alt="credit" style="margin-left: 2px; margin-bottom: 2px; height: 16px; display: inline-block; vertical-align: sub; filter: invert(1) brightness(0.5) sepia(1) saturate(5) hue-rotate(80deg);"></button>';
-				buycardsHtml += '<button class="button" onclick="alert(\'Not yet implemented\');" style="width: 100%;">BUY SHAPER PACK: 10<img src="images/nsg/NSG_CREDIT.svg" class="card-icon" alt="credit" style="margin-left: 2px; margin-bottom: 2px; height: 16px; display: inline-block; vertical-align: sub; filter: invert(1) brightness(0.5) sepia(1) saturate(5) hue-rotate(80deg);"></button>';
+				
+				// Add buttons for selected packs
+				for (var i = 0; i < selectedShopPacks.length; i++) {
+					var pack = selectedShopPacks[i];
+					buycardsHtml += '<button class="button" onclick="BuyCardPack(' + i + ');" style="width: 100%;">BUY ' + pack.name.toUpperCase() + ': ' + pack.cost + '<img src="images/nsg/NSG_CREDIT.svg" class="card-icon" alt="credit" style="margin-left: 2px; margin-bottom: 2px; height: 16px; display: inline-block; vertical-align: sub; filter: invert(1) brightness(0.5) sepia(1) saturate(5) hue-rotate(80deg);"></button>';
+				}
+				
 				buycardsHtml += '<button class="button" onclick="CloseBuyCardsModal();" style="width: 100%;">CLOSE</button>';
 				buycardsHtml += '</div>';
 				buycardsHtml += '</div>';
@@ -225,6 +231,207 @@
 				
 				// Add credits
 				gauntletCredits += totalCredits;
+				
+				// Update the credits display in the modal
+				document.getElementById('shop-credits').innerHTML = gauntletCredits;
+				
+				// Update the UI
+				UpdateCardCountsUI();
+				RenderAllCardsList();
+			}
+
+			// Global variables for shop
+			var gauntletSeed = '';
+			var gauntletAllowedSets = [];
+			var selectedShopPacks = [];
+
+			// Function to select unique random packs
+			function SelectRandomShopPacks() {
+				if (!gauntletConfig || !gauntletConfig.cardPacks) return [];
+				
+				// Seed the RNG using the gauntlet seed with an offset for pack selection
+				if (gauntletSeed && gauntletSeed.length > 0 && typeof Math.seedrandom === 'function') {
+					var packSelectionSeed = gauntletSeed + '_packs';
+					Math.seedrandom(packSelectionSeed);
+				}
+				
+				var packIndices = [];
+				var totalPacks = gauntletConfig.cardPacks.length;
+				
+				// Select 3 unique random pack indices
+				while (packIndices.length < 3 && packIndices.length < totalPacks) {
+					var randomIndex = Math.floor(Math.random() * totalPacks);
+					if (packIndices.indexOf(randomIndex) === -1) {
+						packIndices.push(randomIndex);
+					}
+				}
+				
+				// Return the actual pack objects
+				var packs = [];
+				for (var i = 0; i < packIndices.length; i++) {
+					packs.push(gauntletConfig.cardPacks[packIndices[i]]);
+				}
+				return packs;
+			}
+
+			// Function to generate cards from a pack based on factors
+			function GeneratePackCards(packConfig) {
+				if (!packConfig) return [];
+				
+				var cards = [];
+				// Note: Each pack purchase should generate different cards, so we don't seed this.
+				// If you want deterministic cards per purchase, seed here with an offset.
+				
+				// Generate cardQuantity cards
+				for (var cardIndex = 0; cardIndex < packConfig.cardQuantity; cardIndex++) {
+					// Randomly select type based on typeFactors
+					var typeKeys = Object.keys(packConfig.typeFactors);
+					var typeWeights = [];
+					var totalTypeWeight = 0;
+					
+					for (var i = 0; i < typeKeys.length; i++) {
+						typeWeights.push(packConfig.typeFactors[typeKeys[i]]);
+						totalTypeWeight += typeWeights[i];
+					}
+					
+					var typeRoll = Math.random() * totalTypeWeight;
+					var typeAccum = 0;
+					var selectedType = '';
+					for (var i = 0; i < typeKeys.length; i++) {
+						typeAccum += typeWeights[i];
+						if (typeRoll <= typeAccum) {
+							selectedType = typeKeys[i];
+							break;
+						}
+					}
+					
+					// Randomly select faction based on factionFactors
+					var factionKeys = Object.keys(packConfig.factionFactors);
+					var factionWeights = [];
+					var totalFactionWeight = 0;
+					
+					for (var i = 0; i < factionKeys.length; i++) {
+						factionWeights.push(packConfig.factionFactors[factionKeys[i]]);
+						totalFactionWeight += factionWeights[i];
+					}
+					
+					var factionRoll = Math.random() * totalFactionWeight;
+					var factionAccum = 0;
+					var selectedFaction = '';
+					for (var i = 0; i < factionKeys.length; i++) {
+						factionAccum += factionWeights[i];
+						if (factionRoll <= factionAccum) {
+							selectedFaction = factionKeys[i];
+							break;
+						}
+					}
+					
+					// Find cards matching type and faction
+					var eligibleCards = [];
+					for (var cardId = 0; cardId < cardSet.length; cardId++) {
+						var card = cardSet[cardId];
+						if (!card) continue;
+						
+						// Check allowed sets
+						if (gauntletAllowedSets && gauntletAllowedSets.length > 0) {
+							var cardSetCode = cardIdToSet[cardId] || '';
+							if (gauntletAllowedSets.indexOf(cardSetCode) === -1) continue;
+						}
+						
+						// Check type match
+						var cardType = (card.cardType || '').toLowerCase();
+						if (cardType !== selectedType) continue;
+						
+						// Check faction match
+						var cardFaction = (card.faction || '').toLowerCase();
+						var factionMatch = false;
+						if (selectedFaction === 'anarch' && (cardFaction === 'anarch' || cardFaction === 'anarch-runner')) factionMatch = true;
+						else if (selectedFaction === 'criminal' && (cardFaction === 'criminal' || cardFaction === 'criminal-runner')) factionMatch = true;
+						else if (selectedFaction === 'shaper' && (cardFaction === 'shaper' || cardFaction === 'shaper-runner')) factionMatch = true;
+						else if (selectedFaction === 'neutral' && (cardFaction === 'neutral' || cardFaction === 'neutral-runner')) factionMatch = true;
+						
+						if (factionMatch) {
+							eligibleCards.push(cardId);
+						}
+					}
+					
+					// Randomly select from eligible cards
+					if (eligibleCards.length > 0) {
+						var randomCard = eligibleCards[Math.floor(Math.random() * eligibleCards.length)];
+						cards.push(randomCard);
+					} else if (cardIndex === 0) {
+						// Only log once per pack to avoid spam
+						console.warn("No eligible cards found. selectedType:", selectedType, "selectedFaction:", selectedFaction, "gauntletAllowedSets:", gauntletAllowedSets);
+					}
+				}
+				
+				return cards;
+			}
+
+			// Function to buy a card pack
+			function BuyCardPack(packIndex) {
+				if (packIndex < 0 || packIndex >= selectedShopPacks.length) return;
+				
+				var pack = selectedShopPacks[packIndex];
+				if (!pack) return;
+				
+				// Check if player has enough credits
+				if (gauntletCredits < pack.cost) {
+					alert('Not enough credits! You have ' + gauntletCredits + ' but this pack costs ' + pack.cost + '.');
+					return;
+				}
+				
+				// Generate cards from pack
+				var cardsGenerated = GeneratePackCards(pack);
+				
+				// Add cards to deck
+				for (var i = 0; i < cardsGenerated.length; i++) {
+					var cardId = cardsGenerated[i];
+					if (gauntletCardCounts[cardId]) {
+						gauntletCardCounts[cardId]++;
+					} else {
+						gauntletCardCounts[cardId] = 1;
+					}
+				}
+				
+				// Deduct credits
+				gauntletCredits -= pack.cost;
+				
+				// Build card list for display, counting duplicates
+				var cardCounts = {};
+				for (var i = 0; i < cardsGenerated.length; i++) {
+					var cardId = cardsGenerated[i];
+					if (cardCounts[cardId]) {
+						cardCounts[cardId]++;
+					} else {
+						cardCounts[cardId] = 1;
+					}
+				}
+				
+				// Sort cards by title alphabetically
+				var cardIds = Object.keys(cardCounts).map(function(id) { return parseInt(id); });
+				cardIds.sort(function(a, b) {
+					var titleA = (cardSet[a].title || '').toLowerCase();
+					var titleB = (cardSet[b].title || '').toLowerCase();
+					return titleA.localeCompare(titleB);
+				});
+				
+				// Build display list
+				var contentDiv = document.getElementById('shop-content');
+				var listHtml = '<div style="color: var(--crt-red); font-family: monospace; text-align: left; display: inline-block; margin: 20px 0;">';
+				listHtml += '<p style="margin: 5px 0; color: var(--glow-red); font-weight: bold;">Added from ' + pack.name + ':</p>';
+				
+				for (var i = 0; i < cardIds.length; i++) {
+					var cardId = cardIds[i];
+					var count = cardCounts[cardId];
+					var cardTitle = cardSet[cardId].title || 'Unknown Card';
+					listHtml += '<p style="margin: 5px 0;">' + count + 'x ' + cardTitle + '</p>';
+				}
+				
+				listHtml += '<p style="margin-top: 20px; color: var(--glow-red);"><strong>Purchased for ' + pack.cost + ' <img src="images/nsg/NSG_CREDIT.svg" class="card-icon" alt="credit" style="margin-left: 0px; height: 16px; display: inline-block; vertical-align: sub; filter: invert(1) brightness(0.5) sepia(1) saturate(5) hue-rotate(80deg);"></strong></p>';
+				listHtml += '</div>';
+				
+				contentDiv.innerHTML = listHtml;
 				
 				// Update the credits display in the modal
 				document.getElementById('shop-credits').innerHTML = gauntletCredits;
@@ -477,6 +684,45 @@
 				console.log("Decoded g parameter:", gauntletState);
 				// Store credits from gauntlet state
 				gauntletCredits = gauntletState.credits || 0;
+				// Store seed from gauntlet state
+				gauntletSeed = gauntletState.seed || '';
+				// Store allowed sets from gauntlet state
+				gauntletAllowedSets = gauntletState.allowedSets || [];
+				
+				// Build cardIdToSet mapping from cardData.json pack_code
+				// Only map cards that exist in both cardData.json and the .js files
+				var packCodeToSet = {
+					'sg': 'sg',
+					'su21': 'su21',
+					'ms': 'ms',
+					'elev': 'elev'
+				};
+				
+				if (cardData && cardData.data) {
+					for (var i = 0; i < cardData.data.length; i++) {
+						var c = cardData.data[i];
+						var cardId = c.code;
+						// Only map if card exists in cardSet
+						if (cardSet[cardId]) {
+							var packCode = c.pack_code || '';
+							var setCode = packCodeToSet[packCode] || packCode;
+							cardIdToSet[cardId] = setCode;
+						}
+					}
+				}
+				
+				// Note: cardIdToSet mapping is now populated from cardData.json
+				console.log("cardIdToSet mapping ready:", Object.keys(cardIdToSet).length, "cards mapped");
+				console.log("gauntletAllowedSets:", gauntletAllowedSets);
+				
+				// Debug: Show breakdown of mapped cards by set
+				var setBreakdown = {};
+				for (var cardId in cardIdToSet) {
+					var setCode = cardIdToSet[cardId];
+					setBreakdown[setCode] = (setBreakdown[setCode] || 0) + 1;
+				}
+				console.log("Cards per set:", setBreakdown);
+				
 				// Log opponent names and URLs
 				if (gauntletState.opponents && gauntletState.opponents.length > 0) {
 					console.log("Gauntlet Opponents:");
@@ -487,6 +733,10 @@
 						console.log((i + 1) + ". " + opponentName + " (" + opponentFaction + ") - URL: " + opponentURL);
 					}
 				}
+				
+				// Select random packs on page load so they're deterministic
+				selectedShopPacks = SelectRandomShopPacks();
+				console.log("Shop packs selected:", selectedShopPacks.map(function(p) { return p.name; }));
 				
 				// Show welcome modal if this is the start of a gauntlet (defeated === 0)
 				if (gauntletState.defeated === 0) {

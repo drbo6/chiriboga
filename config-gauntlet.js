@@ -8,7 +8,132 @@ var gauntletConfig = {
 
   // ===== STARTING CREDITS =====
   // Number of credits the player starts with in gauntlet mode
-  startingCredits: 10,
+  startingCredits: 1000,
+
+  // ===== CARD PACK CONFIGURATIONS =====
+  // Define card pack types available for purchase with their distribution factors
+  // Each pack specifies card quantity and factors for faction and card type probabilities
+  cardPacks: [
+    {
+      name: 'Anarch Pack',
+      cost: 10,
+      cardQuantity: 5,
+      factionFactors: {
+        anarch: 2,
+        criminal: 1,
+        shaper: 1,
+        neutral: 1
+      },
+      typeFactors: {
+        event: 1,
+        resource: 1,
+        program: 1,
+        hardware: 1
+      }
+    },
+    {
+      name: 'Criminal Pack',
+      cost: 10,
+      cardQuantity: 5,
+      factionFactors: {
+        anarch: 1,
+        criminal: 2,
+        shaper: 1,
+        neutral: 1
+      },
+      typeFactors: {
+        event: 1,
+        resource: 1,
+        program: 1,
+        hardware: 1
+      }
+    },
+    {
+      name: 'Shaper Pack',
+      cost: 10,
+      cardQuantity: 5,
+      factionFactors: {
+        anarch: 1,
+        criminal: 1,
+        shaper: 2,
+        neutral: 1
+      },
+      typeFactors: {
+        event: 1,
+        resource: 1,
+        program: 1,
+        hardware: 1
+      }
+    },
+    {
+      name: 'Event Pack',
+      cost: 10,
+      cardQuantity: 5,
+      factionFactors: {
+        anarch: 1,
+        criminal: 1,
+        shaper: 1,
+        neutral: 1
+      },
+      typeFactors: {
+        event: 2,
+        resource: 1,
+        program: 1,
+        hardware: 1
+      }
+    },
+    {
+      name: 'Resource Pack',
+      cost: 10,
+      cardQuantity: 5,
+      factionFactors: {
+        anarch: 1,
+        criminal: 1,
+        shaper: 1,
+        neutral: 1
+      },
+      typeFactors: {
+        event: 1,
+        resource: 2,
+        program: 1,
+        hardware: 1
+      }
+    },
+    {
+      name: 'Program Pack',
+      cost: 10,
+      cardQuantity: 5,
+      factionFactors: {
+        anarch: 1,
+        criminal: 1,
+        shaper: 1,
+        neutral: 1
+      },
+      typeFactors: {
+        event: 1,
+        resource: 1,
+        program: 2,
+        hardware: 1
+      }
+    },
+    {
+      name: 'Hardware Pack',
+      cost: 10,
+      cardQuantity: 5,
+      factionFactors: {
+        anarch: 1,
+        criminal: 1,
+        shaper: 1,
+        neutral: 1
+      },
+      typeFactors: {
+        event: 1,
+        resource: 1,
+        program: 1,
+        hardware: 2
+      }
+    }
+  ],
 
   // ===== ALTERNATE FACTIONS =====
   // If true, each selected precon represents a different faction (one opponent per faction)

@@ -9,6 +9,7 @@
   <link rel="stylesheet" href="style.css" />
   <?php include 'cardrenderer/webfont.php'; ?>
   <script src="deck/lz-string.min.js"></script>
+  <script src="deck/seedrandom.min.js"></script>
   <script>
     var cardSet = []; // prepare to receive card definitions
     var setIdentifiers = []; // set identifiers
@@ -419,6 +420,7 @@
       }
       
       // Create gauntlet state object
+      var seed = Math.random().toString(36).substring(2, 15);
       var gauntletState = {
         subset: gauntletCardCounts,
         opponents: selectedOpponents,
@@ -426,7 +428,8 @@
         agendaScored: 0,
         credits: gauntletConfig && gauntletConfig.startingCredits ? gauntletConfig.startingCredits : 0,
         gauntletLength: gauntletLength,
-        allowedSets: gauntletConfig && gauntletConfig.allowedSets ? gauntletConfig.allowedSets : []
+        allowedSets: gauntletConfig && gauntletConfig.allowedSets ? gauntletConfig.allowedSets : [],
+        seed: seed
       };
       
       // Encode gauntlet state
