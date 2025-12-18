@@ -80,7 +80,7 @@
 		
 		?>
 		<script>
-			var json = {};
+			var json = { cards: [] };
 			var opponentdeckstr = "";
 			var opponentdeckimg = "";
 			var uid = 0;
@@ -181,7 +181,35 @@
 					$('#preconselect').empty().append('<option value="-1">Load Precon Deck</option>');
 				}
 
-				// DRBO6: Generate gauntlet card subset based on config
+				// DRBO6: Gauntlet Mode - Load or generate gauntlet state
+				function LoadOrGenerateGauntletState() {
+					var gauntletParam = URIParameter("g");
+					
+					if (gauntletParam && gauntletParam !== "") {
+						// Load gauntlet state from parameter
+						try {
+							var gauntletState = JSON.parse(LZString.decompressFromEncodedURIComponent(gauntletParam));
+							if (gauntletState && gauntletState.subset) {
+								gauntletCardCounts = gauntletState.subset;
+								// Rebuild gauntletCardIds from counts
+								gauntletCardIds = [];
+								for (var cardId in gauntletCardCounts) {
+									var qty = gauntletCardCounts[cardId];
+									for (var i = 0; i < qty; i++) {
+										gauntletCardIds.push(parseInt(cardId));
+									}
+								}
+							}
+						} catch(e) {
+							console.error("Failed to parse gauntlet state:", e);
+							GenerateGauntletCardSet();
+						}
+					} else {
+						// Generate the gauntlet card set now that cardData is loaded
+						GenerateGauntletCardSet();
+					}
+				}
+				
 				// This must happen AFTER cardData is loaded so filtering works correctly
 				function GenerateGauntletCardSet() {
 					gauntletCardIds = [];
@@ -266,33 +294,90 @@
 					}
 				}
 
-				// Generate the gauntlet card set now that cardData is loaded
-				GenerateGauntletCardSet();
+				// Load or generate the gauntlet card set now that cardData is loaded
+				LoadOrGenerateGauntletState();
 
 				// Rebuild identity dropdown now that deckPlayer is runner
 				PopulateIdentityDropdown();
 
-				// Pick random runner identity from playerIdentities (now correctly populated)
-				if (playerIdentities.length > 0) {
-					var randomIdentity = playerIdentities[RandomRange(0, playerIdentities.length - 1)];
-					json.identity = randomIdentity;
-					$("#identityselect").val(randomIdentity);
-
-					// Set identity image - verify cardSet has this identity first
-					if (cardSet[randomIdentity] && cardSet[randomIdentity].imageFile) {
-						var imageFile = ChangeImageFileToJPG(cardSet[randomIdentity].imageFile);
-						$("#identity").prop("src", "images/" + imageFile);
-					}
-				} else {
-					// Fallback: no runner identities found
-					$("#identity").prop("src", "images/glow_outline.png");
+			// Load runner deck from URL parameter (r) - the player's deck
+			var specifiedRunnerDeck = URIParameter("r");
+			if (specifiedRunnerDeck != "" && specifiedRunnerDeck != "random") {
+				json = JSON.parse(
+					LZString.decompressFromEncodedURIComponent(specifiedRunnerDeck)
+				);
+				if (typeof json.cards == 'undefined') json.cards = [];
+				// Update identity dropdown and image
+				$("#identityselect option[value=" + json.identity + "]").prop("selected", "selected");
+				$("#identity").prop("src", "images/" + ChangeImageFileToJPG(cardSet[json.identity].imageFile));
+			}
+			
+			// Load corp deck from URL parameter (c) - the opponent's deck
+			var specifiedCorpDeck = URIParameter("c");
+			if (specifiedCorpDeck != "" && specifiedCorpDeck != "random") {
+				var oppjson = JSON.parse(
+					LZString.decompressFromEncodedURIComponent(specifiedCorpDeck)
+				);
+				opponentdeckstr = "c=" + specifiedCorpDeck + "&";
+				opponentdeckimg = "images/" + ChangeImageFileToJPG(cardSet[oppjson.identity].imageFile);
+			}
+			
+			// Debug: Log decoded parameters
+			var decodedR = URIParameter("r");
+			var decodedC = URIParameter("c");
+			var decodedG = URIParameter("g");
+			
+			if (decodedR) {
+				console.log("Decoded r parameter:", JSON.parse(LZString.decompressFromEncodedURIComponent(decodedR)));
+			}
+			if (decodedC) {
+				console.log("Decoded c parameter:", JSON.parse(LZString.decompressFromEncodedURIComponent(decodedC)));
+			}
+			if (decodedG) {
+				console.log("Decoded g parameter:", JSON.parse(LZString.decompressFromEncodedURIComponent(decodedG)));
+			}
+			
+			// Display deck output and opponent info (matching decklauncher.php pattern)
+			RecalculateDeckCounts();
+			
+			// Display deck stats
+			var deckSizeTarget = cardSet[json.identity].deckSize;
+			var influenceLimit = cardSet[json.identity].influenceLimit;
+			var totalCards = json.cards.length;
+			var totalInfluence = 0;
+			for (var i = 0; i < json.cards.length; i++) {
+				var cardId = json.cards[i];
+				if (cardSet[cardId].faction !== cardSet[json.identity].faction) {
+					totalInfluence += cardSet[cardId].influence;
 				}
-
-				// Render cards after cardData is loaded
-				RenderAllCardsList();
-				UpdateCardCountsUI();
-
-				// After identities and UI are ready, populate precons for current identity
+			}
+			
+			var validityOutput = '<div class="deck-stats">';
+			// Cards stat
+			var cardsClass = 'deck-stat';
+			if (totalCards < deckSizeTarget) cardsClass += ' bad';
+			validityOutput += '<div class="'+cardsClass+'"><span class="stat-label">Cards:</span> '+totalCards+' / '+deckSizeTarget+'</div>';
+			// Influence stat
+			var infClass = 'deck-stat';
+			if (totalInfluence > influenceLimit) infClass += ' bad';
+			validityOutput += '<div class="'+infClass+'"><span class="stat-label">Influence:</span> '+totalInfluence+' / '+influenceLimit+'</div>';
+			validityOutput += '</div>';
+			$("#output").html(validityOutput);
+			
+			// Update opponent image (accordion restored)
+			if (opponentdeckimg != "") {
+				var oppHTML = '' +
+					'<div class="opponent-header"><span class="opponent-title">Opponent Deck</span><span class="opponent-arrow" aria-hidden="true">&#9660;</span></div>' +
+					'<div class="opponent-body"><img src="'+opponentdeckimg+'"/></div>';
+				$("#opponentid").html(oppHTML).addClass('collapsed').show();
+			} else {
+				$("#opponentid").hide();
+			}
+			
+			// Render cards from gauntlet subset
+			RenderAllCardsList();
+			UpdateCardCountsUI();
+			
 				try {
 					var currentIdSel = $('#identityselect').val();
 					var effectiveId = currentIdSel || (json && json.identity);
@@ -320,10 +405,17 @@
 					if (ct>0) lines.push(ct+" "+cardSet[id].title);
 				}
 				$("#deck").val(lines.join("\n"));
+				AutoResizeDeckTextarea();
 			}
 
 			function AddCardToDeck(id) {
+				if (typeof json.cards === 'undefined') json.cards = [];
 				if (typeof deckCounts[id] === 'undefined') deckCounts[id]=0;
+				// Check if adding another copy would exceed the gauntlet card limit
+				var maxCopies = gauntletCardCounts[id] || 0;
+				if (deckCounts[id] >= maxCopies) {
+					return; // Cannot add more copies than available in gauntlet
+				}
 				deckCounts[id]++;
 				json.cards.push(id);
 				deckModified = true;
@@ -332,6 +424,7 @@
 				if (showingOnlySelected) ApplyFilter();
 			}
 			function RemoveCardFromDeck(id) {
+				if (typeof json.cards === 'undefined') json.cards = [];
 				if (typeof deckCounts[id] === 'undefined' || deckCounts[id]===0) return;
 				deckCounts[id]--;
 				//remove one occurrence from json.cards
@@ -471,35 +564,41 @@
 			function RenderAllCardsList() {
 				$("#cardcontainer").empty();
 				allCardIdsForPlayer = [];
-			// DRBO6: In gauntlet mode, only show cards available in gauntlet
-			var cardsToShow = [];
-			if (gauntletCardIds.length > 0) {
-				// Gauntlet mode: use the subset
-				cardsToShow = gauntletCardIds;
-			} else {
-				// Fallback: collect all non-identity cards for the current player
-				for (var i=0; i<cardSet.length; i++) {
-					if (typeof cardSet[i] !== 'undefined' && cardSet[i].player == deckPlayer && cardSet[i].cardType !== 'identity') {
-						cardsToShow.push(i);
+				// DRBO6: In gauntlet mode, only show cards available in gauntlet
+				var cardsToShow = [];
+				if (gauntletCardIds.length > 0) {
+					// Gauntlet mode: use the subset - get unique card IDs
+					var uniqueCardIds = {};
+					for (var i = 0; i < gauntletCardIds.length; i++) {
+						uniqueCardIds[gauntletCardIds[i]] = true;
+					}
+					cardsToShow = Object.keys(uniqueCardIds).map(function(x) { return parseInt(x); });
+				} else {
+					// Fallback: collect all non-identity cards for the current player
+					for (var i=0; i<cardSet.length; i++) {
+						if (typeof cardSet[i] !== 'undefined' && cardSet[i].player == deckPlayer && cardSet[i].cardType !== 'identity') {
+							cardsToShow.push(i);
+						}
 					}
 				}
-			}
-			for (var i=0;i<cardsToShow.length;i++) {
-				var cardId = cardsToShow[i];
-				if (typeof cardSet[cardId] !== 'undefined' && cardSet[cardId].player == deckPlayer && cardSet[cardId].cardType !== 'identity') {
-					allCardIdsForPlayer.push(cardId);
-					var imgSrc = 'images/'+ChangeImageFileToJPG(cardSet[cardId].imageFile);
-					var gauntletQty = gauntletCardCounts[cardId] || 0;
-					var deckQty = deckCounts[cardId] || 0;
-					// Show both quantities: gauntlet on left, deck on right
-					var cardHtml = '<div class="card-item" data-id="'+cardId+'">'
-						+'<div class="count-badge gauntlet-available" data-id="'+cardId+'">'+gauntletQty+'</div>'
-						+'<div class="count-badge deck-count" data-id="'+cardId+'">'+deckQty+'</div>'
-						+'<img class="card-image" loading="lazy" src="'+imgSrc+'" alt="'+cardSet[cardId].title+'" />'
-						+'<div class="card-title">'+cardSet[cardId].title+'</div>'
-						+'<div class="card-controls">'
-							+'<button type="button" class="remove-btn" data-id="'+cardId+'">-</button>'
-							+'<button type="button" class="add-btn" data-id="'+cardId+'">+</button>'
+				for (var i=0;i<cardsToShow.length;i++) {
+					var cardId = cardsToShow[i];
+					if (typeof cardSet[cardId] !== 'undefined' && cardSet[cardId].player == deckPlayer && cardSet[cardId].cardType !== 'identity') {
+						allCardIdsForPlayer.push(cardId);
+						var imgSrc = 'images/'+ChangeImageFileToJPG(cardSet[cardId].imageFile);
+						var gauntletQty = gauntletCardCounts[cardId] || 0;
+						var deckQty = deckCounts[cardId] || 0;
+						// Show both quantities in format: gauntlet | deck
+						var cardHtml = '<div class="card-item" data-id="'+cardId+'">'
+							+'<div class="count-badge" data-id="'+cardId+'">'+gauntletQty+' | '+deckQty+'</div>'
+							+'<img class="card-image" loading="lazy" src="'+imgSrc+'" alt="'+cardSet[cardId].title+'" />'
+							+'<div class="card-title">'+cardSet[cardId].title+'</div>'
+							+'<div class="card-controls">'
+								+'<button type="button" class="remove-btn" data-id="'+cardId+'">-</button>'
+								+'<button type="button" class="add-btn" data-id="'+cardId+'">+</button>'
+							+'</div>'
+						+'</div>';
+						$("#cardcontainer").append(cardHtml);
 					}
 				}
 				AttachCardListEvents();
@@ -519,29 +618,27 @@
 			}
 
 			function UpdateCardCountsUI() {
-			// DRBO6: Handle dual quantities for gauntlet mode
-			$("#cardcontainer .count-badge.deck-count").each(function(){
-				var id = parseInt($(this).attr('data-id'));
-				var deckCt = deckCounts[id] || 0;
-				$(this).text(deckCt);
-				// Apply darkening to cards not in deck
-				$(this).closest('.card-item').toggleClass('not-in-deck', deckCt === 0);
-			});
-			// Update gauntlet quantity badges
-			$("#cardcontainer .count-badge.gauntlet-available").each(function(){
-				var id = parseInt($(this).attr('data-id'));
-				var gaCt = gauntletCardCounts[id] || 0;
-				$(this).text(gaCt);
-			});
-			// Keep filters in sync after counts change
-			if (showingOnlySelected) {
-				// Re-apply current pack filter first
-				ApplyFilter();
-				// Then hide any visible cards that have count 0
-				$('#cardcontainer .card-item').each(function(){
-					if ($(this).is(':visible')) {
-						var id = parseInt($(this).find('.deck-count').attr('data-id'));
-							if (ct === 0) $(this).hide();
+				// DRBO6: Handle dual quantities for gauntlet mode (deck/subset)
+				$("#cardcontainer .count-badge").each(function(){
+					var id = parseInt($(this).attr('data-id'));
+					var gaCt = gauntletCardCounts[id] || 0;
+					var deckCt = deckCounts[id] || 0;
+					$(this).text(deckCt + '/' + gaCt);
+					// In gauntlet mode, show badges when there are cards in the gauntlet subset
+					$(this).toggleClass('has-copies', gaCt > 0);
+					// Apply darkening to cards not in deck
+					$(this).closest('.card-item').toggleClass('not-in-deck', deckCt === 0);
+				});
+				// Keep filters in sync after counts change
+				if (showingOnlySelected) {
+					// Re-apply current pack filter first
+					ApplyFilter();
+					// Then hide any visible cards that have count 0 in deck
+					$('#cardcontainer .card-item').each(function(){
+						if ($(this).is(':visible')) {
+							var id = parseInt($(this).find('.count-badge').attr('data-id'));
+							var deckCt = deckCounts[id] || 0;
+							if (deckCt === 0) $(this).hide();
 						}
 					});
 				}
@@ -1108,7 +1205,21 @@
 			  UpdateCardCountsUI();
 			}
 
+			// Auto-resize deck textarea - globally accessible
+			function AutoResizeDeckTextarea() {
+				var textarea = $("#deck")[0];
+				if (textarea) {
+					textarea.style.height = "auto";
+					var newHeight = Math.min(textarea.scrollHeight, 500);
+					textarea.style.height = newHeight + "px";
+				}
+			}
+			
 			function Init() {
+			  $("#deck").on("input", AutoResizeDeckTextarea);
+			  // Set initial minimum height
+			  AutoResizeDeckTextarea();
+			  
 			  //set up autosuggest
 			  var autoMinLen = 1;
 			  $("#deck").on("keydown", function (event) {
@@ -1643,40 +1754,45 @@
 			  }
 			  UpdateCardCountsUI();
 			  //done checking, permit launch if valid
+			  var deckSizeTarget = cardSet[json.identity].deckSize;
+			  var influenceLimit = cardSet[json.identity].influenceLimit;
+			  var validityOutput = '<div class="deck-stats">';
+			  // Cards stat
+			  var cardsClass = 'deck-stat';
+			  if (totalCards < deckSizeTarget) cardsClass += ' bad';
+			  validityOutput += '<div class="'+cardsClass+'"><span class="stat-label">Cards:</span> '+totalCards+' / '+deckSizeTarget+'</div>';
+			  // Influence stat
+			  var infClass = 'deck-stat';
+			  if (totalInfluence > influenceLimit) infClass += ' bad';
+			  validityOutput += '<div class="'+infClass+'"><span class="stat-label">Influence:</span> '+totalInfluence+' / '+influenceLimit+'</div>';
+			  // Corp agenda points
+			  if (deckPlayer == corp) {
+				var agendaMin = 2 * Math.floor(Math.max(totalCards,deckSizeTarget) / 5) + 2;
+				var agendaMax = agendaMin + 1;
+				var agClass = 'deck-stat';
+				if (totalAgendaPoints < agendaMin || totalAgendaPoints > agendaMax) agClass += ' bad';
+				validityOutput += '<div class="'+agClass+'"><span class="stat-label">Agenda Pts:</span> '+totalAgendaPoints+' ('+agendaMin+'-'+agendaMax+' required)</div>';
+			  }
+			  validityOutput += '</div>';
 			  if (validDeck) {
-				var deckSizeTarget = cardSet[json.identity].deckSize;
-				var influenceLimit = cardSet[json.identity].influenceLimit;
-				var validityOutput = '<div class="deck-stats">';
-				// Cards stat
-				var cardsClass = 'deck-stat';
-				if (totalCards < deckSizeTarget) cardsClass += ' bad';
-				validityOutput += '<div class="'+cardsClass+'"><span class="stat-label">Cards:</span> '+totalCards+' / '+deckSizeTarget+'</div>';
-				// Influence stat
-				var infClass = 'deck-stat';
-				if (totalInfluence > influenceLimit) infClass += ' bad';
-				validityOutput += '<div class="'+infClass+'"><span class="stat-label">Influence:</span> '+totalInfluence+' / '+influenceLimit+'</div>';
-				// Corp agenda points
-				if (deckPlayer == corp) {
-				  var agendaMin = 2 * Math.floor(Math.max(totalCards,deckSizeTarget) / 5) + 2;
-				  var agendaMax = agendaMin + 1;
-				  var agClass = 'deck-stat';
-				  if (totalAgendaPoints < agendaMin || totalAgendaPoints > agendaMax) agClass += ' bad';
-				  validityOutput += '<div class="'+agClass+'"><span class="stat-label">Agenda Pts:</span> '+totalAgendaPoints+' ('+agendaMin+'-'+agendaMax+' required)</div>';
-				}
-				validityOutput += '</div>';
 				$("#output").html(validityOutput);
 				$("#launch").prop("disabled", false);
+			  } else {
+				$("#output").html(validityOutput + $("#output").html());
 			  }
 		  $("#launch").html("PLAY<br>DECK");
 		  UpdateLaunchStrings();
-		  //update opponent image (accordion restored)
+		  //update opponent image (accordion restored) - always visible
 		  if (opponentdeckimg != "") {
 			  var oppHTML = '' +
 				'<div class="opponent-header"><span class="opponent-title">Opponent Deck</span><span class="opponent-arrow" aria-hidden="true">&#9660;</span></div>' +
 				'<div class="opponent-body"><img src="'+opponentdeckimg+'"/></div>';
-			  $("#opponentid").html(oppHTML).addClass('collapsed').show();
+			  $("#opponentid").html(oppHTML).addClass('collapsed');
 		  } else {
-			  $("#opponentid").hide();
+			  var emptyOppHTML = '' +
+				'<div class="opponent-header"><span class="opponent-title">Opponent Deck</span><span class="opponent-arrow" aria-hidden="true">&#9660;</span></div>' +
+				'<div class="opponent-body"><img src="images/glow_outline.png"/></div>';
+			  $("#opponentid").html(emptyOppHTML).addClass('collapsed');
 		  }
 		}			//function for testing and debugging
 			function TestGeneration(seed=0) {

@@ -22,6 +22,7 @@
   <?php
   // Load card sets
   echo '<script src="utility.js?' . filemtime('utility.js') . '"></script>';
+  echo '<script src="config-gauntlet.js?' . filemtime('config-gauntlet.js') . '"></script>';
   $sets = ["systemgateway","systemupdate2021","midnightsun","elevation"];
   foreach ($sets as $set) {
     echo '<script src="sets/'.$set.'.js?' . filemtime('sets/'.$set.'.js') . '"></script>';
@@ -221,11 +222,134 @@
       }
     }
     
-    // Function to reroll decks
-    function rerollDecks() {
-      selectRandomDecks();
+    // Function to launch gauntlet mode
+    function LaunchGauntlet() {
+      // Generate gauntlet card subset
+      var gauntletCardIds = [];
+      var gauntletCardCounts = {};
+      
+      // Helper to check if card matches subtype requirements
+      function CardMatchesRequirement(cardId, matchSubtypes, excludeSubtypes) {
+        if (!cardSet[cardId] || !cardSet[cardId].subTypes) return false;
+        var cardSubtypes = cardSet[cardId].subTypes || [];
+        
+        if (excludeSubtypes && excludeSubtypes.length > 0) {
+          for (var i = 0; i < excludeSubtypes.length; i++) {
+            if (cardSubtypes.indexOf(excludeSubtypes[i]) !== -1) return false;
+          }
+        }
+        
+        if (!matchSubtypes || matchSubtypes.length === 0) return true;
+        
+        for (var i = 0; i < matchSubtypes.length; i++) {
+          if (cardSubtypes.indexOf(matchSubtypes[i]) === -1) return false;
+        }
+        return true;
+      }
+      
+      // Add fixed cards
+      if (gauntletConfig && gauntletConfig.fixedCards) {
+        for (var i = 0; i < gauntletConfig.fixedCards.length; i++) {
+          var fixedCard = gauntletConfig.fixedCards[i];
+          var cardId = fixedCard.id;
+          var quantity = fixedCard.quantity || 1;
+          gauntletCardCounts[cardId] = (gauntletCardCounts[cardId] || 0) + quantity;
+          for (var j = 0; j < quantity; j++) {
+            gauntletCardIds.push(cardId);
+          }
+        }
+      }
+      
+      // Add random cards
+      if (gauntletConfig && gauntletConfig.randomCardRequirements) {
+        for (var req = 0; req < gauntletConfig.randomCardRequirements.length; req++) {
+          var requirement = gauntletConfig.randomCardRequirements[req];
+          var quantity = requirement.quantity || 0;
+          var cardType = requirement.cardType;
+          var matchSubtypes = requirement.matchSubtypes || [];
+          var excludeSubtypes = requirement.excludeSubtypes || [];
+          
+          var matchingCards = [];
+          for (var cardId in cardSet) {
+            if (!cardSet[cardId]) continue;
+            if (cardSet[cardId].player !== runner) continue;
+            if (cardSet[cardId].cardType !== cardType) continue;
+            if (cardSet[cardId].cardType === 'identity') continue;
+            if (CardMatchesRequirement(cardId, matchSubtypes, excludeSubtypes)) {
+              matchingCards.push(parseInt(cardId));
+            }
+          }
+          
+          var selected = 0;
+          while (selected < quantity && matchingCards.length > 0) {
+            var randomIdx = Math.floor(Math.random() * matchingCards.length);
+            var selectedCard = matchingCards[randomIdx];
+            gauntletCardIds.push(selectedCard);
+            gauntletCardCounts[selectedCard] = (gauntletCardCounts[selectedCard] || 0) + 1;
+            selected++;
+          }
+        }
+      }
+      
+      // Select 4 random corp opponents (1 from each faction)
+      var corpFactions = ['Jinteki', 'HB', 'NBN', 'Weyland'];
+      var selectedOpponents = [];
+      
+      for (var f = 0; f < corpFactions.length; f++) {
+        var faction = corpFactions[f];
+        var candidateDecks = preconDecks.filter(function(d) {
+          if (!cardSet[d.identity]) return false;
+          var identity = cardSet[d.identity];
+          return identity.player === corp && identity.faction === faction;
+        });
+        
+        if (candidateDecks.length > 0) {
+          var chosen = candidateDecks[Math.floor(Math.random() * candidateDecks.length)];
+          selectedOpponents.push({identity: parseInt(chosen.identity), cards: []});
+          // Populate cards from precon
+          for (var cc in chosen.cards) {
+            if (!chosen.cards.hasOwnProperty(cc)) continue;
+            var qty = chosen.cards[cc];
+            for (var q = 0; q < qty; q++) {
+              selectedOpponents[selectedOpponents.length - 1].cards.push(parseInt(cc));
+            }
+          }
+        }
+      }
+      
+      // Create gauntlet state object
+      var gauntletState = {
+        subset: gauntletCardCounts,
+        opponents: selectedOpponents,
+        defeated: 0
+      };
+      
+      // Encode gauntlet state
+      var encodedG = LZString.compressToEncodedURIComponent(JSON.stringify(gauntletState));
+      
+      // Select random runner identity
+      var runnerIdentities = [];
+      for (var i = 0; i < cardSet.length; i++) {
+        if (cardSet[i] && cardSet[i].cardType === 'identity' && cardSet[i].player === runner) {
+          runnerIdentities.push(i);
+        }
+      }
+      
+      var randomRunner = runnerIdentities[Math.floor(Math.random() * runnerIdentities.length)];
+      
+      // Create empty runner deck with random identity
+      var runnerDeck = {identity: randomRunner, cards: []};
+      var encodedR = LZString.compressToEncodedURIComponent(JSON.stringify(runnerDeck));
+      
+      // Use first corp opponent as starting opponent
+      var corpOpponentDeck = selectedOpponents[0];
+      var encodedC = LZString.compressToEncodedURIComponent(JSON.stringify(corpOpponentDeck));
+      
+      // Navigate to gauntlet
+      window.location.href = 'gauntlet.php?sets=systemgateway-systemupdate2021-midnightsun-elevation&r=' + encodedR + '&c=' + encodedC + '&g=' + encodedG;
     }
     
+
     // Wait for all scripts to load before selecting decks
     window.addEventListener('load', function() {
       console.log('Total precon decks loaded:', preconDecks.length);
@@ -269,7 +393,7 @@
       
       // Handle gauntlet/tournament mode
       if (option === 'tournament') {
-        window.location.href = 'gauntlet.php?gauntlet=true';
+        LaunchGauntlet();
         return;
       }
       

@@ -236,7 +236,7 @@
 
 /* Opponent box styling to match green CRT theme */
 .rightpart #opponentid, #opponentid {
-	display: none; /* shown when opponentdeckimg is set */
+	display: block; /* always visible */
 	margin-top: 8px;
 	padding: 12px 14px;
 	border: 1px solid var(--border-green) !important; /* soften border to match buttons */
