@@ -140,11 +140,11 @@
 				var modal = document.getElementById('buy-cards-modal');
 				if (!modal) return; // Modal not open
 				
-				// Find all existing pack buttons and rebuild just the button section
-				var existingButtons = modal.querySelectorAll('button.button');
-				if (existingButtons.length < 2) return; // No modal buttons yet
+				// Find the buttons container
+				var buttonsDiv = document.getElementById('shop-buttons');
+				if (!buttonsDiv) return;
 				
-				// Rebuild pack button HTML (skip first button which is SELL EXTRA CARDS)
+				// Rebuild pack button HTML
 				var newButtonsHtml = '';
 				newButtonsHtml += '<button class="button" onclick="SellExtraCards();" style="width: 100%;">SELL EXTRA CARDS</button>';
 				
@@ -156,39 +156,18 @@
 				
 				newButtonsHtml += '<button class="button" onclick="CloseBuyCardsModal();" style="width: 100%;">CLOSE</button>';
 				
-				// Replace button HTML by finding the buttons container
-				// The structure is: modal > solo-menu > button elements at the end
-				var soloMenu = modal.querySelector('.solo-menu');
-				if (soloMenu) {
-					// Get all buttons in the menu
-					var buttons = soloMenu.querySelectorAll('.button');
-					// Remove existing buttons (keep shop-content div)
-					for (var i = buttons.length - 1; i >= 0; i--) {
-						buttons[i].parentNode.removeChild(buttons[i]);
-					}
-					// Create new buttons container
-					var buttonContainer = document.createElement('div');
-					buttonContainer.style.display = 'flex';
-					buttonContainer.style.flexDirection = 'column';
-					buttonContainer.style.justifyContent = 'center';
-					buttonContainer.style.gap = '10px';
-					buttonContainer.style.width = '100%';
-					buttonContainer.style.padding = '20px';
-					buttonContainer.innerHTML = newButtonsHtml;
-					soloMenu.appendChild(buttonContainer);
-				}
+				buttonsDiv.innerHTML = newButtonsHtml;
 			}
 
 			// Function to show the Buy Cards modal
 			function ShowBuyCardsModal() {
 				// Packs are already selected on page load
-				var buycardsHtml = '<div class="solo-menu" style="display: flex; flex-direction: column; align-items: center; width: 600px; max-height: 80vh; overflow-y: auto;">';
-				buycardsHtml += '<h2 style="color: var(--crt-red); text-shadow: 0 0 5px var(--crt-red), 0 0 15px var(--glow-red), 0 0 35px var(--glow-red-dark); margin: 20px 0;">AESOP\'S PAWN SHOP</h2>';
+				var buycardsHtml = '<div class="solo-menu" style="display: flex; flex-direction: column; align-items: center; width: 600px;">';
+				buycardsHtml += '<h1 class="logo-text" style="color: var(--crt-red); text-shadow: 0 0 5px var(--crt-red), 0 0 15px var(--glow-red), 0 0 35px var(--glow-red-dark); margin: 20px 0;">AESOP\'S PAWN SHOP</h1>';
 				buycardsHtml += '<div style="color: var(--crt-red); font-family: monospace; padding: 20px; text-align: center; width: 100%;">';
 				buycardsHtml += '<p>Current Credits: <span id="shop-credits">' + gauntletCredits + '</span><img src="images/nsg/NSG_CREDIT.svg" class="card-icon" alt="credit" style="margin-left: 0px; margin-bottom: 2px; height: 16px; display: inline-block; vertical-align: sub; filter: invert(1) brightness(0.5) sepia(1) saturate(5) hue-rotate(80deg);"></p>';
 				buycardsHtml += '</div>';
-				buycardsHtml += '<div id="shop-content" style="width: 100%; padding: 20px; text-align: center;"></div>';
-				buycardsHtml += '<div style="display: flex; flex-direction: column; justify-content: center; gap: 10px; width: 100%; padding: 20px;">';
+				buycardsHtml += '<div id="shop-buttons" style="display: flex; flex-direction: column; justify-content: center; gap: 10px; width: 100%; padding: 20px; min-height: 200px;">';
 				buycardsHtml += '<button class="button" onclick="SellExtraCards();" style="width: 100%;">SELL EXTRA CARDS</button>';
 				
 				// Add buttons for selected packs
@@ -223,6 +202,11 @@
 				}
 			}
 
+			// Function to go back to shop from purchase view
+			function BackToShop() {
+				RefreshShopPackButtons();
+			}
+
 			// Function to sell extra cards (cards with more than 3 copies)
 			function SellExtraCards() {
 				var cardsToRemove = []; // Array of {cardId, count}
@@ -241,8 +225,8 @@
 				}
 				
 				if (cardsToRemove.length === 0) {
-					var contentDiv = document.getElementById('shop-content');
-					contentDiv.innerHTML = '<p style="color: var(--crt-red);">No cards with more than 3 copies available to sell.</p>';
+					var buttonsDiv = document.getElementById('shop-buttons');
+					buttonsDiv.innerHTML = '<p style="color: var(--crt-red);">No cards with more than 3 copies available to sell.</p><button class="button" onclick="BackToShop();" style="width: 100%; margin-top: 20px;">BACK TO SHOP</button>';
 					return;
 				}
 				
@@ -254,8 +238,7 @@
 				});
 				
 				// Build display list
-				var contentDiv = document.getElementById('shop-content');
-				var listHtml = '<div style="color: var(--crt-red); font-family: monospace; text-align: left; display: inline-block; margin: 20px 0;">';
+				var listHtml = '<div style="color: var(--crt-red); font-family: monospace; text-align: center; display: inline-block; margin: 0;">';
 				
 				for (var i = 0; i < cardsToRemove.length; i++) {
 					var item = cardsToRemove[i];
@@ -263,10 +246,12 @@
 					listHtml += '<p style="margin: 5px 0;">' + item.excess + 'x ' + cardTitle + '</p>';
 				}
 				
-				listHtml += '<p style="margin-top: 20px; color: var(--glow-red);"><strong>Sold for ' + totalCredits + ' credits.</strong></p>';
+				listHtml += '<p style="margin-top: 20px; color: var(--glow-red);"><strong>Sold for ' + totalCredits + ' <img src="images/nsg/NSG_CREDIT.svg" class="card-icon" alt="credit" style="margin-left: 0px; height: 16px; display: inline-block; vertical-align: sub; filter: invert(1) brightness(0.5) sepia(1) saturate(5) hue-rotate(80deg);"></strong></p>';
 				listHtml += '</div>';
 				
-				contentDiv.innerHTML = listHtml;
+				// Find the buttons container and replace with sale info and BACK TO SHOP button
+				var buttonsDiv = document.getElementById('shop-buttons');
+				buttonsDiv.innerHTML = listHtml + '<button class="button" onclick="BackToShop();" style="width: 100%; margin-top: 20px;">BACK TO SHOP</button>';
 				
 				// Remove excess cards from gauntletCardCounts
 				for (var i = 0; i < cardsToRemove.length; i++) {
@@ -439,8 +424,7 @@
 				});
 				
 				// Build display list
-				var contentDiv = document.getElementById('shop-content');
-				var listHtml = '<div style="color: var(--crt-red); font-family: monospace; text-align: left; display: inline-block; margin: 20px 0;">';
+				var listHtml = '<div style="color: var(--crt-red); font-family: monospace; text-align: center; display: inline-block; margin: 0;">';
 				listHtml += '<p style="margin: 5px 0; color: var(--glow-red); font-weight: bold;">Added from ' + pack.name + ':</p>';
 				
 				for (var i = 0; i < cardIds.length; i++) {
@@ -453,7 +437,9 @@
 				listHtml += '<p style="margin-top: 20px; color: var(--glow-red);"><strong>Purchased for ' + pack.cost + ' <img src="images/nsg/NSG_CREDIT.svg" class="card-icon" alt="credit" style="margin-left: 0px; height: 16px; display: inline-block; vertical-align: sub; filter: invert(1) brightness(0.5) sepia(1) saturate(5) hue-rotate(80deg);"></strong></p>';
 				listHtml += '</div>';
 				
-				contentDiv.innerHTML = listHtml;
+				// Find the buttons container and replace with purchase info and BACK TO SHOP button
+				var buttonsDiv = document.getElementById('shop-buttons');
+				buttonsDiv.innerHTML = listHtml + '<button class="button" onclick="BackToShop();" style="width: 100%; margin-top: 20px;">BACK TO SHOP</button>';
 				
 				// Update the credits display in the modal
 				document.getElementById('shop-credits').innerHTML = gauntletCredits;
@@ -466,9 +452,6 @@
 				shopPurchaseCount++;
 				selectedShopPacks = SelectRandomShopPacks();
 				console.log("Shop packs re-randomized (purchase #" + shopPurchaseCount + "):", selectedShopPacks.map(function(p) { return p.name; }));
-				
-				// Refresh the modal buttons if it's still open
-				RefreshShopPackButtons();
 			}
 		</script>
 		<?php
