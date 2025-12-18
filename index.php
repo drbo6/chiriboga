@@ -388,7 +388,8 @@
       var gauntletState = {
         subset: gauntletCardCounts,
         opponents: selectedOpponents,
-        defeated: 0
+        defeated: 0,
+        agendaScored: 0
       };
       
       // Encode gauntlet state

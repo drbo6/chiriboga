@@ -1039,6 +1039,9 @@ function PlayerWin(player, msgstr) {
           // Increment defeated count
           gauntletState.defeated = (gauntletState.defeated || 0) + 1;
           
+          // Add corp's agenda points to total
+          gauntletState.agendaScored = (gauntletState.agendaScored || 0) + AgendaPoints(corp);
+          
           // Compress the updated gauntlet state
           var updatedGauntlet = LZString.compressToEncodedURIComponent(JSON.stringify(gauntletState));
           
