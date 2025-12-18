@@ -1023,37 +1023,38 @@ function PlayerWin(player, msgstr) {
     location.reload(); //restart game
   };
   
-  // DRBO6: Add Edit Deck option to winPhase
+  // Add Edit Deck option to winPhase
   winPhase.Enumerate["edit deck"] = function () {
     return [{}];
+  };
+  winPhase.text = {
+    "play again": "Return to deck builder with the same decks",
+    "edit deck": "Edit the decks in the deck builder"
   };
   winPhase.Resolve["edit deck"] = function () {
     // Build deck objects for both player decks
     var runnerDeckObj = { identity: runner.identityCard.setNumber, cards: [] };
     var corpDeckObj = { identity: corp.identityCard.setNumber, cards: [] };
     
-    // Collect runner cards (from stack, grip, installed, rig)
-    var allRunnerCards = runner.stack.concat(runner.grip, runner.installed);
-    for (var i = 0; i < runner.rig.length; i++) {
-      var row = runner.rig[i];
-      for (var j = 0; j < row.length; j++) {
-        allRunnerCards.push(row[j]);
-      }
-    }
+    // Collect runner cards (from stack, grip, and rig)
+    var allRunnerCards = runner.stack.concat(runner.grip);
+    allRunnerCards = allRunnerCards.concat(runner.rig.programs, runner.rig.hardware, runner.rig.resources);
+    
     for (var i = 0; i < allRunnerCards.length; i++) {
       if (allRunnerCards[i].cardType !== 'identity') {
         runnerDeckObj.cards.push(allRunnerCards[i].setNumber);
       }
     }
     
-    // Collect corp cards (from RnD, HQ, Archives, installed servers)
+    // Collect corp cards (from RnD, HQ, Archives, and installed servers)
     var allCorpCards = corp.RnD.cards.concat(corp.HQ.cards, corp.archives.cards);
     for (var i = 0; i < corp.remoteServers.length; i++) {
       var server = corp.remoteServers[i];
-      allCorpCards = allCorpCards.concat(server.root, server.ice);
+      allCorpCards = allCorpCards.concat(server.ice);
     }
-    // Add central server cards
+    // Add installed cards in central servers
     allCorpCards = allCorpCards.concat(corp.HQ.root, corp.HQ.ice, corp.RnD.root, corp.RnD.ice, corp.archives.root, corp.archives.ice);
+    
     for (var i = 0; i < allCorpCards.length; i++) {
       if (allCorpCards[i].cardType !== 'identity') {
         corpDeckObj.cards.push(allCorpCards[i].setNumber);
