@@ -6,7 +6,7 @@ var gauntletConfig = {
   // Specific card IDs with exact quantities
   // Each card object specifies: id (card ID) and quantity (how many copies)
   fixedCards: [
-    { id: 30028, quantity: 10 },  // Jailbreak
+    { id: 30028, quantity: 3 },  // Jailbreak
     { id: 30029, quantity: 3 },  // Overclock
     { id: 30030, quantity: 3 },  // Sure Gamble
     { id: 30033, quantity: 3 },  // Smartware Distributor
@@ -21,22 +21,22 @@ var gauntletConfig = {
   // Subtypes are case-sensitive and must match exactly as printed on cards
   randomCardRequirements: [
     // Hardware
-    { quantity: 3, cardType: 'hardware', matchSubtypes: ['Console'], excludeSubtypes: [] },
-    { quantity: 2, cardType: 'hardware', matchSubtypes: [], excludeSubtypes: ['Console'] },
+    { quantity: 2, cardType: 'hardware', matchSubtypes: ['Console'], excludeSubtypes: [] },
+    { quantity: 4, cardType: 'hardware', matchSubtypes: [], excludeSubtypes: ['Console'] },
     
     // Resources (any subtype)
-    { quantity: 3, cardType: 'resource', matchSubtypes: [], excludeSubtypes: [] },
+    { quantity: 15, cardType: 'resource', matchSubtypes: [], excludeSubtypes: [] },
     
     // Programs - Icebreakers
-    { quantity: 1, cardType: 'program', matchSubtypes: ['Icebreaker', 'Killer'], excludeSubtypes: [] },
-    { quantity: 1, cardType: 'program', matchSubtypes: ['Icebreaker', 'Fracter'], excludeSubtypes: [] },
-    { quantity: 1, cardType: 'program', matchSubtypes: ['Icebreaker', 'Decoder'], excludeSubtypes: [] },
+    { quantity: 3, cardType: 'program', matchSubtypes: ['Icebreaker', 'Killer'], excludeSubtypes: [] },
+    { quantity: 3, cardType: 'program', matchSubtypes: ['Icebreaker', 'Fracter'], excludeSubtypes: [] },
+    { quantity: 3, cardType: 'program', matchSubtypes: ['Icebreaker', 'Decoder'], excludeSubtypes: [] },
     { quantity: 1, cardType: 'program', matchSubtypes: ['Icebreaker', 'AI'], excludeSubtypes: [] },
     
     // Programs - Other
-    { quantity: 2, cardType: 'program', matchSubtypes: [], excludeSubtypes: ['Icebreaker'] },
+    { quantity: 10, cardType: 'program', matchSubtypes: [], excludeSubtypes: ['Icebreaker'] },
     
     // Events
-    { quantity: 5, cardType: 'event', matchSubtypes: [], excludeSubtypes: [] }
+    { quantity: 18, cardType: 'event', matchSubtypes: [], excludeSubtypes: [] }
   ]
 };

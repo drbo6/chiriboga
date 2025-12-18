@@ -361,6 +361,9 @@
 			var infClass = 'deck-stat';
 			if (totalInfluence > influenceLimit) infClass += ' bad';
 			validityOutput += '<div class="'+infClass+'"><span class="stat-label">Influence:</span> '+totalInfluence+' / '+influenceLimit+'</div>';
+			// Collection stat - count unique cards in gauntlet subset
+			var collectionSize = Object.keys(gauntletCardCounts).length;
+			validityOutput += '<div class="deck-stat"><span class="stat-label">Collection:</span> '+collectionSize+' unique cards</div>';
 			validityOutput += '</div>';
 			$("#output").html(validityOutput);
 			
@@ -424,7 +427,8 @@
 				deckModified = true;
 				UpdateDeckTextareaFromCounts();
 				UpdateCardCountsUI();
-				if (showingOnlySelected) ApplyFilter();
+				Parse();
+			if (showingOnlySelected) ApplyFilter();
 			}
 			function RemoveCardFromDeck(id) {
 				if (typeof json.cards === 'undefined') json.cards = [];
@@ -436,35 +440,35 @@
 				deckModified = true;
 				UpdateDeckTextareaFromCounts();
 				UpdateCardCountsUI();
-				if (showingOnlySelected) ApplyFilter();
+				Parse();
+			if (showingOnlySelected) ApplyFilter();
+		}
+
+		// Sort state and functions
+		var currentSort = 'id'; // 'id', 'name', 'type', 'faction'
+
+		function GetFactionOrder(cardId) {
+			var card = cardSet[cardId];
+			if (!card) return 999;
+			var faction = (card.faction || '').toLowerCase();
+			if (deckPlayer === 'corp') {
+				// Corp faction order: HB->Jinteki->NBN->Weyland->Neutral
+				if (faction === 'haas-bioroid' || faction === 'hb') return 0;
+				if (faction === 'jinteki') return 1;
+				if (faction === 'nbn') return 2;
+				if (faction === 'weyland-consortium' || faction === 'weyland') return 3;
+				if (faction === 'neutral' || faction === 'neutral-corp') return 4;
+			} else {
+				// Runner faction order: Anarch->Criminal->Shaper->Neutral
+				if (faction === 'anarch') return 0;
+				if (faction === 'criminal') return 1;
+				if (faction === 'shaper') return 2;
+				if (faction === 'neutral' || faction === 'neutral-runner') return 3;
 			}
+			return 999;
+		}
 
-			// Sort state and functions
-			var currentSort = 'id'; // 'id', 'name', 'type', 'faction'
-
-			function GetFactionOrder(cardId) {
-				var card = cardSet[cardId];
-				if (!card) return 999;
-				var faction = (card.faction || '').toLowerCase();
-				
-				if (deckPlayer === runner) {
-					// Runner faction order: Anarch->Criminal->Shaper->Neutral
-					if (faction === 'anarch') return 0;
-					if (faction === 'criminal') return 1;
-					if (faction === 'shaper') return 2;
-					if (faction === 'neutral' || faction === 'neutral-runner') return 3;
-				} else {
-					// Corp faction order: HB->Jinteki->NBN->Weyland->Neutral
-					if (faction === 'haas-bioroid' || faction === 'hb') return 0;
-					if (faction === 'jinteki') return 1;
-					if (faction === 'nbn') return 2;
-					if (faction === 'weyland-consortium' || faction === 'weyland') return 3;
-					if (faction === 'neutral' || faction === 'neutral-corp') return 4;
-				}
-				return 999;
-			}
-
-			function GetTypeOrder(cardId) {
+		function GetTypeOrder(cardId) {
 				var card = cardSet[cardId];
 				if (!card) return 999;
 				var cardType = (card.cardType || '').toLowerCase();
@@ -1758,6 +1762,9 @@
 				if (totalAgendaPoints < agendaMin || totalAgendaPoints > agendaMax) agClass += ' bad';
 				validityOutput += '<div class="'+agClass+'"><span class="stat-label">Agenda Pts:</span> '+totalAgendaPoints+' ('+agendaMin+'-'+agendaMax+' required)</div>';
 			  }
+			  // Collection stat - count unique cards in gauntlet subset
+			  var collectionSize = Object.keys(gauntletCardCounts).length;
+			  validityOutput += '<div class="deck-stat"><span class="stat-label">Collection:</span> '+collectionSize+' unique cards</div>';
 			  validityOutput += '</div>';
 			  if (validDeck) {
 				$("#output").html(validityOutput);
