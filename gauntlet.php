@@ -909,6 +909,7 @@
 			
 			// Render cards from gauntlet subset
 			RenderAllCardsList();
+			UpdateDeckTextareaFromCounts(); // Populate deck display from loaded deck
 			UpdateCardCountsUI();
 			UpdateLaunchStrings();
 			UpdatePlayDeckButtonState();
