@@ -1044,11 +1044,20 @@ function PlayerWin(player, msgstr) {
           
           // Get other parameters
           var runnerDeck = URIParameter("r");
-          var corpDeck = URIParameter("c");
           var sets = URIParameter("sets");
           
+          // Get the next opponent from the opponents array
+          var nextCorpDeck = URIParameter("c"); // Default to current if no next opponent
+          if (gauntletState.opponents && gauntletState.opponents.length > 0) {
+            // Get the next opponent in the cycle (defeated count determines which opponent)
+            var opponentIndex = gauntletState.defeated % gauntletState.opponents.length;
+            var nextOpponent = gauntletState.opponents[opponentIndex];
+            // Encode the next opponent deck
+            nextCorpDeck = LZString.compressToEncodedURIComponent(JSON.stringify(nextOpponent));
+          }
+          
           // Build the new URL
-          var newUrl = 'gauntlet.php?r=' + runnerDeck + '&c=' + corpDeck + '&g=' + updatedGauntlet;
+          var newUrl = 'gauntlet.php?r=' + runnerDeck + '&c=' + nextCorpDeck + '&g=' + updatedGauntlet;
           if (sets !== "") {
             newUrl += '&sets=' + sets;
           }
