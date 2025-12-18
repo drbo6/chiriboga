@@ -8,7 +8,88 @@ var gauntletConfig = {
 
   // ===== STARTING CREDITS =====
   // Number of credits the player starts with in gauntlet mode
-  startingCredits: 1000,
+  startingCredits: 10,
+
+  // ===== ALTERNATE FACTIONS =====
+  // If true, each selected precon represents a different faction (one opponent per faction)
+  // If false, randomly selects precons across all factions without faction requirement
+  alternateFactions: true,
+
+  // ===== ALLOWED IDENTITIES =====
+  // Specify which identities can be used in gauntlet mode
+  // Leave empty array to allow all identities
+  allowedIdentities: {
+    // Runner identities (excluding The Catalyst and Esa Afzali)
+    runnerIds: [
+      35001, // Phoenix
+      30001, // Rene
+      30010, // Zahya
+      30019, // Tao
+      31001, // Quetzal
+      31002, // Reina
+      31013, // Ken
+      31014, // Steve
+      31025, // Ayla
+      31026 // Rielle
+    ],
+    // Corp identities (currently unused)
+    corpIds: []
+  },
+
+  // ===== ALLOWED SETS =====
+  // Specify which card sets to include in the gauntlet card pool
+  // Leave empty array to allow all sets
+  // Valid set codes: 'sg' (System Gateway), 'su21' (System Update 2021), 'ms' (Midnight Sun), 'elev' (Elevation)
+  allowedSets: [
+    'sg',     // System Gateway
+    'su21',   // System Update 2021
+    //'ms',     // Midnight Sun
+    //'elev'    // Elevation
+  ],
+
+  // ===== LOCKED FIXED CARDS =====
+  // If true, cards listed in fixedCards are excluded from the initial random card pool
+  // If false, fixed cards can also appear in the initial random card pool
+  lockedFixedCards: true,
+
+  // ===== FIXED CARDS =====
+  // Specific card IDs with exact quantities
+  // Each card object specifies: id (card ID) and quantity (how many copies)
+  fixedCards: [
+    { id: 30028, quantity: 3 },  // Jailbreak
+    { id: 30029, quantity: 3 },  // Overclock
+    { id: 30030, quantity: 3 },  // Sure Gamble
+    { id: 30031, quantity: 3 },  // T400 Memory Diamond
+    { id: 30032, quantity: 3 },  // Mayfly    
+    { id: 30033, quantity: 3 },  // Smartware Distributor
+    { id: 30034, quantity: 3 },  // Verbal Plasticity
+  ],
+
+  // ===== RANDOM CARD POOL SPECIFICATIONS =====
+  // Define how many random cards to add from each category
+  // quantity = total number of random selections to make (cards can repeat)
+  // Each object specifies: quantity, cardType, and subtypes to match
+  // Subtypes are case-sensitive and must match exactly as printed on cards
+  randomCardRequirements: [
+    // Hardware
+    { quantity: 2, cardType: 'hardware', matchSubtypes: ['Console'], excludeSubtypes: [] },
+    { quantity: 4, cardType: 'hardware', matchSubtypes: [], excludeSubtypes: ['Console'] },
+    
+    // Resources (any subtype)
+    { quantity: 12, cardType: 'resource', matchSubtypes: [], excludeSubtypes: [] },
+    
+    // Programs - Icebreakers
+    { quantity: 2, cardType: 'program', matchSubtypes: ['Icebreaker', 'Killer'], excludeSubtypes: [] },
+    { quantity: 2, cardType: 'program', matchSubtypes: ['Icebreaker', 'Fracter'], excludeSubtypes: [] },
+    { quantity: 2, cardType: 'program', matchSubtypes: ['Icebreaker', 'Decoder'], excludeSubtypes: [] },
+    { quantity: 1, cardType: 'program', matchSubtypes: ['Icebreaker', 'AI'], excludeSubtypes: [] },
+    
+    // Programs - Other
+    { quantity: 8, cardType: 'program', matchSubtypes: [], excludeSubtypes: ['Icebreaker'] },
+    
+    // Events
+    { quantity: 15, cardType: 'event', matchSubtypes: [], excludeSubtypes: [] }
+  ],
 
   // ===== CARD PACK CONFIGURATIONS =====
   // Define card pack types available for purchase with their distribution factors
@@ -133,86 +214,6 @@ var gauntletConfig = {
         hardware: 4
       }
     }
-  ],
-
-  // ===== ALTERNATE FACTIONS =====
-  // If true, each selected precon represents a different faction (one opponent per faction)
-  // If false, randomly selects precons across all factions without faction requirement
-  alternateFactions: true,
-
-  // ===== ALLOWED IDENTITIES =====
-  // Specify which identities can be used in gauntlet mode
-  // Leave empty array to allow all identities
-  allowedIdentities: {
-    // Runner identities (excluding The Catalyst and Esa Afzali)
-    runnerIds: [
-      35001, // Phoenix
-      30001, // Rene
-      30010, // Zahya
-      30019, // Tao
-      31001, // Quetzal
-      31002, // Reina
-      31013, // Ken
-      31014, // Steve
-      31025, // Ayla
-      31026 // Rielle
-    ],
-    // Corp identities (currently unused)
-    corpIds: []
-  },
-
-  // ===== ALLOWED SETS =====
-  // Specify which card sets to include in the gauntlet card pool
-  // Leave empty array to allow all sets
-  // Valid set codes: 'sg' (System Gateway), 'su21' (System Update 2021), 'ms' (Midnight Sun), 'elev' (Elevation)
-  allowedSets: [
-    'sg',     // System Gateway
-    'su21',   // System Update 2021
-    //'ms',     // Midnight Sun
-    //'elev'    // Elevation
-  ],
-
-  // ===== LOCKED FIXED CARDS =====
-  // If true, cards listed in fixedCards are excluded from the initial random card pool
-  // If false, fixed cards can also appear in the initial random card pool
-  lockedFixedCards: true,
-
-  // ===== FIXED CARDS =====
-  // Specific card IDs with exact quantities
-  // Each card object specifies: id (card ID) and quantity (how many copies)
-  fixedCards: [
-    { id: 30028, quantity: 3 },  // Jailbreak
-    { id: 30029, quantity: 3 },  // Overclock
-    { id: 30030, quantity: 3 },  // Sure Gamble
-    { id: 30031, quantity: 3 },  // T400 Memory Diamond
-    { id: 30032, quantity: 3 },  // Mayfly    
-    { id: 30033, quantity: 3 },  // Smartware Distributor
-    { id: 30034, quantity: 3 },  // Verbal Plasticity
-  ],
-
-  // ===== RANDOM CARD POOL SPECIFICATIONS =====
-  // Define how many random cards to add from each category
-  // quantity = total number of random selections to make (cards can repeat)
-  // Each object specifies: quantity, cardType, and subtypes to match
-  // Subtypes are case-sensitive and must match exactly as printed on cards
-  randomCardRequirements: [
-    // Hardware
-    { quantity: 2, cardType: 'hardware', matchSubtypes: ['Console'], excludeSubtypes: [] },
-    { quantity: 4, cardType: 'hardware', matchSubtypes: [], excludeSubtypes: ['Console'] },
-    
-    // Resources (any subtype)
-    { quantity: 12, cardType: 'resource', matchSubtypes: [], excludeSubtypes: [] },
-    
-    // Programs - Icebreakers
-    { quantity: 2, cardType: 'program', matchSubtypes: ['Icebreaker', 'Killer'], excludeSubtypes: [] },
-    { quantity: 2, cardType: 'program', matchSubtypes: ['Icebreaker', 'Fracter'], excludeSubtypes: [] },
-    { quantity: 2, cardType: 'program', matchSubtypes: ['Icebreaker', 'Decoder'], excludeSubtypes: [] },
-    { quantity: 1, cardType: 'program', matchSubtypes: ['Icebreaker', 'AI'], excludeSubtypes: [] },
-    
-    // Programs - Other
-    { quantity: 8, cardType: 'program', matchSubtypes: [], excludeSubtypes: ['Icebreaker'] },
-    
-    // Events
-    { quantity: 15, cardType: 'event', matchSubtypes: [], excludeSubtypes: [] }
   ]
+
 };

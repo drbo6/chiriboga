@@ -136,6 +136,16 @@
 				}
 			}
 
+			// Function to check if there are cards to sell
+			function HasCardsToSell() {
+				for (var cardId in gauntletCardCounts) {
+					if (gauntletCardCounts[cardId] > 3) {
+						return true;
+					}
+				}
+				return false;
+			}
+
 			// Function to refresh the pack buttons in the modal
 			function RefreshShopPackButtons() {
 				var modal = document.getElementById('buy-cards-modal');
@@ -147,12 +157,20 @@
 				
 				// Rebuild pack button HTML
 				var newButtonsHtml = '';
-				newButtonsHtml += '<button class="button" onclick="SellExtraCards();" style="width: 100%;">SELL EXTRA CARDS</button>';
+				
+				// SELL EXTRA CARDS button - disable if no cards to sell
+				var hasCards = HasCardsToSell();
+				var sellDisabled = hasCards ? '' : ' disabled';
+				var sellStyle = hasCards ? 'width: 100%;' : 'width: 100%; opacity: 0.6; border-color: var(--border-red-dark); color: var(--crt-red-muted); cursor: default; background-color: rgba(12,24,12,0.7) !important; pointer-events: none;';
+				newButtonsHtml += '<button class="button" onclick="SellExtraCards();"' + sellDisabled + ' style="' + sellStyle + '">SELL EXTRA CARDS</button>';
 				
 				// Add buttons for selected packs
 				for (var i = 0; i < selectedShopPacks.length; i++) {
 					var pack = selectedShopPacks[i];
-					newButtonsHtml += '<button class="button" onclick="BuyCardPack(' + i + ');" style="width: 100%;">BUY ' + pack.name.toUpperCase() + ': ' + pack.cost + '<img src="images/nsg/NSG_CREDIT.svg" class="card-icon" alt="credit" style="margin-left: 2px; margin-bottom: 2px; height: 16px; display: inline-block; vertical-align: sub; filter: invert(1) brightness(0.5) sepia(1) saturate(5) hue-rotate(80deg);"></button>';
+					var canAfford = gauntletCredits >= pack.cost;
+					var packDisabled = canAfford ? '' : ' disabled';
+					var packStyle = canAfford ? 'width: 100%;' : 'width: 100%; opacity: 0.6; border-color: var(--border-red-dark); color: var(--crt-red-muted); cursor: default; background-color: rgba(12,24,12,0.7) !important; pointer-events: none;';
+					newButtonsHtml += '<button class="button" onclick="BuyCardPack(' + i + ');"' + packDisabled + ' style="' + packStyle + '">BUY ' + pack.name.toUpperCase() + ': ' + pack.cost + '<img src="images/nsg/NSG_CREDIT.svg" class="card-icon" alt="credit" style="margin-left: 2px; margin-bottom: 2px; height: 16px; display: inline-block; vertical-align: sub; filter: invert(1) brightness(0.5) sepia(1) saturate(5) hue-rotate(80deg);"></button>';
 				}
 				
 				newButtonsHtml += '<button class="button" onclick="CloseBuyCardsModal();" style="width: 100%;">CLOSE</button>';
@@ -169,12 +187,20 @@
 				buycardsHtml += '<p>Current Credits: <span id="shop-credits">' + gauntletCredits + '</span><img src="images/nsg/NSG_CREDIT.svg" class="card-icon" alt="credit" style="margin-left: 0px; margin-bottom: 2px; height: 16px; display: inline-block; vertical-align: sub; filter: invert(1) brightness(0.5) sepia(1) saturate(5) hue-rotate(80deg);"></p>';
 				buycardsHtml += '</div>';
 				buycardsHtml += '<div id="shop-buttons" style="display: flex; flex-direction: column; justify-content: center; gap: 10px; width: 100%; padding: 20px; min-height: 200px;">';
-				buycardsHtml += '<button class="button" onclick="SellExtraCards();" style="width: 100%;">SELL EXTRA CARDS</button>';
+				
+				// SELL EXTRA CARDS button - disable if no cards to sell
+				var hasCards = HasCardsToSell();
+				var sellDisabled = hasCards ? '' : ' disabled';
+				var sellStyle = hasCards ? 'width: 100%;' : 'width: 100%; opacity: 0.6; border-color: var(--border-red-dark); color: var(--crt-red-muted); cursor: default; background-color: rgba(12,24,12,0.7) !important; pointer-events: none;';
+				buycardsHtml += '<button class="button" onclick="SellExtraCards();"' + sellDisabled + ' style="' + sellStyle + '">SELL EXTRA CARDS</button>';
 				
 				// Add buttons for selected packs
 				for (var i = 0; i < selectedShopPacks.length; i++) {
 					var pack = selectedShopPacks[i];
-					buycardsHtml += '<button class="button" onclick="BuyCardPack(' + i + ');" style="width: 100%;">BUY ' + pack.name.toUpperCase() + ': ' + pack.cost + '<img src="images/nsg/NSG_CREDIT.svg" class="card-icon" alt="credit" style="margin-left: 2px; margin-bottom: 2px; height: 16px; display: inline-block; vertical-align: sub; filter: invert(1) brightness(0.5) sepia(1) saturate(5) hue-rotate(80deg);"></button>';
+					var canAfford = gauntletCredits >= pack.cost;
+					var packDisabled = canAfford ? '' : ' disabled';
+					var packStyle = canAfford ? 'width: 100%;' : 'width: 100%; opacity: 0.6; border-color: var(--border-red-dark); color: var(--crt-red-muted); cursor: default; background-color: rgba(12,24,12,0.7) !important; pointer-events: none;';
+					buycardsHtml += '<button class="button" onclick="BuyCardPack(' + i + ');"' + packDisabled + ' style="' + packStyle + '">BUY ' + pack.name.toUpperCase() + ': ' + pack.cost + '<img src="images/nsg/NSG_CREDIT.svg" class="card-icon" alt="credit" style="margin-left: 2px; margin-bottom: 2px; height: 16px; display: inline-block; vertical-align: sub; filter: invert(1) brightness(0.5) sepia(1) saturate(5) hue-rotate(80deg);"></button>';
 				}
 				
 				buycardsHtml += '<button class="button" onclick="CloseBuyCardsModal();" style="width: 100%;">CLOSE</button>';
@@ -687,6 +713,11 @@
 				// Update identity dropdown and image
 				$("#identityselect option[value=" + json.identity + "]").prop("selected", "selected");
 				$("#identity").prop("src", "images/" + ChangeImageFileToJPG(cardSet[json.identity].imageFile));
+			}
+			
+			// Disable identity dropdown if player has already defeated opponents in this gauntlet
+			if (typeof gauntletState !== 'undefined' && gauntletState !== null && gauntletState.defeated >= 1) {
+				$("#identityselect").prop("disabled", true);
 			}
 			
 			// Load corp deck from URL parameter (c) - the opponent's deck
