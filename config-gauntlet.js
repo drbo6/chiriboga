@@ -6,6 +6,10 @@ var gauntletConfig = {
   // Number of opponents in a gauntlet run (one from each faction)
   gauntletLength: 4,
 
+  // ===== STARTING CREDITS =====
+  // Number of credits the player starts with in gauntlet mode
+  startingCredits: 10,
+
   // ===== ALTERNATE FACTIONS =====
   // If true, each selected precon represents a different faction (one opponent per faction)
   // If false, randomly selects precons across all factions without faction requirement

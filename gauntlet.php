@@ -133,6 +133,106 @@
 					modal.style.display = 'none';
 				}
 			}
+
+			// Function to show the Buy Cards modal
+			function ShowBuyCardsModal() {
+				var buycardsHtml = '<div class="solo-menu" style="display: flex; flex-direction: column; align-items: center; width: 600px; max-height: 80vh; overflow-y: auto;">';
+				buycardsHtml += '<h2 style="color: var(--crt-red); text-shadow: 0 0 5px var(--crt-red), 0 0 15px var(--glow-red), 0 0 35px var(--glow-red-dark); margin: 20px 0;">CARD SHOP</h2>';
+				buycardsHtml += '<div style="color: var(--crt-red); font-family: monospace; padding: 20px; text-align: center; width: 100%;">';
+				buycardsHtml += '<p>Current Credits: <span id="shop-credits">' + gauntletCredits + '</span><img src="images/nsg/NSG_CREDIT.svg" class="card-icon" alt="credit" style="margin-left: 0px; margin-bottom: 2px; height: 16px; display: inline-block; vertical-align: sub; filter: invert(1) brightness(0.5) sepia(1) saturate(5) hue-rotate(80deg);"></p>';
+				buycardsHtml += '</div>';
+				buycardsHtml += '<div id="shop-content" style="width: 100%; padding: 20px; text-align: center;"></div>';
+				buycardsHtml += '<div style="display: flex; flex-direction: column; justify-content: center; gap: 10px; width: 100%; padding: 20px;">';
+				buycardsHtml += '<button class="button" onclick="SellExtraCards();" style="width: 100%;">SELL EXTRA CARDS</button>';
+				buycardsHtml += '<button class="button" onclick="alert(\'Not yet implemented\');" style="width: 100%;">BUY ANARCH PACK: 10<img src="images/nsg/NSG_CREDIT.svg" class="card-icon" alt="credit" style="margin-left: 2px; margin-bottom: 2px; height: 16px; display: inline-block; vertical-align: sub; filter: invert(1) brightness(0.5) sepia(1) saturate(5) hue-rotate(80deg);"></button>';
+				buycardsHtml += '<button class="button" onclick="alert(\'Not yet implemented\');" style="width: 100%;">BUY CRIMINAL PACK: 10<img src="images/nsg/NSG_CREDIT.svg" class="card-icon" alt="credit" style="margin-left: 2px; margin-bottom: 2px; height: 16px; display: inline-block; vertical-align: sub; filter: invert(1) brightness(0.5) sepia(1) saturate(5) hue-rotate(80deg);"></button>';
+				buycardsHtml += '<button class="button" onclick="alert(\'Not yet implemented\');" style="width: 100%;">BUY SHAPER PACK: 10<img src="images/nsg/NSG_CREDIT.svg" class="card-icon" alt="credit" style="margin-left: 2px; margin-bottom: 2px; height: 16px; display: inline-block; vertical-align: sub; filter: invert(1) brightness(0.5) sepia(1) saturate(5) hue-rotate(80deg);"></button>';
+				buycardsHtml += '<button class="button" onclick="CloseBuyCardsModal();" style="width: 100%;">CLOSE</button>';
+				buycardsHtml += '</div>';
+				buycardsHtml += '</div>';
+
+				var modal = document.getElementById('buy-cards-modal');
+				if (!modal) {
+					modal = document.createElement('div');
+					modal.id = 'buy-cards-modal';
+					modal.className = 'modal';
+					modal.style.display = 'flex';
+					modal.style.zIndex = '10000';
+					document.body.appendChild(modal);
+				}
+				
+				modal.innerHTML = buycardsHtml;
+				modal.style.display = 'flex';
+			}
+
+			// Function to close the Buy Cards modal
+			function CloseBuyCardsModal() {
+				var modal = document.getElementById('buy-cards-modal');
+				if (modal) {
+					modal.style.display = 'none';
+				}
+			}
+
+			// Function to sell extra cards (cards with more than 3 copies)
+			function SellExtraCards() {
+				var cardsToRemove = []; // Array of {cardId, count}
+				var totalCredits = 0;
+				
+				// Find all cards with more than 3 copies
+				for (var cardId in gauntletCardCounts) {
+					if (gauntletCardCounts[cardId] > 3) {
+						var excess = gauntletCardCounts[cardId] - 3;
+						cardsToRemove.push({
+							cardId: parseInt(cardId),
+							excess: excess
+						});
+						totalCredits += excess;
+					}
+				}
+				
+				if (cardsToRemove.length === 0) {
+					var contentDiv = document.getElementById('shop-content');
+					contentDiv.innerHTML = '<p style="color: var(--crt-red);">No cards with more than 3 copies available to sell.</p>';
+					return;
+				}
+				
+				// Sort by card title alphabetically
+				cardsToRemove.sort(function(a, b) {
+					var titleA = (cardSet[a.cardId].title || '').toLowerCase();
+					var titleB = (cardSet[b.cardId].title || '').toLowerCase();
+					return titleA.localeCompare(titleB);
+				});
+				
+				// Build display list
+				var contentDiv = document.getElementById('shop-content');
+				var listHtml = '<div style="color: var(--crt-red); font-family: monospace; text-align: left; display: inline-block; margin: 20px 0;">';
+				
+				for (var i = 0; i < cardsToRemove.length; i++) {
+					var item = cardsToRemove[i];
+					var cardTitle = cardSet[item.cardId].title || 'Unknown Card';
+					listHtml += '<p style="margin: 5px 0;">' + item.excess + 'x ' + cardTitle + '</p>';
+				}
+				
+				listHtml += '<p style="margin-top: 20px; color: var(--glow-red);"><strong>Sold for ' + totalCredits + ' credits.</strong></p>';
+				listHtml += '</div>';
+				
+				contentDiv.innerHTML = listHtml;
+				
+				// Remove excess cards from gauntletCardCounts
+				for (var i = 0; i < cardsToRemove.length; i++) {
+					gauntletCardCounts[cardsToRemove[i].cardId] = 3;
+				}
+				
+				// Add credits
+				gauntletCredits += totalCredits;
+				
+				// Update the credits display in the modal
+				document.getElementById('shop-credits').innerHTML = gauntletCredits;
+				
+				// Update the UI
+				UpdateCardCountsUI();
+				RenderAllCardsList();
+			}
 		</script>
 		<?php
 		// Load preconstructed decks
@@ -2075,7 +2175,7 @@
 				</div>
 			<div class="leftrow buttons">
 				<button id="launch" class="button button-red" onclick="if(!$(this).prop('disabled')) window.location.href=$(this).prop('href');">PLAY<br>DECK</button>
-				<button id="buycards" class="button">BUY<br>CARDS</button>
+				<button id="buycards" onclick="ShowBuyCardsModal();" class="button">BUY<br>CARDS</button>
 				<button id="addnoninfluence" onclick="AddNonInfluence();" class="button">ADD IN-<br>FACTION</button>
 				<button id="cleardeck" onclick="ClearDeck();" class="button">CLEAR<br>DECK</button>
 				<button id="sortbydeck" onclick="CycleSort();" class="button">SORT BY:<br>NAME</button>

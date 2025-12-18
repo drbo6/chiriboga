@@ -424,7 +424,7 @@
         opponents: selectedOpponents,
         defeated: 0,
         agendaScored: 0,
-        credits: 0,
+        credits: gauntletConfig && gauntletConfig.startingCredits ? gauntletConfig.startingCredits : 0,
         gauntletLength: gauntletLength,
         allowedSets: gauntletConfig && gauntletConfig.allowedSets ? gauntletConfig.allowedSets : []
       };
