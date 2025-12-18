@@ -170,7 +170,8 @@
 					var canAfford = gauntletCredits >= pack.cost;
 					var packDisabled = canAfford ? '' : ' disabled';
 					var packStyle = canAfford ? 'width: 100%;' : 'width: 100%; opacity: 0.6; border-color: var(--border-red-dark); color: var(--crt-red-muted); cursor: default; background-color: rgba(12,24,12,0.7) !important; pointer-events: none;';
-					newButtonsHtml += '<button class="button" onclick="BuyCardPack(' + i + ');"' + packDisabled + ' style="' + packStyle + '">BUY ' + pack.name.toUpperCase() + ': ' + pack.cost + '<img src="images/nsg/NSG_CREDIT.svg" class="card-icon" alt="credit" style="margin-left: 2px; margin-bottom: 2px; height: 16px; display: inline-block; vertical-align: sub; filter: invert(1) brightness(0.5) sepia(1) saturate(5) hue-rotate(80deg);"></button>';
+					var iconFilter = canAfford ? 'invert(1) brightness(0.5) sepia(1) saturate(5) hue-rotate(80deg)' : 'brightness(0) saturate(100%) invert(0.6) sepia(80%) hue-rotate(8deg) saturate(0.7)';
+					newButtonsHtml += '<button class="button" onclick="BuyCardPack(' + i + ');"' + packDisabled + ' style="' + packStyle + '">BUY ' + pack.name.toUpperCase() + ': ' + pack.cost + '<img src="images/nsg/NSG_CREDIT.svg" class="card-icon" alt="credit" style="margin-left: 2px; margin-bottom: 2px; height: 16px; display: inline-block; vertical-align: sub; filter: ' + iconFilter + ';"></button>';
 				}
 				
 				newButtonsHtml += '<button class="button" onclick="CloseBuyCardsModal();" style="width: 100%;">CLOSE</button>';
@@ -200,7 +201,8 @@
 					var canAfford = gauntletCredits >= pack.cost;
 					var packDisabled = canAfford ? '' : ' disabled';
 					var packStyle = canAfford ? 'width: 100%;' : 'width: 100%; opacity: 0.6; border-color: var(--border-red-dark); color: var(--crt-red-muted); cursor: default; background-color: rgba(12,24,12,0.7) !important; pointer-events: none;';
-					buycardsHtml += '<button class="button" onclick="BuyCardPack(' + i + ');"' + packDisabled + ' style="' + packStyle + '">BUY ' + pack.name.toUpperCase() + ': ' + pack.cost + '<img src="images/nsg/NSG_CREDIT.svg" class="card-icon" alt="credit" style="margin-left: 2px; margin-bottom: 2px; height: 16px; display: inline-block; vertical-align: sub; filter: invert(1) brightness(0.5) sepia(1) saturate(5) hue-rotate(80deg);"></button>';
+					var iconFilter = canAfford ? 'invert(1) brightness(0.5) sepia(1) saturate(5) hue-rotate(80deg)' : 'brightness(0) saturate(100%) invert(0.6) sepia(80%) hue-rotate(8deg) saturate(0.7)';
+					buycardsHtml += '<button class="button" onclick="BuyCardPack(' + i + ');"' + packDisabled + ' style="' + packStyle + '">BUY ' + pack.name.toUpperCase() + ': ' + pack.cost + '<img src="images/nsg/NSG_CREDIT.svg" class="card-icon" alt="credit" style="margin-left: 2px; margin-bottom: 2px; height: 16px; display: inline-block; vertical-align: sub; filter: ' + iconFilter + ';"></button>';
 				}
 				
 				buycardsHtml += '<button class="button" onclick="CloseBuyCardsModal();" style="width: 100%;">CLOSE</button>';
@@ -1621,10 +1623,25 @@
 			  var string = JSON.stringify(deckForUri);
 			  var compressed = LZString.compressToEncodedURIComponent(string);
 			  var gauntletParam = URIParameter("g");
+			  var updatedGauntletParam = gauntletParam;
+			  
+			  // Update gauntletState with current shopPurchaseCount if gauntlet mode is active
+			  if (gauntletParam !== "") {
+				try {
+				  var gauntletState = JSON.parse(LZString.decompressFromEncodedURIComponent(gauntletParam));
+				  gauntletState.shopPurchaseCount = shopPurchaseCount;
+				  updatedGauntletParam = LZString.compressToEncodedURIComponent(JSON.stringify(gauntletState));
+				} catch (e) {
+				  console.error("Failed to update gauntlet state with shopPurchaseCount:", e);
+				  // Fall back to original parameter
+				  updatedGauntletParam = gauntletParam;
+				}
+			  }
+			  
 			  var launchAddress = "engine.php?p=" + dC + "&" + setStr + opponentdeckstr + dC + "=" + compressed;
 			  // Add gauntlet parameter if present
-			  if (gauntletParam !== "") {
-				launchAddress += "&g=" + gauntletParam;
+			  if (updatedGauntletParam !== "") {
+				launchAddress += "&g=" + updatedGauntletParam;
 			  }
 			  // Build address for switching sides. If we already have an opponent deck, make it the active deck; otherwise use random
 			  var existingOpponentCompressed = "";
@@ -1647,8 +1664,8 @@
 			  $("#launch").prop("href", launchAddress);
 			  $("#opponent").prop("href", opponentAddress);
 			  var historyUrl = "gauntlet.php?" + setStr + opponentdeckstr + dC + "=" + compressed;
-			  if (gauntletParam !== "") {
-				historyUrl += "&g=" + gauntletParam;
+			  if (updatedGauntletParam !== "") {
+				historyUrl += "&g=" + updatedGauntletParam;
 			  }
 			  history.replaceState(
 				null,
