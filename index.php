@@ -247,6 +247,38 @@
         return true;
       }
       
+      // Helper to check if card is from an allowed set
+      function CardFromAllowedSet(cardId) {
+        if (!gauntletConfig || !gauntletConfig.allowedSets) return true;
+        if (gauntletConfig.allowedSets.length === 0) return true;
+        
+        var allowedSets = gauntletConfig.allowedSets;
+        var cardIdStr = String(cardId);
+        
+        // Map card ID ranges to set codes
+        var cardSetMap = {
+          '30': 'sg',      // System Gateway (30000-30999)
+          '31': 'su21',    // System Update 2021 (31000-31999)
+          '33': 'ms',      // Midnight Sun (33000-33999)
+          '35': 'elev'     // Elevation (35000-35999)
+        };
+        
+        // Get the set code for this card
+        var cardSetPrefix = cardIdStr.substring(0, 2);
+        var cardSetCode = cardSetMap[cardSetPrefix];
+        
+        if (!cardSetCode) return false;
+        return allowedSets.indexOf(cardSetCode) !== -1;
+      }
+      
+      // Build exclusion list for locked fixed cards
+      var excludedCardIds = {};
+      if (gauntletConfig && gauntletConfig.lockedFixedCards && gauntletConfig.fixedCards) {
+        for (var i = 0; i < gauntletConfig.fixedCards.length; i++) {
+          excludedCardIds[gauntletConfig.fixedCards[i].id] = true;
+        }
+      }
+      
       // Add fixed cards
       if (gauntletConfig && gauntletConfig.fixedCards) {
         for (var i = 0; i < gauntletConfig.fixedCards.length; i++) {
@@ -275,6 +307,8 @@
             if (cardSet[cardId].player !== runner) continue;
             if (cardSet[cardId].cardType !== cardType) continue;
             if (cardSet[cardId].cardType === 'identity') continue;
+            if (!CardFromAllowedSet(cardId)) continue;
+            if (excludedCardIds[cardId]) continue;  // Skip excluded fixed cards
             if (CardMatchesRequirement(cardId, matchSubtypes, excludeSubtypes)) {
               matchingCards.push(parseInt(cardId));
             }
@@ -390,7 +424,8 @@
         opponents: selectedOpponents,
         defeated: 0,
         agendaScored: 0,
-        gauntletLength: gauntletLength
+        gauntletLength: gauntletLength,
+        allowedSets: gauntletConfig && gauntletConfig.allowedSets ? gauntletConfig.allowedSets : []
       };
       
       // Encode gauntlet state

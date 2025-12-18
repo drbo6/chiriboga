@@ -103,11 +103,12 @@
 				welcomeHtml += '</div>';
 				welcomeHtml += '<div style="color: var(--crt-red); font-family: monospace; padding: 20px; text-align: center; width: 100%; max-width: 500px;">';
 				welcomeHtml += '<p>In this mode, you will face ' + gauntletLength + ' randomly selected decks.</p>';
-				welcomeHtml += '<p style="margin-top: 20px;">Create a deck from a randomized limited card pool and beat them all consecutively to defeat the Gauntlet.</p>';
-				welcomeHtml += '<p style="margin-top: 20px;">Every agenda point that you steal gets you new cards, but every agenda point that the corp scores costs you some of your cards.</p>';				
+				welcomeHtml += '<p style="margin-top: 20px;">Build a deck from a randomized limited card pool and beat them consecutively to defeat the Gauntlet.</p>';
+				welcomeHtml += '<p style="margin-top: 20px;">Every agenda point that you steal gets you more cards, but every agenda point that the corp scores costs you some of your cards.</p>';
+				welcomeHtml += '<p style="margin-top: 20px;">After your first game, you can no longer change your identity.</p>';								
 				welcomeHtml += '<p style="margin-top: 20px;">Good luck!</p>';
 				welcomeHtml += '</div>';
-				welcomeHtml += '<div style="display: flex; justify-content: center; margin-top: 20px; width: 100%;"><button class="button" onclick="CloseGauntletWelcomeModal();">CONTINUE</button></div>';
+				welcomeHtml += '<div style="display: flex; justify-content: center; margin-top: 0px; width: 100%;"><button class="button" onclick="CloseGauntletWelcomeModal();">CONTINUE</button></div>';
 				welcomeHtml += '</div>';
 
 				var modal = document.getElementById('gauntlet-welcome-modal');
@@ -817,6 +818,8 @@
 					var iconName = word.toUpperCase();
 					// Special case: [trash] maps to TRASH_ABILITY
 					if (iconName === 'TRASH') iconName = 'TRASH_ABILITY';
+					// Replace all hyphens with underscores in icon name
+					iconName = iconName.replace(/-/g, '_');
 					return '<img src="images/nsg/NSG_' + iconName + '.svg" class="card-icon" alt="' + word + '">';
 				});
 				// Replace newlines with <br> tags (handle both literal \n and actual newlines)

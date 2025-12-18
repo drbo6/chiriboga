@@ -32,6 +32,22 @@ var gauntletConfig = {
     corpIds: []
   },
 
+  // ===== ALLOWED SETS =====
+  // Specify which card sets to include in the gauntlet card pool
+  // Leave empty array to allow all sets
+  // Valid set codes: 'sg' (System Gateway), 'su21' (System Update 2021), 'ms' (Midnight Sun), 'elev' (Elevation)
+  allowedSets: [
+    'sg',     // System Gateway
+    'su21',   // System Update 2021
+    //'ms',     // Midnight Sun
+    //'elev'    // Elevation
+  ],
+
+  // ===== LOCKED FIXED CARDS =====
+  // If true, cards listed in fixedCards are excluded from the initial random card pool
+  // If false, fixed cards can also appear in the initial random card pool
+  lockedFixedCards: true,
+
   // ===== FIXED CARDS =====
   // Specific card IDs with exact quantities
   // Each card object specifies: id (card ID) and quantity (how many copies)
@@ -39,9 +55,10 @@ var gauntletConfig = {
     { id: 30028, quantity: 3 },  // Jailbreak
     { id: 30029, quantity: 3 },  // Overclock
     { id: 30030, quantity: 3 },  // Sure Gamble
+    { id: 30031, quantity: 3 },  // T400 Memory Diamond
+    { id: 30032, quantity: 3 },  // Mayfly    
     { id: 30033, quantity: 3 },  // Smartware Distributor
     { id: 30034, quantity: 3 },  // Verbal Plasticity
-    { id: 30032, quantity: 3 }   // Mayfly
   ],
 
   // ===== RANDOM CARD POOL SPECIFICATIONS =====
