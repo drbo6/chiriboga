@@ -1142,14 +1142,14 @@
 				currentSort = 'influence';
 				$('#sortbydeck').html('SORT BY:<br>INFLUENCE');
 			} else if (currentSort === 'influence') {
-				currentSort = 'type';
-				$('#sortbydeck').html('SORT BY:<br>TYPE');
-			} else if (currentSort === 'type') {
+				currentSort = 'quantity';
+				$('#sortbydeck').html('SORT BY:<br>QUANTITY');
+			} else if (currentSort === 'quantity') {
 				currentSort = 'faction';
 				$('#sortbydeck').html('SORT BY:<br>FACTION');
 			} else if (currentSort === 'faction') {
-				currentSort = 'quantity';
-				$('#sortbydeck').html('SORT BY:<br>QUANTITY');
+				currentSort = 'type';
+				$('#sortbydeck').html('SORT BY:<br>TYPE');
 			} else {
 				currentSort = 'name';
 				$('#sortbydeck').html('SORT BY:<br>NAME');
