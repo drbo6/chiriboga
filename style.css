@@ -2772,7 +2772,7 @@ body.deck-builder-page {
     min-height: 100vh;
 }
 /* Settings Panel Styles */
-.settings-panel { flex:1; border:1px solid var(--crt-green)44; padding:20px; display:flex; flex-direction:column; gap:10px; overflow:hidden; }
+.settings-panel { flex:1; border:1px solid var(--crt-green)44; padding:25px; display:flex; flex-direction:column; gap:10px; overflow:hidden; }
 .settings-header-row { display:flex; justify-content:space-between; align-items:center; margin-bottom:4px; }
 .settings-title { font-size:14px; letter-spacing:4px; opacity:0.8; }
 .settings-back { background:var(--bg-dark); color:var(--crt-green); border:1px solid var(--border-green-dark); padding:6px 12px; font-size:10px; letter-spacing:2px; cursor:pointer; }
@@ -2806,6 +2806,7 @@ body.deck-builder-page {
 .checkbox-label:hover input:not(:disabled) { border-color:var(--crt-green); }
 .checkbox-label.checkbox-disabled { opacity:0.5; cursor:default; }
 .checkbox-label.checkbox-disabled input { cursor:default; }
+.checkbox-label .checkbox-text { width:115px; text-align:left; }
 
 /* Precon list for gauntlet settings */
 .settings-section-header { font-size:11px; letter-spacing:2px; color:var(--crt-green-pale); text-transform:uppercase; padding:12px 0 6px 0; border-top:1px solid var(--crt-green)33; margin-top:8px; }

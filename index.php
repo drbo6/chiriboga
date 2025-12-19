@@ -128,7 +128,7 @@
                 <button class="settings-back" onclick="closeSettings()">BACK</button>
               </div>
               <div class="settings-content">
-                <div class="settings-group">
+                <div class="settings-group" title="Number of opponents you must defeat to complete the Gauntlet">
                   <label class="settings-label">GAUNTLET LENGTH</label>
                   <div class="settings-stepper">
                     <button class="stepper-btn" id="gauntlet-length-minus" onclick="adjustGauntletLength(-1)">−</button>
@@ -136,38 +136,38 @@
                     <button class="stepper-btn" id="gauntlet-length-plus" onclick="adjustGauntletLength(1)">+</button>
                   </div>
                 </div>
-                <div class="settings-group">
+                <div class="settings-group" title="Cycle through all four corp factions before repeating any faction">
                   <label class="settings-label">ALTERNATE FACTIONS</label>
                   <div class="settings-switch">
                     <input type="checkbox" id="alternate-factions-toggle" onchange="toggleAlternateFactions()">
                     <label for="alternate-factions-toggle" class="switch-label"></label>
                   </div>
                 </div>
-                <div class="settings-group">
+                <div class="settings-group" title="Distribute runner cards evenly across all factions in your Gauntlet starting card pool">
                   <label class="settings-label">BALANCED FACTIONS</label>
                   <div class="settings-switch">
                     <input type="checkbox" id="balanced-factions-toggle" onchange="toggleBalancedFactions()">
                     <label for="balanced-factions-toggle" class="switch-label"></label>
                   </div>
                 </div>
-                <div class="settings-group">
+                <div class="settings-group" title="Card sets available for building your runner deck in Gauntlet mode">
                   <label class="settings-label">ALLOWED<br />PLAYER SETS</label>
                   <div class="settings-checkboxes">
-                    <label class="checkbox-label checkbox-disabled">
+                    <label class="checkbox-label checkbox-disabled" title="Core set, always included">
                       <input type="checkbox" id="set-sg" checked disabled>
-                      <span>System Gateway</span>
+                      <span class="checkbox-text">System Gateway</span>
                     </label>
-                    <label class="checkbox-label">
+                    <label class="checkbox-label" title="Additional cards from System Update 2021">
                       <input type="checkbox" id="set-su21" onchange="toggleAllowedSet('su21')">
-                      <span>System Update 2021</span>
+                      <span class="checkbox-text">System Update 2021</span>
                     </label>
-                    <label class="checkbox-label">
+                    <label class="checkbox-label" title="Elevation expansion cards (probably bugs here, but hopefully not game-breaking)">
                       <input type="checkbox" id="set-elev" onchange="toggleAllowedSet('elev')">
-                      <span>Elevation (Untested)</span>
+                      <span class="checkbox-text">Elevation (Untested)</span>
                     </label>
                   </div>
                 </div>
-                <div class="settings-section-header">GAUNTLET OPPONENTS</div>
+                <div class="settings-section-header" title="Select which corp decks can appear as opponents in Gauntlet mode">GAUNTLET OPPONENTS</div>
                 <div class="precon-list" id="precon-list">
                   <!-- Populated by JavaScript -->
                 </div>
