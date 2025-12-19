@@ -28,10 +28,13 @@
 		<?php
 		echo '<link rel="stylesheet" type="text/css" href="style.css?' . filemtime('style.css') . '" />';
 		$jsfiles = array('init','phase', 'command', 'checks', 'mechanics', 'utility', 'config-gauntlet');
-		$sets = ["systemgateway","systemupdate2021","midnightsun","elevation"];
+
+		// Load card sets
+		$sets = ["coreset","systemgateway","systemupdate2021","midnightsun","elevation"];
 		foreach ($sets as $set) {
 			array_push($jsfiles, 'sets/'.$set);
 		}
+		
 		$jsfiles = array_merge($jsfiles, array('sets/tutorial', 'decks', 'runcalculator', 'ai_corp', 'ai_runner'));
 		$maxfilemtime = 0;
 		foreach ($jsfiles as $jsfile) {

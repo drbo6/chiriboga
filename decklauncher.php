@@ -69,7 +69,8 @@
 		<?php
 		echo '<script src="utility.js?' . filemtime('utility.js') . '"></script>';
 		
-		$sets = ["systemgateway","systemupdate2021","midnightsun","elevation"];
+		// Load card sets
+		$sets = ["systemgateway","systemupdate2021","elevation"];
 		foreach ($sets as $set) {
 			echo '<script src="sets/'.$set.'.js?' . filemtime('sets/'.$set.'.js') . '"></script>';
 		}
@@ -1615,6 +1616,70 @@
 					}
 				}
 			}
+			
+			// Click deck-stats 6 times to load additional sets
+			var deckStatsClickCount = 0;
+			var additionalSetsLoaded = false;
+			$(document).on('click', '.deck-stats', function() {
+				if (additionalSetsLoaded) return;
+				deckStatsClickCount++;
+				if (deckStatsClickCount >= 6) {
+					additionalSetsLoaded = true;
+					console.log('Loading additional card sets...');
+					
+					// Load coreset and midnightsun dynamically
+					var setsToLoad = ['coreset', 'midnightsun'];
+					var scriptsLoaded = 0;
+					
+					setsToLoad.forEach(function(setName) {
+						var script = document.createElement('script');
+						script.src = 'sets/' + setName + '.js?' + Date.now();
+						script.onload = function() {
+							scriptsLoaded++;
+							console.log('Loaded ' + setName + '.js');
+							if (scriptsLoaded === setsToLoad.length) {
+								console.log('All additional sets loaded. Rebuilding card lists...');
+								
+								// Rebuild allCardIdsForPlayer to include new sets
+								allCardIdsForPlayer = [];
+								for (var i = 0; i < cardSet.length; i++) {
+									if (cardSet[i] && cardSet[i].player === deckPlayer && cardSet[i].cardType !== 'identity') {
+										allCardIdsForPlayer.push(i);
+									}
+								}
+								
+								// Rebuild playerIdentities dropdown
+								var currentIdentity = json.identity;
+								playerIdentities = [];
+								for (var i = 0; i < cardSet.length; i++) {
+									if (cardSet[i] && cardSet[i].player === deckPlayer && cardSet[i].cardType === 'identity') {
+										playerIdentities.push({ id: i, title: cardSet[i].title });
+									}
+								}
+								playerIdentities.sort(function(a, b) { return a.title.localeCompare(b.title); });
+								
+								// Rebuild identity dropdown
+								var identityHTML = '';
+								for (var i = 0; i < playerIdentities.length; i++) {
+									var selected = (playerIdentities[i].id == currentIdentity) ? ' selected' : '';
+									identityHTML += '<option value="' + playerIdentities[i].id + '"' + selected + '>' + playerIdentities[i].title + '</option>';
+								}
+								$('#identityselect').html(identityHTML);
+								
+								// Refresh the card list display
+								RenderAllCardsList();
+								AttachCardListEvents();
+								ApplyFilter();
+								UpdateCardCountsUI();
+							}
+						};
+						script.onerror = function() {
+							console.error('Failed to load ' + setName + '.js');
+						};
+						document.head.appendChild(script);
+					});
+				}
+			});
 		</script>
 
 	</head>

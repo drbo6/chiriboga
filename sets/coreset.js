@@ -139,76 +139,77 @@ coreSet[6] = {
     },
   },
 };
-coreSet[7] = {
-  title: "Corroder",
-  imageFile: "01007.png",
-  player: runner,
-  cardType: "program",
-  subTypes: ["Icebreaker", "Fracter"],
-  memoryCost: 1,
-  installCost: 2,
-  strength: 2,
-  strengthBoost: 0,
-  modifyStrength: {
-    Resolve: function (card) {
-      if (card == this) return this.strengthBoost;
-      return 0; //no modification to strength
-    },
-  },
-  abilities: [
-    {
-      text: "Break barrier subroutine.",
-      Enumerate: function () {
-        if (!CheckEncounter()) return [];
-        if (!CheckSubType(attackedServer.ice[approachIce], "Barrier"))
-          return [];
-        if (!CheckCredits(1, runner, "using", this)) return [];
-        if (!CheckStrength(this)) return [];
-        return ChoicesEncounteredSubroutines();
-      },
-      Resolve: function (params) {
-        SpendCredits(
-          runner,
-          1,
-          "using",
-          this,
-          function () {
-            Break(params.subroutine);
-          },
-          this
-        );
-      },
-    },
-    {
-      text: "+1 strength.",
-      Enumerate: function () {
-        if (!CheckEncounter()) return []; //technically you can +1 strength outside encounters but I'm putting this here for interface usability
-        if (CheckStrength(this)) return []; //technically you can over-strength but I'm putting this here for interface usability
-        if (!CheckUnbrokenSubroutines()) return []; //as above
-        if (!CheckCredits(1, runner, "using", this)) return [];
-        return [{}];
-      },
-      Resolve: function (params) {
-        SpendCredits(
-          runner,
-          1,
-          "using",
-          this,
-          function () {
-            BoostStrength(this, 1);
-          },
-          this
-        );
-      },
-    },
-  ],
-  responseOnEncounterEnds: {
-    Resolve: function () {
-      this.strengthBoost = 0;
-    },
-    automatic: true,
-  },
-};
+// coreSet[7] = {
+//   title: "Corroder",
+//   imageFile: "01007.png",
+//   player: runner,
+//   cardType: "program",
+//   subTypes: ["Icebreaker", "Fracter"],
+//   memoryCost: 1,
+//   installCost: 2,
+//   strength: 2,
+//   strengthBoost: 0,
+//   modifyStrength: {
+//     Resolve: function (card) {
+//       if (card == this) return this.strengthBoost;
+//       return 0;
+//     },
+//   },
+//   abilities: [
+//     {
+//       text: "Break barrier subroutine.",
+//       Enumerate: function () {
+//         if (!CheckEncounter()) return [];
+//         if (!CheckSubType(attackedServer.ice[approachIce], "Barrier"))
+//           return [];
+//         if (!CheckCredits(1, runner, "using", this)) return [];
+//         if (!CheckStrength(this)) return [];
+//         return ChoicesEncounteredSubroutines();
+//       },
+//       Resolve: function (params) {
+//         SpendCredits(
+//           runner,
+//           1,
+//           "using",
+//           this,
+//           function () {
+//             Break(params.subroutine);
+//           },
+//           this
+//         );
+//       },
+//     },
+//     {
+//       text: "+1 strength.",
+//       Enumerate: function () {
+//         if (!CheckEncounter()) return [];
+//         if (CheckStrength(this)) return [];
+//         if (!CheckUnbrokenSubroutines()) return [];
+//         if (!CheckCredits(1, runner, "using", this)) return [];
+//         return [{}];
+//       },
+//       Resolve: function (params) {
+//         SpendCredits(
+//           runner,
+//           1,
+//           "using",
+//           this,
+//           function () {
+//             BoostStrength(this, 1);
+//           },
+//           this
+//         );
+//       },
+//     },
+//   ],
+//   responseOnEncounterEnds: {
+//     Resolve: function () {
+//       this.strengthBoost = 0;
+//     },
+//     automatic: true,
+//   },
+// };
+// DUPLICATE: System Update 2021 has Corroder (card 31005)
 coreSet[8] = {
   title: "Datasucker",
   imageFile: "01008.png",
@@ -368,40 +369,41 @@ coreSet[10] = {
     automatic: true,
   },
 };
-coreSet[11] = {
-  title: "Mimic",
-  imageFile: "01011.png",
-  player: runner,
-  cardType: "program",
-  subTypes: ["Icebreaker", "Killer"],
-  memoryCost: 1,
-  installCost: 3,
-  strength: 3,
-  abilities: [
-    {
-      text: "Break sentry subroutine.",
-      Enumerate: function () {
-        if (!CheckEncounter()) return [];
-        if (!CheckSubType(attackedServer.ice[approachIce], "Sentry")) return [];
-        if (!CheckCredits(1, runner, "using", this)) return [];
-        if (!CheckStrength(this)) return [];
-        return ChoicesEncounteredSubroutines();
-      },
-      Resolve: function (params) {
-        SpendCredits(
-          runner,
-          1,
-          "using",
-          this,
-          function () {
-            Break(params.subroutine);
-          },
-          this
-        );
-      },
-    },
-  ],
-};
+// coreSet[11] = {
+//   title: "Mimic",
+//   imageFile: "01011.png",
+//   player: runner,
+//   cardType: "program",
+//   subTypes: ["Icebreaker", "Killer"],
+//   memoryCost: 1,
+//   installCost: 3,
+//   strength: 3,
+//   abilities: [
+//     {
+//       text: "Break sentry subroutine.",
+//       Enumerate: function () {
+//         if (!CheckEncounter()) return [];
+//         if (!CheckSubType(attackedServer.ice[approachIce], "Sentry")) return [];
+//         if (!CheckCredits(1, runner, "using", this)) return [];
+//         if (!CheckStrength(this)) return [];
+//         return ChoicesEncounteredSubroutines();
+//       },
+//       Resolve: function (params) {
+//         SpendCredits(
+//           runner,
+//           1,
+//           "using",
+//           this,
+//           function () {
+//             Break(params.subroutine);
+//           },
+//           this
+//         );
+//       },
+//     },
+//   ],
+// };
+// DUPLICATE: System Update 2021 has Mimic (card 31007)
 coreSet[12] = {
   title: "Parasite",
   imageFile: "01012.png",
@@ -568,22 +570,23 @@ coreSet[14] = {
     },
   ],
 };
-coreSet[15] = {
-  title: "Ice Carver",
-  imageFile: "01015.png",
-  player: runner,
-  cardType: "resource",
-  subTypes: ["Virtual"],
-  installCost: 3,
-  unique: true,
-  modifyStrength: {
-    Resolve: function (card) {
-      if (!CheckEncounter()) return 0;
-      if (CheckCardType(card, ["ice"])) return -1;
-      return 0; //no modification to strength
-    },
-  },
-};
+// coreSet[15] = {
+//   title: "Ice Carver",
+//   imageFile: "01015.png",
+//   player: runner,
+//   cardType: "resource",
+//   subTypes: ["Virtual"],
+//   installCost: 3,
+//   unique: true,
+//   modifyStrength: {
+//     Resolve: function (card) {
+//       if (!CheckEncounter()) return 0;
+//       if (CheckCardType(card, ["ice"])) return -1;
+//       return 0; //no modification to strength
+//     },
+//   },
+// };
+// DUPLICATE: System Update 2021 has Ice Carver (card 31008)
 coreSet[16] = {
   title: "Wyldside",
   imageFile: "01016.png",
@@ -600,83 +603,86 @@ coreSet[16] = {
     automatic: true, //for usability, this is not strict implementation
   },
 };
-coreSet[17] = {
-  title: "Gabriel Santiago: Consummate Professional",
-  imageFile: "01017.png",
-  player: runner,
-  cardType: "identity",
-};
-coreSet[20] = {
-  title: "Forged Activation Orders",
-  imageFile: "01020.png",
-  player: runner,
-  player: runner,
-  cardType: "event",
-  subTypes: ["Sabotage"],
-  playCost: 1,
-  Enumerate: function () {
-    return ChoicesInstalledCards(corp, function (card) {
-      if (card.cardType != "ice") return false; //only include ice
-      if (card.rezzed == true) return false; //only include unrezzed ice
-      return true;
-    });
-  },
-  Resolve: function (params) {
-    var card = params.card;
-    if (
-      CheckRez(card, ["ice"]) &&
-      CheckCredits(RezCost(card), corp, "rezzing", card)
-    ) {
-      var choicesb = [
-        { card: card, id: 0, label: "Rez " + GetTitle(card, true) },
-        { card: card, id: 1, label: "Trash " + GetTitle(card, true) },
-      ];
-      function decisionCallbackb(paramsb) {
-        var card = paramsb.card;
-        if (paramsb.id == 0) {
-          SpendCredits(
-            corp,
-            RezCost(card),
-            "rezzing",
-            card,
-            function () {
-              Rez(card);
-            },
-            this
-          );
-        } else {
-          Trash(card, true);
-        }
-      }
-      DecisionPhase(
-        corp,
-        choicesb,
-        decisionCallbackb,
-        null,
-        "Forged Activation Orders",
-        this
-      ); //choose whether to rez or trash
-    } else {
-      Log(GetTitle(card, true) + " cannot be rezzed");
-      Trash(card, true);
-    }
-  },
-  text: "Choose an unrezzed piece of ice",
-};
-coreSet[30] = {
-  title: "Crash Space",
-  imageFile: "01030.png",
-  player: runner,
-  cardType: "resource",
-  subTypes: ["Location"],
-  installCost: 2,
-  recurringCredits: 2,
-  canUseCredits: function (doing, card) {
-    if (doing == "removing tags") return true;
-    return false;
-  },
-  //TODO Trash: prevent up to 3 meat damage.
-};
+// coreSet[17] = {
+//   title: "Gabriel Santiago: Consummate Professional",
+//   imageFile: "01017.png",
+//   player: runner,
+//   cardType: "identity",
+// };  
+// TODO: Missing deckSize, influenceLimit, and identity ability (gain 2 credits on first successful HQ run each turn)
+// coreSet[20] = {
+//   title: "Forged Activation Orders",
+//   imageFile: "01020.png",
+//   player: runner,
+//   player: runner,
+//   cardType: "event",
+//   subTypes: ["Sabotage"],
+//   playCost: 1,
+//   Enumerate: function () {
+//     return ChoicesInstalledCards(corp, function (card) {
+//       if (card.cardType != "ice") return false;
+//       if (card.rezzed == true) return false;
+//       return true;
+//     });
+//   },
+//   Resolve: function (params) {
+//     var card = params.card;
+//     if (
+//       CheckRez(card, ["ice"]) &&
+//       CheckCredits(RezCost(card), corp, "rezzing", card)
+//     ) {
+//       var choicesb = [
+//         { card: card, id: 0, label: "Rez " + GetTitle(card, true) },
+//         { card: card, id: 1, label: "Trash " + GetTitle(card, true) },
+//       ];
+//       function decisionCallbackb(paramsb) {
+//         var card = paramsb.card;
+//         if (paramsb.id == 0) {
+//           SpendCredits(
+//             corp,
+//             RezCost(card),
+//             "rezzing",
+//             card,
+//             function () {
+//               Rez(card);
+//             },
+//             this
+//           );
+//         } else {
+//           Trash(card, true);
+//         }
+//       }
+//       DecisionPhase(
+//         corp,
+//         choicesb,
+//         decisionCallbackb,
+//         null,
+//         "Forged Activation Orders",
+//         this
+//       );
+//     } else {
+//       Log(GetTitle(card, true) + " cannot be rezzed");
+//       Trash(card, true);
+//     }
+//   },
+//   text: "Choose an unrezzed piece of ice",
+// };
+// DUPLICATE: System Update 2021 has Forged Activation Orders (card 31014)
+// coreSet[30] = {
+//   title: "Crash Space",
+//   imageFile: "01030.png",
+//   player: runner,
+//   cardType: "resource",
+//   subTypes: ["Location"],
+//   installCost: 2,
+//   recurringCredits: 2,
+//   canUseCredits: function (doing, card) {
+//     if (doing == "removing tags") return true;
+//     return false;
+//   },
+//   //TODO Trash: prevent up to 3 meat damage.
+// };
+// TODO: Missing trash ability to prevent up to 3 meat damage
 coreSet[32] = {
   title: "Decoy",
   imageFile: "01032.png",
@@ -740,22 +746,25 @@ coreSet[33] = {
     automatic: true,
   },
 };
-coreSet[34] = {
-  title: "Diesel",
-  imageFile: "01034.png",
-  player: runner,
-  cardType: "event",
-  playCost: 0,
-  Resolve: function (params) {
-    Draw(runner, 3);
-  },
-};
-coreSet[35] = {
-  title: "Modded",
-  player: runner,
-  cardType: "event",
-  playCost: 0,
-};
+// coreSet[34] = {
+//   title: "Diesel",
+//   imageFile: "01034.png",
+//   player: runner,
+//   cardType: "event",
+//   playCost: 0,
+//   Resolve: function (params) {
+//     Draw(runner, 3);
+//   },
+// };
+// DUPLICATE: System Update 2021 has Diesel (card 31027)
+// coreSet[35] = {
+//   title: "Modded",
+//   imageFile: "01035.png",
+//   player: runner,
+//   cardType: "event",
+//   playCost: 0,
+// };
+// TODO: Missing implementation - should allow installing hardware/program with 3 credit discount
 coreSet[38] = {
   title: "Akamatsu Mem Chip",
   imageFile: "01038.png",
@@ -765,26 +774,29 @@ coreSet[38] = {
   installCost: 1,
   memoryUnits: 1,
 };
-coreSet[39] = {
-  title: "Rabbit Hole",
-  player: runner,
-  cardType: "hardware",
-  installCost: 2,
-};
-coreSet[40] = {
-  title: "The Personal Touch",
-  imageFile: "01040.png",
-  player: runner,
-  cardType: "hardware",
-  subTypes: ["Mod"],
-  installCost: 2,
-  installOnlyOn: function (card) {
-    if (!CheckCardType(card, ["program"])) return false;
-    if (!CheckSubType(card, "Icebreaker")) return false;
-    return true;
-  },
-  //TODO Host icebreaker has +1 strength
-};
+// coreSet[39] = {
+//   title: "Rabbit Hole",
+//   imageFile: "01039.png",
+//   player: runner,
+//   cardType: "hardware",
+//   installCost: 2,
+// };
+// TODO: Missing link property and on-install ability to search for and install another Rabbit Hole with 1 credit discount
+// coreSet[40] = {
+//   title: "The Personal Touch",
+//   imageFile: "01040.png",
+//   player: runner,
+//   cardType: "hardware",
+//   subTypes: ["Mod"],
+//   installCost: 2,
+//   installOnlyOn: function (card) {
+//     if (!CheckCardType(card, ["program"])) return false;
+//     if (!CheckSubType(card, "Icebreaker")) return false;
+//     return true;
+//   },
+//   //TODO Host icebreaker has +1 strength
+// };
+// TODO: Missing modifyStrength implementation to give hosted icebreaker +1 strength
 coreSet[41] = {
   title: "The Toolbox",
   imageFile: "01041.png",
@@ -802,74 +814,75 @@ coreSet[41] = {
     return false;
   },
 };
-coreSet[43] = {
-  title: "Gordian Blade",
-  imageFile: "01043.png",
-  player: runner,
-  cardType: "program",
-  subTypes: ["Icebreaker", "Decoder"],
-  memoryCost: 1,
-  installCost: 4,
-  strength: 2,
-  strengthBoost: 0,
-  modifyStrength: {
-    Resolve: function (card) {
-      if (card == this) return this.strengthBoost;
-      return 0; //no modification to strength
-    },
-  },
-  responseOnRunEnds: {
-    Resolve: function (card) {
-      this.strengthBoost = 0;
-    },
-    automatic: true,
-  },
-  abilities: [
-    {
-      text: "Break code gate subroutine.",
-      Enumerate: function () {
-        if (!CheckEncounter()) return [];
-        if (!CheckCredits(1, runner, "using", this)) return [];
-        if (!CheckSubType(attackedServer.ice[approachIce], "Code Gate"))
-          return [];
-        if (!CheckStrength(this)) return [];
-        return ChoicesEncounteredSubroutines();
-      },
-      Resolve: function (params) {
-        SpendCredits(
-          runner,
-          1,
-          "using",
-          this,
-          function () {
-            Break(params.subroutine);
-          },
-          this
-        );
-      },
-    },
-    {
-      text: "+1 strength for the remainder of this run.",
-      Enumerate: function () {
-        if (!CheckRunning()) return [];
-        if (!CheckCredits(1, runner, "using", this)) return [];
-        return [{}];
-      },
-      Resolve: function (params) {
-        SpendCredits(
-          runner,
-          1,
-          "using",
-          this,
-          function () {
-            BoostStrength(this, 1);
-          },
-          this
-        );
-      },
-    },
-  ],
-};
+// coreSet[43] = {
+//   title: "Gordian Blade",
+//   imageFile: "01043.png",
+//   player: runner,
+//   cardType: "program",
+//   subTypes: ["Icebreaker", "Decoder"],
+//   memoryCost: 1,
+//   installCost: 4,
+//   strength: 2,
+//   strengthBoost: 0,
+//   modifyStrength: {
+//     Resolve: function (card) {
+//       if (card == this) return this.strengthBoost;
+//       return 0;
+//     },
+//   },
+//   responseOnRunEnds: {
+//     Resolve: function (card) {
+//       this.strengthBoost = 0;
+//     },
+//     automatic: true,
+//   },
+//   abilities: [
+//     {
+//       text: "Break code gate subroutine.",
+//       Enumerate: function () {
+//         if (!CheckEncounter()) return [];
+//         if (!CheckCredits(1, runner, "using", this)) return [];
+//         if (!CheckSubType(attackedServer.ice[approachIce], "Code Gate"))
+//           return [];
+//         if (!CheckStrength(this)) return [];
+//         return ChoicesEncounteredSubroutines();
+//       },
+//       Resolve: function (params) {
+//         SpendCredits(
+//           runner,
+//           1,
+//           "using",
+//           this,
+//           function () {
+//             Break(params.subroutine);
+//           },
+//           this
+//         );
+//       },
+//     },
+//     {
+//       text: "+1 strength for the remainder of this run.",
+//       Enumerate: function () {
+//         if (!CheckRunning()) return [];
+//         if (!CheckCredits(1, runner, "using", this)) return [];
+//         return [{}];
+//       },
+//       Resolve: function (params) {
+//         SpendCredits(
+//           runner,
+//           1,
+//           "using",
+//           this,
+//           function () {
+//             BoostStrength(this, 1);
+//           },
+//           this
+//         );
+//       },
+//     },
+//   ],
+// };
+// DUPLICATE: System Update 2021 has Gordian Blade (card 31033)
 var netShieldUsedThisTurn = false; //Multiple Net Shields cannot prevent more damage. [Official FAQ]
 coreSet[45] = {
   title: "Net Shield",
@@ -1021,16 +1034,17 @@ coreSet[49] = {
     }
   },
 };
-coreSet[50] = {
-  title: "Sure Gamble",
-  imageFile: "01050.png",
-  player: runner,
-  cardType: "event",
-  playCost: 5,
-  Resolve: function (params) {
-    GainCredits(runner, 9);
-  },
-};
+// coreSet[50] = {
+//   title: "Sure Gamble",
+//   imageFile: "01050.png",
+//   player: runner,
+//   cardType: "event",
+//   playCost: 5,
+//   Resolve: function (params) {
+//     GainCredits(runner, 9);
+//   },
+// };
+// DUPLICATE: System Gateway has Sure Gamble (card 30033)
 coreSet[51] = {
   title: "Crypsis",
   imageFile: "01051.png",
@@ -1384,87 +1398,89 @@ coreSet[63] = {
     },
   ],
 };
-coreSet[64] = {
-  title: "Rototurret",
-  imageFile: "01064.png",
-  player: corp,
-  cardType: "ice",
-  rezCost: 4,
-  strength: 0,
-  subTypes: ["Sentry", "Destroyer"],
-  subroutines: [
-    {
-      text: "Trash 1 program.",
-      Resolve: function () {
-        TrashPrograms(1);
-      },
-    },
-    {
-      text: "End the run.",
-      Resolve: function () {
-        EndTheRun();
-      },
-    },
-  ],
-};
-coreSet[65] = {
-  title: "Corporate Troubleshooter",
-  imageFile: "01065.png",
-  player: corp,
-  cardType: "upgrade",
-  subTypes: ["Connection"],
-  rezCost: 0,
-  trashCost: 2,
-};
-coreSet[67] = {
-  title: "Jinteki: Personal Evolution",
-  imageFile: "01067.png",
-  player: corp,
-  cardType: "identity",
-  subTypes: ["Megacorp"],
-  responseOnScored: {
-    Resolve: function () {
-	  //damage can be prevented
-      if (CheckCardType(intended.score, ["agenda"])) Damage("net", 1, true);
-    },
-  },
-  responseOnStolen: {
-    Resolve: function () {
-	  //damage can be prevented
-      if (CheckCardType(intended.steal, ["agenda"])) Damage("net", 1, true);
-    },
-  },
-};
-coreSet[68] = {
-  title: "Nisei MK II",
-  imageFile: "01068.png",
-  player: corp,
-  cardType: "agenda",
-  subTypes: ["Initiative"],
-  agendaPoints: 2,
-  advancementRequirement: 4,
-  agenda: 0,
-  responseOnScored: {
-    Resolve: function () {
-      if (intended.score == this) AddCounters(this, "agenda", 1);
-    },
-    automatic: true,
-  },
-  abilities: [
-    {
-      text: "End the run.",
-      Enumerate: function () {
-        if (!CheckCounters(this, "agenda", 1)) return [];
-        if (!CheckRunning()) return [];
-        return [{}];
-      },
-      Resolve: function (params) {
-        RemoveCounters(this, "agenda", 1);
-        EndTheRun();
-      },
-    },
-  ],
-};
+// coreSet[64] = {
+//   title: "Rototurret",
+//   imageFile: "01064.png",
+//   player: corp,
+//   cardType: "ice",
+//   rezCost: 4,
+//   strength: 0,
+//   subTypes: ["Sentry", "Destroyer"],
+//   subroutines: [
+//     {
+//       text: "Trash 1 program.",
+//       Resolve: function () {
+//         TrashPrograms(1);
+//       },
+//     },
+//     {
+//       text: "End the run.",
+//       Resolve: function () {
+//         EndTheRun();
+//       },
+//     },
+//   ],
+// };
+// DUPLICATE: System Update 2021 has Rototurret (card 31055)
+// coreSet[65] = {
+//   title: "Corporate Troubleshooter",
+//   imageFile: "01065.png",
+//   player: corp,
+//   cardType: "upgrade",
+//   subTypes: ["Connection"],
+//   rezCost: 0,
+//   trashCost: 2,
+// };
+// TODO: Missing trash ability - trash and pay X credits to give ice +X strength for current encounter
+// coreSet[67] = {
+//   title: "Jinteki: Personal Evolution",
+//   imageFile: "01067.png",
+//   player: corp,
+//   cardType: "identity",
+//   subTypes: ["Megacorp"],
+//   responseOnScored: {
+//     Resolve: function () {
+//       if (CheckCardType(intended.score, ["agenda"])) Damage("net", 1, true);
+//     },
+//   },
+//   responseOnStolen: {
+//     Resolve: function () {
+//       if (CheckCardType(intended.steal, ["agenda"])) Damage("net", 1, true);
+//     },
+//   },
+// };
+// DUPLICATE: System Update 2021 has Jinteki: Personal Evolution (card 31058)
+// coreSet[68] = {
+//   title: "Nisei MK II",
+//   imageFile: "01068.png",
+//   player: corp,
+//   cardType: "agenda",
+//   subTypes: ["Initiative"],
+//   agendaPoints: 2,
+//   advancementRequirement: 4,
+//   agenda: 0,
+//   responseOnScored: {
+//     Resolve: function () {
+//       if (intended.score == this) AddCounters(this, "agenda", 1);
+//     },
+//     automatic: true,
+//   },
+//   abilities: [
+//     {
+//       text: "End the run.",
+//       Enumerate: function () {
+//         if (!CheckCounters(this, "agenda", 1)) return [];
+//         if (!CheckRunning()) return [];
+//         return [{}];
+//       },
+//       Resolve: function (params) {
+//         RemoveCounters(this, "agenda", 1);
+//         EndTheRun();
+//       },
+//     },
+//   ],
+// };
+// DUPLICATE: System Update 2021 has Nisei MK II (card 31060)
 coreSet[69] = {
   title: "Project Junebug",
   imageFile: "01069.png",
@@ -1517,61 +1533,58 @@ coreSet[69] = {
     },
   },
 };
-coreSet[70] = {
-  title: "Snare!",
-  imageFile: "01070.png",
-  player: corp,
-  cardType: "asset",
-  subTypes: ["Ambush"],
-  rezCost: 0,
-  trashCost: 0,
-  automaticOnAccess: {
-    Resolve: function (card) {
-      if (card == this) {
-        //set up the function first (to call straight away or after reveal)
-        function abilityPart() {
-          //can't use ability if can't afford it or if it is in archives
-          if (
-            !CheckCredits(4, corp, "", this) ||
-            this.cardLocation == corp.archives.cards
-          )
-            return;
-          var choices = [
-            { id: 0, label: "4[c]: Do 3 net damage and give the runner 1 tag" },
-            { id: 1, label: "Continue" },
-          ];
-          function decisionCallback(params) {
-            if (params.id == 0) {
-              SpendCredits(
-                corp,
-                4,
-                "",
-                this,
-                function () {
-                  Damage("net", 
-                    3,
-					true, //damage can be prevented
-                    function (cardsTrashed) {
-                      AddTags(1);
-                    },
-                    this
-                  );
-                },
-                this
-              );
-            }
-          }
-          DecisionPhase(corp, choices, decisionCallback, null, "Snare!", this);
-        }
-        //reveal if accessed from R&D
-        if (this.cardLocation == corp.RnD.cards)
-          Reveal(this, abilityPart, this);
-        //or just straight to ability
-        else abilityPart.call(this);
-      }
-    },
-  },
-};
+// coreSet[70] = {
+//   title: "Snare!",
+//   imageFile: "01070.png",
+//   player: corp,
+//   cardType: "asset",
+//   subTypes: ["Ambush"],
+//   rezCost: 0,
+//   trashCost: 0,
+//   automaticOnAccess: {
+//     Resolve: function (card) {
+//       if (card == this) {
+//         function abilityPart() {
+//           if (
+//             !CheckCredits(4, corp, "", this) ||
+//             this.cardLocation == corp.archives.cards
+//           )
+//             return;
+//           var choices = [
+//             { id: 0, label: "4[c]: Do 3 net damage and give the runner 1 tag" },
+//             { id: 1, label: "Continue" },
+//           ];
+//           function decisionCallback(params) {
+//             if (params.id == 0) {
+//               SpendCredits(
+//                 corp,
+//                 4,
+//                 "",
+//                 this,
+//                 function () {
+//                   Damage("net", 
+//                     3,
+//                     true,
+//                     function (cardsTrashed) {
+//                       AddTags(1);
+//                     },
+//                     this
+//                   );
+//                 },
+//                 this
+//               );
+//             }
+//           }
+//           DecisionPhase(corp, choices, decisionCallback, null, "Snare!", this);
+//         }
+//         if (this.cardLocation == corp.RnD.cards)
+//           Reveal(this, abilityPart, this);
+//         else abilityPart.call(this);
+//       }
+//     },
+//   },
+// };
+// DUPLICATE: System Update 2021 has Snare! (card 31062)
 
 coreSet[71] = {
   title: "Zaibatsu Loyalty",
@@ -2017,43 +2030,45 @@ coreSet[89] = {
     },
   ],
 };
-coreSet[92] = {
-  title: "SanSan City Grid",
-  imageFile: "01092.png",
-  player: corp,
-  cardType: "upgrade",
-  subTypes: ["Region"],
-  rezCost: 6,
-  trashCost: 5,
-  modifyAdvancementRequirement: {
-    Resolve: function (card) {
-      var cardServer = GetServer(card);
-      if (cardServer != null) {
-        if (cardServer == GetServer(this)) {
-          if (CheckCardType(card, ["agenda"])) return -1;
-        }
-      }
-      return 0; //no modification to cost
-    },
-  },
-};
-coreSet[94] = {
-  title: "Hostile Takeover",
-  imageFile: "01094.png",
-  player: corp,
-  cardType: "agenda",
-  subTypes: ["Expansion"],
-  agendaPoints: 1,
-  advancementRequirement: 2,
-  responseOnScored: {
-    Resolve: function () {
-      if (intended.score == this) {
-        GainCredits(corp, 7);
-        BadPublicity(1);
-      }
-    },
-  },
-};
+// coreSet[92] = {
+//   title: "SanSan City Grid",
+//   imageFile: "01092.png",
+//   player: corp,
+//   cardType: "upgrade",
+//   subTypes: ["Region"],
+//   rezCost: 6,
+//   trashCost: 5,
+//   modifyAdvancementRequirement: {
+//     Resolve: function (card) {
+//       var cardServer = GetServer(card);
+//       if (cardServer != null) {
+//         if (cardServer == GetServer(this)) {
+//           if (CheckCardType(card, ["agenda"])) return -1;
+//         }
+//       }
+//       return 0;
+//     },
+//   },
+// };
+// DUPLICATE: System Update 2021 has SanSan City Grid (card 31082)
+// coreSet[94] = {
+//   title: "Hostile Takeover",
+//   imageFile: "01094.png",
+//   player: corp,
+//   cardType: "agenda",
+//   subTypes: ["Expansion"],
+//   agendaPoints: 1,
+//   advancementRequirement: 2,
+//   responseOnScored: {
+//     Resolve: function () {
+//       if (intended.score == this) {
+//         GainCredits(corp, 7);
+//         BadPublicity(1);
+//       }
+//     },
+//   },
+// };
+// DUPLICATE: System Update 2021 has Hostile Takeover (card 31084)
 coreSet[107] = {
   title: "Private Security Force",
   imageFile: "01107.png",
@@ -2099,56 +2114,59 @@ coreSet[108] = {
     },
   ],
 };
-coreSet[109] = {
-  title: "PAD Campaign",
-  imageFile: "01109.png",
-  player: corp,
-  cardType: "asset",
-  subTypes: ["Advertisement"],
-  rezCost: 2,
-  trashCost: 4,
-  responseOnCorpTurnBegins: {
-    Resolve: function () {
-      GainCredits(corp, 1);
-    },
-    automatic: true, //for usability, this is not strict implementation
-  },
-  text: "Gain 1 credit.",
-};
-coreSet[110] = {
-  title: "Hedge Fund",
-  imageFile: "01110.png",
-  player: corp,
-  cardType: "operation",
-  subTypes: ["Transaction"],
-  playCost: 5,
-  Resolve: function (params) {
-    GainCredits(corp, 9);
-  },
-};
-coreSet[111] = {
-  title: "Enigma",
-  imageFile: "01111.png",
-  player: corp,
-  cardType: "ice",
-  rezCost: 3,
-  strength: 2,
-  subTypes: ["Code Gate"],
-  subroutines: [
-    {
-      text: "The Runner loses [click], if able.",
-      Resolve: function () {
-        LoseClicks(runner, 1);
-      },
-    },
-    {
-      text: "End the run.",
-      Resolve: function () {
-        EndTheRun();
-      },
-    },
-  ],
-};
+// coreSet[109] = {
+//   title: "PAD Campaign",
+//   imageFile: "01109.png",
+//   player: corp,
+//   cardType: "asset",
+//   subTypes: ["Advertisement"],
+//   rezCost: 2,
+//   trashCost: 4,
+//   responseOnCorpTurnBegins: {
+//     Resolve: function () {
+//       GainCredits(corp, 1);
+//     },
+//     automatic: true,
+//   },
+//   text: "Gain 1 credit.",
+// };
+// DUPLICATE: System Update 2021 has PAD Campaign (card 31095)
+// coreSet[110] = {
+//   title: "Hedge Fund",
+//   imageFile: "01110.png",
+//   player: corp,
+//   cardType: "operation",
+//   subTypes: ["Transaction"],
+//   playCost: 5,
+//   Resolve: function (params) {
+//     GainCredits(corp, 9);
+//   },
+// };
+// DUPLICATE: System Gateway has Hedge Fund (card 30074)
+// coreSet[111] = {
+//   title: "Enigma",
+//   imageFile: "01111.png",
+//   player: corp,
+//   cardType: "ice",
+//   rezCost: 3,
+//   strength: 2,
+//   subTypes: ["Code Gate"],
+//   subroutines: [
+//     {
+//       text: "The Runner loses [click], if able.",
+//       Resolve: function () {
+//         LoseClicks(runner, 1);
+//       },
+//     },
+//     {
+//       text: "End the run.",
+//       Resolve: function () {
+//         EndTheRun();
+//       },
+//     },
+//   ],
+// };
+// DUPLICATE: System Update 2021 has Enigma (card 31096)
 coreSet[112] = {
   title: "Hunter",
   imageFile: "01112.png",
@@ -2185,3 +2203,10 @@ coreSet[113] = {
     },
   ],
 };
+// Export Core Set cards to global cardSet array
+setIdentifiers.push('core');
+for (var i = 1; i < coreSet.length; i++) {
+  if (typeof coreSet[i] !== 'undefined') {
+    cardSet[i] = coreSet[i];
+  }
+}

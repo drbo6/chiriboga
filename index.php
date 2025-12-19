@@ -21,10 +21,11 @@
     }
   </script>
   <?php
-  // Load card sets
   echo '<script src="utility.js?' . filemtime('utility.js') . '"></script>';
   echo '<script src="config-gauntlet.js?' . filemtime('config-gauntlet.js') . '"></script>';
-  $sets = ["systemgateway","systemupdate2021","midnightsun","elevation"];
+
+  // Load card sets
+  $sets = ["coreset","systemgateway","systemupdate2021","midnightsun","elevation"];
   foreach ($sets as $set) {
     echo '<script src="sets/'.$set.'.js?' . filemtime('sets/'.$set.'.js') . '"></script>';
   }
