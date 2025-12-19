@@ -2647,7 +2647,7 @@
 				<button id="addnoninfluence" onclick="AddNonInfluence();" class="button">ADD IN-<br>FACTION</button>
 				<button id="cleardeck" onclick="ClearDeck();" class="button">CLEAR<br>DECK</button>
 				<button id="sortbydeck" onclick="CycleSort();" class="button">SORT BY:<br>NAME</button>
-				<button id="sortdeck" onclick="CycleTypeFilter();" class="button">FILTER:<br>NONE</button>
+				<button id="sortdeck" onclick="CycleTypeFilter();" class="button">FILTER:<br>ALL</button>
 				<button id="togglecards" onclick="ToggleOtherCards();" class="button">HIDE UNSELECTED</button>
 				<button id="exittomenu" onclick="window.location.href='index.php';" class="button">BACK TO MENU</button>
 				<!-- DRBO6: Gauntlet Mode - hide Set as Opponent, Random Deck, Import NRDB, Load Precon -->
