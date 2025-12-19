@@ -5,17 +5,17 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1">
 		<title>Chiriboga Deck Launcher</title>
 		<link href="images/favicon.ico" rel="icon">
-		<link rel="stylesheet" href="jquery/jquery-ui.css?<?php echo filemtime('jquery/jquery-ui.css'); ?>" />
-		<link rel="stylesheet" href="style.css?<?php echo filemtime('style.css'); ?>" />
+		<link rel="stylesheet" href="jquery/jquery-ui.css" />
+		<link rel="stylesheet" href="style.css" />
 		<link rel="manifest" href="manifest.json">
 		<?php
 		include 'cardrenderer/webfont.php';
 		?>
-		<script src="jquery/jquery-3.2.1.min.js?<?php echo filemtime('jquery/jquery-3.2.1.min.js'); ?>"></script>
-		<script src="jquery/jquery-ui.min.js?<?php echo filemtime('jquery/jquery-ui.min.js'); ?>"></script>
-		<script src="jquery/textarea-helper.js?<?php echo filemtime('jquery/textarea-helper.js'); ?>"></script>
-		<script src="deck/lz-string.min.js?<?php echo filemtime('deck/lz-string.min.js'); ?>"></script>
-		<script src="deck/seedrandom.min.js?<?php echo filemtime('deck/seedrandom.min.js'); ?>"></script>
+		<script src="jquery/jquery-3.2.1.min.js"></script>
+		<script src="jquery/jquery-ui.min.js"></script>
+		<script src="jquery/textarea-helper.js"></script>
+		<script src="deck/lz-string.min.js"></script>
+		<script src="deck/seedrandom.min.js"></script>
 		<script>
 			//create some variables so we can load the card definitions
 			var runner = {};
@@ -890,9 +890,31 @@
 					LZString.decompressFromEncodedURIComponent(specifiedRunnerDeck)
 				);
 				if (typeof json.cards == 'undefined') json.cards = [];
-				// Update identity dropdown and image
-				$("#identityselect option[value=" + json.identity + "]").prop("selected", "selected");
-				$("#identity").prop("src", "images/" + ChangeImageFileToJPG(cardSet[json.identity].imageFile));
+				
+				// Check if the identity from the URL is available in the filtered dropdown
+				var identityInDropdown = $("#identityselect option[value=" + json.identity + "]").length > 0;
+				
+				if (identityInDropdown) {
+					// Update identity dropdown and image
+					$("#identityselect option[value=" + json.identity + "]").prop("selected", "selected");
+					$("#identity").prop("src", "images/" + ChangeImageFileToJPG(cardSet[json.identity].imageFile));
+				} else {
+					// Identity not available (set not allowed), fall back to first available identity
+					var firstIdentity = $("#identityselect option:first").val();
+					if (firstIdentity && cardSet[firstIdentity]) {
+						json.identity = parseInt(firstIdentity);
+						$("#identityselect").val(firstIdentity);
+						$("#identity").prop("src", "images/" + ChangeImageFileToJPG(cardSet[firstIdentity].imageFile));
+						console.warn("Identity from URL not in allowed sets, falling back to:", cardSet[firstIdentity].title);
+					}
+				}
+			} else {
+				// No runner deck in URL - set default identity from first dropdown option
+				var firstIdentity = $("#identityselect option:first").val();
+				if (firstIdentity && cardSet[firstIdentity]) {
+					json.identity = parseInt(firstIdentity);
+					$("#identity").prop("src", "images/" + ChangeImageFileToJPG(cardSet[firstIdentity].imageFile));
+				}
 			}
 			
 			// Load corp deck from URL parameter (c) - the opponent's deck
