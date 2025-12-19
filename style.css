@@ -1850,6 +1850,9 @@ body::-webkit-scrollbar-track {
 	cursor: pointer;
 	border-radius: 3px;
 	transition: background-color 0.15s ease, color 0.15s ease;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
 }
 
 .deck-card-entry:hover {
@@ -1861,6 +1864,11 @@ body::-webkit-scrollbar-track {
 	background-color: rgba(51, 255, 51, 0.25);
 }
 
+.deck-card-info {
+	display: flex;
+	align-items: center;
+}
+
 .deck-card-count {
 	display: inline-block;
 	min-width: 22px;
@@ -1870,6 +1878,14 @@ body::-webkit-scrollbar-track {
 
 .deck-card-title {
 	color: var(--crt-green);
+}
+
+.deck-card-subtype {
+	color: var(--crt-amber);
+	font-size: 0.85em;
+	opacity: 0.85;
+	margin-left: 8px;
+	white-space: nowrap;
 }
 
 .leftrow {

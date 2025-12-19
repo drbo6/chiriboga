@@ -1057,11 +1057,22 @@
 							if (cardType === 'event') {
 								categories['Event'].push({ id: id, count: ct, title: card.title });
 							} else if (cardType === 'hardware') {
-								categories['Hardware'].push({ id: id, count: ct, title: card.title });
+								// Check for Console subtype
+								var isConsole = subTypes.indexOf('Console') !== -1;
+								categories['Hardware'].push({ id: id, count: ct, title: card.title, isConsole: isConsole });
 							} else if (cardType === 'program' && isIcebreaker) {
-								categories['Icebreaker'].push({ id: id, count: ct, title: card.title });
+								// Determine icebreaker subtype(s)
+								var breakerTypes = [];
+								if (subTypes.indexOf('Fracter') !== -1) breakerTypes.push('Fracter');
+								if (subTypes.indexOf('Decoder') !== -1) breakerTypes.push('Decoder');
+								if (subTypes.indexOf('Killer') !== -1) breakerTypes.push('Killer');
+								if (subTypes.indexOf('AI') !== -1) breakerTypes.push('AI');
+								var breakerTypeStr = breakerTypes.length > 0 ? breakerTypes.join('/') : '';
+								categories['Icebreaker'].push({ id: id, count: ct, title: card.title, breakerType: breakerTypeStr });
 							} else if (cardType === 'program') {
-								categories['Program'].push({ id: id, count: ct, title: card.title });
+								// Check for Trojan subtype
+								var isTrojan = subTypes.indexOf('Trojan') !== -1;
+								categories['Program'].push({ id: id, count: ct, title: card.title, isTrojan: isTrojan });
 							} else if (cardType === 'resource') {
 								categories['Resource'].push({ id: id, count: ct, title: card.title });
 							}
@@ -1113,8 +1124,20 @@
 					for (var k = 0; k < cards.length; k++) {
 						var cardEntry = cards[k];
 						html += '<div class="deck-card-entry" data-card-id="' + cardEntry.id + '" onclick="ShowLightbox(' + cardEntry.id + ');">';
-						html += '<span class="deck-card-count">' + cardEntry.count + 'x</span> ';
-						html += '<span class="deck-card-title">' + cardEntry.title + '</span>';
+						html += '<span class="deck-card-info"><span class="deck-card-count">' + cardEntry.count + 'x</span> ';
+						html += '<span class="deck-card-title">' + cardEntry.title + '</span></span>';
+						// Show icebreaker subtype if available
+						if (cardEntry.breakerType) {
+							html += '<span class="deck-card-subtype">[' + cardEntry.breakerType + ']</span>';
+						}
+						// Show Console indicator for hardware
+						if (cardEntry.isConsole) {
+							html += '<span class="deck-card-subtype">[Console]</span>';
+						}
+						// Show Trojan indicator for programs
+						if (cardEntry.isTrojan) {
+							html += '<span class="deck-card-subtype">[Trojan]</span>';
+						}
 						html += '</div>';
 					}
 					
