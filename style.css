@@ -1452,10 +1452,10 @@ body::-webkit-scrollbar-track {
 
 #cardcontainer { 
 	display:grid; 
-	grid-template-columns:repeat(auto-fit,minmax(120px,1fr)); 
+	grid-template-columns:repeat(auto-fit,minmax(120px, max-content)); 
 	gap:12px; 
 	padding:16px; 
-	justify-content:stretch; 
+	justify-content:start; 
 	overflow-x:auto; 
 	min-width:min-content; 
 	grid-auto-rows:min-content; 
@@ -1475,6 +1475,7 @@ body::-webkit-scrollbar-track {
 	display:grid; 
 	grid-template-rows: auto minmax(30px, auto) auto; 
 	align-content:start; 
+	max-width: 250px;
 }
 #cardcontainer .card-item::after {
 	content:"";
