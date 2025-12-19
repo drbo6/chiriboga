@@ -1124,6 +1124,12 @@
 					   if (factionOrderA !== factionOrderB) return factionOrderA - factionOrderB;
 					   // Alphabetical within faction
 					   return (cardA.title || '').localeCompare(cardB.title || '');
+				   } else if (currentSort === 'quantity') {
+					   var qtyA = gauntletCardCounts[idA] || 0;
+					   var qtyB = gauntletCardCounts[idB] || 0;
+					   if (qtyA !== qtyB) return qtyB - qtyA; // Descending (highest qty first)
+					   // Secondary: alphabetical by title
+					   return (cardA.title || '').localeCompare(cardB.title || '');
 				   }
 				   return 0;
 			   });
@@ -1141,6 +1147,9 @@
 			} else if (currentSort === 'type') {
 				currentSort = 'faction';
 				$('#sortbydeck').html('SORT BY:<br>FACTION');
+			} else if (currentSort === 'faction') {
+				currentSort = 'quantity';
+				$('#sortbydeck').html('SORT BY:<br>QUANTITY');
 			} else {
 				currentSort = 'name';
 				$('#sortbydeck').html('SORT BY:<br>NAME');
