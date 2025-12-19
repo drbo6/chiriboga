@@ -1290,17 +1290,16 @@
 			modalHtml += '</div>';
 			modalHtml += '<div style="color: var(--crt-red); font-family: monospace; padding: 10px; text-align: center;">';
 			modalHtml += '<p style="font-size: 16px;"><strong>' + cardName + '</strong></p>';
-			modalHtml += '<p style="margin-top: 10px;">How many would you like to sell?</p>';
-			modalHtml += '<p style="margin-top: 5px; font-size: 14px;">(You have ' + availableCount + ' available)</p>';
+			modalHtml += '<p class="sell-modal-text">How many would you like to sell?</p>';
 			modalHtml += '</div>';
 			// Quantity stepper
-			modalHtml += '<div class="settings-stepper" style="margin: 10px 0;">';
+			modalHtml += '<div class="settings-stepper sell-modal-stepper">';
 			modalHtml += '<button type="button" class="stepper-btn" onclick="AdjustSellQuantity(-1);" id="sell-qty-minus">-</button>';
-			modalHtml += '<span class="stepper-value" id="sell-qty-value" style="min-width: 40px;">1</span>';
+			modalHtml += '<span class="stepper-value sell-modal-qty" id="sell-qty-value">1</span>';
 			modalHtml += '<button type="button" class="stepper-btn" onclick="AdjustSellQuantity(1);" id="sell-qty-plus"' + (availableCount <= 1 ? ' disabled' : '') + '>+</button>';
 			modalHtml += '</div>';
 			// Credit display
-			modalHtml += '<p style="color: var(--crt-red); font-family: monospace; margin: 5px 0;">You will receive <span id="sell-credit-value">1</span> <img src="images/nsg/NSG_CREDIT.svg" class="card-icon" alt="credit" style="height: 16px; filter: invert(1) brightness(0.5) sepia(1) saturate(5) hue-rotate(80deg);"></p>';
+			modalHtml += '<p class="sell-modal-credit">You will receive <span id="sell-credit-value" class="sell-modal-credit-value">1</span> <img src="images/nsg/NSG_CREDIT.svg" class="card-icon" alt="credit" style="filter: invert(1) brightness(0.5) sepia(1) saturate(5) hue-rotate(80deg);"></p>';
 			// Buttons
 			modalHtml += '<div style="display: flex; justify-content: center; gap: 20px; margin-top: 15px; width: 100%;">';
 			modalHtml += '<button class="button" onclick="CloseSellConfirmModal();">CANCEL</button>';
@@ -1528,7 +1527,7 @@
 			if (gauntletCredits < cheapestPackCost) {
 				// Show red alert message - can't afford any packs
 				var alertHtml = '<div id="pool-verification-alert" class="pool-verification-alert">';
-				alertHtml += 'ALERT! - You failed the pool verification test with this runner. You may not be able to build a legal deck to continue the Gauntlet.';
+				alertHtml += 'ALERT! - You currently do not have enough cards to build a legal deck with this runner. You may not be able to continue the Gauntlet. Sorry. Please let yourself out.';
 				alertHtml += '</div>';
 				
 				// Insert the alert between the runner image and the card stats (#output)
