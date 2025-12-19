@@ -1,245 +1,3 @@
-
-
-<!DOCTYPE html> <html lang="en"> <head> <meta charset="UTF-8"> <meta name="viewport" content="width=device-width, initial-scale=1.0"> <title>Netrunner: Solo Mode</title> <link href="images/favicon.ico" rel="icon"> <link rel="manifest" href="manifest.json"> <link rel="stylesheet"
-
-pasted
-
-Do you see any reason why I tend to end up with more Anarch cards than the other factions in my subset?
-
-10:09 PM
-
-Investigated card selection logic and identified missing faction balancing mechanism.
-20s
-
-
-
-
-
-
-
-
-
-
-
-Looking at your LaunchGauntlet() function, I can see the issue. When selecting random cards for the subset, there's no faction balancing:
-
-javascript
-for (var cardId in cardSet) {
-  if (!cardSet[cardId]) continue;
-  if (cardSet[cardId].player !== runner) continue;
-  if (cardSet[cardId].cardType !== cardType) continue;
-  if (cardSet[cardId].cardType === 'identity') continue;
-  if (!CardFromAllowedSet(cardId)) continue;
-  if (excludedCardIds[cardId]) continue;
-  if (CardMatchesRequirement(cardId, matchSubtypes, excludeSubtypes)) {
-    matchingCards.push(parseInt(cardId));
-  }
-}
-This pulls from all runner cards matching the requirements without regard to faction. If Anarch has more programs, icebreakers, or whatever subtypes your gauntletConfig.randomCardRequirements specifies, they'll naturally dominate the random selection pool.
-
-To fix this, you could add faction balancing—something like:
-
-Group matchingCards by faction first
-When selecting, randomly pick a faction, then pick a card from that faction's pool
-Or select round-robin across factions until you hit the quantity
-Would you like me to draft a fix? I'd need to see config-gauntlet.js to understand what card type/subtype requirements you're working with, but the structural change would be straightforward regardless.
-
-
-systemgateway.js
-js
-
-
-systemupdate2021.js
-js
-
-
-config-gauntlet.js
-233 lines
-
-js
-
-Here is the config and the two sets. I don't think there are more anarchs in there?
-
-10:11 PM
-
-3 steps
-
-Examining the System Update 2021 card set
-Show working file
-
-Devised script to audit faction distribution across card sets.
-
-Let me write a quick script to count the faction distribution across the allowed sets:
-
-
-Extract runner card faction and type info from the set files
-
-
-
-Pivoted toward scripting for clearer card analysis.
-
-Let me write a proper analysis script:
-
-
-2 steps
-
-Running the card distribution analysis
-
-
-
-Analyzed faction distribution across card categories and identified imbalances.
-
-
-
-
-There's your answer. While the total cards per faction are balanced (18 each), look at the breakdown by card type:
-
-Programs: Anarch 9, Criminal 6, Shaper 8 Non-icebreaker programs: Anarch 5, Criminal 2, Shaper 3 Resources: Anarch 5, Criminal 2, Shaper 3
-
-Your gauntlet config requests:
-
-8 non-icebreaker programs → Anarch owns 50% of the pool (5/10)
-12 resources → Anarch owns 38% of the pool (5/13), vs Criminal at 15%
-So when you randomly pull programs and resources, Anarch cards have a much higher probability of being selected. The faction imbalance isn't in the total card count—it's in the specific card types your randomCardRequirements is requesting.
-
-Fix options:
-
-Faction-balanced selection — modify the random selection to pick a faction first (equally weighted), then pick a card from that faction's pool for the given type.
-Weighted random by faction — give under-represented factions higher weights to compensate for smaller pools.
-Per-faction quotas — explicitly require "4 resources from each faction" rather than "12 resources."
-Want me to draft option 1 as a code change? It would slot into your LaunchGauntlet() function's random card loop.
-
-
-index.php
-php
-
-I would like a balancedFactions boolean in the config and when it is true you can use a faction-balanced selection method
-
-10:16 PM
-
-3 steps
-
-Viewing the LaunchGauntlet function in index.php
-Show working file
-
-Architected config flag and refactored card selection logic.
-
-
-
-Now I have the full picture. I'll create updated versions of both files:
-
-config-gauntlet.js — add the balancedFactions option
-index.php — modify the random card selection to use faction-balanced selection when enabled
-
-Creating updated config-gauntlet.js with balancedFactions option
-config-gauntlet.js
-
-Refactoring card selection logic to implement faction-balanced methodology.
-
-
-
-
-Now let me update the index.php with the faction-balanced selection logic:
-
-
-6 steps
-
-Check for hidden characters in the file
-
-
-
-Identified file format issue requiring conversion.
-
-The file has Windows line endings. Let me convert and then make the edit:
-
-
-2 steps
-
-Replace the random card selection logic with faction-balanced version
-+84
--32
-index.php
-
-Let me verify the change looks good.
-
-Let me verify the change:
-
-
-Verify the updated faction-balanced selection code
-Show working file
-
-The code looks good. Now let me present both files to the user.
-
-Both files are ready. Let me copy them to the outputs directory:
-
-
-2 steps
-
-Presented 2 files
-
-Synthesized configuration feature with faction-balancing methodology.
-
-Here are the updated files:
-
-config-gauntlet.js — Added balancedFactions: true (lines 32-35):
-
-javascript
-// ===== BALANCED FACTIONS =====
-// If true, random card selection will balance across runner factions (Anarch, Criminal, Shaper, Neutral)
-// This prevents factions with more cards of a given type from dominating the card pool
-// If false, cards are selected purely randomly from the matching pool
-balancedFactions: true,
-index.php — The random card selection now branches based on that flag:
-
-When true: Groups matching cards by faction first, then for each selection picks a random faction (equal weight among factions that have cards left), then picks a random card from that faction
-When false: Original behavior (pick randomly from the entire pool)
-With your current card distribution (Anarch having 9 programs vs Criminal's 6), enabling this should bring the expected faction distribution much closer to 25% each rather than Anarch dominating program and resource slots.
-
-Config gauntlet
-JS 
-Index
-Code · PHP 
-Could we change the balancing method in index so that every faction has as close to the same number of cards as possible while still meeting the random requirements?
-
-10:21 PM
-
-Reconciling card repetition mechanics with balanced faction distribution.
-1m, 18s
-
-
-
-
-
-Good idea — that's more deterministic. Instead of randomly picking a faction each time (which still allows variance), we can calculate exact quotas upfront and distribute evenly.
-
-
-6 steps
-
-Presented file
-
-Implemented quota-based faction balancing system successfully.
-
-Done. The new approach guarantees even distribution:
-
-For 12 resources across 4 factions: exactly 3 from each faction
-
-For 15 events across 4 factions: 3 factions get 4, 1 faction gets 3 (which faction gets the extra is randomized via the shuffle)
-
-For 8 non-icebreaker programs across 3 factions (if Neutral has none): 2 factions get 3, 1 faction gets 2
-
-The shuffle before allocation ensures the remainder slots are distributed fairly across runs rather than always favoring the same factions.
-
-Index
-Code · PHP 
-
-
-
-
-
-Claude is AI and can make mistakes. Please double-check responses.
-Index · PHP
-Copy
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -249,6 +7,40 @@ Copy
   <link href="images/favicon.ico" rel="icon">
   <link rel="manifest" href="manifest.json">
   <link rel="stylesheet" href="style.css" />
+  <style>
+    /* Settings Panel Styles - matching credits-panel */
+    .settings-panel { flex:1; border:1px solid var(--crt-green)44; padding:15px; display:flex; flex-direction:column; gap:10px; overflow:hidden; }
+    .settings-header-row { display:flex; justify-content:space-between; align-items:center; margin-bottom:4px; }
+    .settings-title { font-size:14px; letter-spacing:4px; opacity:0.8; }
+    .settings-back { background:var(--bg-dark); color:var(--crt-green); border:1px solid var(--border-green-dark); padding:6px 12px; font-size:10px; letter-spacing:2px; cursor:pointer; }
+    .settings-back:hover { background:var(--crt-green); color:var(--bg-dark); }
+    .settings-content { overflow-y:auto; flex:1 1 auto; display:flex; flex-direction:column; gap:4px; padding-right:6px; }
+    .settings-group { display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px solid var(--crt-green)22; }
+    .settings-group:last-child { border-bottom:none; }
+    .settings-label { font-size:11px; letter-spacing:2px; color:var(--crt-green-pale); text-transform:uppercase; }
+    /* Stepper for gauntlet length */
+    .settings-stepper { display:flex; align-items:center; gap:8px; }
+    .stepper-btn { background:var(--bg-dark); color:var(--crt-green); border:1px solid var(--border-green-dark); width:28px; height:28px; font-size:16px; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all 0.2s; }
+    .stepper-btn:hover:not(:disabled) { background:var(--crt-green); color:var(--bg-dark); }
+    .stepper-btn:disabled { color:var(--border-green-dark); border-color:var(--border-green-dark); cursor:default; opacity:0.4; }
+    .stepper-value { color:var(--crt-green); font-size:14px; min-width:24px; text-align:center; }
+    /* Toggle switch */
+    .settings-switch { position:relative; }
+    .settings-switch input { opacity:0; width:0; height:0; position:absolute; }
+    .switch-label { display:block; width:40px; height:20px; background:var(--bg-dark); border:1px solid var(--border-green-dark); border-radius:10px; cursor:pointer; position:relative; transition:all 0.3s; }
+    .switch-label::after { content:''; position:absolute; width:14px; height:14px; background:var(--crt-green-muted); border-radius:50%; top:2px; left:3px; transition:all 0.3s; }
+    .settings-switch input:checked + .switch-label { background:var(--border-green); border-color:var(--crt-green); }
+    .settings-switch input:checked + .switch-label::after { left:21px; background:var(--crt-green); }
+    /* Checkboxes for sets */
+    .settings-checkboxes { display:flex; flex-direction:column; gap:6px; align-items:flex-end; }
+    .checkbox-label { display:flex; align-items:center; gap:8px; color:var(--crt-green-pale); cursor:pointer; font-size:10px; letter-spacing:1px; }
+    .checkbox-label input { appearance:none; -webkit-appearance:none; width:14px; height:14px; border:1px solid var(--border-green-dark); background:var(--bg-dark); cursor:pointer; position:relative; flex-shrink:0; }
+    .checkbox-label input:checked { background:var(--border-green); border-color:var(--crt-green); }
+    .checkbox-label input:checked::after { content:'✓'; position:absolute; color:var(--crt-green); font-size:10px; top:-1px; left:2px; }
+    .checkbox-label:hover input:not(:disabled) { border-color:var(--crt-green); }
+    .checkbox-label.checkbox-disabled { opacity:0.5; cursor:default; }
+    .checkbox-label.checkbox-disabled input { cursor:default; }
+  </style>
   <?php include 'cardrenderer/webfont.php'; ?>
   <script src="deck/lz-string.min.js"></script>
   <script src="deck/seedrandom.min.js"></script>
@@ -364,6 +156,54 @@ Copy
               </div>
             </div>
 
+            <div class="settings-panel" id="settings-panel" style="display:none;">
+              <div class="settings-header-row">
+                <div class="settings-title">SETTINGS</div>
+                <button class="settings-back" onclick="closeSettings()">BACK</button>
+              </div>
+              <div class="settings-content">
+                <div class="settings-group">
+                  <label class="settings-label">GAUNTLET LENGTH</label>
+                  <div class="settings-stepper">
+                    <button class="stepper-btn" id="gauntlet-length-minus" onclick="adjustGauntletLength(-1)">−</button>
+                    <span class="stepper-value" id="gauntlet-length-value">4</span>
+                    <button class="stepper-btn" id="gauntlet-length-plus" onclick="adjustGauntletLength(1)">+</button>
+                  </div>
+                </div>
+                <div class="settings-group">
+                  <label class="settings-label">ALTERNATE FACTIONS</label>
+                  <div class="settings-switch">
+                    <input type="checkbox" id="alternate-factions-toggle" onchange="toggleAlternateFactions()">
+                    <label for="alternate-factions-toggle" class="switch-label"></label>
+                  </div>
+                </div>
+                <div class="settings-group">
+                  <label class="settings-label">BALANCED FACTIONS</label>
+                  <div class="settings-switch">
+                    <input type="checkbox" id="balanced-factions-toggle" onchange="toggleBalancedFactions()">
+                    <label for="balanced-factions-toggle" class="switch-label"></label>
+                  </div>
+                </div>
+                <div class="settings-group">
+                  <label class="settings-label">ALLOWED SETS</label>
+                  <div class="settings-checkboxes">
+                    <label class="checkbox-label checkbox-disabled">
+                      <input type="checkbox" id="set-sg" checked disabled>
+                      <span>System Gateway</span>
+                    </label>
+                    <label class="checkbox-label">
+                      <input type="checkbox" id="set-su21" onchange="toggleAllowedSet('su21')">
+                      <span>System Update 2021</span>
+                    </label>
+                    <label class="checkbox-label">
+                      <input type="checkbox" id="set-elev" onchange="toggleAllowedSet('elev')">
+                      <span>Elevation</span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <div class="tutorial-panel" id="tutorial-panel" style="display:none;">
               <div class="tutorial-header-row">
                 <div class="tutorial-title">TUTORIAL</div>
@@ -422,6 +262,111 @@ Copy
     var aiDeck = null;
     var giromRunnerDecks = [];
     var giromCorpDecks = [];
+    
+    // Settings overrides (initialized from gauntletConfig on page load)
+    var settingsOverrides = {
+      gauntletLength: null,
+      alternateFactions: null,
+      balancedFactions: null,
+      allowedSets: null
+    };
+    
+    // Load settings from localStorage, falling back to config defaults
+    function initializeSettings() {
+      var saved = null;
+      try {
+        var savedJson = localStorage.getItem('chiriboga-settings');
+        if (savedJson) {
+          saved = JSON.parse(savedJson);
+        }
+      } catch (e) {
+        console.warn('Could not load settings from localStorage:', e);
+      }
+      
+      // Use saved values if available, otherwise fall back to config
+      settingsOverrides.gauntletLength = (saved && typeof saved.gauntletLength === 'number') 
+        ? Math.min(12, Math.max(4, saved.gauntletLength))  // Clamp to valid range
+        : (gauntletConfig.gauntletLength || 4);
+      settingsOverrides.alternateFactions = (saved && typeof saved.alternateFactions === 'boolean') 
+        ? saved.alternateFactions 
+        : (gauntletConfig.alternateFactions !== false);
+      settingsOverrides.balancedFactions = (saved && typeof saved.balancedFactions === 'boolean') 
+        ? saved.balancedFactions 
+        : (gauntletConfig.balancedFactions || false);
+      settingsOverrides.allowedSets = (saved && Array.isArray(saved.allowedSets)) 
+        ? saved.allowedSets.slice() 
+        : (gauntletConfig.allowedSets ? gauntletConfig.allowedSets.slice() : []);
+      
+      // Ensure System Gateway is always included
+      if (settingsOverrides.allowedSets.indexOf('sg') === -1) {
+        settingsOverrides.allowedSets.push('sg');
+      }
+      
+      // Update UI to match
+      document.getElementById('gauntlet-length-value').textContent = settingsOverrides.gauntletLength;
+      document.getElementById('alternate-factions-toggle').checked = settingsOverrides.alternateFactions;
+      document.getElementById('balanced-factions-toggle').checked = settingsOverrides.balancedFactions;
+      document.getElementById('set-su21').checked = settingsOverrides.allowedSets.indexOf('su21') !== -1;
+      document.getElementById('set-elev').checked = settingsOverrides.allowedSets.indexOf('elev') !== -1;
+      
+      // Update stepper button states
+      updateStepperButtons();
+    }
+    
+    // Save settings to localStorage
+    function saveSettings() {
+      try {
+        var toSave = {
+          gauntletLength: settingsOverrides.gauntletLength,
+          alternateFactions: settingsOverrides.alternateFactions,
+          balancedFactions: settingsOverrides.balancedFactions,
+          allowedSets: settingsOverrides.allowedSets
+        };
+        localStorage.setItem('chiriboga-settings', JSON.stringify(toSave));
+      } catch (e) {
+        console.warn('Could not save settings to localStorage:', e);
+      }
+    }
+    
+    // Update stepper button disabled states based on current value
+    function updateStepperButtons() {
+      var minusBtn = document.getElementById('gauntlet-length-minus');
+      var plusBtn = document.getElementById('gauntlet-length-plus');
+      minusBtn.disabled = settingsOverrides.gauntletLength <= 4;
+      plusBtn.disabled = settingsOverrides.gauntletLength >= 12;
+    }
+    
+    // Settings control functions
+    function adjustGauntletLength(delta) {
+      var newVal = settingsOverrides.gauntletLength + delta;
+      if (newVal >= 4 && newVal <= 12) {
+        settingsOverrides.gauntletLength = newVal;
+        document.getElementById('gauntlet-length-value').textContent = newVal;
+        updateStepperButtons();
+        saveSettings();
+      }
+    }
+    
+    function toggleAlternateFactions() {
+      settingsOverrides.alternateFactions = document.getElementById('alternate-factions-toggle').checked;
+      saveSettings();
+    }
+    
+    function toggleBalancedFactions() {
+      settingsOverrides.balancedFactions = document.getElementById('balanced-factions-toggle').checked;
+      saveSettings();
+    }
+    
+    function toggleAllowedSet(setCode) {
+      var checkbox = document.getElementById('set-' + setCode);
+      var idx = settingsOverrides.allowedSets.indexOf(setCode);
+      if (checkbox.checked && idx === -1) {
+        settingsOverrides.allowedSets.push(setCode);
+      } else if (!checkbox.checked && idx !== -1) {
+        settingsOverrides.allowedSets.splice(idx, 1);
+      }
+      saveSettings();
+    }
     
     // Function to select random decks
     function selectRandomDecks() {
@@ -492,10 +437,9 @@ Copy
       
       // Helper to check if card is from an allowed set
       function CardFromAllowedSet(cardId) {
-        if (!gauntletConfig || !gauntletConfig.allowedSets) return true;
-        if (gauntletConfig.allowedSets.length === 0) return true;
+        if (!settingsOverrides.allowedSets || settingsOverrides.allowedSets.length === 0) return true;
         
-        var allowedSets = gauntletConfig.allowedSets;
+        var allowedSets = settingsOverrides.allowedSets;
         var cardIdStr = String(cardId);
         
         // Map card ID ranges to set codes
@@ -537,7 +481,7 @@ Copy
       
       // Add random cards
       if (gauntletConfig && gauntletConfig.randomCardRequirements) {
-        var useBalancedFactions = gauntletConfig.balancedFactions || false;
+        var useBalancedFactions = settingsOverrides.balancedFactions || false;
         var runnerFactions = ['Anarch', 'Criminal', 'Shaper', 'Neutral'];
         
         for (var req = 0; req < gauntletConfig.randomCardRequirements.length; req++) {
@@ -632,8 +576,8 @@ Copy
       }
       
       // Select opponents based on gauntlet configuration
-      var gauntletLength = (gauntletConfig && gauntletConfig.gauntletLength) ? gauntletConfig.gauntletLength : 4;
-      var alternateFactions = (gauntletConfig && typeof gauntletConfig.alternateFactions !== 'undefined') ? gauntletConfig.alternateFactions : true;
+      var gauntletLength = settingsOverrides.gauntletLength || 4;
+      var alternateFactions = settingsOverrides.alternateFactions;
       
       var selectedOpponents = [];
       
@@ -734,7 +678,7 @@ Copy
         credits: gauntletConfig && gauntletConfig.startingCredits ? gauntletConfig.startingCredits : 0,
         creditsWon: 0,
         gauntletLength: gauntletLength,
-        allowedSets: gauntletConfig && gauntletConfig.allowedSets ? gauntletConfig.allowedSets : [],
+        allowedSets: settingsOverrides.allowedSets || [],
         seed: seed,
         shopPurchaseCount: 0
       };
@@ -793,6 +737,9 @@ Copy
       // Select initial random decks
       selectRandomDecks();
 
+      // Initialize settings from config
+      initializeSettings();
+
       // Lock menu layout dimensions so panel swaps do not shift the UI
       lockMenuLayoutDimensions();
 
@@ -812,6 +759,12 @@ Copy
       // Handle gauntlet/tournament mode
       if (option === 'tournament') {
         LaunchGauntlet();
+        return;
+      }
+      
+      // Handle settings
+      if (option === 'settings') {
+        openSettings();
         return;
       }
       
@@ -1015,6 +968,33 @@ Copy
       document.getElementById('menu-buttons').style.display='flex';
       // Clear explicit width so menu layout can adapt on resize
       var p = document.getElementById('credits-panel');
+      p.style.width='';
+      p.style.maxHeight='';
+    }
+
+    // Settings toggle
+    function openSettings(){
+      var menu = document.getElementById('menu-buttons');
+      var panel = document.getElementById('settings-panel');
+      // If already open, act like back button
+      if (menu.style.display === 'none' && panel.style.display === 'flex') {
+        closeSettings();
+        return;
+      }
+      // Capture current width of menu buttons before hiding
+      var rect = menu.getBoundingClientRect();
+      var w = rect.width;
+      var h = rect.height;
+      menu.style.display='none';
+      panel.style.width = w + 'px';
+      panel.style.maxHeight = h + 'px';
+      panel.style.display='flex';
+    }
+    function closeSettings(){
+      document.getElementById('settings-panel').style.display='none';
+      document.getElementById('menu-buttons').style.display='flex';
+      // Clear explicit width so menu layout can adapt on resize
+      var p = document.getElementById('settings-panel');
       p.style.width='';
       p.style.maxHeight='';
     }
