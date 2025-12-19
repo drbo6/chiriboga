@@ -1462,6 +1462,9 @@ body::-webkit-scrollbar-track {
 	background:transparent; 
 	flex:1; 
 	min-width:0; 
+	/* Mobile fix: optimize scroll and paint performance */
+	-webkit-overflow-scrolling: touch;
+	contain: layout style;
 }
 #cardcontainer .card-item { 
 	background:#0a0f0a; 
@@ -1476,6 +1479,11 @@ body::-webkit-scrollbar-track {
 	grid-template-rows: auto minmax(30px, auto) auto; 
 	align-content:start; 
 	max-width: 250px;
+	/* Mobile rendering fix: force GPU layer to prevent blank cards on scroll */
+	-webkit-transform: translateZ(0);
+	transform: translateZ(0);
+	-webkit-backface-visibility: hidden;
+	backface-visibility: hidden;
 }
 #cardcontainer .card-item::after {
 	content:"";
@@ -1497,6 +1505,8 @@ body::-webkit-scrollbar-track {
 #cardcontainer .card-item.not-in-deck img {
 	opacity: 0.5;
 	filter: brightness(0.75) saturate(0.5);
+	/* Mobile fix: hint browser to optimize filter changes */
+	will-change: opacity, filter;
 }
 #cardcontainer .card-item.not-in-deck:hover img {
 	opacity: 0.7;
@@ -1508,6 +1518,9 @@ body::-webkit-scrollbar-track {
 	border-radius:6px; 
 	display:block; 
 	position:relative; 
+	/* Mobile fix: ensure images paint correctly with lazy loading */
+	-webkit-transform: translateZ(0);
+	transform: translateZ(0);
 }
 #cardcontainer .card-title { 
 	font-size:12px; 
@@ -1552,7 +1565,11 @@ body::-webkit-scrollbar-track {
 	position:absolute; 
 	top:calc(50% - 15px); 
 	left:50%; 
-	transform:translate(-50%,-50%); 
+	/* Mobile fix: use translate3d for GPU acceleration and add backface-visibility */
+	-webkit-transform:translate3d(-50%,-50%,0);
+	transform:translate3d(-50%,-50%,0); 
+	-webkit-backface-visibility: hidden;
+	backface-visibility: hidden;
 	background:var(--bg-dark); 
 	color:var(--crt-green); 
 	padding:6px 10px; 
@@ -1569,6 +1586,8 @@ body::-webkit-scrollbar-track {
 	box-shadow:0 0 8px rgba(31,109,31,0.4), inset 0 0 12px rgba(31,109,31,0.25); 
 	transition:opacity .2s; 
 	z-index:2; 
+	/* Hint to browser to optimize opacity changes */
+	will-change: opacity;
 }
 #cardcontainer .count-badge.has-copies { 
 	opacity:1; 
