@@ -185,7 +185,7 @@
                   </div>
                 </div>
                 <div class="settings-group">
-                  <label class="settings-label">ALLOWED SETS</label>
+                  <label class="settings-label">ALLOWED<br />SETS</label>
                   <div class="settings-checkboxes">
                     <label class="checkbox-label checkbox-disabled">
                       <input type="checkbox" id="set-sg" checked disabled>
@@ -243,7 +243,7 @@
         </div>
 
         <div class="meta-stack portrait-only">
-          <div class="version">BUILD 0.1.0-ALPHA // 2077.<?php echo date('m.d'); ?></div>
+          <div class="version">BUILD 0.6.6-BETA // 2077.<?php echo date('m.d'); ?></div>
           <div class="status-bar">
             <span class="status-item" style="cursor:pointer;" onclick="openCredits()">CREDITS</span>
             <span class="status-item" id="threat-level-portrait">THREAT LEVEL: <span id="threat-color-portrait">1</span></span>
