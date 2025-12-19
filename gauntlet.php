@@ -1213,21 +1213,21 @@
 				
 				if (currentTypeFilter === 'none') {
 					isVisible = true;
-				} else if (currentTypeFilter === 'faction') {
-					// Show only cards matching the identity's faction (not neutral)
-					var identity = cardSet[json.identity];
-					if (identity) {
-						identityFaction = (identity.faction || '').toLowerCase();
-						var cardFaction = (card.faction || '').toLowerCase();
-						var isNeutral = cardFaction === 'neutral' || cardFaction === 'neutral-runner' || cardFaction === 'neutral-corp';
-						isVisible = !isNeutral && cardFaction === identityFaction;
-					}
 				} else if (currentTypeFilter === 'influence') {
 					// Show cards that are NOT in the identity's faction and NOT neutral
 					var cardFaction = (card.faction || '').toLowerCase();
 					var isNeutral = cardFaction === 'neutral' || cardFaction === 'neutral-runner' || cardFaction === 'neutral-corp';
 					var matchesFaction = cardFaction === identityFaction;
 					isVisible = !isNeutral && !matchesFaction;
+				} else if (currentTypeFilter === 'anarch') {
+					var cardFaction = (card.faction || '').toLowerCase();
+					isVisible = (cardFaction === 'anarch' || cardFaction === 'anarch-runner');
+				} else if (currentTypeFilter === 'criminal') {
+					var cardFaction = (card.faction || '').toLowerCase();
+					isVisible = (cardFaction === 'criminal' || cardFaction === 'criminal-runner');
+				} else if (currentTypeFilter === 'shaper') {
+					var cardFaction = (card.faction || '').toLowerCase();
+					isVisible = (cardFaction === 'shaper' || cardFaction === 'shaper-runner');
 				} else {
 					var cardType = (card.cardType || '').toLowerCase();
 					isVisible = (currentTypeFilter === cardType);
@@ -1239,12 +1239,18 @@
 
 		function CycleTypeFilter() {
 			if (currentTypeFilter === 'none') {
-				currentTypeFilter = 'faction';
-				$('#sortdeck').html('FILTER:<br>FACTION');
-			} else if (currentTypeFilter === 'faction') {
 				currentTypeFilter = 'influence';
 				$('#sortdeck').html('FILTER:<br>INFLUENCE');
 			} else if (currentTypeFilter === 'influence') {
+				currentTypeFilter = 'anarch';
+				$('#sortdeck').html('FILTER:<br>ANARCH');
+			} else if (currentTypeFilter === 'anarch') {
+				currentTypeFilter = 'criminal';
+				$('#sortdeck').html('FILTER:<br>CRIMINAL');
+			} else if (currentTypeFilter === 'criminal') {
+				currentTypeFilter = 'shaper';
+				$('#sortdeck').html('FILTER:<br>SHAPER');
+			} else if (currentTypeFilter === 'shaper') {
 				currentTypeFilter = 'event';
 				$('#sortdeck').html('FILTER:<br>EVENT');
 			} else if (currentTypeFilter === 'event') {
