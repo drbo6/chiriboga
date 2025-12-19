@@ -19,8 +19,7 @@ var gauntletConfig = {
     agendaPointScored: -2,     // Credits per agenda point scored by corp (negative = loss)
     runSuccessful: 1,          // Credits for successful run - not implemented yet
     runEnded: -1,              // Credits deducted when run ends - not implemented yet
-    corpTrashed: -1,           // Credits deducted when corp card is trashed - not implemented yet
-    runnerTrashed: 1           // Credits gained when runner card is trashed - not implemented yet
+    minimalCredits: 10         // Minimum credits player can have (prevents going negative)
   },
 
   // ===== ALTERNATE FACTIONS =====

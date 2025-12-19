@@ -1127,25 +1127,46 @@ function PlayerWin(player, msgstr) {
           
           // Calculate creditsWon for this match
           // Formula: victory + (agendaPointStolen * runnerAgendaPoints) + (agendaPointScored * corpAgendaPoints)
-          // Note: agendaPointScored is typically negative, so we add it (not subtract)
+          //        + (runSuccessful * successfulRuns) + (runEnded * endedRuns)
+          // Note: agendaPointScored and runEnded are typically negative, so we add them (not subtract)
           if (typeof gauntletConfig !== 'undefined' && gauntletConfig && gauntletConfig.matchRewards) {
             try {
               var rewards = gauntletConfig.matchRewards;
               var victory = (typeof rewards.victory !== 'undefined') ? rewards.victory : 5;
               var agendaPointStolen = (typeof rewards.agendaPointStolen !== 'undefined') ? rewards.agendaPointStolen : 0;
               var agendaPointScored = (typeof rewards.agendaPointScored !== 'undefined') ? rewards.agendaPointScored : 0;
+              var runSuccessfulReward = (typeof rewards.runSuccessful !== 'undefined') ? rewards.runSuccessful : 0;
+              var runEndedReward = (typeof rewards.runEnded !== 'undefined') ? rewards.runEnded : 0;
+              var minimalCredits = (typeof rewards.minimalCredits !== 'undefined') ? rewards.minimalCredits : 0;
               
               var runnerPoints = AgendaPoints(runner);
               var corpPoints = AgendaPoints(corp);
               
-              // agendaPointScored is negative, so we add it (not subtract)
-              var creditsThisMatch = victory + (agendaPointStolen * runnerPoints) + (agendaPointScored * corpPoints);
+              // Count successful runs and ended runs from the game log
+              var successfulRuns = 0;
+              var endedRuns = 0;
+              if (typeof capturedLog !== 'undefined' && Array.isArray(capturedLog)) {
+                for (var i = 0; i < capturedLog.length; i++) {
+                  if (capturedLog[i] === "Run successful") {
+                    successfulRuns++;
+                  } else if (capturedLog[i] === "Run ends") {
+                    endedRuns++;
+                  }
+                }
+              }
               
-              // Ensure creditsWon is at least equal to victory
-              creditsThisMatch = Math.max(creditsThisMatch, victory);
+              // Calculate total credits for this match
+              var creditsThisMatch = victory 
+                + (agendaPointStolen * runnerPoints) 
+                + (agendaPointScored * corpPoints)
+                + (runSuccessfulReward * successfulRuns)
+                + (runEndedReward * endedRuns);
+              
+              // Ensure creditsWon is at least minimalCredits
+              creditsThisMatch = Math.max(creditsThisMatch, minimalCredits);
               
               gauntletState.creditsWon = (gauntletState.creditsWon || 0) + creditsThisMatch;
-              console.log("Credits won this match: " + creditsThisMatch + " (total: " + gauntletState.creditsWon + ")");
+              console.log("Credits won this match: " + creditsThisMatch + " (victory:" + victory + " agenda:" + (agendaPointStolen * runnerPoints) + "/" + (agendaPointScored * corpPoints) + " runs:" + successfulRuns + "/" + endedRuns + " total: " + gauntletState.creditsWon + ")");
             } catch (rewardError) {
               console.error("Error calculating credits won:", rewardError);
               // Just use victory as default if calculation fails
