@@ -3312,3 +3312,95 @@ function mycowebResolveSubroutine(cardRef, subtype, excludeSelf) {
     cardRef
   );
 }
+
+//Card 34: Aggressive Trendsetting
+//Haas-Bioroid Agenda: Initiative
+//Advancement: 3, Points: 1
+//The first time the Runner trashes an installed Corp card during each of their turns,
+//they may spend [click]. If they do not, you get +1 allotted [click] for your next turn.
+cardSet[35037] = {
+  title: "Aggressive Trendsetting",
+  imageFile: "35037.png",
+  player: corp,
+  faction: "Haas-Bioroid",
+  cardType: "agenda",
+  subTypes: ["Initiative"],
+  agendaPoints: 1,
+  advancementRequirement: 3,
+  
+  triggeredThisTurn: false,
+  pendingTrigger: false, //set by automaticOnWouldTrash, used by responseOnTrash
+  
+  //Reset the trigger flag at the start of each Runner turn
+  responseOnRunnerTurnBegins: {
+    Resolve: function() {
+      this.triggeredThisTurn = false;
+    },
+    automatic: true,
+  },
+  
+  //Detect when an installed Corp card is about to be trashed during Runner's turn
+  //This fires BEFORE the card moves to Archives, so we can check cardLocation
+  automaticOnWouldTrash: {
+    Resolve: function(cards) {
+      //Only trigger during Runner's turn
+      if (playerTurn !== runner) return;
+      //Only trigger once per turn
+      if (this.triggeredThisTurn) return;
+      
+      //Check if any of the trashed cards was an installed Corp card
+      for (var i = 0; i < cards.length; i++) {
+        var card = cards[i];
+        if (card.player !== corp) continue;
+        
+        //Check if it was installed (not in HQ, R&D, or Archives piles)
+        var loc = card.cardLocation;
+        if (loc === corp.HQ.cards) continue;
+        if (loc === corp.RnD.cards) continue;
+        if (loc === corp.archives.cards) continue;
+        
+        //It was an installed Corp card - set flag to trigger in responseOnTrash
+        this.pendingTrigger = true;
+        return;
+      }
+    },
+  },
+  
+  //Present the Runner's choice after the trash completes
+  responseOnTrash: {
+    Enumerate: function(cards) {
+      if (!this.pendingTrigger) return [];
+      return [{}];
+    },
+    Resolve: function(params) {
+      this.pendingTrigger = false;
+      this.triggeredThisTurn = true;
+      
+      var cardRef = this;
+      var choices = [];
+      
+      //Runner may spend click if they have one
+      if (CheckClicks(runner, 1)) {
+        choices.push({ spend: true, label: "Spend [click]", button: "Spend [click]" });
+      }
+      choices.push({ spend: false, label: "Decline (Corp gets +1 click next turn)", button: "Decline" });
+      
+      DecisionPhase(
+        runner,
+        choices,
+        function(choiceParams) {
+          if (choiceParams.spend) {
+            SpendClicks(runner, 1);
+            Log("Runner spends [click] to prevent Aggressive Trendsetting");
+          } else {
+            AddTempBonusClicks(corp, 1);
+          }
+        },
+        "Aggressive Trendsetting",
+        "Spend [click] or Corp gets +1 allotted click next turn?",
+        cardRef
+      );
+    },
+    text: "Runner may spend [click] or Corp gets +1 allotted click",
+  },
+};
