@@ -563,6 +563,27 @@
 					}
 				}
 				
+				// Sort identities alphabetically by display title
+				playerIdentities.sort(function(a, b) {
+					var fullTitleA = cardSet[a].title || '';
+					var fullTitleB = cardSet[b].title || '';
+					var shortTitleA = fullTitleA;
+					var shortTitleB = fullTitleB;
+					
+					if (deckPlayer === corp) {
+						var colonIdxA = fullTitleA.indexOf(': ');
+						if (colonIdxA > -1) shortTitleA = fullTitleA.substring(colonIdxA + 2).trim();
+						var colonIdxB = fullTitleB.indexOf(': ');
+						if (colonIdxB > -1) shortTitleB = fullTitleB.substring(colonIdxB + 2).trim();
+					} else {
+						// Runner
+						if (fullTitleA.indexOf(':') > -1) shortTitleA = fullTitleA.split(':')[0].trim();
+						if (fullTitleB.indexOf(':') > -1) shortTitleB = fullTitleB.split(':')[0].trim();
+					}
+					
+					return shortTitleA.localeCompare(shortTitleB);
+				});
+				
 				// Clear and populate the dropdown
 				$("#identityselect").empty();
 				for (var i = 0; i < playerIdentities.length; i++) {
