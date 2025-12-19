@@ -2394,10 +2394,21 @@ body { background: #0a0a0a; min-height: 100vh; display: flex; align-items: cente
 
 .tutorial-item:hover {
   background-color: var(--crt-green);
-  color: var(--bg-dark);
+  color: black;
   text-shadow: none;
   border-color: var(--crt-green);
   box-shadow: 0 0 12px var(--button-glow-hover), inset 0 0 12px var(--button-glow-hover-inset);
+}
+
+.tutorial-item:hover .tutorial-number {
+  color: black;
+  border-color: black;
+  background: rgba(0, 0, 0, 0.2);
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.35), inset 0 0 6px rgba(0, 0, 0, 0.25);
+}
+
+.tutorial-item:hover .tutorial-label {
+  color: black;
 }
 
 .tutorial-item:active {

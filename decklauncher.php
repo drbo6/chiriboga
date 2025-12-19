@@ -5,17 +5,17 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1">
 		<title>Chiriboga Deck Launcher</title>
 		<link href="images/favicon.ico" rel="icon">
-		<link rel="stylesheet" href="jquery/jquery-ui.css" />
-		<link rel="stylesheet" href="style.css" />
+		<?php echo '<link rel="stylesheet" href="jquery/jquery-ui.css?' . filemtime('jquery/jquery-ui.css') . '" />'; ?>
+		<?php echo '<link rel="stylesheet" href="style.css?' . filemtime('style.css') . '" />'; ?>
 		<link rel="manifest" href="manifest.json">
 		<?php
 		include 'cardrenderer/webfont.php';
+		echo '<script src="jquery/jquery-3.2.1.min.js?' . filemtime('jquery/jquery-3.2.1.min.js') . '"></script>';
+		echo '<script src="jquery/jquery-ui.min.js?' . filemtime('jquery/jquery-ui.min.js') . '"></script>';
+		echo '<script src="jquery/textarea-helper.js?' . filemtime('jquery/textarea-helper.js') . '"></script>';
+		echo '<script src="deck/lz-string.min.js?' . filemtime('deck/lz-string.min.js') . '"></script>';
+		echo '<script src="deck/seedrandom.min.js?' . filemtime('deck/seedrandom.min.js') . '"></script>';
 		?>
-		<script src="jquery/jquery-3.2.1.min.js"></script>
-		<script src="jquery/jquery-ui.min.js"></script>
-		<script src="jquery/textarea-helper.js"></script>
-		<script src="deck/lz-string.min.js"></script>
-		<script src="deck/seedrandom.min.js"></script>
 		<script>
 			//create some variables so we can load the card definitions
 			var runner = {};
@@ -103,7 +103,7 @@
 		?>
 		<script>
 			// Load card data from JSON
-			$.getJSON('carddata/carddata.json', function(data) {
+			$.getJSON('carddata/carddata.json?<?php echo filemtime('carddata/carddata.json'); ?>', function(data) {
 				cardData = data;
 				// Build quick lookup by code for import
 				try {

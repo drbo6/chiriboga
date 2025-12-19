@@ -10,16 +10,16 @@
 		echo '<link rel="stylesheet" type="text/css" href="style.css?' . filemtime('style.css') . '" />';
 		?> 
 		<link rel="manifest" href="manifest.json">
-		<script src="jquery/jquery-3.2.1.min.js"></script>
-		<script src="cardrenderer/pixi.min.js"></script>
-		<script src="cardrenderer/pixi-particles.min.js"></script>
+		<?php echo '<script src="jquery/jquery-3.2.1.min.js?' . filemtime('jquery/jquery-3.2.1.min.js') . '"></script>'; ?>
+		<?php echo '<script src="cardrenderer/pixi.min.js?' . filemtime('cardrenderer/pixi.min.js') . '"></script>'; ?>
+		<?php echo '<script src="cardrenderer/pixi-particles.min.js?' . filemtime('cardrenderer/pixi-particles.min.js') . '"></script>'; ?>
 		<?php
 		echo '<script src="cardrenderer/particlesystems.js?' . filemtime('cardrenderer/particlesystems.js') . '"></script>';
 		echo '<script src="cardrenderer/cardrenderer.js?' . filemtime('cardrenderer/cardrenderer.js') . '"></script>';
 		include 'cardrenderer/webfont.php';
 		?>
-		<script src="deck/lz-string.min.js"></script>
-		<script src="deck/seedrandom.min.js"></script>
+		<?php echo '<script src="deck/lz-string.min.js?' . filemtime('deck/lz-string.min.js') . '"></script>'; ?>
+		<?php echo '<script src="deck/seedrandom.min.js?' . filemtime('deck/seedrandom.min.js') . '"></script>'; ?>
 		<script>
 			var cardSet = []; //prepare to receive card definitions
 			var setIdentifiers = []; //set identifiers
