@@ -5,17 +5,17 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1">
 		<title>Chiriboga Deck Launcher</title>
 		<link href="images/favicon.ico" rel="icon">
-		<link rel="stylesheet" href="jquery/jquery-ui.css" />
-		<link rel="stylesheet" href="style.css" />
+		<link rel="stylesheet" href="jquery/jquery-ui.css?<?php echo filemtime('jquery/jquery-ui.css'); ?>" />
+		<link rel="stylesheet" href="style.css?<?php echo filemtime('style.css'); ?>" />
 		<link rel="manifest" href="manifest.json">
 		<?php
 		include 'cardrenderer/webfont.php';
 		?>
-		<script src="jquery/jquery-3.2.1.min.js"></script>
-		<script src="jquery/jquery-ui.min.js"></script>
-		<script src="jquery/textarea-helper.js"></script>
-		<script src="deck/lz-string.min.js"></script>
-		<script src="deck/seedrandom.min.js"></script>
+		<script src="jquery/jquery-3.2.1.min.js?<?php echo filemtime('jquery/jquery-3.2.1.min.js'); ?>"></script>
+		<script src="jquery/jquery-ui.min.js?<?php echo filemtime('jquery/jquery-ui.min.js'); ?>"></script>
+		<script src="jquery/textarea-helper.js?<?php echo filemtime('jquery/textarea-helper.js'); ?>"></script>
+		<script src="deck/lz-string.min.js?<?php echo filemtime('deck/lz-string.min.js'); ?>"></script>
+		<script src="deck/seedrandom.min.js?<?php echo filemtime('deck/seedrandom.min.js'); ?>"></script>
 		<script>
 			//create some variables so we can load the card definitions
 			var runner = {};
@@ -246,11 +246,11 @@
 				// Rebuild pack button HTML
 				var newButtonsHtml = '';
 				
-				// SELL EXTRA CARDS button - disable if no cards to sell
+				// SELL ALL EXTRA CARDS button - disable if no cards to sell
 				var hasCards = HasCardsToSell();
 				var sellDisabled = hasCards ? '' : ' disabled';
 				var sellStyle = hasCards ? 'width: 100%;' : 'width: 100%; opacity: 0.6; border-color: var(--border-red-dark); color: var(--crt-red-muted); cursor: default; background-color: rgba(12,24,12,0.7) !important; pointer-events: none;';
-				newButtonsHtml += '<button class="button" onclick="SellExtraCards();"' + sellDisabled + ' style="' + sellStyle + '">SELL EXTRA CARDS</button>';
+				newButtonsHtml += '<button class="button" onclick="SellExtraCards();"' + sellDisabled + ' style="' + sellStyle + '">SELL ALL EXTRA CARDS</button>';
 				
 				// Add buttons for selected packs
 				for (var i = 0; i < selectedShopPacks.length; i++) {
@@ -267,7 +267,7 @@
 				buttonsDiv.innerHTML = newButtonsHtml;
 			}
 
-			// Function to show the Buy Cards modal
+			// Function to show the Buy/Sell Cards modal
 			function ShowBuyCardsModal() {
 				// Packs are already selected on page load
 				var buycardsHtml = '<div class="solo-menu" style="display: flex; flex-direction: column; align-items: center; width: 600px;">';
@@ -277,11 +277,11 @@
 				buycardsHtml += '</div>';
 				buycardsHtml += '<div id="shop-buttons" style="display: flex; flex-direction: column; justify-content: center; gap: 10px; width: 100%; padding: 20px; min-height: 200px;">';
 				
-				// SELL EXTRA CARDS button - disable if no cards to sell
+				// SELL ALL EXTRA CARDS button - disable if no cards to sell
 				var hasCards = HasCardsToSell();
 				var sellDisabled = hasCards ? '' : ' disabled';
 				var sellStyle = hasCards ? 'width: 100%;' : 'width: 100%; opacity: 0.6; border-color: var(--border-red-dark); color: var(--crt-red-muted); cursor: default; background-color: rgba(12,24,12,0.7) !important; pointer-events: none;';
-				buycardsHtml += '<button class="button" onclick="SellExtraCards();"' + sellDisabled + ' style="' + sellStyle + '">SELL EXTRA CARDS</button>';
+				buycardsHtml += '<button class="button" onclick="SellExtraCards();"' + sellDisabled + ' style="' + sellStyle + '">SELL ALL EXTRA CARDS</button>';
 				
 				// Add buttons for selected packs
 				for (var i = 0; i < selectedShopPacks.length; i++) {
@@ -311,7 +311,7 @@
 				modal.style.display = 'flex';
 			}
 
-			// Function to close the Buy Cards modal
+			// Function to close the Buy/Sell Cards modal
 			function CloseBuyCardsModal() {
 				var modal = document.getElementById('buy-cards-modal');
 				if (modal) {
@@ -324,7 +324,7 @@
 				RefreshShopPackButtons();
 			}
 
-			// Function to sell extra cards (cards with more than 3 copies)
+			// Function to sell all extra cards (cards with more than 3 copies)
 			function SellExtraCards() {
 				var cardsToRemove = []; // Array of {cardId, count}
 				var totalCredits = 0;
@@ -3018,7 +3018,7 @@
 				</div>
 			<div class="leftrow buttons">
 				<button id="launch" class="button button-red" onclick="if(!$(this).prop('disabled')) window.location.href=$(this).prop('href');">PLAY<br>DECK</button>
-				<button id="buycards" onclick="ShowBuyCardsModal();" class="button">BUY<br>CARDS</button>
+				<button id="buycards" onclick="ShowBuyCardsModal();" class="button">BUY/SELL<br>CARDS</button>
 				<button id="addnoninfluence" onclick="AddNonInfluence();" class="button">ADD IN-<br>FACTION</button>
 				<button id="cleardeck" onclick="ClearDeck();" class="button">CLEAR<br>DECK</button>
 				<button id="sortbydeck" onclick="CycleSort();" class="button">SORT BY:<br>NAME</button>

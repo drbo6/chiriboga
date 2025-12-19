@@ -6,10 +6,10 @@
   <title>Netrunner: Solo Mode</title>
   <link href="images/favicon.ico" rel="icon">
   <link rel="manifest" href="manifest.json">
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="style.css?<?php echo filemtime('style.css'); ?>" />
   <?php include 'cardrenderer/webfont.php'; ?>
-  <script src="deck/lz-string.min.js"></script>
-  <script src="deck/seedrandom.min.js"></script>
+  <script src="deck/lz-string.min.js?<?php echo filemtime('deck/lz-string.min.js'); ?>"></script>
+  <script src="deck/seedrandom.min.js?<?php echo filemtime('deck/seedrandom.min.js'); ?>"></script>
   <script>
     var cardSet = []; // prepare to receive card definitions
     var setIdentifiers = []; // set identifiers
