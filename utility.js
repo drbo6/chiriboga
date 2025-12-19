@@ -371,6 +371,8 @@ function ReproductionCode(full=false) {
   if (full || corp.badPublicity > 0) ret += "corp.badPublicity = "+corp.badPublicity+";\n";
   if (full || runner.tags > 0) ret += "runner.tags = "+runner.tags+";\n";
   if (full || runner.coreDamage > 0) ret += "runner.coreDamage = "+runner.coreDamage+";\n";
+  if (full || corp.tempBonusClicks > 0) ret += "corp.tempBonusClicks = "+corp.tempBonusClicks+";\n";
+  if (full || runner.tempBonusClicks > 0) ret += "runner.tempBonusClicks = "+runner.tempBonusClicks+";\n";
   if (full) {
 	  if (playerTurn == corp) ret += "playerTurn = corp;\n";
 	  else ret += "playerTurn = runner;\n";
@@ -1494,14 +1496,60 @@ function IsFaceUp(card) {
 }
 
 /**
- * Provides the clicks for the active player to spend in their action phase.<br/>No message is logged.
+ * Provides the clicks for the active player to spend in their action phase.<br/>Logs if modified.
  *
  * @method ResetClicks
  * @param {Player} player corp or runner
  */
-function ResetClicks(player) {
-  if (player == corp) corp.clickTracker = 3;
-  else if (player == runner) runner.clickTracker = 4;
+function ResetClicks(player) { //DRBO6 - Edited this to accommodate Aggressive Trendsetting
+  //Base allotted clicks
+  var baseClicks = (player == corp) ? 3 : 4;
+  
+  //Apply permanent modifications from cards (modifyAllottedClicks trigger)
+  var permanentMod = ModifyingTriggers("modifyAllottedClicks", player);
+  
+  //Apply temporary one-time bonus (e.g., from Aggressive Trendsetting)
+  var tempMod = player.tempBonusClicks || 0;
+  player.tempBonusClicks = 0; //Clear after use
+  
+  //Calculate total
+  var totalClicks = baseClicks + permanentMod + tempMod;
+  if (totalClicks < 0) totalClicks = 0; //Can't have negative clicks
+  
+  player.clickTracker = totalClicks;
+  
+  //Log if there's any modification
+  if (permanentMod !== 0 || tempMod !== 0) {
+    var playerName = (player == corp) ? "Corp" : "Runner";
+    Log(playerName + " receives " + totalClicks + " allotted clicks");
+  }
+}
+
+/**
+ * Gets the allotted clicks for a player (base + modifications, without temp bonus).<br/>Nothing is logged.
+ *
+ * @method AllottedClicks
+ * @param {Player} player corp or runner
+ * @returns {int} allotted clicks
+ */
+function AllottedClicks(player) {
+  var baseClicks = (player == corp) ? 3 : 4;
+  var permanentMod = ModifyingTriggers("modifyAllottedClicks", player);
+  return Math.max(0, baseClicks + permanentMod);
+}
+
+/**
+ * Adds temporary bonus clicks for a player's next turn.<br/>Logs the result.
+ *
+ * @method AddTempBonusClicks
+ * @param {Player} player corp or runner
+ * @param {int} amount number of bonus clicks to add
+ */
+function AddTempBonusClicks(player, amount) {
+  if (typeof player.tempBonusClicks === 'undefined') player.tempBonusClicks = 0;
+  player.tempBonusClicks += amount;
+  var playerName = (player == corp) ? "Corp" : "Runner";
+  Log(playerName + " will receive +" + amount + " allotted click(s) next turn");
 }
 
 /**

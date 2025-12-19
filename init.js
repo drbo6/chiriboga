@@ -183,6 +183,7 @@ function Init() {
   corp.identityCard = null;
   corp.creditPool = 0;
   corp.clickTracker = 0;
+  corp.tempBonusClicks = 0; //one-time bonus clicks for next turn (e.g., Aggressive Trendsetting)
   corp.scoreArea = []; //scored agendas
   corp.HQ = NewServer("HQ", true); //corp.HQ.cards is corp hand
   corp.RnD = NewServer("R&D", true);
@@ -199,6 +200,7 @@ function Init() {
   runner.creditPool = 0;
   runner.temporaryCredits = 0; //generated at start of run, removed at end of run (e.g. from bad publicity)
   runner.clickTracker = 0;
+  runner.tempBonusClicks = 0; //one-time bonus clicks for next turn
   runner.startingMU = 4;
   runner._renderOnlyMU = runner.startingMU; //don't use this for anything
   runner.scoreArea = []; //stolen agendas
