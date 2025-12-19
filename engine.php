@@ -29,9 +29,6 @@
 		echo '<link rel="stylesheet" type="text/css" href="style.css?' . filemtime('style.css') . '" />';
 		$jsfiles = array('init','phase', 'command', 'checks', 'mechanics', 'utility', 'config-gauntlet');
 		$sets = ["systemgateway","systemupdate2021","midnightsun","elevation"];
-		if (isset($_GET['sets'])) {
-			$sets = explode("-",preg_replace( "/[^a-zA-Z0-9-]/", "", $_GET['sets'] )); 
-		}
 		foreach ($sets as $set) {
 			array_push($jsfiles, 'sets/'.$set);
 		}

@@ -1246,7 +1246,6 @@ function PlayerWin(player, msgstr) {
           
           // Get other parameters
           var runnerDeck = URIParameter("r");
-          var sets = URIParameter("sets");
           
           // Get the next opponent from the opponents array
           var nextCorpDeck = URIParameter("c"); // Default to current if no next opponent
@@ -1260,9 +1259,6 @@ function PlayerWin(player, msgstr) {
           
           // Build the new URL
           var newUrl = 'gauntlet.php?r=' + runnerDeck + '&c=' + nextCorpDeck + '&g=' + updatedGauntlet;
-          if (sets !== "") {
-            newUrl += '&sets=' + sets;
-          }
           
           window.location.href = newUrl;
         } catch (e) {

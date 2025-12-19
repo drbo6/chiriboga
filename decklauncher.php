@@ -70,9 +70,6 @@
 		echo '<script src="utility.js?' . filemtime('utility.js') . '"></script>';
 		
 		$sets = ["systemgateway","systemupdate2021","midnightsun","elevation"];
-		if (isset($_GET['sets'])) {
-			$sets = explode("-",preg_replace( "/[^a-zA-Z0-9-]/", "", $_GET['sets'] )); 
-		}
 		foreach ($sets as $set) {
 			echo '<script src="sets/'.$set.'.js?' . filemtime('sets/'.$set.'.js') . '"></script>';
 		}
@@ -754,14 +751,6 @@
 				dC = "c"; //deckchar is c for corp
 				oC = "r"; //opponentchar is r for runner
 			}
-			var setStr = "";
-			// Default to all core sets including Midnight Sun if none specified
-			if (URIParameter("sets") !== "") {
-				setStr = "sets="+URIParameter("sets")+"&";
-			} else {
-				setStr = "sets=systemgateway-systemupdate2021-midnightsun-elevation&";
-			}
-
 			var playerIdentities = [];
 			for (var i=0; i<cardSet.length; i++) {
 				if (typeof cardSet[i] != 'undefined' &&  typeof cardSet[i].faction != 'undefined') {
@@ -783,7 +772,7 @@
 			  }
 			  var string = JSON.stringify(deckForUri);
 			  var compressed = LZString.compressToEncodedURIComponent(string);
-			  var launchAddress = "engine.php?p=" + dC + "&" + setStr + opponentdeckstr + dC + "=" + compressed;
+			  var launchAddress = "engine.php?p=" + dC + "&" + opponentdeckstr + dC + "=" + compressed;
 			  // Build address for switching sides. If we already have an opponent deck, make it the active deck; otherwise use random
 			  var existingOpponentCompressed = "";
 			  if (opponentdeckstr !== "") {
@@ -797,17 +786,17 @@
 			  var opponentAddress;
 			  if (existingOpponentCompressed) {
 				// We are transitioning: new active side oC gets opponent deck; old active side becomes opponent
-				opponentAddress = "decklauncher.php?p=" + oC + "&" + setStr + oC + "=" + existingOpponentCompressed + "&" + dC + "=" + compressed;
+				opponentAddress = "decklauncher.php?p=" + oC + "&" + oC + "=" + existingOpponentCompressed + "&" + dC + "=" + compressed;
 			  } else {
 				// No opponent deck yet: keep previous behavior (random opponent) while passing current deck as opposite param
-				opponentAddress = "decklauncher.php?p=" + oC + "&" + setStr + oC + "=random&" + dC + "=" + compressed;
+				opponentAddress = "decklauncher.php?p=" + oC + "&" + oC + "=random&" + dC + "=" + compressed;
 			  }
 			  $("#launch").prop("href", launchAddress);
 			  $("#opponent").prop("href", opponentAddress);
 			  history.replaceState(
 				null,
 				"Chiriboga",
-				"decklauncher.php?" + setStr + opponentdeckstr + dC + "=" + compressed
+				"decklauncher.php?" + opponentdeckstr + dC + "=" + compressed
 			  );
 			}
 

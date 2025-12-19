@@ -559,11 +559,9 @@ function LoadDecks() {
   }
 
   var deckJson = {};
-  var setStr = "";
-  if (URIParameter("sets") !== "") setStr = "sets="+URIParameter("sets")+"&";
   $("#randomdeck").attr(
     "onclick",
-    "window.location.href='decklauncher.php?"+setStr+(viewingPlayer==runner?"r":"c")+"=random';"
+    "window.location.href='decklauncher.php?"+(viewingPlayer==runner?"r":"c")+"=random';"
   );
 
   //*RUNNER*
@@ -634,7 +632,7 @@ function LoadDecks() {
 	if (URIParameter("c")) opponentDeckString = "c="+URIParameter("c")+"&";
     $("#editdeck").attr(
       "onclick",
-      "window.location.href='decklauncher.php?p=r&"+setStr+opponentDeckString+"r=" + compressedDeckString + "';"
+      "window.location.href='decklauncher.php?p=r&"+opponentDeckString+"r=" + compressedDeckString + "';"
     );
   }
   PrintDeck(runner.identityCard, runner.stack);
@@ -715,7 +713,7 @@ function LoadDecks() {
 	if (URIParameter("r")) opponentDeckString = "r="+URIParameter("r")+"&";
     $("#editdeck").attr(
       "onclick",
-      "window.location.href='decklauncher.php?p=c&"+setStr+opponentDeckString+"c=" + compressedDeckString + "';"
+      "window.location.href='decklauncher.php?p=c&"+opponentDeckString+"c=" + compressedDeckString + "';"
     );
   }
   PrintDeck(corp.identityCard, corp.RnD.cards);

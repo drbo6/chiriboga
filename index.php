@@ -781,7 +781,7 @@
       var encodedC = LZString.compressToEncodedURIComponent(JSON.stringify(corpOpponentDeck));
       
       // Navigate to gauntlet
-      window.location.href = 'gauntlet.php?sets=systemgateway-systemupdate2021-midnightsun-elevation&r=' + encodedR + '&c=' + encodedC + '&g=' + encodedG;
+      window.location.href = 'gauntlet.php?r=' + encodedR + '&c=' + encodedC + '&g=' + encodedG;
     }
     
 
@@ -936,7 +936,7 @@
           var playerSide = (cardSet[playerDeck.identity].player === runner) ? 'r' : 'c';
           var aiSide = (cardSet[aiDeck.identity].player === runner) ? 'r' : 'c';
           
-          window.location.href = 'decklauncher.php?sets=systemgateway-systemupdate2021-midnightsun-elevation&p=' + playerSide + 
+          window.location.href = 'decklauncher.php?p=' + playerSide + 
                                  '&' + aiSide + '=' + aiCompressed + 
                                  '&' + playerSide + '=' + playerCompressed;
         } else if (option === 'quick' && playerDeck && aiDeck) {
@@ -969,7 +969,7 @@
           var playerSide = (cardSet[playerDeck.identity].player === runner) ? 'r' : 'c';
           var aiSide = (cardSet[aiDeck.identity].player === runner) ? 'r' : 'c';
           
-          window.location.href = 'engine.php?sets=systemgateway-systemupdate2021-midnightsun-elevation&p=' + playerSide + 
+          window.location.href = 'engine.php?p=' + playerSide + 
                                  '&' + aiSide + '=' + aiCompressed + 
                                  '&' + playerSide + '=' + playerCompressed +
                                  '&showdeck=1';
