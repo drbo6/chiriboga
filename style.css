@@ -1982,6 +1982,12 @@ body::-webkit-scrollbar-track {
 #opponentid:not(.collapsed) .opponent-arrow { transform:translateY(-50%) rotate(180deg); }
 #opponentid.collapsed .opponent-body { display:none; }
 
+/* Collection stat - collapsible without triangle */
+.collection-stat { cursor:pointer; }
+.collection-stat-wrapper.collapsed .collection-details { display:none; }
+.collection-details { margin-top:8px; margin-bottom:12px; padding-left:20px; }
+.collection-details > div { display:flex; justify-content:space-between; margin:2px 0; }
+
 /* Hide default arrow in IE/Edge (legacy) */
 select::-ms-expand { display: none; }
 

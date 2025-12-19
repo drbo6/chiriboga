@@ -65,6 +65,10 @@
 			$(document).on('click','#opponentid .opponent-header', function(){
 				var box = $('#opponentid'); box.toggleClass('collapsed');
 			});
+			// Collection stat collapsible handler (no visual triangle)
+			$(document).on('click','.collection-stat-wrapper .collection-stat', function(){
+				$(this).closest('.collection-stat-wrapper').toggleClass('collapsed');
+			});
 		})();
 		</script>
 		<?php
@@ -910,9 +914,21 @@
 			var infClass = 'deck-stat';
 			if (totalInfluence > influenceLimit) infClass += ' bad';
 			validityOutput += '<div class="'+infClass+'"><span class="stat-label">Influence:</span> '+totalInfluence+' / '+influenceLimit+'</div>';
-			// Collection stat - count unique cards in gauntlet subset
-			var collectionSize = Object.keys(gauntletCardCounts).length;
-			validityOutput += '<div class="deck-stat"><span class="stat-label">Collection:</span> '+collectionSize+' unique cards</div>';
+			// Collection stat - count unique cards in gauntlet subset with faction breakdown
+			var collectionSize = 0;
+			var factionCounts = { 'Anarch': 0, 'Criminal': 0, 'Shaper': 0, 'Neutral': 0 };
+			for (var cardId in gauntletCardCounts) {
+				collectionSize += gauntletCardCounts[cardId];
+				if (cardSet[cardId]) {
+					var faction = (cardSet[cardId].faction || '').toLowerCase();
+					if (faction === 'anarch' || faction === 'anarch-runner') factionCounts['Anarch'] += gauntletCardCounts[cardId];
+					else if (faction === 'criminal' || faction === 'criminal-runner') factionCounts['Criminal'] += gauntletCardCounts[cardId];
+					else if (faction === 'shaper' || faction === 'shaper-runner') factionCounts['Shaper'] += gauntletCardCounts[cardId];
+					else if (faction === 'neutral' || faction === 'neutral-runner') factionCounts['Neutral'] += gauntletCardCounts[cardId];
+				}
+			}
+			var collectionDetailsHtml = '<div class="collection-details"><div><span>&gt; Anarch:</span><span>' + factionCounts['Anarch'] + ' cards</span></div><div><span>&gt; Criminal:</span><span>' + factionCounts['Criminal'] + ' cards</span></div><div><span>&gt; Shaper:</span><span>' + factionCounts['Shaper'] + ' cards</span></div><div><span>&gt; Neutral:</span><span>' + factionCounts['Neutral'] + ' cards</span></div></div>';
+			validityOutput += '<div class="collection-stat-wrapper collapsed"><div class="deck-stat collection-stat"><span class="stat-label">Collection:</span> '+collectionSize+' cards</div>' + collectionDetailsHtml + '</div>';
 			// Credits stat
 			validityOutput += '<div class="deck-stat"><span class="stat-label">Credits:</span> '+gauntletCredits+'</div>';
 			validityOutput += '</div>';
@@ -2522,9 +2538,21 @@
 				if (totalAgendaPoints < agendaMin || totalAgendaPoints > agendaMax) agClass += ' bad';
 				validityOutput += '<div class="'+agClass+'"><span class="stat-label">Agenda Pts:</span> '+totalAgendaPoints+' ('+agendaMin+'-'+agendaMax+' required)</div>';
 			  }
-			  // Collection stat - count unique cards in gauntlet subset
-			  var collectionSize = Object.keys(gauntletCardCounts).length;
-			  validityOutput += '<div class="deck-stat"><span class="stat-label">Collection:</span> '+collectionSize+' unique cards</div>';
+			  // Collection stat - count unique cards in gauntlet subset with faction breakdown
+			  var collectionSize = 0;
+			  var factionCounts = { 'Anarch': 0, 'Criminal': 0, 'Shaper': 0, 'Neutral': 0 };
+			  for (var cardId in gauntletCardCounts) {
+				collectionSize += gauntletCardCounts[cardId];
+				if (cardSet[cardId]) {
+					var faction = (cardSet[cardId].faction || '').toLowerCase();
+					if (faction === 'anarch' || faction === 'anarch-runner') factionCounts['Anarch'] += gauntletCardCounts[cardId];
+					else if (faction === 'criminal' || faction === 'criminal-runner') factionCounts['Criminal'] += gauntletCardCounts[cardId];
+					else if (faction === 'shaper' || faction === 'shaper-runner') factionCounts['Shaper'] += gauntletCardCounts[cardId];
+					else if (faction === 'neutral' || faction === 'neutral-runner') factionCounts['Neutral'] += gauntletCardCounts[cardId];
+				}
+			  }
+			  var collectionDetailsHtml = '<div class="collection-details"><div><span>&gt; Anarch:</span><span>' + factionCounts['Anarch'] + ' cards</span></div><div><span>&gt; Criminal:</span><span>' + factionCounts['Criminal'] + ' cards</span></div><div><span>&gt; Shaper:</span><span>' + factionCounts['Shaper'] + ' cards</span></div><div><span>&gt; Neutral:</span><span>' + factionCounts['Neutral'] + ' cards</span></div></div>';
+			  validityOutput += '<div class="collection-stat-wrapper collapsed"><div class="deck-stat collection-stat"><span class="stat-label">Collection:</span> '+collectionSize+' cards</div>' + collectionDetailsHtml + '</div>';
 			  // Credits stat
 			  validityOutput += '<div class="deck-stat"><span class="stat-label">Credits:</span> '+gauntletCredits+'</div>';
 			  validityOutput += '</div>';
