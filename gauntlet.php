@@ -633,7 +633,16 @@
 				for (var i=0; i<cardSet.length; i++) {
 					if (typeof cardSet[i] != 'undefined' &&  typeof cardSet[i].faction != 'undefined') {
 						if (cardSet[i].cardType == 'identity') {
-							if (deckPlayer == cardSet[i].player) playerIdentities.push(i);
+							if (deckPlayer == cardSet[i].player) {
+								// Filter by allowed sets if configured
+								if (gauntletAllowedSets && gauntletAllowedSets.length > 0) {
+									var identitySetCode = cardIdToSet[i] || '';
+									if (gauntletAllowedSets.indexOf(identitySetCode) === -1) {
+										continue; // Skip identities not in allowed sets
+									}
+								}
+								playerIdentities.push(i);
+							}
 						}
 					}
 				}
@@ -726,10 +735,36 @@
 				function LoadOrGenerateGauntletState() {
 					var gauntletParam = URIParameter("g");
 					
+					// Build cardIdToSet mapping from cardData.json pack_code
+					// This must happen before identity filtering
+					var packCodeToSet = {
+						'sg': 'sg',
+						'su21': 'su21',
+						'ms': 'ms',
+						'elev': 'elev'
+					};
+					
+					if (cardData && cardData.data) {
+						for (var i = 0; i < cardData.data.length; i++) {
+							var c = cardData.data[i];
+							var cardId = c.code;
+							// Only map if card exists in cardSet
+							if (cardSet[cardId]) {
+								var packCode = c.pack_code || '';
+								var setCode = packCodeToSet[packCode] || packCode;
+								cardIdToSet[cardId] = setCode;
+							}
+						}
+					}
+					
 					if (gauntletParam && gauntletParam !== "") {
 						// Load gauntlet state from parameter
 						try {
 							var gauntletState = JSON.parse(LZString.decompressFromEncodedURIComponent(gauntletParam));
+							
+							// Extract allowed sets from gauntlet state (must happen before identity dropdown population)
+							gauntletAllowedSets = gauntletState.allowedSets || [];
+							
 							if (gauntletState && gauntletState.subset) {
 								gauntletCardCounts = {};
 								// Rebuild gauntletCardIds from counts and validate card IDs
