@@ -7,7 +7,7 @@ registerPrecon({
     URL: "https://netrunnerdb.com/en/decklist/8fc12751-627a-4053-97f4-a9373734c963/-sg-su21-built-to-last-advancement-factory",
     Notes: "This deck's identity gives you credits whenever you advance cards, so it loads up on advanceable ice and assets to generate lots of money, then uses Trick of Light to quickly move those accumulated advancement tokens onto agendas like Oaktown Renovation to score them in surprise turns.",
     cards: {
-        "30053": 3,  // Spin Doctorn
+        "30053": 3,  // Spin Doctor
         "30060": 1,  // Above the Law
         "30062": 3,  // Ballista
         "30063": 3,  // Pharos
@@ -25,6 +25,6 @@ registerPrecon({
         "31075": 2,  // Archer
         "31076": 3,  // Hortum
         "31077": 3,  // Ice Wall
-        "31080": 3// PAD Campaign
+        "31080": 3   // PAD Campaign
     }
 });

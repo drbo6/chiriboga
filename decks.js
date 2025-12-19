@@ -760,26 +760,26 @@ function LoadDecks() {
   // SET UP THE MAIN STATES FOR THE RUNNER AND CORP
   // ----------------------------------------------
 
-	RunnerTestField(35001, //identity
-		[30032, 30032, 35009, 35008], //heapCards
-		[35015, 35022, 35022, 30033, 35014, 35030, 35005, 35016, 35034, 35004, 35010, 35009, 35008, 35029, 35007,35005,35005,35005,35005], //stackCards
-		[35003, 30009, 30018, 31011, 35027, 31003], //gripCards
-		[35010, 30007,35018,31008,30015,30016,35009], //installed
-		[30069,30069], //stolen
-		cardBackTexturesRunner,glowTextures,strengthTextures
-  );
+	// RunnerTestField(35001, //identity
+	// 	[30032, 30032, 35009, 35008], //heapCards
+	// 	[35015, 35022, 35022, 30033, 35014, 35030, 35005, 35016, 35034, 35004, 35010, 35009, 35008, 35029, 35007,35005,35005,35005,35005], //stackCards
+	// 	[35003, 30009, 30018, 31011, 35027, 31003], //gripCards
+	// 	[35010, 30007,35018,31008,30015,30016,35009], //installed
+	// 	[30069,30069], //stolen
+	// 	cardBackTexturesRunner,glowTextures,strengthTextures
+  // );
 
-	CorpTestField(35036, //identity
-		[30037, 30047,30073,35075,30074], //archivesCards
-		[30073,30072,30047,30073,30073,30039,30039,30039,30039,30039,30039,30039,30039,30039,30039,30039,30039,30039,30039,30039,35044,35044,35044,35045], //rndCards
-		[35072,35040,35082], //hqCards
-		[], //archivesInstalled
-		[35041], //rndInstalled
-		[35042], //hqInstalled
-		[[35038,30072,30072,35075],[35038,35042],[30037, 35053]], //remotes (array of arrays)
-		[30067], //scored
-		cardBackTexturesCorp,glowTextures,strengthTextures
-  );
+	// CorpTestField(35036, //identity
+	// 	[30037, 30047,30073,35075,30074], //archivesCards
+	// 	[30073,30072,30047,30073,30073,30039,30039,30039,30039,30039,30039,30039,30039,30039,30039,30039,30039,30039,30039,30039,35044,35044,35044,35045], //rndCards
+	// 	[35072,35040,35082], //hqCards
+	// 	[], //archivesInstalled
+	// 	[35041], //rndInstalled
+	// 	[35042], //hqInstalled
+	// 	[[35038,30072,30072,35075],[35038,35042],[30037, 35053]], //remotes (array of arrays)
+	// 	[30067], //scored
+	// 	cardBackTexturesCorp,glowTextures,strengthTextures
+  // );
 
   // // REZ ICE
   // // -------
