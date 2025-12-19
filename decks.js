@@ -754,7 +754,7 @@ function LoadDecks() {
   // // You can enable the debug menu at the top of init.js
 
   // debugging = true; //set true to log extra details and pause execution on error
-  viewAllFronts = true; //set true to see all card fronts (for testing)
+  // viewAllFronts = true; //set true to see all card fronts (for testing)
   // mainLoopDelay = 50; //for speedy AI vs AI testing (any faster than this and funny things happen at end-of-game)
 
   // SET UP THE MAIN STATES FOR THE RUNNER AND CORP

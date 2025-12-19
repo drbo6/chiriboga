@@ -185,7 +185,7 @@
                   </div>
                 </div>
                 <div class="settings-group">
-                  <label class="settings-label">ALLOWED<br />SETS</label>
+                  <label class="settings-label">ALLOWED<br />PLAYER SETS</label>
                   <div class="settings-checkboxes">
                     <label class="checkbox-label checkbox-disabled">
                       <input type="checkbox" id="set-sg" checked disabled>
@@ -197,9 +197,13 @@
                     </label>
                     <label class="checkbox-label">
                       <input type="checkbox" id="set-elev" onchange="toggleAllowedSet('elev')">
-                      <span>Elevation</span>
+                      <span>Elevation (Untested)</span>
                     </label>
                   </div>
+                </div>
+                <div class="settings-section-header">GAUNTLET OPPONENTS</div>
+                <div class="precon-list" id="precon-list">
+                  <!-- Populated by JavaScript -->
                 </div>
               </div>
             </div>
@@ -268,7 +272,8 @@
       gauntletLength: null,
       alternateFactions: null,
       balancedFactions: null,
-      allowedSets: null
+      allowedSets: null,
+      preconOverrides: {}  // Maps precon name to boolean override for useForGauntlet
     };
     
     // Load settings from localStorage, falling back to config defaults
@@ -302,6 +307,11 @@
         settingsOverrides.allowedSets.push('sg');
       }
       
+      // Load precon overrides
+      settingsOverrides.preconOverrides = (saved && typeof saved.preconOverrides === 'object' && saved.preconOverrides !== null)
+        ? saved.preconOverrides
+        : {};
+      
       // Update UI to match
       document.getElementById('gauntlet-length-value').textContent = settingsOverrides.gauntletLength;
       document.getElementById('alternate-factions-toggle').checked = settingsOverrides.alternateFactions;
@@ -311,6 +321,9 @@
       
       // Update stepper button states
       updateStepperButtons();
+      
+      // Populate precon list
+      populatePreconList();
     }
     
     // Save settings to localStorage
@@ -320,7 +333,8 @@
           gauntletLength: settingsOverrides.gauntletLength,
           alternateFactions: settingsOverrides.alternateFactions,
           balancedFactions: settingsOverrides.balancedFactions,
-          allowedSets: settingsOverrides.allowedSets
+          allowedSets: settingsOverrides.allowedSets,
+          preconOverrides: settingsOverrides.preconOverrides
         };
         localStorage.setItem('chiriboga-settings', JSON.stringify(toSave));
       } catch (e) {
@@ -366,6 +380,90 @@
         settingsOverrides.allowedSets.splice(idx, 1);
       }
       saveSettings();
+    }
+    
+    // Populate precon list in settings
+    function populatePreconList() {
+      var listContainer = document.getElementById('precon-list');
+      if (!listContainer) return;
+      
+      listContainer.innerHTML = '';
+      
+      // Filter to corp precons only (gauntlet opponents)
+      var corpPrecons = preconDecks.filter(function(d) {
+        if (!cardSet[d.identity]) return false;
+        return cardSet[d.identity].player === corp;
+      });
+      
+      // Sort by faction then name
+      corpPrecons.sort(function(a, b) {
+        var factionA = cardSet[a.identity].faction || '';
+        var factionB = cardSet[b.identity].faction || '';
+        if (factionA !== factionB) return factionA.localeCompare(factionB);
+        return (a.name || '').localeCompare(b.name || '');
+      });
+      
+      for (var i = 0; i < corpPrecons.length; i++) {
+        var precon = corpPrecons[i];
+        var identity = cardSet[precon.identity];
+        var faction = identity.faction || 'Unknown';
+        
+        // Determine if enabled: override takes precedence, otherwise use precon default
+        var isEnabled = settingsOverrides.preconOverrides.hasOwnProperty(precon.name)
+          ? settingsOverrides.preconOverrides[precon.name]
+          : (precon.useForGauntlet === true);
+        
+        var item = document.createElement('div');
+        item.className = 'precon-item';
+        
+        var checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.className = 'precon-checkbox';
+        checkbox.checked = isEnabled;
+        checkbox.dataset.preconName = precon.name;
+        checkbox.onchange = function() {
+          togglePreconOverride(this.dataset.preconName, this.checked);
+        };
+        
+        var nameLink = document.createElement('a');
+        nameLink.className = 'precon-name';
+        nameLink.textContent = precon.name || 'Unknown Deck';
+        if (precon.URL) {
+          nameLink.href = precon.URL;
+          nameLink.target = '_blank';
+          nameLink.rel = 'noopener';
+        }
+        
+        var factionLabel = document.createElement('span');
+        factionLabel.className = 'precon-faction';
+        // Abbreviate faction names
+        var factionAbbrev = {
+          'Jinteki': 'JIN',
+          'Haas-Bioroid': 'HB',
+          'NBN': 'NBN',
+          'Weyland Consortium': 'WEY'
+        };
+        factionLabel.textContent = factionAbbrev[faction] || faction.substring(0, 3).toUpperCase();
+        
+        item.appendChild(checkbox);
+        item.appendChild(nameLink);
+        item.appendChild(factionLabel);
+        listContainer.appendChild(item);
+      }
+    }
+    
+    // Toggle precon override
+    function togglePreconOverride(preconName, enabled) {
+      settingsOverrides.preconOverrides[preconName] = enabled;
+      saveSettings();
+    }
+    
+    // Helper function to check if a precon is enabled for gauntlet
+    function isPreconEnabledForGauntlet(precon) {
+      if (settingsOverrides.preconOverrides.hasOwnProperty(precon.name)) {
+        return settingsOverrides.preconOverrides[precon.name];
+      }
+      return precon.useForGauntlet === true;
     }
     
     // Function to select random decks
@@ -603,6 +701,7 @@
         for (var f = 0; f < corpFactions.length; f++) {
           var faction = corpFactions[f];
           var candidateDecks = preconDecks.filter(function(d) {
+            if (!isPreconEnabledForGauntlet(d)) return false;
             if (!cardSet[d.identity]) return false;
             var identity = cardSet[d.identity];
             return identity.player === corp && identity.faction === faction;
@@ -627,6 +726,7 @@
         // Randomly select opponents from all factions without faction constraint
         // Allows duplicates only after cycling through all available decks
         var candidateDecks = preconDecks.filter(function(d) {
+          if (!isPreconEnabledForGauntlet(d)) return false;
           if (!cardSet[d.identity]) return false;
           var identity = cardSet[d.identity];
           return identity.player === corp;
@@ -759,6 +859,46 @@
       
       // Handle gauntlet/tournament mode
       if (option === 'tournament') {
+        // Check if there are enough gauntlet precons before launching
+        var gauntletCorpDecks = preconDecks.filter(function(d) {
+          if (!isPreconEnabledForGauntlet(d)) return false;
+          if (!cardSet[d.identity]) return false;
+          var identity = cardSet[d.identity];
+          return identity.player === corp;
+        });
+        
+        // Need at least gauntletLength precons total
+        var gauntletLength = settingsOverrides.gauntletLength || 4;
+        if (gauntletCorpDecks.length < gauntletLength) {
+          item.innerHTML = 'MISSING PRECONS';
+          setTimeout(() => {
+            item.innerHTML = 'GAUNTLET';
+          }, 1500);
+          return;
+        }
+        
+        // Need at least 1 precon for each corp faction
+        var requiredFactions = ['Jinteki', 'Haas-Bioroid', 'NBN', 'Weyland Consortium'];
+        var missingFaction = false;
+        for (var i = 0; i < requiredFactions.length; i++) {
+          var faction = requiredFactions[i];
+          var hasFaction = gauntletCorpDecks.some(function(d) {
+            return cardSet[d.identity].faction === faction;
+          });
+          if (!hasFaction) {
+            missingFaction = true;
+            break;
+          }
+        }
+        
+        if (missingFaction) {
+          item.innerHTML = 'MISSING PRECONS';
+          setTimeout(() => {
+            item.innerHTML = 'GAUNTLET';
+          }, 1500);
+          return;
+        }
+        
         LaunchGauntlet();
         return;
       }

@@ -2771,3 +2771,15 @@ body.deck-builder-page {
     height: auto;
     min-height: 100vh;
 }
+/* Precon list for gauntlet settings */
+.settings-section-header { font-size:11px; letter-spacing:2px; color:var(--crt-green-pale); text-transform:uppercase; padding:12px 0 6px 0; border-top:1px solid var(--crt-green)33; margin-top:8px; }
+.precon-list { display:flex; flex-direction:column; gap:4px; }
+.precon-item { display:flex; align-items:center; gap:8px; padding:6px 0; border-bottom:1px solid var(--crt-green)15; }
+.precon-item:last-child { border-bottom:none; }
+.precon-checkbox { appearance:none; -webkit-appearance:none; width:14px; height:14px; border:1px solid var(--border-green-dark); background:var(--bg-dark); cursor:pointer; position:relative; flex-shrink:0; }
+.precon-checkbox:checked { background:var(--border-green); border-color:var(--crt-green); }
+.precon-checkbox:checked::after { content:'✓'; position:absolute; color:var(--crt-green); font-size:10px; top:-1px; left:2px; }
+.precon-checkbox:hover { border-color:var(--crt-green); }
+.precon-name { font-size:10px; letter-spacing:1px; color:var(--crt-green-pale); text-decoration:none; flex:1; cursor:pointer; transition:color 0.2s; }
+.precon-name:hover { color:var(--crt-green); }
+.precon-faction { font-size:8px; letter-spacing:1px; color:var(--crt-green-muted); text-transform:uppercase; flex-shrink:0; }

@@ -506,6 +506,18 @@
 				else if (e.key === 'ArrowRight') { e.preventDefault(); NavigateLightbox(1); }
 				else if (e.key === 'Escape') { e.preventDefault(); HideLightbox(); }
 			});
+			
+			// Right-click handlers for sort and filter buttons
+			$(document).on('contextmenu','#sortdeck', function(e){
+				e.preventDefault();
+				CycleSortReverse();
+				return false;
+			});
+			$(document).on('contextmenu','#filterdeck', function(e){
+				e.preventDefault();
+				CycleFilterReverse();
+				return false;
+			});
 
 			var showingOnlySelected = false;
 			var currentFilter = 'all'; // 'all', 'systemgateway', 'systemupdate2021'
@@ -534,6 +546,43 @@
 					$('#filterdeck').html('FILTER:<br>ALL CARDS');
 				}
 				ApplyFilter();
+			}
+
+			function CycleFilterReverse() {
+				if (currentFilter === 'all') {
+					currentFilter = 'elevation';
+					$('#filterdeck').html('FILTER:<br>ELEV');
+				} else if (currentFilter === 'elevation') {
+					currentFilter = 'systemupdate2021';
+					$('#filterdeck').html('FILTER:<br>SU21');
+				} else if (currentFilter === 'systemupdate2021') {
+					currentFilter = 'systemgateway';
+					$('#filterdeck').html('FILTER:<br>SG');
+				} else {
+					currentFilter = 'all';
+					$('#filterdeck').html('FILTER:<br>ALL CARDS');
+				}
+				ApplyFilter();
+			}
+
+			function CycleSortReverse() {
+				if (currentSort === 'id') {
+					currentSort = 'faction';
+					$('#sortdeck').html('SORT BY:<br>FACTION');
+				} else if (currentSort === 'faction') {
+					currentSort = 'type';
+					$('#sortdeck').html('SORT BY:<br>TYPE');
+				} else if (currentSort === 'type') {
+					currentSort = 'influence';
+					$('#sortdeck').html('SORT BY:<br>INFLUENCE');
+				} else if (currentSort === 'influence') {
+					currentSort = 'name';
+					$('#sortdeck').html('SORT BY:<br>NAME');
+				} else {
+					currentSort = 'id';
+					$('#sortdeck').html('SORT BY:<br>ID');
+				}
+				SortCardContainer();
 			}
 
 		function ApplyFilter() {
