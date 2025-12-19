@@ -33,5 +33,7 @@ registerPrecon({
         "31035": 1,  // Aesop's Pawnshop
         "31036": 2,  // Professional Contacts
         "31037": 3// Dirty Laundry
-    }
+    },
+    // sets: The set codes this deck is designed with
+    sets: ["sg", "su21"]
 });

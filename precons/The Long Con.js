@@ -37,5 +37,7 @@ registerPrecon({
         "31023": 1,  // Sneakdoor Beta
         "31024": 2,  // Security Testing
         "31039": 3// Earthrise Hotel
-    }
+    },
+    // sets: The set codes this deck is designed with
+    sets: ["sg", "su21"]
 });

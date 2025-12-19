@@ -34,5 +34,7 @@ registerPrecon({
         "31076": 3,  // Hortum
         "31077": 3,  // Ice Wall
         "31080": 3   // PAD Campaign
-    }
+    },
+    // sets: The set codes this deck is designed with
+    sets: ["sg", "su21"]
 });

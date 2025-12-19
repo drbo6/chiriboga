@@ -9,7 +9,7 @@ registerPrecon({
     // useForQuickGame: Whether to include this deck in Quick Game selection
     useForQuickGame: false,
     // useForGauntlet: Whether to include this deck in Gauntlet mode selection
-    useForGauntlet: false,
+    useForGauntlet: true,
     // deck_set: The set or category this deck belongs to
     deck_set: "none",
     URL: "https://netrunnerdb.com/en/decklist/288aed16-328e-4678-b461-ed46272cfa29/sg-su21-decoding-you",
@@ -34,5 +34,7 @@ registerPrecon({
         "31029": 2,  // The Maker's Eye
         "31032": 3,  // Egret
         "31037": 3// Dirty Laundry
-    }
+    },
+    // sets: The set codes this deck is designed with
+    sets: ["sg", "su21"]
 });

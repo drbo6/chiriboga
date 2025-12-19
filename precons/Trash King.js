@@ -33,5 +33,7 @@ registerPrecon({
         "31011": 2,  // Scrubber
         "31027": 3,  // Diesel
         "31039": 3// Earthrise Hotel
-    }
+    },
+    // sets: The set codes this deck is designed with
+    sets: ["sg", "su21"]
 });

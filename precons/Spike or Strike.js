@@ -37,5 +37,7 @@ registerPrecon({
         "31079": 1,  // Crisium Grid
         "31080": 2,  // PAD Campaign
         "31081": 2// Enigma
-    }
+    },
+    // sets: The set codes this deck is designed with
+    sets: ["sg", "su21"]
 });

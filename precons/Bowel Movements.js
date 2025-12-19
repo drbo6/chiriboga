@@ -34,5 +34,7 @@ registerPrecon({
         "35016": 2,  // Maintenance Access
         "35026": 2,  // Ritual
         "35029": 1   // Azimat
-    }
+    },
+    // sets: The set codes this deck is designed with
+    sets: ["sg", "elev"]
 });

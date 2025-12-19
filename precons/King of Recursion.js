@@ -9,7 +9,7 @@ registerPrecon({
     // useForQuickGame: Whether to include this deck in Quick Game selection
     useForQuickGame: false,
     // useForGauntlet: Whether to include this deck in Gauntlet mode selection
-    useForGauntlet: false,
+    useForGauntlet: true,
     // deck_set: The set or category this deck belongs to
     deck_set: "none",
     URL: "https://netrunnerdb.com/en/decklist/935c51f3-267d-4835-80df-2459272a2320/-sg-su21-king-of-recursion",
@@ -36,5 +36,7 @@ registerPrecon({
         "31037": 3,  // Dirty Laundry
         "31038": 3,  // Prepaid VoicePAD
         "31039": 3// Earthrise Hotel
-    }
+    },
+    // sets: The set codes this deck is designed with
+    sets: ["sg", "su21"]
 });

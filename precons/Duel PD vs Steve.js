@@ -34,5 +34,7 @@ registerPrecon({
         "31059": 2,  // Hokusai Grid
         "31077": 3,  // Ice Wall
         "31081": 3// Enigma
-    }
+    },
+    // sets: The set codes this deck is designed with
+    sets: ["sg", "su21"]
 });

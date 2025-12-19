@@ -9,7 +9,7 @@ registerPrecon({
     // useForQuickGame: Whether to include this deck in Quick Game selection
     useForQuickGame: false,
     // useForGauntlet: Whether to include this deck in Gauntlet mode selection
-    useForGauntlet: false,
+    useForGauntlet: true,
     // deck_set: The set or category this deck belongs to
     deck_set: "none",
     URL: "https://netrunnerdb.com/en/decklist/15a4982d-512e-4b44-aa12-59e0467bbd71/-sg-su21-cooking-ren-",
@@ -32,5 +32,7 @@ registerPrecon({
         "31015": 3,  // Career Fair
         "31029": 2,  // The Maker's Eye
         "31039": 3// Earthrise Hotel
-    }
+    },
+    // sets: The set codes this deck is designed with
+    sets: ["sg", "su21"]
 });

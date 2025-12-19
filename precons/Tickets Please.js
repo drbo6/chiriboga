@@ -35,5 +35,7 @@ registerPrecon({
         "35026": 1,  // Ritual
         "35027": 1,  // GAMEDRAGON™ Pro
         "35034": 3   // Side Hustle
-    }
+    },
+    // sets: The set codes this deck is designed with
+    sets: ["sg", "elev"]
 });

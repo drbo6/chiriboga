@@ -9,7 +9,7 @@ registerPrecon({
     // useForQuickGame: Whether to include this deck in Quick Game selection
     useForQuickGame: false,
     // useForGauntlet: Whether to include this deck in Gauntlet mode selection
-    useForGauntlet: false,
+    useForGauntlet: true,
     // deck_set: The set or category this deck belongs to
     deck_set: "none",
     URL: "https://netrunnerdb.com/en/decklist/046dca3d-9ba7-4cb1-a029-5e5cb5ec382a/-sg-su21-spirit-breaker",
@@ -33,5 +33,7 @@ registerPrecon({
         "31029": 2,  // The Maker's Eye
         "31037": 3,  // Dirty Laundry
         "31039": 3// Earthrise Hotel
-    }
+    },
+    // sets: The set codes this deck is designed with
+    sets: ["sg", "su21"]
 });

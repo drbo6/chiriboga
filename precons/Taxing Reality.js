@@ -9,7 +9,7 @@ registerPrecon({
     // useForQuickGame: Whether to include this deck in Quick Game selection
     useForQuickGame: false,
     // useForGauntlet: Whether to include this deck in Gauntlet mode selection
-    useForGauntlet: false,
+    useForGauntlet: true,
     // deck_set: The set or category this deck belongs to
     deck_set: "none",
     URL: "https://netrunnerdb.com/en/decklist/324e0519-b293-494f-88cd-245997b26a9f/-sg-su21-taxing-reality",
@@ -34,5 +34,7 @@ registerPrecon({
         "31068": 1,  // Psychographics
         "31069": 2,  // SanSan City Grid
         "31081": 3// Enigma
-    }
+    },
+    // sets: The set codes this deck is designed with
+    sets: ["sg", "su21"]
 });

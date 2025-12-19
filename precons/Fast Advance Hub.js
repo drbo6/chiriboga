@@ -9,7 +9,7 @@ registerPrecon({
     // useForQuickGame: Whether to include this deck in Quick Game selection
     useForQuickGame: false,
     // useForGauntlet: Whether to include this deck in Gauntlet mode selection
-    useForGauntlet: false,
+    useForGauntlet: true,
     // deck_set: The set or category this deck belongs to
     deck_set: "none",
     URL: "https://netrunnerdb.com/en/decklist/c3b4a8d0-7f19-4a30-9867-56399d4fa72d/-sg-su21-fast-advance-hub",
@@ -34,5 +34,7 @@ registerPrecon({
         "31075": 1,  // Archer
         "31080": 3,  // PAD Campaign
         "31081": 2// Enigma
-    }
+    },
+    // sets: The set codes this deck is designed with
+    sets: ["sg", "su21"]
 });

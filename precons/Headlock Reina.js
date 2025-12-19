@@ -9,7 +9,7 @@ registerPrecon({
     // useForQuickGame: Whether to include this deck in Quick Game selection
     useForQuickGame: false,
     // useForGauntlet: Whether to include this deck in Gauntlet mode selection
-    useForGauntlet: false,
+    useForGauntlet: true,
     // deck_set: The set or category this deck belongs to
     deck_set: "none",
     URL: "https://netrunnerdb.com/en/decklist/f59ec206-691a-4a07-b3e5-69c4d3b06460/-gateway-update-headlock-reina",
@@ -38,5 +38,7 @@ registerPrecon({
         "31023": 1,  // Sneakdoor Beta
         "31037": 3,  // Dirty Laundry
         "31039": 3// Earthrise Hotel
-    }
+    },
+    // sets: The set codes this deck is designed with
+    sets: ["sg", "su21"]
 });

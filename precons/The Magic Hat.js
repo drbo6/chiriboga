@@ -38,5 +38,7 @@ registerPrecon({
         "31030": 3,  // Atman
         "31035": 1,  // Aesop's Pawnshop
         "31036": 2// Professional Contacts
-    }
+    },
+    // sets: The set codes this deck is designed with
+    sets: ["sg", "su21"]
 });

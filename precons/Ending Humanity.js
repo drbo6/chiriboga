@@ -9,9 +9,11 @@ registerPrecon({
     // useForQuickGame: Whether to include this deck in Quick Game selection
     useForQuickGame: false,
     // useForGauntlet: Whether to include this deck in Gauntlet mode selection
-    useForGauntlet: false,
+    useForGauntlet: true,
     // deck_set: The set or category this deck belongs to
     deck_set: "none",
+    URL: "https://netrunnerdb.com/en/decklist/75938bff-d669-4bb9-81ce-768abdff0815/-sg-su21-ending-humanity",
+    notes: "Restoring Humanity gives you a credit each turn if there's a facedown card in Archives. Hansei Review feeds this by discarding cards, and you can discard Subliminal Messaging to Hansei then get it back later. Protect your scoring server with cheap \"end the run\" ice like Eli 1.0 and Palisade. Use Seamless Launch to score 4/2 agendas in one turn. Save your Nisei MK II token to protect your final agenda, combining it with Manegarm Skunkworks and Anoetic Void to lock down your remote.",
     cards: {
         "30040": 2,  // Seamless Launch
         "30042": 2,  // Manegarm Skunkworks
@@ -31,5 +33,7 @@ registerPrecon({
         "31054": 3,  // Snare!
         "31081": 3,  // Enigma
         "31082": 3// Subliminal Messaging
-    }
+    },
+    // sets: The set codes this deck is designed with
+    sets: ["sg", "su21"]
 });

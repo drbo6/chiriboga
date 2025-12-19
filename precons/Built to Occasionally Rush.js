@@ -9,7 +9,7 @@ registerPrecon({
     // useForQuickGame: Whether to include this deck in Quick Game selection
     useForQuickGame: false,
     // useForGauntlet: Whether to include this deck in Gauntlet mode selection
-    useForGauntlet: false,
+    useForGauntlet: true,
     // deck_set: The set or category this deck belongs to
     deck_set: "none",
     URL: "https://netrunnerdb.com/en/decklist/31135b71-454c-4f41-9563-eca5f8b1e1ca/-gateway-update-built-to-occasionally-rush",
@@ -35,5 +35,7 @@ registerPrecon({
         "31076": 3,  // Hortum
         "31077": 3,  // Ice Wall
         "31082": 2// Subliminal Messaging
-    }
+    },
+    // sets: The set codes this deck is designed with
+    sets: ["sg", "su21"]
 });

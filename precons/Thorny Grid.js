@@ -34,5 +34,7 @@ registerPrecon({
         "31057": 3,  // Celebrity Gift
         "31058": 2,  // Trick of Light
         "31059": 2// Hokusai Grid
-    }
+    },
+    // sets: The set codes this deck is designed with
+    sets: ["sg", "su21"]
 });

@@ -33,5 +33,7 @@ registerPrecon({
         "31022": 1,  // Femme Fatale
         "31023": 2,  // Sneakdoor Beta
         "31039": 3// Earthrise Hotel
-    }
+    },
+    // sets: The set codes this deck is designed with
+    sets: ["sg", "su21"]
 });

@@ -38,5 +38,7 @@ registerPrecon({
         "35072": 3,  // Anthill Excavation Contract
         "35075": 3,  // Kessleroid
         "35082": 2   // Mahkota Langit Grid
-    }
+    },
+    // sets: The set codes this deck is designed with
+    sets: ["sg", "elev"]
 });

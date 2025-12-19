@@ -34,5 +34,7 @@ registerPrecon({
         "31046": 2,  // Rototurret
         "31054": 1,  // Snare!
         "31066": 2// Tollbooth
-    }
+    },
+    // sets: The set codes this deck is designed with
+    sets: ["sg", "su21"]
 });

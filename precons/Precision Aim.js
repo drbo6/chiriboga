@@ -9,7 +9,7 @@ registerPrecon({
     // useForQuickGame: Whether to include this deck in Quick Game selection
     useForQuickGame: false,
     // useForGauntlet: Whether to include this deck in Gauntlet mode selection
-    useForGauntlet: false,
+    useForGauntlet: true,
     // deck_set: The set or category this deck belongs to
     deck_set: "none",
     URL: "https://netrunnerdb.com/en/decklist/06670078-b27a-4c3b-8fa9-470258adacdd/-sg-su21-precision-aim",
@@ -32,5 +32,7 @@ registerPrecon({
         "31046": 3,  // Rototurret
         "31049": 3,  // Corporate Troubleshooter
         "31080": 2// PAD Campaign
-    }
+    },
+    // sets: The set codes this deck is designed with
+    sets: ["sg", "su21"]
 });

@@ -36,5 +36,7 @@ registerPrecon({
         "31033": 1,  // Gordian Blade
         "31035": 1,  // Aesop's Pawnshop
         "31038": 2// Prepaid VoicePAD
-    }
+    },
+    // sets: The set codes this deck is designed with
+    sets: ["sg", "su21"]
 });

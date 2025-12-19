@@ -9,7 +9,7 @@ registerPrecon({
 	// useForQuickGame: Whether to include this deck in Quick Game selection
 	useForQuickGame: false,
 	// useForGauntlet: Whether to include this deck in Gauntlet mode selection
-	useForGauntlet: false,
+	useForGauntlet: true,
 	// deck_set: The set or category this deck belongs to
 	deck_set: "none",
 	URL: "https://netrunnerdb.com/en/decklist/215fedad-e199-4cd3-b3e2-014d9fcfd578/run-bypass-breach-trash-sg-su21-",
@@ -36,5 +36,7 @@ registerPrecon({
 		"31032": 2,  // Egret
 		"31033": 2,  // Gordian Blade
 		"31037": 2   // Dirty Laundry
-	}
+	},
+	// sets: The set codes this deck is designed with
+	sets: ["sg", "su21"]
 });

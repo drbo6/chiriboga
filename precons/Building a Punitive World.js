@@ -9,7 +9,7 @@ registerPrecon({
     // useForQuickGame: Whether to include this deck in Quick Game selection
     useForQuickGame: false,
     // useForGauntlet: Whether to include this deck in Gauntlet mode selection
-    useForGauntlet: false,
+    useForGauntlet: true,
     // deck_set: The set or category this deck belongs to
     deck_set: "none",
     URL: "https://netrunnerdb.com/en/decklist/b48dcbee-adda-4d0f-a046-861e396e4575/-sg-su21-building-a-punitive-world",
@@ -35,5 +35,7 @@ registerPrecon({
         "31079": 1,  // Crisium Grid
         "31080": 2,  // PAD Campaign
         "31081": 3// Enigma
-    }
+    },
+    // sets: The set codes this deck is designed with
+    sets: ["sg", "su21"]
 });

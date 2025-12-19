@@ -9,7 +9,7 @@ registerPrecon({
     // useForQuickGame: Whether to include this deck in Quick Game selection
     useForQuickGame: false,
     // useForGauntlet: Whether to include this deck in Gauntlet mode selection
-    useForGauntlet: false,
+    useForGauntlet: true,
     // deck_set: The set or category this deck belongs to
     deck_set: "none",
     URL: "https://netrunnerdb.com/en/decklist/ee479e0b-24c4-41a4-9447-505ddc97a59a/-sg-su21-proco-ayla",
@@ -35,5 +35,7 @@ registerPrecon({
         "31030": 3,  // Atman
         "31036": 3,  // Professional Contacts
         "31037": 3// Dirty Laundry
-    }
+    },
+    // sets: The set codes this deck is designed with
+    sets: ["sg", "su21"]
 });

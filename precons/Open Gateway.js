@@ -36,5 +36,7 @@ registerPrecon({
         "31037": 3,  // Dirty Laundry
         "31038": 1,  // Prepaid VoicePAD
         "31039": 3// Earthrise Hotel
-    }
+    },
+    // sets: The set codes this deck is designed with
+    sets: ["sg", "su21"]
 });

@@ -36,5 +36,7 @@ registerPrecon({
         "31031": 1,  // Chameleon
         "31037": 3,  // Dirty Laundry
         "31039": 3// Earthrise Hotel
-    }
+    },
+    // sets: The set codes this deck is designed with
+    sets: ["sg", "su21"]
 });

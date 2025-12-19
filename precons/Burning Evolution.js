@@ -9,7 +9,7 @@ registerPrecon({
     // useForQuickGame: Whether to include this deck in Quick Game selection
     useForQuickGame: false,
     // useForGauntlet: Whether to include this deck in Gauntlet mode selection
-    useForGauntlet: false,
+    useForGauntlet: true,
     // deck_set: The set or category this deck belongs to
     deck_set: "none",
     URL: "https://netrunnerdb.com/en/decklist/201f6554-7454-43ec-a00e-eaf4aefe23f7/sg-su21-burning-evolution",
@@ -33,5 +33,7 @@ registerPrecon({
         "31077": 3,  // Ice Wall
         "31080": 2,  // PAD Campaign
         "31082": 2// Subliminal Messaging
-    }
+    },
+    // sets: The set codes this deck is designed with
+    sets: ["sg", "su21"]
 });

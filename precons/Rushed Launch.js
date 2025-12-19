@@ -35,5 +35,7 @@ registerPrecon({
         "31046": 1,  // Rototurret
         "31066": 2,  // Tollbooth
         "31069": 2// SanSan City Grid
-    }
+    },
+    // sets: The set codes this deck is designed with
+    sets: ["sg", "su21"]
 });

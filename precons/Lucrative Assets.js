@@ -12,8 +12,8 @@ registerPrecon({
     useForGauntlet: true,
     // deck_set: The set or category this deck belongs to
     deck_set: "Girometics SG+SU21",
-    URL: "",
-    Notes: "",
+    URL: "https://netrunnerdb.com/en/decklist/5d13ec62-4d4b-4291-98a0-61abe80b9df8/-sg-su21-near-earth-hub-lucrative-assets",
+    Notes: "NEH rewards you for installing lots of assets, and this deck uses that to play a \"shell game\": you install cards facedown and make the Runner guess which ones are agendas and which are assets or upgrades they'll have to pay to trash. Using never-advance tools, you can score agendas the turn you install them, so the Runner can never be sure what's what. Meanwhile, your cheap taxing ice drains their credits, making it even harder to trash everything. Instead of killing the Runner with damage, you win by emptying their bank account.",
     cards: {
         "30038": 1,  // Ansel 1.0
         "30040": 2,  // Seamless Launch
@@ -36,5 +36,7 @@ registerPrecon({
         "31069": 3,  // SanSan City Grid
         "31080": 3,  // PAD Campaign
         "31081": 2// Enigma
-    }
+    },
+    // sets: The set codes this deck is designed with
+    sets: ["sg", "su21"]
 });

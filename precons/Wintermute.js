@@ -35,5 +35,7 @@ registerPrecon({
         "31045": 3,  // Ravana 1.0
         "31046": 3,  // Rototurret
         "31047": 2// Archived Memories
-    }
+    },
+    // sets: The set codes this deck is designed with
+    sets: ["sg", "su21"]
 });

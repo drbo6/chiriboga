@@ -36,5 +36,7 @@ registerPrecon({
         "31076": 3,  // Hortum
         "31077": 2,  // Ice Wall
         "31078": 3// Punitive Counterstrike
-    }
+    },
+    // sets: The set codes this deck is designed with
+    sets: ["sg", "su21"]
 });

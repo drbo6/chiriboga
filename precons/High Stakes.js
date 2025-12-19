@@ -33,5 +33,7 @@ registerPrecon({
         "31054": 3,  // Snare!
         "31058": 3,  // Trick of Light
         "31082": 2// Subliminal Messaging
-    }
+    },
+    // sets: The set codes this deck is designed with
+    sets: ["sg", "su21"]
 });

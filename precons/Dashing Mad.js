@@ -33,5 +33,7 @@ registerPrecon({
         "35015": 3,  // Lie Low
         "35018": 2,  // Detente
         "35034": 3   // Side Hustle
-    }
+    },
+    // sets: The set codes this deck is designed with
+    sets: ["sg", "elev"]
 });

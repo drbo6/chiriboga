@@ -9,7 +9,7 @@ registerPrecon({
     // useForQuickGame: Whether to include this deck in Quick Game selection
     useForQuickGame: false,
     // useForGauntlet: Whether to include this deck in Gauntlet mode selection
-    useForGauntlet: false,
+    useForGauntlet: true,
     // deck_set: The set or category this deck belongs to
     deck_set: "none",
     URL: "https://netrunnerdb.com/en/decklist/494fec55-e58f-4187-9769-aa44eb03a63c/bio-builder",
@@ -37,5 +37,7 @@ registerPrecon({
         "31048": 3,  // Biotic Labor
         "31069": 1,  // SanSan City Grid
         "31081": 1// Enigma
-    }
+    },
+    // sets: The set codes this deck is designed with
+    sets: ["sg", "su21"]
 });

@@ -35,5 +35,7 @@ registerPrecon({
         "31035": 1,  // Aesop's Pawnshop
         "31037": 3,  // Dirty Laundry
         "31038": 2// Prepaid VoicePAD
-    }
+    },
+    // sets: The set codes this deck is designed with
+    sets: ["sg", "su21"]
 });
