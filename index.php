@@ -191,7 +191,7 @@
               </div>
             </div>
             
-            <div class="match-preview" onclick="rerollDecks()">
+            <div class="match-preview" onclick="selectRandomDecks()">
               <div class="preview-title">QUICK GAME<br />INCOMING..</div>
               <div class="portrait-container" id="player-portrait">
                 <img class="portrait" src="" alt="">
