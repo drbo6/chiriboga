@@ -69,6 +69,17 @@
 			$(document).on('click','.collection-stat-wrapper .collection-stat', function(){
 				$(this).closest('.collection-stat-wrapper').toggleClass('collapsed');
 			});
+			// Right-click handlers for sort and filter buttons
+			$(document).on('contextmenu','#sortbydeck', function(e){
+				e.preventDefault();
+				CycleSortReverse();
+				return false;
+			});
+			$(document).on('contextmenu','#sortdeck', function(e){
+				e.preventDefault();
+				CycleTypeFilterReverse();
+				return false;
+			});
 		})();
 		</script>
 		<?php
@@ -1157,6 +1168,26 @@
 			SortCardsBySort();
 		}
 
+		function CycleSortReverse() {
+			if (currentSort === 'name') {
+				currentSort = 'type';
+				$('#sortbydeck').html('SORT BY:<br>TYPE');
+			} else if (currentSort === 'type') {
+				currentSort = 'faction';
+				$('#sortbydeck').html('SORT BY:<br>FACTION');
+			} else if (currentSort === 'faction') {
+				currentSort = 'influence';
+				$('#sortbydeck').html('SORT BY:<br>INFLUENCE');
+			} else if (currentSort === 'influence') {
+				currentSort = 'quantity';
+				$('#sortbydeck').html('SORT BY:<br>QUANTITY');
+			} else {
+				currentSort = 'name';
+				$('#sortbydeck').html('SORT BY:<br>NAME');
+			}
+			SortCardsBySort();
+		}
+
 		// Type filter state and functions
 		var currentTypeFilter = 'none'; // 'none', 'influence', 'event', 'hardware', 'program', 'resource'
 
@@ -1262,6 +1293,39 @@
 			} else if (currentTypeFilter === 'program') {
 				currentTypeFilter = 'resource';
 				$('#sortdeck').html('FILTER:<br>RESOURCE');
+			} else {
+				currentTypeFilter = 'none';
+				$('#sortdeck').html('FILTER:<br>ALL');
+			}
+			SortCardsBySort();
+			ApplyTypeFilter();
+		}
+
+		function CycleTypeFilterReverse() {
+			if (currentTypeFilter === 'none') {
+				currentTypeFilter = 'resource';
+				$('#sortdeck').html('FILTER:<br>RESOURCE');
+			} else if (currentTypeFilter === 'resource') {
+				currentTypeFilter = 'program';
+				$('#sortdeck').html('FILTER:<br>PROGRAM');
+			} else if (currentTypeFilter === 'program') {
+				currentTypeFilter = 'hardware';
+				$('#sortdeck').html('FILTER:<br>HARDWARE');
+			} else if (currentTypeFilter === 'hardware') {
+				currentTypeFilter = 'event';
+				$('#sortdeck').html('FILTER:<br>EVENT');
+			} else if (currentTypeFilter === 'event') {
+				currentTypeFilter = 'shaper';
+				$('#sortdeck').html('FILTER:<br>SHAPER');
+			} else if (currentTypeFilter === 'shaper') {
+				currentTypeFilter = 'criminal';
+				$('#sortdeck').html('FILTER:<br>CRIMINAL');
+			} else if (currentTypeFilter === 'criminal') {
+				currentTypeFilter = 'anarch';
+				$('#sortdeck').html('FILTER:<br>ANARCH');
+			} else if (currentTypeFilter === 'anarch') {
+				currentTypeFilter = 'influence';
+				$('#sortdeck').html('FILTER:<br>INFLUENCE');
 			} else {
 				currentTypeFilter = 'none';
 				$('#sortdeck').html('FILTER:<br>ALL');
