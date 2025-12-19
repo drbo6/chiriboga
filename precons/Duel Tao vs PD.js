@@ -1,8 +1,16 @@
 // Exported preconstructed deck
 registerPrecon({
+    // name: Display name of the precon deck
     name: "Duel: Tao vs PD",
-    identity: "30019",
-    default: false,
+    // identity: Card ID of the identity/commander for this deck
+    identity: "31044",
+    // useAsCustomDefault: Whether this deck is the default choice for its identity when auto-selecting
+    useAsCustomDefault: false,
+    // useForQuickGame: Whether to include this deck in Quick Game selection
+    useForQuickGame: false,
+    // useForGauntlet: Whether to include this deck in Gauntlet mode selection
+    useForGauntlet: false,
+    // deck_set: The set or category this deck belongs to
     deck_set: "Duel",
     URL: "https://netrunnerdb.com/en/decklist/0c5fcba2-bacd-4e0b-9118-8ae8ec10473c/sg-su21-duel-episode-1-t-o-salonga-vs-pd-",
     notes: "This Tāo Salonga Shaper deck focuses on flexibility, efficiency, and server manipulation to outmaneuver Precision Design’s Haas-Bioroid defenses. It emphasizes economy and tempo with Overclock, Prepaid VoicePAD, Fermenter, and Pantograph, while using virus programs like Botulus and Sneakdoor Beta to pressure the Corp and force purges. Program tutoring via Test Run and card draw from Verbal Plasticity and Aesop’s Pawnshop ensures that Tāo can quickly assemble the right tools for deep runs, swapping ICE and exploiting weaknesses in the Corp’s fast, expensive setup.",

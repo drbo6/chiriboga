@@ -1,8 +1,16 @@
 // Exported preconstructed deck
 registerPrecon({
+    // name: Display name of the precon deck
     name: "King of Recursion",
+    // identity: Card ID of the identity/commander for this deck
     identity: "31014",
-    default: false,
+    // useAsCustomDefault: Whether this deck is the default choice for its identity when auto-selecting
+    useAsCustomDefault: false,
+    // useForQuickGame: Whether to include this deck in Quick Game selection
+    useForQuickGame: false,
+    // useForGauntlet: Whether to include this deck in Gauntlet mode selection
+    useForGauntlet: false,
+    // deck_set: The set or category this deck belongs to
     deck_set: "none",
     URL: "https://netrunnerdb.com/en/decklist/935c51f3-267d-4835-80df-2459272a2320/-sg-su21-king-of-recursion",
     notes: "This Steve Criminal deck focuses on using HQ runs to generate card advantage and economy, with the Corp choosing which card goes to your grip. Economy comes from Pennyshaver, Security Testing, and event-based sources, supported by Prepaid VoicePAD to reduce the cost of playing events like Test Run and Sure Gamble. Multi-access tools such as Jailbreak, The Maker’s Eye, Docklands Pass, and Sneakdoor Beta pressure multiple servers, while Mutual Favor and Test Run tutor and recover essential breakers, and resources like Earthrise Hotel and Scrubber provide card flow and economic support.",

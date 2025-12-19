@@ -1,9 +1,17 @@
 // Exported preconstructed deck
 registerPrecon({
+    // name: Display name of the precon deck
     name: "The Long Con",
+    // identity: Card ID of the identity/commander for this deck
     identity: "31014",
-    default: false,
-    deck_set: "Girometics",
+    // useAsCustomDefault: Whether this deck is the default choice for its identity when auto-selecting
+    useAsCustomDefault: false,
+    // useForQuickGame: Whether to include this deck in Quick Game selection
+    useForQuickGame: true,
+    // useForGauntlet: Whether to include this deck in Gauntlet mode selection
+    useForGauntlet: true,
+    // deck_set: The set or category this deck belongs to
+    deck_set: "Girometics SG+SU21",
     URL: "https://netrunnerdb.com/en/decklist/70985518-9780-4cae-9582-e75f02b89342/-sg-su21-steve-cambridge-the-long-con",
     Notes: "This deck aims to drain the Corp’s resources by forcing them to either rez expensive ice or trash it, then repeatedly recovers powerful derez tools like Emergency Shutdown and Forged Activation Orders with his ID ability. While not as immediately punishing as Reina, Steve stays rich and disruptive by farming centrals with Red Team and Security Testing, using Tread Lightly early and Inside Job later to break open scoring servers.",
     cards: {

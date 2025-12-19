@@ -1,9 +1,17 @@
 // Ken "Express" Tenma preconstructed deck
 registerPrecon({
+	// name: Display name of the precon deck
 	name: "The Well-Paced Speedrunner",
+	// identity: Card ID of the identity/commander for this deck
 	identity: "31013",
-	default: false,
-	deck_set: "Girometics",
+	// useAsCustomDefault: Whether this deck is the default choice for its identity when auto-selecting
+	useAsCustomDefault: false,
+	// useForQuickGame: Whether to include this deck in Quick Game selection
+	useForQuickGame: true,
+	// useForGauntlet: Whether to include this deck in Gauntlet mode selection
+	useForGauntlet: true,
+	// deck_set: The set or category this deck belongs to
+	deck_set: "Girometics SG+SU21",
 	URL: "https://claude.ai/chat/61b290bd-a0ff-403a-8a84-c534c9624b3d",
 	Notes: "This identity rewards you for playing run events often, so this deck uses Forged Activation Orders to scout servers safely and Atman (powered by Leech counters from all those runs) as your main tool for breaking through security barriers.",
 	cards: {

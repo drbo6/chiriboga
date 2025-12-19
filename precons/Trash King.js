@@ -1,9 +1,17 @@
 // Exported preconstructed deck
 registerPrecon({
+    // name: Display name of the precon deck
     name: "Trash King",
+    // identity: Card ID of the identity/commander for this deck
     identity: "30001",
-    default: false,
-    deck_set: "Girometics",
+    // useAsCustomDefault: Whether this deck is the default choice for its identity when auto-selecting
+    useAsCustomDefault: false,
+    // useForQuickGame: Whether to include this deck in Quick Game selection
+    useForQuickGame: true,
+    // useForGauntlet: Whether to include this deck in Gauntlet mode selection
+    useForGauntlet: true,
+    // deck_set: The set or category this deck belongs to
+    deck_set: "Girometics SG+SU21",
     URL: "https://netrunnerdb.com/en/decklist/c61cbd7f-4c52-4406-8fad-d263009f27eb/-sg-su21-ren-loup-arcemont-trash-king",
     Notes: "Loup's identity gives you money for trashing the corporation's cards, so this deck uses virus programs like Carnivore and Imp to aggressively destroy the corp's resources, with DZMZ Optimizer to afford installing all those viruses and Diesel to draw enough cards to feed Carnivore.",
     cards: {

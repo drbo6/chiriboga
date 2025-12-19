@@ -1,9 +1,17 @@
 // Exported preconstructed deck
 registerPrecon({
+    // name: Display name of the precon deck
     name: "Wintermute",
+    // identity: Card ID of the identity/commander for this deck
     identity: "31040",
-    default: false,
-    deck_set: "Girometics",
+    // useAsCustomDefault: Whether this deck is the default choice for its identity when auto-selecting
+    useAsCustomDefault: false,
+    // useForQuickGame: Whether to include this deck in Quick Game selection
+    useForQuickGame: true,
+    // useForGauntlet: Whether to include this deck in Gauntlet mode selection
+    useForGauntlet: true,
+    // deck_set: The set or category this deck belongs to
+    deck_set: "Girometics SG+SU21",
     URL: "https://netrunnerdb.com/en/decklist/96f81f1b-c310-4601-a4bb-c8c2acbc3865/-sg-su21-architects-of-tomorrow-wintermute",
     Notes: "This glacier deck builds a heavily iced remote server, using bioroids that your identity discounts and a powerful defensive setup built around Manegarm Skunkworks and Anoetic Void—a combo often called SkunkVoid. Manegarm forces the Runner to pay credits or end the run before they can access anything, and Anoetic Void lets you spend cards from HQ to instantly end the run; together, they can repeatedly shut the Runner out even after they make it through all your ice.",
     cards: {

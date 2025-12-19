@@ -1,8 +1,16 @@
 // Exported preconstructed deck
 registerPrecon({
+    // name: Display name of the precon deck
     name: "Decoding You",
+    // identity: Card ID of the identity/commander for this deck
     identity: "31026",
-    default: false,
+    // useAsCustomDefault: Whether this deck is the default choice for its identity when auto-selecting
+    useAsCustomDefault: false,
+    // useForQuickGame: Whether to include this deck in Quick Game selection
+    useForQuickGame: false,
+    // useForGauntlet: Whether to include this deck in Gauntlet mode selection
+    useForGauntlet: false,
+    // deck_set: The set or category this deck belongs to
     deck_set: "none",
     URL: "https://netrunnerdb.com/en/decklist/288aed16-328e-4678-b461-ed46272cfa29/sg-su21-decoding-you",
     notes: "This Shaper starter deck centers on Unity as an efficient breaker that can also handle non-code gate ICE via Rielle “Kit” Peddler’s ability or Egret. It builds long-term value through sustained draw and click efficiency with Verbal Plasticity and Smartware Distributor, while threatening explosive R&D pressure with an early Conduit. Overall, it showcases the Shaper philosophy of flexibility, efficiency, and clever problem-solving over brute force.",

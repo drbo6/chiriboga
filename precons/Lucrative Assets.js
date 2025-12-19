@@ -1,9 +1,17 @@
 // Exported preconstructed deck
 registerPrecon({
+    // name: Display name of the precon deck
     name: "Lucrative Assets",
+    // identity: Card ID of the identity/commander for this deck
     identity: "31060",
-    default: false,
-    deck_set: "Girometics",
+    // useAsCustomDefault: Whether this deck is the default choice for its identity when auto-selecting
+    useAsCustomDefault: false,
+    // useForQuickGame: Whether to include this deck in Quick Game selection
+    useForQuickGame: true,
+    // useForGauntlet: Whether to include this deck in Gauntlet mode selection
+    useForGauntlet: true,
+    // deck_set: The set or category this deck belongs to
+    deck_set: "Girometics SG+SU21",
     URL: "",
     Notes: "",
     cards: {

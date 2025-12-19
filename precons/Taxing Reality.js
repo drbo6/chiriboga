@@ -1,8 +1,16 @@
 // Exported preconstructed deck
 registerPrecon({
+    // name: Display name of the precon deck
     name: "Taxing Reality",
-    identity: "30051",
-    default: false,
+    // identity: Card ID of the identity/commander for this deck
+    identity: "31002",
+    // useAsCustomDefault: Whether this deck is the default choice for its identity when auto-selecting
+    useAsCustomDefault: false,
+    // useForQuickGame: Whether to include this deck in Quick Game selection
+    useForQuickGame: false,
+    // useForGauntlet: Whether to include this deck in Gauntlet mode selection
+    useForGauntlet: false,
+    // deck_set: The set or category this deck belongs to
     deck_set: "none",
     URL: "https://netrunnerdb.com/en/decklist/324e0519-b293-494f-88cd-245997b26a9f/-sg-su21-taxing-reality",
     notes: "This deck taxes the runner with ice and tags to create scoring windows. Use SanSan City Grid and Seamless Launch to score big agendas quickly. Cheap ice like Palisade and Ping can stop early runs, while Spin Doctor reshuffles agendas and provides card draw. Your economy comes from Hedge Fund, Regolith Mining License, and Predictive Planogram.",

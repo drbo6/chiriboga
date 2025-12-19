@@ -1,9 +1,17 @@
 // Exported preconstructed deck
 registerPrecon({
+    // name: Display name of the precon deck
     name: "Tag Business",
+    // identity: Card ID of the identity/commander for this deck
     identity: "30051",
-    default: false,
-    deck_set: "Girometics",
+    // useAsCustomDefault: Whether this deck is the default choice for its identity when auto-selecting
+    useAsCustomDefault: false,
+    // useForQuickGame: Whether to include this deck in Quick Game selection
+    useForQuickGame: true,
+    // useForGauntlet: Whether to include this deck in Gauntlet mode selection
+    useForGauntlet: true,
+    // deck_set: The set or category this deck belongs to
+    deck_set: "Girometics SG+SU21",
     URL: "https://netrunnerdb.com/en/decklist/19f26d34-a6bc-4c37-8a82-e2e2712939d4/-sg-su21-reality-plus-tag-business",
     Notes: "This slow, defensive deck that likes a lot of ice on one remote server uses AMAZE Amusements to constantly tag the hacker, then either punishes them with damage cards like Retribution or uses those accumulated tags to quickly score big agendas with Psychographics.",
     cards: {

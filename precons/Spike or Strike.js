@@ -1,9 +1,17 @@
 // Exported preconstructed deck
 registerPrecon({
+    // name: Display name of the precon deck
     name: "Spike or Strike",
+    // identity: Card ID of the identity/commander for this deck
     identity: "31070",
-    default: false,
-    deck_set: "Girometics",
+    // useAsCustomDefault: Whether this deck is the default choice for its identity when auto-selecting
+    useAsCustomDefault: false,
+    // useForQuickGame: Whether to include this deck in Quick Game selection
+    useForQuickGame: true,
+    // useForGauntlet: Whether to include this deck in Gauntlet mode selection
+    useForGauntlet: true,
+    // deck_set: The set or category this deck belongs to
+    deck_set: "Girometics SG+SU21",
     URL: "https://netrunnerdb.com/en/decklist/303cdc17-adc2-469c-be8c-4f8e55119ff7/-sg-su21-building-a-better-world-spike-or-strike",
     Notes: "This deck builds an expensive server to either score it yourself or let the hacker steal Send a Message and hopefully deplete their credits. If the hacker steals the expensive agenda, you follow up with 2 copies of a kill card like either Punitive Counterstrike or Neurospike and eliminate them outright.",
     cards: {

@@ -1,8 +1,16 @@
 // Exported preconstructed deck
 registerPrecon({
+    // name: Display name of the precon deck
     name: "Precision Aim",
+    // identity: Card ID of the identity/commander for this deck
     identity: "30035",
-    default: false,
+    // useAsCustomDefault: Whether this deck is the default choice for its identity when auto-selecting
+    useAsCustomDefault: false,
+    // useForQuickGame: Whether to include this deck in Quick Game selection
+    useForQuickGame: false,
+    // useForGauntlet: Whether to include this deck in Gauntlet mode selection
+    useForGauntlet: false,
+    // deck_set: The set or category this deck belongs to
     deck_set: "none",
     URL: "https://netrunnerdb.com/en/decklist/06670078-b27a-4c3b-8fa9-470258adacdd/-sg-su21-precision-aim",
     notes: "This Precision Design Haas-Bioroid deck focuses on locking out the Runner by trashing their icebreakers, letting you score agendas freely. Economy comes from Hedge Fund, Hansei Review, Marilyn Campaign, and optionally PAD Campaign, while Retribution and Public Trail punish the Runner for overextending or stealing agendas, and Corporate Troubleshooter can temporarily block breakers from interacting with ICE. The ICE suite, including Palisade, Magnet, and Manegarm Skunkworks, taxes the Runner and protects scoring servers, with a scoring plan focused on installing and advancing only 4/2 and 5/3 agendas for fast scoring turns.",

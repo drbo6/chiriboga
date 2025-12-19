@@ -812,7 +812,7 @@
 				// Priority 1: Find all default precons matching identity
 				var defaultPrecons = [];
 				for (var i = 0; i < preconDecks.length; i++) {
-					if (String(preconDecks[i].identity) === String(identityId) && preconDecks[i].default === true) {
+					if (String(preconDecks[i].identity) === String(identityId) && preconDecks[i].useAsCustomDefault === true) {
 						defaultPrecons.push(i);
 					}
 				}
@@ -825,7 +825,7 @@
 				// Priority 2: Find all non-default precons matching identity
 				var nonDefaultPrecons = [];
 				for (var i = 0; i < preconDecks.length; i++) {
-					if (String(preconDecks[i].identity) === String(identityId) && preconDecks[i].default !== true) {
+					if (String(preconDecks[i].identity) === String(identityId) && preconDecks[i].useAsCustomDefault !== true) {
 						nonDefaultPrecons.push(i);
 					}
 				}
@@ -1176,7 +1176,7 @@
 															lines.push('registerPrecon({');
 															lines.push('    name: ' + JSON.stringify(name) + ',');
 															lines.push('    identity: ' + JSON.stringify(String(json.identity)) + ',');
-															lines.push('    default: false,');
+															lines.push('    useAsCustomDefault: false,');
 															lines.push('    deck_set: "none",');
 															lines.push('    cards: {');
 															var keys = Object.keys(counts).sort(function(a,b){return parseInt(a)-parseInt(b);} );

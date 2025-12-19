@@ -1,9 +1,17 @@
 // Exported preconstructed deck
 registerPrecon({
+    // name: Display name of the precon deck
     name: "Customs Duties",
+    // identity: Card ID of the identity/commander for this deck
     identity: "30010",
-    default: false,
-    deck_set: "Girometics",
+    // useAsCustomDefault: Whether this deck is the default choice for its identity when auto-selecting
+    useAsCustomDefault: false,
+    // useForQuickGame: Whether to include this deck in Quick Game selection
+    useForQuickGame: true,
+    // useForGauntlet: Whether to include this deck in Gauntlet mode selection
+    useForGauntlet: true,
+    // deck_set: The set or category this deck belongs to
+    deck_set: "Girometics SG+SU21",
     URL: "https://netrunnerdb.com/en/decklist/5b1841e7-c557-4114-8ff0-647af9a893c7/-sg-su21-zahya-sadeghi-customs-duties",
     Notes: "This deck is all about running frequently and accessing many cards at once, using multi-access events like Jailbreak and Legwork to generate credits with your ID ability. It pairs Anarch breakers and ice-weakening tools like Leech and Ice Carver to repeatedly hit central servers, then uses Criminal tricks like Inside Job and Sneakdoor Beta to reach and steal agendas from well-protected servers.",
     cards: {

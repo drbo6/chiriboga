@@ -1,9 +1,17 @@
 // Exported preconstructed deck
 registerPrecon({
+    // name: Display name of the precon deck
     name: "Fight or Flight",
+    // identity: Card ID of the identity/commander for this deck
     identity: "31002",
-    default: false,
-    deck_set: "Girometics",
+    // useAsCustomDefault: Whether this deck is the default choice for its identity when auto-selecting
+    useAsCustomDefault: false,
+    // useForQuickGame: Whether to include this deck in Quick Game selection
+    useForQuickGame: true,
+    // useForGauntlet: Whether to include this deck in Gauntlet mode selection
+    useForGauntlet: true,
+    // deck_set: The set or category this deck belongs to
+    deck_set: "Girometics SG+SU21",
     URL: "https://netrunnerdb.com/en/decklist/542a21ca-81b2-4c74-8bb9-379dddd9638e/-sg-su21-reina-roja-fight-or-flight",
     Notes: "This Reina deck focuses on economic warfare by using cards like Xanadu and Tranquilizer to make the corporation's security barriers extremely expensive to activate, then destroys the ones they can't afford to keep running with En Passant.",
     cards: {

@@ -1,9 +1,17 @@
 // Exported preconstructed deck
 registerPrecon({
+    // name: Display name of the precon deck
     name: "Open Gateway",
+    // identity: Card ID of the identity/commander for this deck
     identity: "31026",
-    default: false,
-    deck_set: "Girometics",
+    // useAsCustomDefault: Whether this deck is the default choice for its identity when auto-selecting
+    useAsCustomDefault: false,
+    // useForQuickGame: Whether to include this deck in Quick Game selection
+    useForQuickGame: true,
+    // useForGauntlet: Whether to include this deck in Gauntlet mode selection
+    useForGauntlet: true,
+    // deck_set: The set or category this deck belongs to
+    deck_set: "Girometics SG+SU21",
     URL: "https://netrunnerdb.com/en/decklist/e1adee83-e76c-4f85-a8ca-5aace0a85a17/-sg-su21-rielle-kit-peddler-open-gateway",
     Notes: "Kit is a hacker who can turn the first security barrier she encounters each turn into an easier type to break through, so this deck focuses on making one really effective hacking attempt per turn using sneaky bypass tools like Inside Job and her signature program Gordian Blade to get past the corporation's defenses.",
     cards: {

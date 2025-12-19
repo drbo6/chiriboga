@@ -1,8 +1,16 @@
 // Exported preconstructed deck
 registerPrecon({
+    // name: Display name of the precon deck
     name: "ProCo Ayla",
+    // identity: Card ID of the identity/commander for this deck
     identity: "31025",
-    default: false,
+    // useAsCustomDefault: Whether this deck is the default choice for its identity when auto-selecting
+    useAsCustomDefault: false,
+    // useForQuickGame: Whether to include this deck in Quick Game selection
+    useForQuickGame: false,
+    // useForGauntlet: Whether to include this deck in Gauntlet mode selection
+    useForGauntlet: false,
+    // deck_set: The set or category this deck belongs to
     deck_set: "none",
     URL: "https://netrunnerdb.com/en/decklist/ee479e0b-24c4-41a4-9447-505ddc97a59a/-sg-su21-proco-ayla",
     notes: "This deck focuses on getting Professional Contacts early and using it to draw cards efficiently. Economy comes from Sure Gamble, Creative Commission, Dirty Laundry, Overclock, Pantograph, and DZMZ Optimizer. Install your icebreakers using Test Run or Mutual Favor and use Atman and Leech to handle ICE efficiently. Conduit, Jailbreak, and Docklands Pass provide multiple accesses to steal agendas. Mulligan for Professional Contacts first, then for economy cards if you do not see it.",

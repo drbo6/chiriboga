@@ -1,8 +1,16 @@
 // Ken "Express" Tenma preconstructed deck #2
 registerPrecon({
+	// name: Display name of the precon deck
 	name: "Run, bypass, breach, trash, $$$$!",
+	// identity: Card ID of the identity/commander for this deck
 	identity: "31013",
-	default: false,
+	// useAsCustomDefault: Whether this deck is the default choice for its identity when auto-selecting
+	useAsCustomDefault: false,
+	// useForQuickGame: Whether to include this deck in Quick Game selection
+	useForQuickGame: false,
+	// useForGauntlet: Whether to include this deck in Gauntlet mode selection
+	useForGauntlet: false,
+	// deck_set: The set or category this deck belongs to
 	deck_set: "none",
 	URL: "https://netrunnerdb.com/en/decklist/215fedad-e199-4cd3-b3e2-014d9fcfd578/run-bypass-breach-trash-sg-su21-",
 	notes: "This deck focuses on efficient access to the Corp's cards. Use Emergency Shutdown to derez ICE or Inside Job to bypass it. Mutual Favor helps you get the icebreakers you need. Multi-access tools like Docklands Pass, Legwork, and Jailbreak save clicks and credits. Tread Lightly pressures the Corp to spend credits on rezzing ICE. Wildcat Strike and Sure Gamble provide extra resources, while Diesel boosts card draw. Leech replaces Egret for a stronger synergy with icebreakers.",

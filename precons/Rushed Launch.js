@@ -1,9 +1,17 @@
 // Exported preconstructed deck
 registerPrecon({
+    // name: Display name of the precon deck
     name: "Rushed Launch",
+    // identity: Card ID of the identity/commander for this deck
     identity: "30035",
-    default: false,
-    deck_set: "Girometics",
+    // useAsCustomDefault: Whether this deck is the default choice for its identity when auto-selecting
+    useAsCustomDefault: false,
+    // useForQuickGame: Whether to include this deck in Quick Game selection
+    useForQuickGame: true,
+    // useForGauntlet: Whether to include this deck in Gauntlet mode selection
+    useForGauntlet: true,
+    // deck_set: The set or category this deck belongs to
+    deck_set: "Girometics SG+SU21",
     URL: "https://netrunnerdb.com/en/decklist/c9d80538-46a7-45ea-b89a-2287e9bc50be/-sg-su21-precision-design-rushed-launch",
     Notes: "This deck builds a heavily defended remote server with taxing ice like Eli 1.0 and Tollbooth, then uses SanSan City Grid and Seamless Launch to quickly score four agendas behind those defenses before the hacker can break through.",
     cards: {

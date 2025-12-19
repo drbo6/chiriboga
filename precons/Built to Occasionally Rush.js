@@ -1,8 +1,16 @@
 // Exported preconstructed deck
 registerPrecon({
+    // name: Display name of the precon deck
     name: "Built to Occasionally Rush",
+    // identity: Card ID of the identity/commander for this deck
     identity: "30059",
-    default: false,
+    // useAsCustomDefault: Whether this deck is the default choice for its identity when auto-selecting
+    useAsCustomDefault: false,
+    // useForQuickGame: Whether to include this deck in Quick Game selection
+    useForQuickGame: false,
+    // useForGauntlet: Whether to include this deck in Gauntlet mode selection
+    useForGauntlet: false,
+    // deck_set: The set or category this deck belongs to
     deck_set: "none",
     URL: "https://netrunnerdb.com/en/decklist/31135b71-454c-4f41-9563-eca5f8b1e1ca/-gateway-update-built-to-occasionally-rush",
     notes: "This deck is designed to teach new players how to transition from introductory play into broader formats by focusing on two core Corp strategies: Rush and Fast Advance. Early on, it rushes agendas behind minimal End the Run ICE, using cheap remotes and ID and agenda value to score quickly before the Runner is fully set up. In the late game, it pivots to Fast Advance, using advanceable ICE as batteries for Trick of Light to score agendas directly from hand when a scoring remote is no longer safe.",

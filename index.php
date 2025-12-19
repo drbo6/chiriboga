@@ -721,18 +721,18 @@
 
     // Wait for all scripts to load before selecting decks
     window.addEventListener('load', function() {
-      // Filter Girometics decks by side (case-insensitive)
+      // Filter Quick Game decks by side
       giromRunnerDecks = preconDecks.filter(function(d) {
-        var isGirometics = d.deck_set && d.deck_set.toLowerCase() === 'girometics';
+        var isQuickGameDeck = d.useForQuickGame === true;
         var hasIdentity = cardSet[d.identity];
         var isRunner = hasIdentity && cardSet[d.identity].player === runner;
-        return isGirometics && hasIdentity && isRunner;
+        return isQuickGameDeck && hasIdentity && isRunner;
       });
       giromCorpDecks = preconDecks.filter(function(d) {
-        var isGirometics = d.deck_set && d.deck_set.toLowerCase() === 'girometics';
+        var isQuickGameDeck = d.useForQuickGame === true;
         var hasIdentity = cardSet[d.identity];
         var isCorp = hasIdentity && cardSet[d.identity].player === corp;
-        return isGirometics && hasIdentity && isCorp;
+        return isQuickGameDeck && hasIdentity && isCorp;
       });
       
       // Select initial random decks

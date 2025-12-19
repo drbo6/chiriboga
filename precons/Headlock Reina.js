@@ -1,8 +1,16 @@
 // Exported preconstructed deck
 registerPrecon({
+    // name: Display name of the precon deck
     name: "Headlock Reina",
+    // identity: Card ID of the identity/commander for this deck
     identity: "31002",
-    default: false,
+    // useAsCustomDefault: Whether this deck is the default choice for its identity when auto-selecting
+    useAsCustomDefault: false,
+    // useForQuickGame: Whether to include this deck in Quick Game selection
+    useForQuickGame: false,
+    // useForGauntlet: Whether to include this deck in Gauntlet mode selection
+    useForGauntlet: false,
+    // deck_set: The set or category this deck belongs to
     deck_set: "none",
     URL: "https://netrunnerdb.com/en/decklist/f59ec206-691a-4a07-b3e5-69c4d3b06460/-gateway-update-headlock-reina",
     Notes: "This deck tries to control the Corp’s credits by pressuring servers just enough to force them to rez ice, then using tools like Imp, Docklands Pass, Leech, and derez effects to make those rezzes painful and expensive. It still keeps a solid economy and breaker suite—using cards like Mimic, Buzzsaw, and Corroder supported by Leech—so it can stay active even if the Corp purges or refuses to rez.",
