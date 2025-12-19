@@ -397,6 +397,26 @@
 			function SelectRandomShopPacks() {
 				if (!gauntletConfig || !gauntletConfig.cardPacks) return [];
 				
+				// When shopPurchaseCount is 0, always return the three faction packs (Anarch, Criminal, Shaper)
+				if (shopPurchaseCount === 0) {
+					var factionPacks = [];
+					var factionNames = ['Anarch', 'Criminal', 'Shaper'];
+					for (var f = 0; f < factionNames.length; f++) {
+						for (var p = 0; p < gauntletConfig.cardPacks.length; p++) {
+							var pack = gauntletConfig.cardPacks[p];
+							if (pack.name && pack.name.indexOf(factionNames[f]) !== -1) {
+								factionPacks.push(pack);
+								break;
+							}
+						}
+					}
+					// If we found all three faction packs, return them
+					if (factionPacks.length === 3) {
+						return factionPacks;
+					}
+					// Fallback: if faction packs not found by name, continue with random selection
+				}
+				
 				// Seed the RNG using the gauntlet seed with purchase count for deterministic but varying results
 				if (gauntletSeed && gauntletSeed.length > 0 && typeof Math.seedrandom === 'function') {
 					var packSelectionSeed = gauntletSeed + '_packs_' + shopPurchaseCount;
