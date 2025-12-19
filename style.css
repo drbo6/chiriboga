@@ -2820,3 +2820,36 @@ body.deck-builder-page {
 .precon-name { font-size:10px; letter-spacing:1px; color:var(--crt-green-pale); text-decoration:none; flex:1; cursor:pointer; transition:color 0.2s; }
 .precon-name:hover { color:var(--crt-green); }
 .precon-faction { font-size:8px; letter-spacing:1px; color:var(--crt-green-muted); text-transform:uppercase; flex-shrink:0; }
+
+/* Pool Verification Alert */
+.pool-verification-alert {
+	color: var(--crt-red);
+	font-family: monospace;
+	font-size: 12px;
+	font-weight: bold;
+	text-align: center;
+	padding: 10px;
+	margin: 10px 0;
+	border: 1px solid var(--border-red);
+	background: rgba(64, 0, 0, 0.3);
+	text-shadow: 0 0 6px var(--glow-red);
+	box-shadow: 
+		0 0 8px rgba(255, 51, 51, 0.25) inset,
+		0 0 4px rgba(255, 0, 0, 0.15);
+	animation: alert-pulse 2s ease-in-out infinite;
+}
+
+@keyframes alert-pulse {
+	0%, 100% {
+		opacity: 1;
+		box-shadow: 
+			0 0 8px rgba(255, 51, 51, 0.25) inset,
+			0 0 4px rgba(255, 0, 0, 0.15);
+	}
+	50% {
+		opacity: 0.85;
+		box-shadow: 
+			0 0 12px rgba(255, 51, 51, 0.35) inset,
+			0 0 8px rgba(255, 0, 0, 0.25);
+	}
+}

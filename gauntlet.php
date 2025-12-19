@@ -1379,6 +1379,155 @@
 			Parse();
 			if (showingOnlySelected) ApplyFilter();
 			UpdatePlayDeckButtonState();
+			
+			// Run pool verification after selling a card
+			VerifyCardPool();
+		}
+
+		// Helper function to get the cheapest pack cost from config
+		function GetCheapestPackCost() {
+			if (!gauntletConfig || !gauntletConfig.cardPacks || gauntletConfig.cardPacks.length === 0) {
+				return Infinity; // No packs available
+			}
+			var cheapest = Infinity;
+			for (var i = 0; i < gauntletConfig.cardPacks.length; i++) {
+				var packCost = gauntletConfig.cardPacks[i].cost || 0;
+				if (packCost < cheapest) {
+					cheapest = packCost;
+				}
+			}
+			return cheapest;
+		}
+
+		// Pool verification function to check if a legal deck can still be built
+		function VerifyCardPool() {
+			// Remove any existing alert message
+			$('#pool-verification-alert').remove();
+			
+			// Get the current runner identity
+			if (!json || !json.identity || !cardSet[json.identity]) {
+				return true; // No identity selected, skip verification
+			}
+			
+			var identity = cardSet[json.identity];
+			var deckSize = identity.deckSize || 45;
+			var influenceLimit = identity.influenceLimit || 15;
+			var identityFaction = (identity.faction || '').toLowerCase();
+			
+			// Count neutral cards and faction-matching cards
+			var neutralsAndFactionCardCount = 0;
+			var outOfFactionCards = []; // Array of {cardId, influence}
+			var countedCardIds = []; // Array to track all counted card IDs for debug
+			
+			for (var cardId in gauntletCardCounts) {
+				var card = cardSet[parseInt(cardId)];
+				if (!card) continue;
+				
+				var cardFaction = (card.faction || '').toLowerCase();
+				var isNeutral = cardFaction === 'neutral' || cardFaction === 'neutral-runner' || cardFaction === 'neutral-corp';
+				var matchesFaction = cardFaction === identityFaction;
+				
+				var cardCount = gauntletCardCounts[cardId];
+				// Limit each card to max 3 copies for deck building
+				var usableCount = Math.min(cardCount, 3);
+				
+				if (isNeutral || matchesFaction) {
+					neutralsAndFactionCardCount += usableCount;
+					// Add each copy to countedCardIds
+					for (var i = 0; i < usableCount; i++) {
+						countedCardIds.push(parseInt(cardId));
+					}
+				} else {
+					// Out of faction card - add each copy separately for sorting
+					var cardInfluence = card.influence || 0;
+					for (var i = 0; i < usableCount; i++) {
+						outOfFactionCards.push({
+							cardId: parseInt(cardId),
+							influence: cardInfluence
+						});
+					}
+				}
+			}
+			
+			// Check if we have enough with just neutrals and faction cards
+			if (neutralsAndFactionCardCount >= deckSize) {
+				console.log("Pool Verification - PASSED (neutrals + faction only)", {
+					result: "PASSED",
+					neutralsAndFactionCardCount: neutralsAndFactionCardCount,
+					deckSize: deckSize,
+					influenceLimit: influenceLimit,
+					influenceUsed: 0,
+					influenceCardCount: 0,
+					totalAvailable: neutralsAndFactionCardCount,
+					countedCardIds: countedCardIds
+				});
+				return true; // Verification passed
+			}
+			
+			// Sort out-of-faction cards by influence in ascending order
+			outOfFactionCards.sort(function(a, b) {
+				return a.influence - b.influence;
+			});
+			
+			// Count out-of-faction cards that fit within influence limit
+			var influenceCardCount = 0;
+			var influenceCount = 0;
+			
+			for (var i = 0; i < outOfFactionCards.length; i++) {
+				var cardInfluence = outOfFactionCards[i].influence;
+				if (influenceCount + cardInfluence <= influenceLimit) {
+					influenceCount += cardInfluence;
+					influenceCardCount++;
+					// Add this out-of-faction card to countedCardIds
+					countedCardIds.push(outOfFactionCards[i].cardId);
+				} else {
+					// Adding this card would exceed influence limit, stop here
+					break;
+				}
+			}
+			
+			// Check total cards available
+			var totalAvailable = neutralsAndFactionCardCount + influenceCardCount;
+			var passed = totalAvailable >= deckSize;
+			
+			// Log all counted card IDs and comparison numbers for debug
+			console.log("Pool Verification - " + (passed ? "PASSED" : "FAILED"), {
+				result: passed ? "PASSED" : "FAILED",
+				neutralsAndFactionCardCount: neutralsAndFactionCardCount,
+				influenceCardCount: influenceCardCount,
+				totalAvailable: totalAvailable,
+				deckSize: deckSize,
+				influenceUsed: influenceCount,
+				influenceLimit: influenceLimit,
+				countedCardIds: countedCardIds
+			});
+			
+			if (passed) {
+				return true; // Verification passed
+			}
+			
+			// Verification failed - check if player can afford cheapest pack
+			var cheapestPackCost = GetCheapestPackCost();
+			
+			console.log("Pool Verification - Alert Check", {
+				verificationPassed: false,
+				gauntletCredits: gauntletCredits,
+				cheapestPackCost: cheapestPackCost,
+				canAffordPack: gauntletCredits >= cheapestPackCost,
+				showingAlert: gauntletCredits < cheapestPackCost
+			});
+			
+			if (gauntletCredits < cheapestPackCost) {
+				// Show alert message
+				var alertHtml = '<div id="pool-verification-alert" class="pool-verification-alert">';
+				alertHtml += 'ALERT! - You failed the pool verification test with this runner. You may not be able to build a legal deck to continue the Gauntlet.';
+				alertHtml += '</div>';
+				
+				// Insert the alert between the runner image and the card stats (#output)
+				$('#identity').after(alertHtml);
+			}
+			
+			return false; // Verification failed
 		}
 
 		function AddNonInfluence() {
@@ -2520,6 +2669,8 @@
 					if (currentTypeFilter === 'influence') {
 						ApplyTypeFilter();
 					}
+					// Run pool verification when identity changes
+					VerifyCardPool();
 			  });
 
 			  //set up identity select
