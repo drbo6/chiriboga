@@ -613,6 +613,14 @@
 				UpdateCardCountsUI();
 				RenderAllCardsList();
 				Parse(); // Update deck stats including credits display - this saves shopPurchaseCount to URL
+				
+				// Reapply current sort and filters
+				SortCardsBySort();
+				ApplyTypeFilter();
+				if (showingOnlySelected) ApplyFilter();
+				
+				// Run pool verification after buying a pack
+				VerifyCardPool();
 			}
 		</script>
 		<?php
@@ -1518,13 +1526,21 @@
 			});
 			
 			if (gauntletCredits < cheapestPackCost) {
-				// Show alert message
+				// Show red alert message - can't afford any packs
 				var alertHtml = '<div id="pool-verification-alert" class="pool-verification-alert">';
 				alertHtml += 'ALERT! - You failed the pool verification test with this runner. You may not be able to build a legal deck to continue the Gauntlet.';
 				alertHtml += '</div>';
 				
 				// Insert the alert between the runner image and the card stats (#output)
 				$('#identity').after(alertHtml);
+			} else {
+				// Show orange warning message - still have credits to buy packs
+				var warningHtml = '<div id="pool-verification-alert" class="pool-verification-warning">';
+				warningHtml += 'WARNING! You currently do not have enough cards to build a legal deck with this runner. Use your remaining credits wisely.';
+				warningHtml += '</div>';
+				
+				// Insert the warning between the runner image and the card stats (#output)
+				$('#identity').after(warningHtml);
 			}
 			
 			return false; // Verification failed

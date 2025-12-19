@@ -2853,3 +2853,36 @@ body.deck-builder-page {
 			0 0 8px rgba(255, 0, 0, 0.25);
 	}
 }
+
+/* Pool Verification Warning (Orange) */
+.pool-verification-warning {
+	color: #ffaa33;
+	font-family: monospace;
+	font-size: 12px;
+	font-weight: bold;
+	text-align: center;
+	padding: 10px;
+	margin: 10px 0;
+	border: 1px solid #8b5a00;
+	background: rgba(64, 40, 0, 0.3);
+	text-shadow: 0 0 6px rgba(255, 170, 51, 0.6);
+	box-shadow: 
+		0 0 8px rgba(255, 170, 51, 0.25) inset,
+		0 0 4px rgba(255, 136, 0, 0.15);
+	animation: warning-pulse 2s ease-in-out infinite;
+}
+
+@keyframes warning-pulse {
+	0%, 100% {
+		opacity: 1;
+		box-shadow: 
+			0 0 8px rgba(255, 170, 51, 0.25) inset,
+			0 0 4px rgba(255, 136, 0, 0.15);
+	}
+	50% {
+		opacity: 0.85;
+		box-shadow: 
+			0 0 12px rgba(255, 170, 51, 0.35) inset,
+			0 0 8px rgba(255, 136, 0, 0.25);
+	}
+}
