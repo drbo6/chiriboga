@@ -8,7 +8,7 @@ var gauntletConfig = {
 
   // ===== STARTING CREDITS =====
   // Number of credits the player starts with in gauntlet mode
-  startingCredits: 10,
+  startingCredits: 15,
 
   // ===== MATCH REWARDS =====
   // Credits awarded or deducted based on game outcomes
