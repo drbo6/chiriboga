@@ -16,17 +16,23 @@ var gauntletConfig = {
   matchRewards: {
     victory: 5,                // Credits for winning a match
     agendaPointStolen: 3,      // Credits per agenda point stolen from corp
-    agendaPointScored: -3,     // Credits per agenda point scored by corp (negative = loss)
-    runSuccessful: 1,          // Credits for successful run
-    runEnded: -1,              // Credits deducted when run ends
-    corpTrashed: -1,           // Credits deducted when corp card is trashed
-    runnerTrashed: 1           // Credits gained when runner card is trashed
+    agendaPointScored: -2,     // Credits per agenda point scored by corp (negative = loss)
+    runSuccessful: 1,          // Credits for successful run - not implemented yet
+    runEnded: -1,              // Credits deducted when run ends - not implemented yet
+    corpTrashed: -1,           // Credits deducted when corp card is trashed - not implemented yet
+    runnerTrashed: 1           // Credits gained when runner card is trashed - not implemented yet
   },
 
   // ===== ALTERNATE FACTIONS =====
   // If true, each selected precon represents a different faction (one opponent per faction)
   // If false, randomly selects precons across all factions without faction requirement
   alternateFactions: true,
+
+  // ===== BALANCED FACTIONS =====
+  // If true, random card selection will balance across runner factions (Anarch, Criminal, Shaper, Neutral)
+  // This prevents factions with more cards of a given type from dominating the card pool
+  // If false, cards are selected purely randomly from the matching pool
+  balancedFactions: true,
 
   // ===== ALLOWED IDENTITIES =====
   // Specify which identities can be used in gauntlet mode

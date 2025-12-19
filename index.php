@@ -1,3 +1,245 @@
+
+
+<!DOCTYPE html> <html lang="en"> <head> <meta charset="UTF-8"> <meta name="viewport" content="width=device-width, initial-scale=1.0"> <title>Netrunner: Solo Mode</title> <link href="images/favicon.ico" rel="icon"> <link rel="manifest" href="manifest.json"> <link rel="stylesheet"
+
+pasted
+
+Do you see any reason why I tend to end up with more Anarch cards than the other factions in my subset?
+
+10:09 PM
+
+Investigated card selection logic and identified missing faction balancing mechanism.
+20s
+
+
+
+
+
+
+
+
+
+
+
+Looking at your LaunchGauntlet() function, I can see the issue. When selecting random cards for the subset, there's no faction balancing:
+
+javascript
+for (var cardId in cardSet) {
+  if (!cardSet[cardId]) continue;
+  if (cardSet[cardId].player !== runner) continue;
+  if (cardSet[cardId].cardType !== cardType) continue;
+  if (cardSet[cardId].cardType === 'identity') continue;
+  if (!CardFromAllowedSet(cardId)) continue;
+  if (excludedCardIds[cardId]) continue;
+  if (CardMatchesRequirement(cardId, matchSubtypes, excludeSubtypes)) {
+    matchingCards.push(parseInt(cardId));
+  }
+}
+This pulls from all runner cards matching the requirements without regard to faction. If Anarch has more programs, icebreakers, or whatever subtypes your gauntletConfig.randomCardRequirements specifies, they'll naturally dominate the random selection pool.
+
+To fix this, you could add faction balancing—something like:
+
+Group matchingCards by faction first
+When selecting, randomly pick a faction, then pick a card from that faction's pool
+Or select round-robin across factions until you hit the quantity
+Would you like me to draft a fix? I'd need to see config-gauntlet.js to understand what card type/subtype requirements you're working with, but the structural change would be straightforward regardless.
+
+
+systemgateway.js
+js
+
+
+systemupdate2021.js
+js
+
+
+config-gauntlet.js
+233 lines
+
+js
+
+Here is the config and the two sets. I don't think there are more anarchs in there?
+
+10:11 PM
+
+3 steps
+
+Examining the System Update 2021 card set
+Show working file
+
+Devised script to audit faction distribution across card sets.
+
+Let me write a quick script to count the faction distribution across the allowed sets:
+
+
+Extract runner card faction and type info from the set files
+
+
+
+Pivoted toward scripting for clearer card analysis.
+
+Let me write a proper analysis script:
+
+
+2 steps
+
+Running the card distribution analysis
+
+
+
+Analyzed faction distribution across card categories and identified imbalances.
+
+
+
+
+There's your answer. While the total cards per faction are balanced (18 each), look at the breakdown by card type:
+
+Programs: Anarch 9, Criminal 6, Shaper 8 Non-icebreaker programs: Anarch 5, Criminal 2, Shaper 3 Resources: Anarch 5, Criminal 2, Shaper 3
+
+Your gauntlet config requests:
+
+8 non-icebreaker programs → Anarch owns 50% of the pool (5/10)
+12 resources → Anarch owns 38% of the pool (5/13), vs Criminal at 15%
+So when you randomly pull programs and resources, Anarch cards have a much higher probability of being selected. The faction imbalance isn't in the total card count—it's in the specific card types your randomCardRequirements is requesting.
+
+Fix options:
+
+Faction-balanced selection — modify the random selection to pick a faction first (equally weighted), then pick a card from that faction's pool for the given type.
+Weighted random by faction — give under-represented factions higher weights to compensate for smaller pools.
+Per-faction quotas — explicitly require "4 resources from each faction" rather than "12 resources."
+Want me to draft option 1 as a code change? It would slot into your LaunchGauntlet() function's random card loop.
+
+
+index.php
+php
+
+I would like a balancedFactions boolean in the config and when it is true you can use a faction-balanced selection method
+
+10:16 PM
+
+3 steps
+
+Viewing the LaunchGauntlet function in index.php
+Show working file
+
+Architected config flag and refactored card selection logic.
+
+
+
+Now I have the full picture. I'll create updated versions of both files:
+
+config-gauntlet.js — add the balancedFactions option
+index.php — modify the random card selection to use faction-balanced selection when enabled
+
+Creating updated config-gauntlet.js with balancedFactions option
+config-gauntlet.js
+
+Refactoring card selection logic to implement faction-balanced methodology.
+
+
+
+
+Now let me update the index.php with the faction-balanced selection logic:
+
+
+6 steps
+
+Check for hidden characters in the file
+
+
+
+Identified file format issue requiring conversion.
+
+The file has Windows line endings. Let me convert and then make the edit:
+
+
+2 steps
+
+Replace the random card selection logic with faction-balanced version
++84
+-32
+index.php
+
+Let me verify the change looks good.
+
+Let me verify the change:
+
+
+Verify the updated faction-balanced selection code
+Show working file
+
+The code looks good. Now let me present both files to the user.
+
+Both files are ready. Let me copy them to the outputs directory:
+
+
+2 steps
+
+Presented 2 files
+
+Synthesized configuration feature with faction-balancing methodology.
+
+Here are the updated files:
+
+config-gauntlet.js — Added balancedFactions: true (lines 32-35):
+
+javascript
+// ===== BALANCED FACTIONS =====
+// If true, random card selection will balance across runner factions (Anarch, Criminal, Shaper, Neutral)
+// This prevents factions with more cards of a given type from dominating the card pool
+// If false, cards are selected purely randomly from the matching pool
+balancedFactions: true,
+index.php — The random card selection now branches based on that flag:
+
+When true: Groups matching cards by faction first, then for each selection picks a random faction (equal weight among factions that have cards left), then picks a random card from that faction
+When false: Original behavior (pick randomly from the entire pool)
+With your current card distribution (Anarch having 9 programs vs Criminal's 6), enabling this should bring the expected faction distribution much closer to 25% each rather than Anarch dominating program and resource slots.
+
+Config gauntlet
+JS 
+Index
+Code · PHP 
+Could we change the balancing method in index so that every faction has as close to the same number of cards as possible while still meeting the random requirements?
+
+10:21 PM
+
+Reconciling card repetition mechanics with balanced faction distribution.
+1m, 18s
+
+
+
+
+
+Good idea — that's more deterministic. Instead of randomly picking a faction each time (which still allows variance), we can calculate exact quotas upfront and distribute evenly.
+
+
+6 steps
+
+Presented file
+
+Implemented quota-based faction balancing system successfully.
+
+Done. The new approach guarantees even distribution:
+
+For 12 resources across 4 factions: exactly 3 from each faction
+
+For 15 events across 4 factions: 3 factions get 4, 1 faction gets 3 (which faction gets the extra is randomized via the shuffle)
+
+For 8 non-icebreaker programs across 3 factions (if Neutral has none): 2 factions get 3, 1 faction gets 2
+
+The shuffle before allocation ensures the remainder slots are distributed fairly across runs rather than always favoring the same factions.
+
+Index
+Code · PHP 
+
+
+
+
+
+Claude is AI and can make mistakes. Please double-check responses.
+Index · PHP
+Copy
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -295,6 +537,9 @@
       
       // Add random cards
       if (gauntletConfig && gauntletConfig.randomCardRequirements) {
+        var useBalancedFactions = gauntletConfig.balancedFactions || false;
+        var runnerFactions = ['Anarch', 'Criminal', 'Shaper', 'Neutral'];
+        
         for (var req = 0; req < gauntletConfig.randomCardRequirements.length; req++) {
           var requirement = gauntletConfig.randomCardRequirements[req];
           var quantity = requirement.quantity || 0;
@@ -302,26 +547,86 @@
           var matchSubtypes = requirement.matchSubtypes || [];
           var excludeSubtypes = requirement.excludeSubtypes || [];
           
-          var matchingCards = [];
-          for (var cardId in cardSet) {
-            if (!cardSet[cardId]) continue;
-            if (cardSet[cardId].player !== runner) continue;
-            if (cardSet[cardId].cardType !== cardType) continue;
-            if (cardSet[cardId].cardType === 'identity') continue;
-            if (!CardFromAllowedSet(cardId)) continue;
-            if (excludedCardIds[cardId]) continue;  // Skip excluded fixed cards
-            if (CardMatchesRequirement(cardId, matchSubtypes, excludeSubtypes)) {
-              matchingCards.push(parseInt(cardId));
+          if (useBalancedFactions) {
+            // Faction-balanced selection: distribute cards evenly across factions
+            var cardsByFaction = {};
+            for (var f = 0; f < runnerFactions.length; f++) {
+              cardsByFaction[runnerFactions[f]] = [];
             }
-          }
-          
-          var selected = 0;
-          while (selected < quantity && matchingCards.length > 0) {
-            var randomIdx = Math.floor(Math.random() * matchingCards.length);
-            var selectedCard = matchingCards[randomIdx];
-            gauntletCardIds.push(selectedCard);
-            gauntletCardCounts[selectedCard] = (gauntletCardCounts[selectedCard] || 0) + 1;
-            selected++;
+            
+            for (var cardId in cardSet) {
+              if (!cardSet[cardId]) continue;
+              if (cardSet[cardId].player !== runner) continue;
+              if (cardSet[cardId].cardType !== cardType) continue;
+              if (cardSet[cardId].cardType === 'identity') continue;
+              if (!CardFromAllowedSet(cardId)) continue;
+              if (excludedCardIds[cardId]) continue;
+              if (CardMatchesRequirement(cardId, matchSubtypes, excludeSubtypes)) {
+                var cardFaction = cardSet[cardId].faction || 'Neutral';
+                if (cardsByFaction[cardFaction]) {
+                  cardsByFaction[cardFaction].push(parseInt(cardId));
+                }
+              }
+            }
+            
+            // Get factions that have at least one matching card
+            var factionsWithCards = [];
+            for (var f = 0; f < runnerFactions.length; f++) {
+              if (cardsByFaction[runnerFactions[f]].length > 0) {
+                factionsWithCards.push(runnerFactions[f]);
+              }
+            }
+            
+            if (factionsWithCards.length === 0) continue;  // Skip if no cards match
+            
+            // Shuffle factions to randomize who gets remainder slots
+            for (var i = factionsWithCards.length - 1; i > 0; i--) {
+              var j = Math.floor(Math.random() * (i + 1));
+              var temp = factionsWithCards[i];
+              factionsWithCards[i] = factionsWithCards[j];
+              factionsWithCards[j] = temp;
+            }
+            
+            // Calculate even distribution with remainder
+            var basePerFaction = Math.floor(quantity / factionsWithCards.length);
+            var remainder = quantity % factionsWithCards.length;
+            
+            // Select cards from each faction according to quota
+            for (var f = 0; f < factionsWithCards.length; f++) {
+              var faction = factionsWithCards[f];
+              var pool = cardsByFaction[faction];
+              var target = basePerFaction + (f < remainder ? 1 : 0);  // First factions get +1 for remainder
+              
+              for (var s = 0; s < target; s++) {
+                var randomIdx = Math.floor(Math.random() * pool.length);
+                var selectedCard = pool[randomIdx];
+                gauntletCardIds.push(selectedCard);
+                gauntletCardCounts[selectedCard] = (gauntletCardCounts[selectedCard] || 0) + 1;
+              }
+            }
+          } else {
+            // Original unbalanced selection: pick randomly from entire pool
+            var matchingCards = [];
+            for (var cardId in cardSet) {
+              if (!cardSet[cardId]) continue;
+              if (cardSet[cardId].player !== runner) continue;
+              if (cardSet[cardId].cardType !== cardType) continue;
+              if (cardSet[cardId].cardType === 'identity') continue;
+              if (!CardFromAllowedSet(cardId)) continue;
+              if (excludedCardIds[cardId]) continue;
+              if (CardMatchesRequirement(cardId, matchSubtypes, excludeSubtypes)) {
+                matchingCards.push(parseInt(cardId));
+              }
+            }
+            
+            var selected = 0;
+            while (selected < quantity && matchingCards.length > 0) {
+              var randomIdx = Math.floor(Math.random() * matchingCards.length);
+              var selectedCard = matchingCards[randomIdx];
+              gauntletCardIds.push(selectedCard);
+              gauntletCardCounts[selectedCard] = (gauntletCardCounts[selectedCard] || 0) + 1;
+              selected++;
+            }
           }
         }
       }
