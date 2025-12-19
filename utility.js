@@ -1155,6 +1155,42 @@ function PlayerWin(player, msgstr) {
                 }
               }
               
+              // Build the creditsWonText breakdown
+              var breakdownLines = [];
+              
+              // Victory bonus
+              breakdownLines.push({ label: "Victory", value: victory });
+              
+              // Stolen agendas (runner's score area)
+              if (runner.scoreArea && runner.scoreArea.length > 0) {
+                for (var i = 0; i < runner.scoreArea.length; i++) {
+                  var agenda = runner.scoreArea[i];
+                  var agendaCredits = agenda.agendaPoints * agendaPointStolen;
+                  breakdownLines.push({ label: agenda.title + " stolen", value: agendaCredits });
+                }
+              }
+              
+              // Scored agendas by corp (corp's score area) - these are penalties
+              if (corp.scoreArea && corp.scoreArea.length > 0) {
+                for (var i = 0; i < corp.scoreArea.length; i++) {
+                  var agenda = corp.scoreArea[i];
+                  var agendaCredits = agenda.agendaPoints * agendaPointScored;
+                  breakdownLines.push({ label: agenda.title + " scored", value: agendaCredits });
+                }
+              }
+              
+              // Successful runs
+              if (successfulRuns > 0 && runSuccessfulReward !== 0) {
+                var runSuccessCredits = successfulRuns * runSuccessfulReward;
+                breakdownLines.push({ label: successfulRuns + "x Successful Run", value: runSuccessCredits });
+              }
+              
+              // Ended runs
+              if (endedRuns > 0 && runEndedReward !== 0) {
+                var runEndedCredits = endedRuns * runEndedReward;
+                breakdownLines.push({ label: endedRuns + "x Run Ended", value: runEndedCredits });
+              }
+              
               // Calculate total credits for this match
               var creditsThisMatch = victory 
                 + (agendaPointStolen * runnerPoints) 
@@ -1162,19 +1198,38 @@ function PlayerWin(player, msgstr) {
                 + (runSuccessfulReward * successfulRuns)
                 + (runEndedReward * endedRuns);
               
-              // Ensure creditsWon is at least minimalCredits
-              creditsThisMatch = Math.max(creditsThisMatch, minimalCredits);
+              // Check if minimalCredits floor applies
+              var floorApplied = false;
+              if (creditsThisMatch < minimalCredits) {
+                floorApplied = true;
+                creditsThisMatch = minimalCredits;
+              }
               
+              // Build the text representation
+              var textLines = [];
+              for (var i = 0; i < breakdownLines.length; i++) {
+                var line = breakdownLines[i];
+                var valueStr = (line.value >= 0 ? "+" : "") + line.value;
+                textLines.push(line.label + ": " + valueStr);
+              }
+              if (floorApplied) {
+                textLines.push("(Minimum credits applied)");
+              }
+              textLines.push("Total: " + creditsThisMatch + " credits");
+              
+              gauntletState.creditsWonText = textLines.join("\n");
               gauntletState.creditsWon = (gauntletState.creditsWon || 0) + creditsThisMatch;
               console.log("Credits won this match: " + creditsThisMatch + " (victory:" + victory + " agenda:" + (agendaPointStolen * runnerPoints) + "/" + (agendaPointScored * corpPoints) + " runs:" + successfulRuns + "/" + endedRuns + " total: " + gauntletState.creditsWon + ")");
             } catch (rewardError) {
               console.error("Error calculating credits won:", rewardError);
               // Just use victory as default if calculation fails
               gauntletState.creditsWon = (gauntletState.creditsWon || 0) + 5;
+              gauntletState.creditsWonText = "Victory: +5\nTotal: 5 credits";
             }
           } else {
             // If gauntletConfig is not available, just use default victory bonus
             gauntletState.creditsWon = (gauntletState.creditsWon || 0) + 5;
+            gauntletState.creditsWonText = "Victory: +5\nTotal: 5 credits";
           }
           
           // Check if gauntlet is complete

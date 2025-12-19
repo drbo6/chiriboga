@@ -143,13 +143,53 @@
 				modal.style.display = 'flex';
 			}
 
-			function ShowCongratulationsModal(creditsWon) {
+			function ShowCongratulationsModal(creditsWon, creditsWonText) {
 				var congratsHtml = '<div class="solo-menu" style="display: flex; flex-direction: column; align-items: center;">';
 				congratsHtml += '<div class="solo-logo" style="width: 100%;">';
 				congratsHtml += '<h1 class="logo-text" style="color: var(--crt-red); text-shadow: 0 0 5px var(--crt-red), 0 0 15px var(--glow-red), 0 0 35px var(--glow-red-dark);">NICE JOB!</h1>';
 				congratsHtml += '</div>';
-				congratsHtml += '<div style="color: var(--crt-red); font-family: monospace; padding: 20px; text-align: center; width: 100%; max-width: 500px;">';
-				congratsHtml += '<p style="font-size: 18px; font-weight: bold;">You have acquired ' + creditsWon + ' credits</p>';
+				congratsHtml += '<div style="color: var(--crt-green); font-family: monospace; padding: 20px; text-align: left; width: 100%; max-width: 400px;">';
+				
+				// Parse and display the breakdown
+				if (creditsWonText && creditsWonText.length > 0) {
+					var lines = creditsWonText.split('\n');
+					congratsHtml += '<div style="border: 1px solid var(--crt-green); padding: 15px; margin-bottom: 15px; background: rgba(0, 40, 0, 0.3);">';
+					for (var i = 0; i < lines.length; i++) {
+						var line = lines[i];
+						var isTotal = line.indexOf('Total:') === 0;
+						var isMinimum = line.indexOf('(Minimum') === 0;
+						
+						if (isTotal) {
+							// Total line - make it stand out
+							congratsHtml += '<div style="border-top: 1px solid var(--crt-green); margin-top: 10px; padding-top: 10px; font-size: 16px; font-weight: bold; color: var(--crt-green);">' + line + '</div>';
+						} else if (isMinimum) {
+							// Minimum credits note
+							congratsHtml += '<div style="font-size: 12px; color: var(--crt-green-muted); font-style: italic;">' + line + '</div>';
+						} else {
+							// Regular line - check for positive/negative
+							var color = 'var(--crt-green)';
+							if (line.indexOf(': -') !== -1) {
+								color = 'var(--crt-red)';
+							} else if (line.indexOf(': +') !== -1) {
+								color = 'var(--crt-green)';
+							}
+							congratsHtml += '<div style="display: flex; justify-content: space-between; padding: 3px 0; font-size: 14px;">';
+							var parts = line.split(': ');
+							if (parts.length === 2) {
+								congratsHtml += '<span style="color: var(--crt-green-muted);">' + parts[0] + '</span>';
+								congratsHtml += '<span style="color: ' + color + '; font-weight: bold;">' + parts[1] + '</span>';
+							} else {
+								congratsHtml += '<span style="color: ' + color + ';">' + line + '</span>';
+							}
+							congratsHtml += '</div>';
+						}
+					}
+					congratsHtml += '</div>';
+				} else {
+					// Fallback if no breakdown text
+					congratsHtml += '<p style="font-size: 18px; font-weight: bold; text-align: center;">You have acquired ' + creditsWon + ' credits</p>';
+				}
+				
 				congratsHtml += '</div>';
 				congratsHtml += '<div style="display: flex; justify-content: center; margin-top: 0px; width: 100%;"><button class="button" onclick="CloseCongratulationsModal();">CONTINUE</button></div>';
 				congratsHtml += '</div>';
@@ -895,9 +935,11 @@
 				} else if (gauntletState.defeated > 0) {
 					// Show congratulations modal for returning victories
 					var creditsWon = gauntletState.creditsWon || 0;
+					var creditsWonText = gauntletState.creditsWonText || "";
 					gauntletCredits += creditsWon; // Add won credits to available credits
 					gauntletState.creditsWon = 0; // Reset creditsWon since they've been applied
-					ShowCongratulationsModal(creditsWon);
+					gauntletState.creditsWonText = ""; // Reset creditsWonText
+					ShowCongratulationsModal(creditsWon, creditsWonText);
 				}
 			}
 			

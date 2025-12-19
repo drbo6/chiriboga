@@ -677,6 +677,7 @@
         agendaScored: 0,
         credits: gauntletConfig && gauntletConfig.startingCredits ? gauntletConfig.startingCredits : 0,
         creditsWon: 0,
+        creditsWonText: "",
         gauntletLength: gauntletLength,
         allowedSets: settingsOverrides.allowedSets || [],
         seed: seed,
