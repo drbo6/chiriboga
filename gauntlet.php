@@ -982,13 +982,104 @@
 			}
 
 			function UpdateDeckTextareaFromCounts() {
-				var lines = [];
-				for (var i=0;i<allCardIdsForPlayer.length;i++) {
+				// Group cards by category
+				var categories = {
+					'Event': [],
+					'Hardware': [],
+					'Icebreaker': [],
+					'Program': [],
+					'Resource': []
+				};
+				
+				// Corp categories (if needed)
+				var corpCategories = {
+					'Agenda': [],
+					'Asset': [],
+					'Ice': [],
+					'Operation': [],
+					'Upgrade': []
+				};
+				
+				var useCategories = (deckPlayer === runner) ? categories : corpCategories;
+				
+				for (var i = 0; i < allCardIdsForPlayer.length; i++) {
 					var id = allCardIdsForPlayer[i];
 					var ct = deckCounts[id] || 0;
-					if (ct>0) lines.push(ct+" "+cardSet[id].title);
+					if (ct > 0) {
+						var card = cardSet[id];
+						var cardType = (card.cardType || '').toLowerCase();
+						var subTypes = card.subTypes || [];
+						var isIcebreaker = subTypes.indexOf('Icebreaker') !== -1;
+						
+						if (deckPlayer === runner) {
+							if (cardType === 'event') {
+								categories['Event'].push({ id: id, count: ct, title: card.title });
+							} else if (cardType === 'hardware') {
+								categories['Hardware'].push({ id: id, count: ct, title: card.title });
+							} else if (cardType === 'program' && isIcebreaker) {
+								categories['Icebreaker'].push({ id: id, count: ct, title: card.title });
+							} else if (cardType === 'program') {
+								categories['Program'].push({ id: id, count: ct, title: card.title });
+							} else if (cardType === 'resource') {
+								categories['Resource'].push({ id: id, count: ct, title: card.title });
+							}
+						} else {
+							// Corp cards
+							if (cardType === 'agenda') {
+								corpCategories['Agenda'].push({ id: id, count: ct, title: card.title });
+							} else if (cardType === 'asset') {
+								corpCategories['Asset'].push({ id: id, count: ct, title: card.title });
+							} else if (cardType === 'ice') {
+								corpCategories['Ice'].push({ id: id, count: ct, title: card.title });
+							} else if (cardType === 'operation') {
+								corpCategories['Operation'].push({ id: id, count: ct, title: card.title });
+							} else if (cardType === 'upgrade') {
+								corpCategories['Upgrade'].push({ id: id, count: ct, title: card.title });
+							}
+						}
+					}
 				}
-				$("#deck").text(lines.join("\n"));
+				
+				// Build HTML output
+				var html = '';
+				var categoryOrder = (deckPlayer === runner) 
+					? ['Event', 'Hardware', 'Icebreaker', 'Program', 'Resource']
+					: ['Agenda', 'Asset', 'Ice', 'Operation', 'Upgrade'];
+				
+				for (var ci = 0; ci < categoryOrder.length; ci++) {
+					var catName = categoryOrder[ci];
+					var cards = useCategories[catName];
+					if (cards.length === 0) continue;
+					
+					// Sort cards alphabetically
+					cards.sort(function(a, b) {
+						return a.title.localeCompare(b.title);
+					});
+					
+					// Count total cards in category
+					var totalInCategory = 0;
+					for (var j = 0; j < cards.length; j++) {
+						totalInCategory += cards[j].count;
+					}
+					
+					// Category header
+					html += '<div class="deck-category">';
+					html += '<div class="deck-category-header">' + catName + ' (' + totalInCategory + ')</div>';
+					html += '<div class="deck-category-cards">';
+					
+					// Card entries
+					for (var k = 0; k < cards.length; k++) {
+						var cardEntry = cards[k];
+						html += '<div class="deck-card-entry" data-card-id="' + cardEntry.id + '" onclick="ShowLightbox(' + cardEntry.id + ');">';
+						html += '<span class="deck-card-count">' + cardEntry.count + 'x</span> ';
+						html += '<span class="deck-card-title">' + cardEntry.title + '</span>';
+						html += '</div>';
+					}
+					
+					html += '</div></div>';
+				}
+				
+				$("#deck").html(html);
 			}
 
 			function AddCardToDeck(id) {
@@ -1189,7 +1280,7 @@
 		}
 
 		// Type filter state and functions
-		var currentTypeFilter = 'none'; // 'none', 'influence', 'event', 'hardware', 'program', 'resource'
+		var currentTypeFilter = 'none'; // 'none', 'influence', 'anarch', 'criminal', 'shaper', 'neutral', 'event', 'hardware', 'program', 'resource'
 
 		function SortCardContainer() {
 				var $container = $('#cardcontainer');
@@ -1259,6 +1350,9 @@
 				} else if (currentTypeFilter === 'shaper') {
 					var cardFaction = (card.faction || '').toLowerCase();
 					isVisible = (cardFaction === 'shaper' || cardFaction === 'shaper-runner');
+				} else if (currentTypeFilter === 'neutral') {
+					var cardFaction = (card.faction || '').toLowerCase();
+					isVisible = (cardFaction === 'neutral' || cardFaction === 'neutral-runner' || cardFaction === 'neutral-corp');
 				} else {
 					var cardType = (card.cardType || '').toLowerCase();
 					isVisible = (currentTypeFilter === cardType);
@@ -1282,6 +1376,9 @@
 				currentTypeFilter = 'shaper';
 				$('#sortdeck').html('FILTER:<br>SHAPER');
 			} else if (currentTypeFilter === 'shaper') {
+				currentTypeFilter = 'neutral';
+				$('#sortdeck').html('FILTER:<br>NEUTRAL');
+			} else if (currentTypeFilter === 'neutral') {
 				currentTypeFilter = 'event';
 				$('#sortdeck').html('FILTER:<br>EVENT');
 			} else if (currentTypeFilter === 'event') {
@@ -1315,6 +1412,9 @@
 				currentTypeFilter = 'event';
 				$('#sortdeck').html('FILTER:<br>EVENT');
 			} else if (currentTypeFilter === 'event') {
+				currentTypeFilter = 'neutral';
+				$('#sortdeck').html('FILTER:<br>NEUTRAL');
+			} else if (currentTypeFilter === 'neutral') {
 				currentTypeFilter = 'shaper';
 				$('#sortdeck').html('FILTER:<br>SHAPER');
 			} else if (currentTypeFilter === 'shaper') {
@@ -1581,7 +1681,7 @@
 			function ClearDeck() {
 				json.cards = [];
 				deckCounts = {};
-				$("#deck").text('');
+				$("#deck").html('');
 				UpdateCardCountsUI();
 				deckModified = true;
 				Parse();
@@ -2047,27 +2147,19 @@
 				}
 			  }
 
-			  //print into deck display
-			  var deckText = "";
-			  var numRows = 0;
-			  for (var i = 0; i < countSoFar.length; i++) {
-				if (countSoFar[i] > 0) {
-				  if (numRows > 0) deckText += "\n";
-				  deckText += countSoFar[i] + " " + cardSet[playerCards[i]].title;
-				  numRows++;
-				}
-			  }
-			  $("#deck").text(deckText);
-			  //initial deckCounts from generated deck
+			  //populate deckCounts from generated deck
 			  deckCounts = {};
 			  for (var i=0;i<playerCards.length;i++) {
 				var id = playerCards[i];
-				deckCounts[id] = countSoFar[i];
+				if (countSoFar[i] > 0) {
+					deckCounts[id] = countSoFar[i];
+				}
 			  }
 			  json.cards = [];
 			  for (var id in deckCounts) {
 				for (var j=0;j<deckCounts[id];j++) json.cards.push(parseInt(id));
 			  }
+			  UpdateDeckTextareaFromCounts();
 			  Parse();
 			  UpdateCardCountsUI();
 			}
@@ -2210,7 +2302,6 @@
 									}
 									console.log('Identity code found:', identityCode);
 									
-									var lines = [];
 									// If identity present, switch identity in builder
 									if (identityCode && window.cardCodeLookup && window.cardCodeLookup[identityCode]) {
 										// find matching cardSet index for identity title
@@ -2264,7 +2355,8 @@
 										}
 									}
 
-								// Convert cards map to lines (skip identities)
+								// Convert cards to deckCounts (skip identities)
+								deckCounts = {};
 								for (var code in cardsObj) {
 									var qty = cardsObj[code];
 									var info = window.cardCodeLookup ? window.cardCodeLookup[code] : null;
@@ -2272,10 +2364,13 @@
 									if (info.type_code === 'identity') continue;
 									// Normalize apostrophes (ʼ to ')
 									var title = info.title.replace(/ʼ/g, "'");
-									lines.push(qty + ' ' + title);
+									var cardId = GetCardIdFromTitle(title);
+									if (cardId > -1) {
+										deckCounts[cardId] = (deckCounts[cardId] || 0) + qty;
+									}
 								}
 									// Fill deck display and trigger parse (this validates without generating new deck)
-									$("#deck").text(lines.join("\n"));
+									UpdateDeckTextareaFromCounts();
 									Parse();
 								} catch(e) {
 									console.error(e);
@@ -2456,7 +2551,6 @@
 				RenderAllCardsList();
 				
 				// Build deck from cards
-				var lines = [];
 				json.cards = [];
 				deckCounts = {};
 				
@@ -2469,12 +2563,11 @@
 						for (var j = 0; j < qty; j++) {
 							json.cards.push(cardIdx);
 			}
-			lines.push(qty + ' ' + cardSet[cardIdx].title);
 		}
 		}
 		
 		// Fill deck display and trigger parse
-		$('#deck').text(lines.join('\n'));
+		UpdateDeckTextareaFromCounts();
 				UpdateCardCountsUI();
 				
 				// Reset dropdown
@@ -2559,51 +2652,26 @@
 			  $("#output").html("");
 			  //visual deck preview retired
 
-			  //read the textarea and create the deck
+			  //read from deckCounts (source of truth) and rebuild json.cards
 			  var validDeck = true;
 			  var totalCards = 0;
 			  var totalInfluence = 0;
 			  var totalAgendaPoints = 0; //only for corp
-			  var outputLine = 0;
 			  json.cards = [];
-			  deckCounts = {};
-		  var pre = $("#deck").text();
-		  // Normalize common apostrophes/quotes in pasted text before parsing
-		  pre = pre
-			.replace(/\u2019|\u2032|\u02BC|\uFF07/g, "'")
-			.replace(/\u201C|\u201D|\u2033|\uFF02/g, '"')
-			.replace(/\u00A0/g, ' ');
-		  var splitText = pre.split("\n");
-			  for (var i = 0; i < splitText.length; i++) {
-				var cardCount = 0;
-				var cardTitle = "";
-				var splitLine = splitText[i].split(" ");
-				if (splitLine.length == 1) {
-				  cardCount = 1;
-				  cardTitle = splitLine[0];
-				} else if (splitLine.length > 1) {
-				  cardCount = parseInt(splitLine[0]);
-				  cardTitle = splitLine.slice(1).join(" ");
-				}
-				if (cardCount > 0 && cardTitle != "") {
-				  var id = GetCardIdFromTitle(cardTitle);
-					if (id > -1) {
-						if (cardSet[id].player == deckPlayer) {
-							//update counts only
-							deckCounts[id] = (deckCounts[id]||0) + cardCount;
-							for (var j=0;j<cardCount;j++) {
-								json.cards.push(id);
-								totalCards++;
-								if (cardSet[id].faction !== cardSet[json.identity].faction) totalInfluence += cardSet[id].influence;
-								if (deckPlayer == corp && typeof cardSet[id].agendaPoints !== 'undefined') totalAgendaPoints += cardSet[id].agendaPoints;
-							}
-						} else {
-							if (deckPlayer == runner) $("#output").append(cardTitle + " is not a Runner card<br/>");
-							else $("#output").append(cardTitle + " is not a Corp card<br/>");
-							validDeck = false;
+			  
+			  for (var id in deckCounts) {
+				var cardCount = deckCounts[id];
+				if (cardCount > 0 && cardSet[id]) {
+					if (cardSet[id].player == deckPlayer) {
+						for (var j = 0; j < cardCount; j++) {
+							json.cards.push(parseInt(id));
+							totalCards++;
+							if (cardSet[id].faction !== cardSet[json.identity].faction) totalInfluence += cardSet[id].influence;
+							if (deckPlayer == corp && typeof cardSet[id].agendaPoints !== 'undefined') totalAgendaPoints += cardSet[id].agendaPoints;
 						}
 					} else {
-						$("#output").append(cardTitle + " not found<br/>");
+						if (deckPlayer == runner) $("#output").append(cardSet[id].title + " is not a Runner card<br/>");
+						else $("#output").append(cardSet[id].title + " is not a Corp card<br/>");
 						validDeck = false;
 					}
 				}
@@ -2693,12 +2761,12 @@
 	</head>
 
 
-	<body onload="Init();">
+	<body class="deck-builder-page" onload="Init();">
 		<div id="contentcontainer">
 			<div id="dataentry">
 				<div class="leftrow toprow">
 					<select id="identityselect"></select>
-					<img id="identity" src="images/glow_outline.png">
+					<img id="identity" src="images/glow_outline.png" onclick="if(json.identity) ShowLightbox(json.identity);" style="cursor:pointer;">
 					<div class="rightpart">
 						<div id="output">
 						</div>
@@ -2752,8 +2820,3 @@
 		</div>
 	</body>
 </html>
-
-
-
-
-

@@ -1759,7 +1759,6 @@ body::-webkit-scrollbar-track {
 	min-width: 280px;
 	max-width: 100%;
 	box-sizing:border-box;
-	height: 100vh;
 	display: flex;
 	flex-direction: column;
 	background: transparent;
@@ -1813,13 +1812,64 @@ body::-webkit-scrollbar-track {
 	box-sizing:border-box;
 	resize:none;
 	box-shadow:0 0 6px var(--border-green), inset 0 0 12px rgba(31,109,31,0.25);
-	flex: 1;
-	min-height: 0;
-	overflow-y: auto;
+	min-height: 100px;
 }
 #deck:focus { 
 	box-shadow:0 0 14px rgba(51,255,51,0.35), inset 0 0 16px rgba(51,255,51,0.2);
 	outline:1px solid var(--crt-green);
+}
+
+/* Deck Category Styles */
+.deck-category {
+	margin-bottom: 12px;
+}
+
+.deck-category:last-child {
+	margin-bottom: 0;
+}
+
+.deck-category-header {
+	font-weight: 700;
+	font-size: 13px;
+	color: var(--crt-green-light);
+	text-transform: uppercase;
+	letter-spacing: 1px;
+	margin-bottom: 4px;
+	padding-bottom: 3px;
+	border-bottom: 1px solid var(--border-green-dark);
+	text-shadow: 0 0 6px var(--glow-green);
+}
+
+.deck-category-cards {
+	padding-left: 8px;
+}
+
+.deck-card-entry {
+	padding: 3px 6px;
+	margin: 2px 0;
+	cursor: pointer;
+	border-radius: 3px;
+	transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.deck-card-entry:hover {
+	background-color: rgba(51, 255, 51, 0.15);
+	color: var(--crt-green-light);
+}
+
+.deck-card-entry:active {
+	background-color: rgba(51, 255, 51, 0.25);
+}
+
+.deck-card-count {
+	display: inline-block;
+	min-width: 22px;
+	color: var(--crt-green-muted);
+	font-weight: 600;
+}
+
+.deck-card-title {
+	color: var(--crt-green);
 }
 
 .leftrow {
@@ -2688,4 +2738,20 @@ body.run-active .fullscreen-button:hover::before {
 #launch.button-red {
     font-weight: 700;
     letter-spacing: 2px;
+}
+
+/* Gauntlet/Deck Builder page scroll fix */
+body:has(#dataentry) {
+    overflow-y: auto !important;
+    overflow-x: hidden;
+    height: auto;
+    min-height: 100vh;
+}
+
+/* Fallback for browsers without :has() support - applied via class on body */
+body.deck-builder-page {
+    overflow-y: auto !important;
+    overflow-x: hidden;
+    height: auto;
+    min-height: 100vh;
 }
