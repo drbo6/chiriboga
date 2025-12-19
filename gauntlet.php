@@ -1139,12 +1139,12 @@
 
 		function CycleSort() {
 			if (currentSort === 'name') {
-				currentSort = 'influence';
-				$('#sortbydeck').html('SORT BY:<br>INFLUENCE');
-			} else if (currentSort === 'influence') {
 				currentSort = 'quantity';
 				$('#sortbydeck').html('SORT BY:<br>QUANTITY');
 			} else if (currentSort === 'quantity') {
+				currentSort = 'influence';
+				$('#sortbydeck').html('SORT BY:<br>INFLUENCE');
+			} else if (currentSort === 'influence') {
 				currentSort = 'faction';
 				$('#sortbydeck').html('SORT BY:<br>FACTION');
 			} else if (currentSort === 'faction') {
@@ -1266,7 +1266,7 @@
 				currentTypeFilter = 'none';
 				$('#sortdeck').html('FILTER:<br>ALL');
 			}
-			SortCardContainer();
+			SortCardsBySort();
 			ApplyTypeFilter();
 		}
 
