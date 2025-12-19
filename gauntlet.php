@@ -1203,6 +1203,127 @@
 			UpdatePlayDeckButtonState();
 		}
 
+		var pendingSellCardId = null; // Track which card is pending sale
+		var pendingSellQuantity = 1; // Track quantity to sell
+
+		function ShowSellConfirmModal(id) {
+			// Check if there are any copies in the gauntlet to sell
+			if (typeof gauntletCardCounts[id] === 'undefined' || gauntletCardCounts[id] <= 0) return;
+			
+			pendingSellCardId = id;
+			pendingSellQuantity = 1; // Reset to default
+			var cardName = cardSet[id] ? cardSet[id].title : 'Unknown Card';
+			var imgSrc = 'images/' + ChangeImageFileToJPG(cardSet[id].imageFile);
+			var availableCount = gauntletCardCounts[id];
+			
+			var modalHtml = '<div class="solo-menu" style="display: flex; flex-direction: column; align-items: center; max-width: 400px;">';
+			modalHtml += '<div class="solo-logo" style="width: 100%;">';
+			modalHtml += '<h1 class="logo-text" style="color: var(--crt-red); text-shadow: 0 0 5px var(--crt-red), 0 0 15px var(--glow-red), 0 0 35px var(--glow-red-dark); font-size: 1.5em;">SELL CARD</h1>';
+			modalHtml += '</div>';
+			modalHtml += '<div style="text-align: center; margin: 10px 0;">';
+			modalHtml += '<img src="' + imgSrc + '" style="max-height: 200px; border-radius: 8px;" />';
+			modalHtml += '</div>';
+			modalHtml += '<div style="color: var(--crt-red); font-family: monospace; padding: 10px; text-align: center;">';
+			modalHtml += '<p style="font-size: 16px;"><strong>' + cardName + '</strong></p>';
+			modalHtml += '<p style="margin-top: 10px;">How many would you like to sell?</p>';
+			modalHtml += '<p style="margin-top: 5px; font-size: 14px;">(You have ' + availableCount + ' available)</p>';
+			modalHtml += '</div>';
+			// Quantity stepper
+			modalHtml += '<div class="settings-stepper" style="margin: 10px 0;">';
+			modalHtml += '<button type="button" class="stepper-btn" onclick="AdjustSellQuantity(-1);" id="sell-qty-minus">-</button>';
+			modalHtml += '<span class="stepper-value" id="sell-qty-value" style="min-width: 40px;">1</span>';
+			modalHtml += '<button type="button" class="stepper-btn" onclick="AdjustSellQuantity(1);" id="sell-qty-plus"' + (availableCount <= 1 ? ' disabled' : '') + '>+</button>';
+			modalHtml += '</div>';
+			// Credit display
+			modalHtml += '<p style="color: var(--crt-red); font-family: monospace; margin: 5px 0;">You will receive <span id="sell-credit-value">1</span> <img src="images/nsg/NSG_CREDIT.svg" class="card-icon" alt="credit" style="height: 16px; filter: invert(1) brightness(0.5) sepia(1) saturate(5) hue-rotate(80deg);"></p>';
+			// Buttons
+			modalHtml += '<div style="display: flex; justify-content: center; gap: 20px; margin-top: 15px; width: 100%;">';
+			modalHtml += '<button class="button" onclick="CloseSellConfirmModal();">CANCEL</button>';
+			modalHtml += '<button class="button button-red" onclick="ConfirmSellCard();">SELL</button>';
+			modalHtml += '</div>';
+			modalHtml += '</div>';
+
+			var modal = document.getElementById('sell-confirm-modal');
+			if (!modal) {
+				modal = document.createElement('div');
+				modal.id = 'sell-confirm-modal';
+				modal.className = 'modal';
+				modal.style.display = 'flex';
+				modal.style.zIndex = '10000';
+				document.body.appendChild(modal);
+			}
+			
+			modal.innerHTML = modalHtml;
+			modal.style.display = 'flex';
+			UpdateSellQuantityButtons();
+		}
+
+		function AdjustSellQuantity(delta) {
+			var availableCount = gauntletCardCounts[pendingSellCardId] || 0;
+			pendingSellQuantity = Math.max(1, Math.min(availableCount, pendingSellQuantity + delta));
+			document.getElementById('sell-qty-value').textContent = pendingSellQuantity;
+			document.getElementById('sell-credit-value').textContent = pendingSellQuantity;
+			UpdateSellQuantityButtons();
+		}
+
+		function UpdateSellQuantityButtons() {
+			var availableCount = gauntletCardCounts[pendingSellCardId] || 0;
+			document.getElementById('sell-qty-minus').disabled = (pendingSellQuantity <= 1);
+			document.getElementById('sell-qty-plus').disabled = (pendingSellQuantity >= availableCount);
+		}
+
+		function CloseSellConfirmModal() {
+			pendingSellCardId = null;
+			pendingSellQuantity = 1;
+			var modal = document.getElementById('sell-confirm-modal');
+			if (modal) modal.style.display = 'none';
+		}
+
+		function ConfirmSellCard() {
+			if (pendingSellCardId !== null) {
+				for (var i = 0; i < pendingSellQuantity; i++) {
+					SellCard(pendingSellCardId);
+				}
+			}
+			CloseSellConfirmModal();
+		}
+
+		function SellCard(id) {
+			// Check if there are any copies in the gauntlet to sell
+			if (typeof gauntletCardCounts[id] === 'undefined' || gauntletCardCounts[id] <= 0) return;
+			
+			// If the card is in the deck, remove it from the deck first
+			if (typeof deckCounts[id] !== 'undefined' && deckCounts[id] > 0) {
+				RemoveCardFromDeck(id);
+			}
+			
+			// Remove one copy from the gauntlet collection
+			gauntletCardCounts[id]--;
+			
+			// Also remove from gauntletCardIds array (remove one occurrence)
+			var idx = gauntletCardIds.indexOf(id);
+			if (idx > -1) gauntletCardIds.splice(idx, 1);
+			
+			// If no copies left, remove from gauntletCardCounts and remove card from display
+			if (gauntletCardCounts[id] <= 0) {
+				delete gauntletCardCounts[id];
+				// Remove the card element from the display
+				$('#cardcontainer .card-item[data-id="' + id + '"]').remove();
+				// Remove from allCardIdsForPlayer array for lightbox navigation
+				var playerIdx = allCardIdsForPlayer.indexOf(id);
+				if (playerIdx > -1) allCardIdsForPlayer.splice(playerIdx, 1);
+			}
+			
+			// Add 1 credit
+			gauntletCredits++;
+			
+			deckModified = true;
+			UpdateCardCountsUI();
+			Parse();
+			if (showingOnlySelected) ApplyFilter();
+			UpdatePlayDeckButtonState();
+		}
+
 		function AddNonInfluence() {
 			// Get the player identity's faction
 			var identity = cardSet[json.identity];
@@ -1579,6 +1700,7 @@
 							+'<div class="card-title">'+cardSet[cardId].title+'</div>'
 							+'<div class="card-controls">'
 								+'<button type="button" class="remove-btn" data-id="'+cardId+'">-</button>'
+								+'<button type="button" class="sell-btn" data-id="'+cardId+'"><img src="images/nsg/NSG_CREDIT.svg" class="card-icon" alt="sell" style="height: 14px; filter: brightness(0) saturate(100%) invert(76%) sepia(85%) saturate(2206%) hue-rotate(81deg) brightness(118%) contrast(119%);"></button>'
 								+'<button type="button" class="add-btn" data-id="'+cardId+'">+</button>'
 							+'</div>'
 						+'</div>';
@@ -1594,7 +1716,8 @@
 			function AttachCardListEvents() {
 				$("#cardcontainer .add-btn").off('click').on('click',function(){ AddCardToDeck(parseInt($(this).attr('data-id'))); });
 				$("#cardcontainer .remove-btn").off('click').on('click',function(){ RemoveCardFromDeck(parseInt($(this).attr('data-id'))); });
-				$("#cardcontainer .card-item img").off('click').on('click',function(e){ 
+				$("#cardcontainer .sell-btn").off('click').on('click',function(){ ShowSellConfirmModal(parseInt($(this).attr('data-id'))); });
+				$("#cardcontainer .card-image").off('click').on('click',function(e){ 
 					e.stopPropagation(); 
 					var cardId = parseInt($(this).closest('.card-item').attr('data-id'));
 					ShowLightbox(cardId); 
