@@ -1213,6 +1213,15 @@
 				
 				if (currentTypeFilter === 'none') {
 					isVisible = true;
+				} else if (currentTypeFilter === 'faction') {
+					// Show only cards matching the identity's faction (not neutral)
+					var identity = cardSet[json.identity];
+					if (identity) {
+						identityFaction = (identity.faction || '').toLowerCase();
+						var cardFaction = (card.faction || '').toLowerCase();
+						var isNeutral = cardFaction === 'neutral' || cardFaction === 'neutral-runner' || cardFaction === 'neutral-corp';
+						isVisible = !isNeutral && cardFaction === identityFaction;
+					}
 				} else if (currentTypeFilter === 'influence') {
 					// Show cards that are NOT in the identity's faction and NOT neutral
 					var cardFaction = (card.faction || '').toLowerCase();
@@ -1230,6 +1239,9 @@
 
 		function CycleTypeFilter() {
 			if (currentTypeFilter === 'none') {
+				currentTypeFilter = 'faction';
+				$('#sortdeck').html('FILTER:<br>FACTION');
+			} else if (currentTypeFilter === 'faction') {
 				currentTypeFilter = 'influence';
 				$('#sortdeck').html('FILTER:<br>INFLUENCE');
 			} else if (currentTypeFilter === 'influence') {
