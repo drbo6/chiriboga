@@ -3041,11 +3041,17 @@
 			  // Mobile fix: Force a repaint after initial render to ensure all elements are visible
 			  // Some mobile browsers skip painting absolute-positioned elements until scroll
 			  setTimeout(function() {
-			    $('#cardcontainer').css('opacity', '0.999');
-			    requestAnimationFrame(function() {
-			      $('#cardcontainer').css('opacity', '1');
-			    });
-			  }, 100);
+			    // Force layout recalculation
+			    var container = document.getElementById('cardcontainer');
+			    if (container) {
+			      var _ = container.offsetHeight; // Trigger layout
+			      // Now force a repaint
+			      $('#cardcontainer').css('opacity', '0.99');
+			      requestAnimationFrame(function() {
+			        $('#cardcontainer').css('opacity', '1');
+			      });
+			    }
+			  }, 150);
 		}
 
 		function Normalise(src) {
