@@ -1062,12 +1062,12 @@
 								);
 								// Update deckPlayer to match selected identity's side
 								deckPlayer = cardSet[json.identity].player;
-								history.pushState(null, "Chiriboga", "decklauncher.php"); //so a random deck is generated
-								GenerateDeck();
 								// Repopulate precon dropdown to only show matching decks (if loaded)
 								if (typeof window.PopulatePreconDropdownForIdentity === 'function') {
 									window.PopulatePreconDropdownForIdentity(json.identity);
 								}
+								// Update deck stats with new identity's requirements
+								Parse();
 			  });
 
 			  //set up identity select
