@@ -1072,6 +1072,217 @@
 
 			  //set up identity select
 						  // Import deck from NetrunnerDB
+						  function SaveDeck() {
+							try {
+								if (!json || !json.identity || !Array.isArray(json.cards)) {
+									$('#save-deck-modal-input').val('');
+									$('#save-deck-modal-message').html('<span style="color: #ff6666;">No deck loaded to save.</span>');
+									$('#save-deck-modal').css('display', 'flex');
+									return;
+								}
+								
+								// Show save deck modal with input
+								$('#save-deck-modal-input').val('My Deck');
+								$('#save-deck-modal-message').html('');
+								$('#save-deck-modal').css('display', 'flex');
+								$('#save-deck-modal-input').focus().select();
+							} catch(e) {
+								console.error('Error in SaveDeck:', e);
+								$('#save-deck-modal-message').html('<span style="color: #ff6666;">Error: ' + e.message + '</span>');
+								$('#save-deck-modal').css('display', 'flex');
+							}
+						  }
+						  
+						  function ConfirmSaveDeck() {
+							try {
+								var deckName = $('#save-deck-modal-input').val().trim();
+								if (!deckName) {
+									$('#save-deck-modal-message').html('<span style="color: #ff6666;">Please enter a deck name.</span>');
+									return;
+								}
+								
+								var deckToSave = {
+									name: deckName,
+									identity: json.identity,
+									cards: json.cards.slice(),
+									savedAt: new Date().toISOString()
+								};
+								
+								var allDecks = JSON.parse(localStorage.getItem('chiribogaDecks') || '{}');
+								var deckKey = 'deck_' + Date.now();
+								allDecks[deckKey] = deckToSave;
+								localStorage.setItem('chiribogaDecks', JSON.stringify(allDecks));
+								
+								$('#save-deck-modal-message').html('<span style="color: #33ff33;">Deck "' + deckName + '" saved successfully!</span>');
+								$('#save-deck-modal-input').val('');
+								$('#save-deck-confirm-btn').attr('disabled', 'disabled');
+								
+								// Close modal after 2 seconds
+								setTimeout(function() {
+									$('#save-deck-modal').css('display', 'none');
+									$('#save-deck-confirm-btn').removeAttr('disabled');
+								}, 2000);
+							} catch(e) {
+								console.error('Error saving deck:', e);
+								$('#save-deck-modal-message').html('<span style="color: #ff6666;">Error saving deck: ' + e.message + '</span>');
+							}
+						  }
+						  
+						  function LoadDeck() {
+							try {
+								var allDecks = JSON.parse(localStorage.getItem('chiribogaDecks') || '{}');
+								if (Object.keys(allDecks).length === 0) {
+									$('#load-deck-modal-message').html('<span style="color: #ff6666;">No saved decks found.</span>');
+									$('#load-deck-modal').css('display', 'flex');
+									return;
+								}
+								
+								PopulateLoadDeckModal(allDecks);
+								$('#load-deck-modal').css('display', 'flex');
+							} catch(e) {
+								console.error('Error in LoadDeck:', e);
+								$('#load-deck-modal-message').html('<span style="color: #ff6666;">Error: ' + e.message + '</span>');
+								$('#load-deck-modal').css('display', 'flex');
+							}
+						  }
+						  
+						  function PopulateLoadDeckModal(allDecks) {
+							var listHtml = '';
+							for (var deckKey in allDecks) {
+								if (allDecks.hasOwnProperty(deckKey)) {
+									var deck = allDecks[deckKey];
+									var savedDate = new Date(deck.savedAt).toLocaleString();
+									var cardCount = deck.cards ? deck.cards.length : 0;
+									var identityName = (deck.identity && cardSet[deck.identity]) ? cardSet[deck.identity].title : 'Unknown';
+									// Strip everything after and including the colon
+									identityName = identityName.split(':')[0].trim();
+									listHtml += '<div class="load-deck-item" style="display:flex; justify-content:space-between; align-items:flex-start; padding:12px; margin:12px 0; border:1px solid var(--border-green); border-radius:6px; background:rgba(31,109,31,0.1);">';
+									listHtml += '<div style="flex:1; margin-right:20px;">';
+									listHtml += '<div style="font-weight:bold; color:var(--crt-green); margin-bottom:8px;">' + deck.name + '</div>';
+									listHtml += '<div style="font-size:12px; color:var(--crt-green-muted); margin-bottom:4px;">' + cardCount + ' cards</div>';
+									listHtml += '<div style="font-size:12px; color:var(--crt-green-muted); margin-bottom:4px;">' + identityName + '</div>';
+									listHtml += '<div style="font-size:12px; color:var(--crt-green-muted);">' + savedDate + '</div>';
+									listHtml += '</div>';
+									listHtml += '<div style="display:flex; gap:8px; flex-shrink:0;">';
+									listHtml += '<button class="button load-deck-load-btn" data-deck-key="' + deckKey + '" style="padding:6px 16px; font-size:12px; min-width:70px;">LOAD</button>';
+									listHtml += '<button class="button load-deck-delete-btn" data-deck-key="' + deckKey + '" style="padding:6px 16px; font-size:12px; min-width:75px;">DELETE</button>';
+									listHtml += '</div>';
+									listHtml += '</div>';
+								}
+							}
+							$('#load-deck-list').html(listHtml);
+							$('#load-deck-modal-message').html('');
+							
+							// Bind load and delete button events
+							$('.load-deck-load-btn').off('click').on('click', function() {
+								var deckKey = $(this).data('deck-key');
+								LoadDeckFromStorage(deckKey);
+							});
+							$('.load-deck-delete-btn').off('click').on('click', function() {
+								var deckKey = $(this).data('deck-key');
+								DeleteDeckFromStorage(deckKey);
+							});
+						  }
+						  
+						  function LoadDeckFromStorage(deckKey) {
+							try {
+								var allDecks = JSON.parse(localStorage.getItem('chiribogaDecks') || '{}');
+								var deck = allDecks[deckKey];
+								if (!deck) {
+									alert('Deck not found');
+									return;
+								}
+								
+								// Load the deck into the current deck
+								json.identity = deck.identity;
+								json.cards = deck.cards.slice();
+								
+								// Rebuild deckCounts from json.cards
+								deckCounts = {};
+								for (var i = 0; i < json.cards.length; i++) {
+									var cardId = json.cards[i];
+									deckCounts[cardId] = (deckCounts[cardId] || 0) + 1;
+								}
+								
+								// Update UI
+								$("#identityselect").val(json.identity).trigger('change');
+								$("#identity").prop("src", "images/" + ChangeImageFileToJPG(cardSet[json.identity].imageFile));
+								deckPlayer = cardSet[json.identity].player;
+								
+								// Update textarea with deck contents
+								UpdateDeckTextareaFromCounts();
+								
+								// Parse and refresh
+								Parse();
+								RenderAllCardsList();
+								AttachCardListEvents();
+								ApplyFilter();
+								UpdateCardCountsUI();
+								
+								// Show success message but keep modal open
+								$('#load-deck-modal-message').html('<span style="color: #33ff33;">Deck "' + deck.name + '" loaded successfully!</span>');
+							} catch(e) {
+								console.error('Error loading deck:', e);
+								alert('Error loading deck: ' + e.message);
+							}
+						  }
+						  
+						  function DeleteDeckFromStorage(deckKey) {
+							// Store the deck key in a global variable for the confirm function
+							window.pendingDeleteDeckKey = deckKey;
+							// Get the deck name to show in the confirmation modal
+							var allDecks = JSON.parse(localStorage.getItem('chiribogaDecks') || '{}');
+							var deck = allDecks[deckKey];
+							var deckName = deck ? deck.name : 'Unknown Deck';
+							
+							// Show confirmation modal
+							$('#delete-confirm-deck-name').text(deckName);
+							$('#delete-confirm-modal').css('display', 'flex');
+						  }
+						  
+						  function ConfirmDeleteDeck() {
+							if (!window.pendingDeleteDeckKey) return;
+							
+							try {
+								var deckKey = window.pendingDeleteDeckKey;
+								var allDecks = JSON.parse(localStorage.getItem('chiribogaDecks') || '{}');
+								delete allDecks[deckKey];
+								localStorage.setItem('chiribogaDecks', JSON.stringify(allDecks));
+								window.pendingDeleteDeckKey = null;
+								
+								// Close confirmation modal
+								$('#delete-confirm-modal').css('display', 'none');
+								
+								// Refresh the load deck modal
+								if (Object.keys(allDecks).length === 0) {
+									$('#load-deck-modal-message').html('<span style="color: #ff6666;">No saved decks found.</span>');
+									$('#load-deck-list').html('');
+								} else {
+									PopulateLoadDeckModal(allDecks);
+								}
+								
+								// Update button visibility
+								UpdateLoadDeckButtonVisibility();
+							} catch(e) {
+								console.error('Error deleting deck:', e);
+								alert('Error deleting deck: ' + e.message);
+							}
+						  }
+						  
+						  function CancelDeleteDeck() {
+							window.pendingDeleteDeckKey = null;
+							$('#delete-confirm-modal').css('display', 'none');
+						  }
+						  
+						  function UpdateLoadDeckButtonVisibility() {
+							var allDecks = JSON.parse(localStorage.getItem('chiribogaDecks') || '{}');
+							if (Object.keys(allDecks).length > 0) {
+								$('#loaddeck').show();
+							} else {
+								$('#loaddeck').hide();
+							}
+						  }
+						  
 						  function ImportDeckFromNRDB() {
 							var url = prompt('Paste NetrunnerDB deck URL');
 							if (!url) return;
@@ -1191,8 +1402,49 @@
 							 .fail(function(){ alert('Failed to fetch decklist from NRDB'); });
 						  }
 
-						  // Bind NRDB import to the unified id used in UI
-						  $('#importnrdb, #importdeck').off('click').on('click', ImportDeckFromNRDB);
+// Bind Save Deck button
+					  $('#savedeck').off('click').on('click', SaveDeck);
+					  
+					  // Bind Load Deck button
+					  $('#loaddeck').off('click').on('click', LoadDeck);
+					  
+					  // Bind NRDB import to the unified id used in UI
+						  $('#importnrdb, #importdeckfromNRDB').off('click').on('click', ImportDeckFromNRDB);
+						  $('#save-deck-confirm-btn').off('click').on('click', ConfirmSaveDeck);
+						  $('#save-deck-close-btn, #save-deck-modal').off('click').on('click', function(e) {
+							if (e.target.id === 'save-deck-modal' || e.target.id === 'save-deck-close-btn') {
+								$('#save-deck-modal').css('display', 'none');
+							}
+						  });
+						  // Allow Enter key to save
+						  $('#save-deck-modal-input').off('keypress').on('keypress', function(e) {
+							if (e.which === 13) {
+								e.preventDefault();
+								ConfirmSaveDeck();
+							}
+						  });
+						  
+						  // Bind Load Deck modal close
+						  $('#load-deck-close-btn, #load-deck-modal').off('click').on('click', function(e) {
+							if (e.target.id === 'load-deck-modal' || e.target.id === 'load-deck-close-btn') {
+								$('#load-deck-modal').css('display', 'none');
+							}
+						  });
+						  $('#load-deck-bottom-close').off('click').on('click', function() {
+							$('#load-deck-modal').css('display', 'none');
+						  });
+						  
+						  // Bind Delete Confirmation modal buttons
+						  $('#delete-confirm-yes-btn').off('click').on('click', ConfirmDeleteDeck);
+						  $('#delete-confirm-no-btn').off('click').on('click', CancelDeleteDeck);
+						  $('#delete-confirm-modal').off('click').on('click', function(e) {
+							if (e.target.id === 'delete-confirm-modal') {
+								CancelDeleteDeck();
+							}
+						  });
+						  
+						  // Check and update Load Deck button visibility
+						  UpdateLoadDeckButtonVisibility();
 
 													// Export current deck as a JS precon and download
 													function ExportJSDeck() {
@@ -1711,7 +1963,13 @@
 					<div class="deck-heading">CURRENT DECK:</div>
 					<textarea id="deck" spellcheck="false" cols="30" style="width:100%;"></textarea>
 					<div style="margin-top:8px;">
-						<button id="importdeck" class="button" type="button">Import Deck from NRDB</button>
+						<button id="savedeck" class="button" type="button">Save Deck</button>
+					</div>
+					<div style="margin-top:8px;">
+						<button id="loaddeck" class="button" type="button" style="display:none;">Load Deck</button>
+					</div>
+					<div style="margin-top:8px;">
+						<button id="importdeckfromNRDB" class="button" type="button">Import Deck from NRDB</button>
 					</div>
 					<div style="margin-top:8px;">
 						<select id="preconselect" class="button" style="width:85%; display:block; margin:0 auto;">
@@ -1737,6 +1995,53 @@
 				<div id="lightbox-body">
 					<img id="lightbox-img" src="" alt="Card"/>
 					<div id="lightbox-text"></div>
+				</div>
+			</div>
+		</div>
+		<!-- Save Deck Modal -->
+		<div id="save-deck-modal" class="modal">
+			<div class="solo-menu">
+				<span id="save-deck-close-btn" class="menu-close">✕</span>
+				<div class="solo-logo">
+					<h1 class="logo-text" style="color: var(--crt-red); text-shadow: 0 0 5px var(--crt-red), 0 0 15px var(--glow-red), 0 0 35px var(--glow-red-dark);">SAVE DECK</h1>
+				</div>
+				<div style="color:var(--crt-green); font-family:monospace; font-size:14px; text-align:center; padding:20px; line-height:1.6;">
+					<p style="margin-bottom:16px;">Your decks are saved locally in your browser. It won't sync across devices and can be cleared if you reset your browser data.</p>
+					<input id="save-deck-modal-input" type="text" placeholder="Enter deck name" style="width:80%; padding:8px; margin:12px auto; display:block; background:var(--bg-dark); border:1px solid var(--border-green); color:var(--crt-green); border-radius:6px; font-family:monospace;">
+					<div id="save-deck-modal-message" style="margin:12px 0; min-height:20px;"></div>
+					<div style="display:flex; gap:10px; justify-content:center; margin-top:20px;">
+						<button id="save-deck-confirm-btn" class="button" style="flex:0 1 120px;">SAVE</button>
+					</div>
+				</div>
+			</div>
+		</div>
+		<!-- Load Deck Modal -->
+		<div id="load-deck-modal" class="modal">
+			<div class="solo-menu">
+				<span id="load-deck-close-btn" class="menu-close">✕</span>
+				<div class="solo-logo">
+					<h1 class="logo-text" style="color: var(--crt-red); text-shadow: 0 0 5px var(--crt-red), 0 0 15px var(--glow-red), 0 0 35px var(--glow-red-dark);">LOAD DECK</h1>
+				</div>
+				<div style="color:var(--crt-green); font-family:monospace; font-size:14px; padding:20px;">
+					<div id="load-deck-list" style="max-height:400px; overflow-y:auto; margin-bottom:16px;"></div>
+					<div id="load-deck-modal-message" style="text-align:center; margin:12px 0; min-height:20px;"></div>
+				</div>
+			</div>
+		</div>
+		<!-- Delete Confirmation Modal -->
+		<div id="delete-confirm-modal" class="modal">
+			<div class="solo-menu" style="max-width:400px;">
+				<div class="solo-logo">
+					<h1 class="logo-text" style="color: var(--crt-red); text-shadow: 0 0 5px var(--crt-red), 0 0 15px var(--glow-red), 0 0 35px var(--glow-red-dark);">CONFIRM DELETE</h1>
+				</div>
+				<div style="color:var(--crt-green); font-family:monospace; font-size:14px; text-align:center; padding:20px; line-height:1.6;">
+					<p style="margin-bottom:16px;">Are you sure you want to delete:</p>
+					<p style="margin-bottom:20px; font-weight:bold;" id="delete-confirm-deck-name"></p>
+					<p style="margin-bottom:20px; font-size:12px; color:var(--crt-green-muted);">This action cannot be undone.</p>
+					<div style="display:flex; gap:10px; justify-content:center;">
+						<button id="delete-confirm-yes-btn" class="button" style="flex:0 1 100px; background:var(--bg-dark); border-color:#ff6666; color:#ff6666;">DELETE</button>
+						<button id="delete-confirm-no-btn" class="button" style="flex:0 1 100px;">CANCEL</button>
+					</div>
 				</div>
 			</div>
 		</div>

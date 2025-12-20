@@ -2802,7 +2802,7 @@
 						  }
 
 						  // Bind NRDB import to the unified id used in UI
-						  $('#importnrdb, #importdeck').off('click').on('click', ImportDeckFromNRDB);
+						  $('#importnrdb, #importdeckfromNRDB').off('click').on('click', ImportDeckFromNRDB);
 
 													// Export current deck as a JS precon and download
 													function ExportJSDeck() {
@@ -3211,7 +3211,7 @@
 					<div class="deck-heading">CURRENT DECK:</div>
 					<div id="deck" style="width:100%; border:1px solid #ccc; padding:10px; min-height:100px; overflow-y:auto; white-space:pre-wrap; word-break:break-word; background-color:#f9f9f9; font-family:monospace;"></div>
 					<div style="margin-top:8px;">
-						<button id="importdeck" class="button" type="button" style="display:none;">Import Deck from NRDB</button>
+						<button id="importdeckfromNRDB" class="button" type="button" style="display:none;">Import Deck from NRDB</button>
 					</div>
 					<div style="margin-top:8px; display:none;">
 						<select id="preconselect" class="button" style="width:85%; display:block; margin:0 auto;">
