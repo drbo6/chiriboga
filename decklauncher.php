@@ -1284,10 +1284,24 @@
 						  }
 						  
 						  function ImportDeckFromNRDB() {
-							var url = prompt('Paste NetrunnerDB deck URL');
-							if (!url) return;
+							// Show import modal
+							$('#import-nrdb-modal-input').val('');
+							$('#import-nrdb-modal-message').html('');
+							$('#import-nrdb-modal').css('display', 'flex');
+							$('#import-nrdb-modal-input').focus();
+						  }
+						  
+						  function ConfirmImportDeckFromNRDB() {
+							var url = $('#import-nrdb-modal-input').val().trim();
+							if (!url) {
+								$('#import-nrdb-modal-message').html('<span style="color: #ff6666;">Please enter a NetrunnerDB deck URL.</span>');
+								return;
+							}
 							var m = url.match(/decklist\/([0-9a-f\-]+)/i);
-							if (!m) { alert('Could not extract deck UUID from URL'); return; }
+							if (!m) {
+								$('#import-nrdb-modal-message').html('<span style="color: #ff6666;">Could not extract deck UUID from URL.</span>');
+								return;
+							}
 							var uuid = m[1];
 							var apiUrl = 'https://netrunnerdb.com/api/2.0/public/decklist/' + uuid;
 							$.getJSON(apiUrl)
@@ -1295,7 +1309,10 @@
 								try {
 									console.log('NRDB Response:', resp);
 									var entry = (resp && resp.data && resp.data[0]) ? resp.data[0] : null;
-									if (!entry) { alert('Decklist not found'); return; }
+									if (!entry) {
+										$('#import-nrdb-modal-message').html('<span style="color: #ff6666;">Decklist not found.</span>');
+										return;
+									}
 									console.log('Entry:', entry);
 									var cardsObj = entry.cards || {};
 									console.log('Cards object:', cardsObj);
@@ -1311,7 +1328,7 @@
 										console.log('Current mode:', currentMode, 'Imported side:', importedSide);
 										if ((currentMode === "corp" && importedSide === "runner") || 
 										    (currentMode === "runner" && importedSide === "corp")) {
-											alert('Cannot import ' + importedSide + ' deck. You are in ' + currentMode + ' mode. Click on "Set as Opponent" to switch sides.');
+											$('#import-nrdb-modal-message').html('<span style="color: #ff6666;">Cannot import ' + importedSide + ' deck. You are in ' + currentMode + ' mode. Click on "Set as Opponent" to switch sides.</span>');
 											return;
 										}
 									}
@@ -1394,12 +1411,20 @@
 									$("#deck").val(lines.join("\n"));
 									$("#deck").prop("rows", lines.length); //resize textarea height to fit
 									Parse();
+									// Show success message and close modal
+									$('#import-nrdb-modal-message').html('<span style="color: #33ff33;">Deck imported successfully!</span>');
+									setTimeout(function() {
+										$('#import-nrdb-modal').css('display', 'none');
+										$('#import-nrdb-modal-message').html('');
+									}, 2000);
 								} catch(e) {
 									console.error(e);
-									alert('Error importing deck');
+									$('#import-nrdb-modal-message').html('<span style="color: #ff6666;">Error importing deck</span>');
 								}
 							 })
-							 .fail(function(){ alert('Failed to fetch decklist from NRDB'); });
+							 .fail(function(){
+								$('#import-nrdb-modal-message').html('<span style="color: #ff6666;">Failed to fetch decklist from NRDB</span>');
+							 });
 						  }
 
 // Bind Save Deck button
@@ -1410,6 +1435,20 @@
 					  
 					  // Bind NRDB import to the unified id used in UI
 						  $('#importnrdb, #importdeckfromNRDB').off('click').on('click', ImportDeckFromNRDB);
+						  $('#import-nrdb-confirm-btn').off('click').on('click', ConfirmImportDeckFromNRDB);
+						  $('#import-nrdb-close-btn, #import-nrdb-modal').off('click').on('click', function(e) {
+							if (e.target.id === 'import-nrdb-modal' || e.target.id === 'import-nrdb-close-btn') {
+								$('#import-nrdb-modal').css('display', 'none');
+							}
+						  });
+						  // Allow Enter key to import
+						  $('#import-nrdb-modal-input').off('keypress').on('keypress', function(e) {
+							if (e.which === 13) {
+								e.preventDefault();
+								ConfirmImportDeckFromNRDB();
+							}
+						  });
+						  
 						  $('#save-deck-confirm-btn').off('click').on('click', ConfirmSaveDeck);
 						  $('#save-deck-close-btn, #save-deck-modal').off('click').on('click', function(e) {
 							if (e.target.id === 'save-deck-modal' || e.target.id === 'save-deck-close-btn') {
@@ -2041,6 +2080,23 @@
 					<div style="display:flex; gap:10px; justify-content:center;">
 						<button id="delete-confirm-yes-btn" class="button" style="flex:0 1 100px; background:var(--bg-dark); border-color:#ff6666; color:#ff6666;">DELETE</button>
 						<button id="delete-confirm-no-btn" class="button" style="flex:0 1 100px;">CANCEL</button>
+					</div>
+				</div>
+			</div>
+		</div>
+		<!-- Import Deck from NRDB Modal -->
+		<div id="import-nrdb-modal" class="modal">
+			<div class="solo-menu">
+				<span id="import-nrdb-close-btn" class="menu-close">✕</span>
+				<div class="solo-logo">
+					<h1 class="logo-text" style="color: var(--crt-red); text-shadow: 0 0 5px var(--crt-red), 0 0 15px var(--glow-red), 0 0 35px var(--glow-red-dark);">IMPORT FROM NRDB</h1>
+				</div>
+				<div style="color:var(--crt-green); font-family:monospace; font-size:14px; text-align:center; padding:20px; line-height:1.6;">
+					<p style="margin-bottom:16px;">Paste a NetrunnerDB deck URL:</p>
+					<input id="import-nrdb-modal-input" type="text" placeholder="https://netrunnerdb.com/decklist/..." style="width:90%; padding:8px; margin:12px auto; display:block; background:var(--bg-dark); border:1px solid var(--border-green); color:var(--crt-green); border-radius:6px; font-family:monospace;">
+					<div id="import-nrdb-modal-message" style="margin:12px 0; min-height:20px;"></div>
+					<div style="display:flex; gap:10px; justify-content:center; margin-top:20px;">
+						<button id="import-nrdb-confirm-btn" class="button" style="flex:0 1 120px;">IMPORT</button>
 					</div>
 				</div>
 			</div>
