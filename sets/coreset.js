@@ -7,6 +7,8 @@ coreSet[1] = {
   link: 0,
   cardType: "identity",
   subTypes: ["G-mod"],
+  deckSize: 45,
+  influenceLimit: 15,
   automaticOnInstall: {
     Resolve: function (card) {
       if (CheckCardType(card, ["program"])) {
@@ -718,6 +720,8 @@ coreSet[33] = {
   link: 1,
   cardType: "identity",
   subTypes: ["Natural"],
+  deckSize: 45,
+  influenceLimit: 15,
   usedThisTurn: false,
   modifyInstallCost: {
     Resolve: function (card) {
