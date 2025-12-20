@@ -1764,6 +1764,15 @@
 			      window.PopulatePreconDropdownForIdentity(effectiveId);
 			    }
 			  } catch(e) { /* ignore */ }
+			  
+			  // Mobile fix: Force a repaint after initial render to ensure all elements are visible
+			  // Some mobile browsers skip painting absolute-positioned elements until scroll
+			  setTimeout(function() {
+			    $('#cardcontainer').css('opacity', '0.999');
+			    requestAnimationFrame(function() {
+			      $('#cardcontainer').css('opacity', '1');
+			    });
+			  }, 100);
 			}
 
 			function Normalise(src) {

@@ -1462,9 +1462,9 @@ body::-webkit-scrollbar-track {
 	background:transparent; 
 	flex:1; 
 	min-width:0; 
-	/* Mobile fix: optimize scroll and paint performance */
+	/* Mobile fix: ensure proper initial paint */
 	-webkit-overflow-scrolling: touch;
-	contain: layout style;
+	/* Removed 'contain: layout style' - it was causing mobile browsers to skip painting elements until scroll */
 }
 #cardcontainer .card-item { 
 	background:#0a0f0a; 
@@ -1542,6 +1542,9 @@ body::-webkit-scrollbar-track {
 	justify-content:space-between; 
 	margin-top:6px; 
 	align-self:start; 
+	/* Mobile fix: ensure controls are painted */
+	-webkit-transform: translateZ(0);
+	transform: translateZ(0);
 }
 #cardcontainer .card-controls button { 
 	flex:1; 
@@ -2215,7 +2218,6 @@ select::-ms-expand { display: none; }
 		gap:2px !important; 
 		padding:3px !important; 
 		row-gap:1px !important; 
-		grid-template-rows: repeat(2, min-content) !important; 
 		/* Removed overflow-y and max-height to prevent second scrollbar; allow page body to scroll */
 		overflow:visible !important; 
 		max-height:none !important; 
@@ -2235,7 +2237,6 @@ select::-ms-expand { display: none; }
 	}
 	#cardcontainer .card-item { 
 		padding:1px !important; 
-		grid-template-rows: auto 12px auto !important; 
 	}
 	#cardcontainer .count-badge { 
 		font-size:16px; 
