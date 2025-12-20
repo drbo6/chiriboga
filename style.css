@@ -1573,6 +1573,10 @@ body::-webkit-scrollbar-track {
 	transform:translate3d(-50%,-50%,0); 
 	-webkit-backface-visibility: hidden;
 	backface-visibility: hidden;
+	/* Mobile paint fix: hint browser to optimize layer for opacity/visibility changes */
+	will-change: opacity, visibility, transform;
+	-webkit-perspective: 1000;
+	perspective: 1000;
 	background:var(--bg-dark); 
 	color:var(--crt-green); 
 	padding:6px 10px; 
