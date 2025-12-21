@@ -152,7 +152,7 @@
                   </div>
                 </div>
                 <div class="settings-group" title="Card sets available for building your runner deck in Gauntlet mode">
-                  <label class="settings-label">ALLOWED<br />PLAYER SETS</label>
+                  <label class="settings-label" id="allowed-sets-label" onclick="handleAllowedSetsClick()" style="cursor: pointer;">ALLOWED<br />PLAYER SETS</label>
                   <div class="settings-checkboxes">
                     <label class="checkbox-label checkbox-disabled" title="Core set, always included">
                       <input type="checkbox" id="set-sg" checked disabled>
@@ -165,6 +165,14 @@
                     <label class="checkbox-label" title="Elevation expansion cards (probably bugs here, but hopefully not game-breaking)">
                       <input type="checkbox" id="set-elev" onchange="toggleAllowedSet('elev')">
                       <span class="checkbox-text">Elevation (Untested)</span>
+                    </label>
+                    <label class="checkbox-label hidden-set-option" id="core-option" title="Original Core Set cards (hidden option)" style="display: none;">
+                      <input type="checkbox" id="set-core" onchange="toggleAllowedSet('core')">
+                      <span class="checkbox-text">Core Set (Legacy)</span>
+                    </label>
+                    <label class="checkbox-label hidden-set-option" id="ms-option" title="Midnight Sun expansion cards (hidden option)" style="display: none;">
+                      <input type="checkbox" id="set-ms" onchange="toggleAllowedSet('ms')">
+                      <span class="checkbox-text">Midnight Sun (Untested)</span>
                     </label>
                   </div>
                 </div>
@@ -243,6 +251,34 @@
       preconOverrides: {}  // Maps precon name to boolean override for useForGauntlet
     };
     
+    // Hidden sets reveal tracking
+    var hiddenSetsRevealed = false;
+    var allowedSetsClickCount = 0;
+    var allowedSetsClickTimeout = null;
+    
+    // Handle clicks on "Allowed Player Sets" label to reveal hidden options
+    function handleAllowedSetsClick() {
+      if (hiddenSetsRevealed) return; // Already revealed
+      
+      allowedSetsClickCount++;
+      
+      // Reset click count after 2 seconds of no clicks
+      if (allowedSetsClickTimeout) {
+        clearTimeout(allowedSetsClickTimeout);
+      }
+      allowedSetsClickTimeout = setTimeout(function() {
+        allowedSetsClickCount = 0;
+      }, 2000);
+      
+      // Reveal hidden options after 6 clicks
+      if (allowedSetsClickCount >= 6) {
+        hiddenSetsRevealed = true;
+        document.getElementById('core-option').style.display = '';
+        document.getElementById('ms-option').style.display = '';
+        saveSettings();
+      }
+    }
+    
     // Load settings from localStorage, falling back to config defaults
     function initializeSettings() {
       var saved = null;
@@ -285,6 +321,15 @@
       document.getElementById('balanced-factions-toggle').checked = settingsOverrides.balancedFactions;
       document.getElementById('set-su21').checked = settingsOverrides.allowedSets.indexOf('su21') !== -1;
       document.getElementById('set-elev').checked = settingsOverrides.allowedSets.indexOf('elev') !== -1;
+      document.getElementById('set-core').checked = settingsOverrides.allowedSets.indexOf('core') !== -1;
+      document.getElementById('set-ms').checked = settingsOverrides.allowedSets.indexOf('ms') !== -1;
+      
+      // Show hidden set options if they were previously revealed
+      if (saved && saved.hiddenSetsRevealed) {
+        document.getElementById('core-option').style.display = '';
+        document.getElementById('ms-option').style.display = '';
+        hiddenSetsRevealed = true;
+      }
       
       // Update stepper button states
       updateStepperButtons();
@@ -301,7 +346,8 @@
           alternateFactions: settingsOverrides.alternateFactions,
           balancedFactions: settingsOverrides.balancedFactions,
           allowedSets: settingsOverrides.allowedSets,
-          preconOverrides: settingsOverrides.preconOverrides
+          preconOverrides: settingsOverrides.preconOverrides,
+          hiddenSetsRevealed: hiddenSetsRevealed
         };
         localStorage.setItem('chiriboga-settings', JSON.stringify(toSave));
       } catch (e) {
@@ -516,8 +562,16 @@
         };
         
         // Get the set code for this card
-        var cardSetPrefix = cardIdStr.substring(0, 2);
-        var cardSetCode = cardSetMap[cardSetPrefix];
+        var cardIdInt = parseInt(cardId);
+        var cardSetCode = null;
+        
+        // Core Set uses 1xxx range (1000-1999)
+        if (cardIdInt >= 1000 && cardIdInt <= 1999) {
+          cardSetCode = 'core';
+        } else {
+          var cardSetPrefix = cardIdStr.substring(0, 2);
+          cardSetCode = cardSetMap[cardSetPrefix];
+        }
         
         if (!cardSetCode) return false;
         return allowedSets.indexOf(cardSetCode) !== -1;

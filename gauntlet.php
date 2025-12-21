@@ -744,6 +744,7 @@
 					// Build cardIdToSet mapping from cardData.json pack_code
 					// This must happen before identity filtering
 					var packCodeToSet = {
+						'core': 'core',
 						'sg': 'sg',
 						'su21': 'su21',
 						'ms': 'ms',
@@ -759,6 +760,30 @@
 								var packCode = c.pack_code || '';
 								var setCode = packCodeToSet[packCode] || packCode;
 								cardIdToSet[cardId] = setCode;
+							}
+						}
+					}
+					
+					// Fallback: Map cards by ID range for cards not in cardData.json
+					for (var cardId in cardSet) {
+						if (!cardSet[cardId]) continue;
+						if (cardIdToSet[cardId]) continue; // Already mapped
+						var cardIdInt = parseInt(cardId);
+						var cardIdStr = String(cardId);
+						
+						// Core Set uses 1xxx range (1000-1999)
+						if (cardIdInt >= 1000 && cardIdInt <= 1999) {
+							cardIdToSet[cardId] = 'core';
+						} else {
+							var prefix = cardIdStr.substring(0, 2);
+							var idRangeMap = {
+								'30': 'sg',      // System Gateway (30000-30999)
+								'31': 'su21',    // System Update 2021 (31000-31999)
+								'33': 'ms',      // Midnight Sun (33000-33999)
+								'35': 'elev'     // Elevation (35000-35999)
+							};
+							if (idRangeMap[prefix]) {
+								cardIdToSet[cardId] = idRangeMap[prefix];
 							}
 						}
 					}
@@ -963,6 +988,7 @@
 				// Build cardIdToSet mapping from cardData.json pack_code
 				// Only map cards that exist in both cardData.json and the .js files
 				var packCodeToSet = {
+					'core': 'core',
 					'sg': 'sg',
 					'su21': 'su21',
 					'ms': 'ms',
@@ -978,6 +1004,30 @@
 							var packCode = c.pack_code || '';
 							var setCode = packCodeToSet[packCode] || packCode;
 							cardIdToSet[cardId] = setCode;
+						}
+					}
+				}
+				
+				// Fallback: Map cards by ID range for cards not in cardData.json
+				for (var cardId in cardSet) {
+					if (!cardSet[cardId]) continue;
+					if (cardIdToSet[cardId]) continue; // Already mapped
+					var cardIdInt = parseInt(cardId);
+					var cardIdStr = String(cardId);
+					
+					// Core Set uses 1xxx range (1000-1999)
+					if (cardIdInt >= 1000 && cardIdInt <= 1999) {
+						cardIdToSet[cardId] = 'core';
+					} else {
+						var prefix = cardIdStr.substring(0, 2);
+						var idRangeMap = {
+							'30': 'sg',      // System Gateway (30000-30999)
+							'31': 'su21',    // System Update 2021 (31000-31999)
+							'33': 'ms',      // Midnight Sun (33000-33999)
+							'35': 'elev'     // Elevation (35000-35999)
+						};
+						if (idRangeMap[prefix]) {
+							cardIdToSet[cardId] = idRangeMap[prefix];
 						}
 					}
 				}
