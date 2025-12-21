@@ -98,10 +98,24 @@
 				   <div class="toggle-options">
 					   <div class="toggle-grid">
 						   <label class="toggle-item"><input type="checkbox" id="narration"> Narrate AI</label>
-						   <label class="toggle-item"><input type="checkbox" id="slowerai"> Slower AI</label>
-						   <label class="toggle-item"><input type="checkbox" id="largerhistory"> Larger history</label>
-						   <label class="toggle-item"><input type="checkbox" id="debugmenu-toggle"> Debug Menu</label>
+					   <label class="toggle-item"><input type="checkbox" id="largerhistory"> Larger history</label>
+					   <label class="toggle-item"><input type="checkbox" id="debugmenu-toggle"> Debug Menu</label>
+					   <div class="toggle-item" style="display:flex;align-items:center;gap:12px;justify-content:flex-start;">
+						   <span style="min-width:50px;color:var(--crt-green-muted);">SPEED:</span>
+						   <label style="display:flex;align-items:center;gap:4px;margin:0;">
+							   <input type="checkbox" id="speed-1" onchange="debugSetSpeedPreset(1000)">
+							   <span style="width:12px;text-align:center;color:var(--crt-green-muted);">1</span>
+						   </label>
+						   <label style="display:flex;align-items:center;gap:4px;margin:0;">
+							   <input type="checkbox" id="speed-2" checked onchange="debugSetSpeedPreset(350)">
+							   <span style="width:12px;text-align:center;color:var(--crt-green-muted);">2</span>
+						   </label>
+						   <label style="display:flex;align-items:center;gap:4px;margin:0;">
+							   <input type="checkbox" id="speed-3" onchange="debugSetSpeedPreset(100)">
+							   <span style="width:12px;text-align:center;color:var(--crt-green-muted);">3</span>
+						   </label>
 					   </div>
+				   </div>
 				   </div>
 			</div>
 		</div>
@@ -132,6 +146,26 @@
 							<option value="">-- Select a card --</option>
 						</select>
 						<button class="button" onclick="debugAddCardToHand()">Add Selected Card</button>
+					</div>
+					<div class="debug-card-group">
+						<label>AI Speed (ms delay)</label>
+					<input type="number" id="debug-ai-speed" min="75" max="1050" step="50" value="350" style="width:100%;padding:8px;margin:5px 0;background-color:#0a0a0a;color:#33ff33;border:2px solid #147014;border-radius:3px;font-family:monospace;font-size:14px;box-sizing:border-box;text-align:center;" onchange="debugSetAISpeed()">
+					<style>
+						#debug-ai-speed::-webkit-outer-spin-button,
+						#debug-ai-speed::-webkit-inner-spin-button {
+							-webkit-appearance: none;
+							appearance: none;
+							background-color: #147014;
+							color: #33ff33;
+							border: 1px solid #0a7c0a;
+							cursor: pointer;
+						}
+						#debug-ai-speed::-webkit-outer-spin-button:hover,
+						#debug-ai-speed::-webkit-inner-spin-button:hover {
+							background-color: #1a8c1a;
+						}
+					</style>
+						<button class="button" onclick="debugSetAISpeed()">Apply Speed</button>
 					</div>
 					<button class="button" onclick="debugWinGame()">Win the Game</button>
 					<button class="button" onclick="debugLoseGame()">Lose the Game</button>

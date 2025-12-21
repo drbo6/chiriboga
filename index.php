@@ -129,6 +129,32 @@
                 <button class="settings-back" onclick="closeSettings()">BACK</button>
               </div>
               <div class="settings-content">
+                <div class="settings-section-header">GLOBAL SETTINGS</div>
+                <div class="settings-group" title="AI execution speed in milliseconds">
+                  <label class="settings-label">GAME SPEED</label>
+                  <div style="display:flex;align-items:center;gap:12px;justify-content:flex-start;">
+                    <label style="display:flex;align-items:center;gap:4px;margin:0;">
+                      <input type="checkbox" id="speed-settings-1" onchange="setGameSpeed(1000)">
+                      <span style="width:12px;text-align:center;color:var(--crt-green-muted);">1</span>
+                    </label>
+                    <label style="display:flex;align-items:center;gap:4px;margin:0;">
+                      <input type="checkbox" id="speed-settings-2" checked onchange="setGameSpeed(350)">
+                      <span style="width:12px;text-align:center;color:var(--crt-green-muted);">2</span>
+                    </label>
+                    <label style="display:flex;align-items:center;gap:4px;margin:0;">
+                      <input type="checkbox" id="speed-settings-3" onchange="setGameSpeed(100)">
+                      <span style="width:12px;text-align:center;color:var(--crt-green-muted);">3</span>
+                    </label>
+                  </div>
+                </div>
+                <div class="settings-group" title="Enable debug menu in game">
+                  <label class="settings-label">DEBUG MENU</label>
+                  <div class="settings-switch">
+                    <input type="checkbox" id="debug-menu-settings-toggle" onchange="toggleDebugMenu()">
+                    <label for="debug-menu-settings-toggle" class="switch-label"></label>
+                  </div>
+                </div>
+                <div class="settings-section-header">GAUNTLET SETTINGS</div>
                 <div class="settings-group" title="Number of opponents you must defeat to complete the Gauntlet">
                   <label class="settings-label">GAUNTLET LENGTH</label>
                   <div class="settings-stepper">
@@ -314,6 +340,16 @@
         ? saved.preconOverrides
         : {};
       
+      // Load game speed (default 350ms)
+      settingsOverrides.gameSpeed = (saved && typeof saved.gameSpeed === 'number')
+        ? saved.gameSpeed
+        : 350;
+      
+      // Load debug menu preference (default false)
+      settingsOverrides.debugMenuEnabled = (saved && typeof saved.debugMenuEnabled === 'boolean')
+        ? saved.debugMenuEnabled
+        : false;
+      
       // Update UI to match
       document.getElementById('gauntlet-length-value').textContent = settingsOverrides.gauntletLength;
       document.getElementById('alternate-factions-toggle').checked = settingsOverrides.alternateFactions;
@@ -322,6 +358,14 @@
       document.getElementById('set-elev').checked = settingsOverrides.allowedSets.indexOf('elev') !== -1;
       document.getElementById('set-core').checked = settingsOverrides.allowedSets.indexOf('core') !== -1;
       document.getElementById('set-ms').checked = settingsOverrides.allowedSets.indexOf('ms') !== -1;
+      
+      // Set game speed checkboxes
+      document.getElementById('speed-settings-1').checked = (settingsOverrides.gameSpeed === 1000);
+      document.getElementById('speed-settings-2').checked = (settingsOverrides.gameSpeed === 350);
+      document.getElementById('speed-settings-3').checked = (settingsOverrides.gameSpeed === 100);
+      
+      // Set debug menu toggle
+      document.getElementById('debug-menu-settings-toggle').checked = settingsOverrides.debugMenuEnabled;
       
       // Update stepper button states
       updateStepperButtons();
@@ -338,7 +382,9 @@
           alternateFactions: settingsOverrides.alternateFactions,
           balancedFactions: settingsOverrides.balancedFactions,
           allowedSets: settingsOverrides.allowedSets,
-          preconOverrides: settingsOverrides.preconOverrides
+          preconOverrides: settingsOverrides.preconOverrides,
+          gameSpeed: settingsOverrides.gameSpeed,
+          debugMenuEnabled: settingsOverrides.debugMenuEnabled
         };
         localStorage.setItem('chiriboga-settings', JSON.stringify(toSave));
       } catch (e) {
@@ -372,6 +418,20 @@
     
     function toggleBalancedFactions() {
       settingsOverrides.balancedFactions = document.getElementById('balanced-factions-toggle').checked;
+      saveSettings();
+    }
+    
+    function setGameSpeed(speed) {
+      settingsOverrides.gameSpeed = speed;
+      // Update checkbox states to make them behave like radio buttons
+      document.getElementById('speed-settings-1').checked = (speed === 1000);
+      document.getElementById('speed-settings-2').checked = (speed === 350);
+      document.getElementById('speed-settings-3').checked = (speed === 100);
+      saveSettings();
+    }
+    
+    function toggleDebugMenu() {
+      settingsOverrides.debugMenuEnabled = document.getElementById('debug-menu-settings-toggle').checked;
       saveSettings();
     }
     

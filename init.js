@@ -318,6 +318,18 @@ function Init() {
         // Also close debug modal if open
         $('#debug-modal').css('display','none');
       }
+      // Save debug menu setting to localStorage
+      try {
+        var savedJson = localStorage.getItem('chiriboga-settings');
+        var saved = {};
+        if (savedJson) {
+          saved = JSON.parse(savedJson);
+        }
+        saved.debugMenuEnabled = enableDebugMenu;
+        localStorage.setItem('chiriboga-settings', JSON.stringify(saved));
+      } catch (e) {
+        console.warn('Could not save debug menu setting to settings:', e);
+      }
     });
   });
   ShowDebugMenuButtonIfEnabled();
@@ -1614,6 +1626,18 @@ function UpdateCounterColors() {
       countersUI[key].runner.sprite.tint = tintColor;
     }
   });
+  
+  //update all counters on cards
+  if (typeof cardRenderer !== 'undefined' && cardRenderer.counters) {
+    for (var i = 0; i < cardRenderer.counters.length; i++) {
+      var counter = cardRenderer.counters[i];
+      if (counter.richText && counter.sprite) {
+        counter.richText.style.fill = textColor;
+        counter.richText.style.stroke = strokeColor;
+        counter.sprite.tint = tintColor;
+      }
+    }
+  }
 }
 
 var counterList = ["advancement", "credits", "virus", "power", "agenda"]; //used for resetting all counters on a card, setting them up for render, etc.
@@ -1763,6 +1787,12 @@ function Setup() {
     card.renderer.sprite.x = card.renderer.destinationPosition.x;
     card.renderer.sprite.y = card.renderer.destinationPosition.y;
   });
+
+  // Load game speed from settings
+  LoadGameSpeedFromSettings();
+
+  // Load debug menu setting from settings
+  LoadDebugMenuFromSettings();
 
   //wait for textures to load (will call StartGame which calls Main)
 }
@@ -2226,4 +2256,113 @@ function debugAddCardToHand() {
   
   // Reset dropdown
   dropdown.value = '';
+}
+
+// Set AI speed
+function debugSetAISpeed() {
+  var speedInput = document.getElementById('debug-ai-speed');
+  if (!speedInput || !speedInput.value) {
+    Log('DEBUG: Please enter a valid speed value (in milliseconds)');
+    return;
+  }
+  
+  var newSpeed = parseInt(speedInput.value);
+  var minSpeed = 75;
+  var maxSpeed = mainLoopDelay * 3; // slower AI speed
+  
+  if (isNaN(newSpeed)) {
+    Log('DEBUG: Speed must be a valid number');
+    return;
+  }
+  
+  // Clamp the speed between min and max
+  if (newSpeed < minSpeed) {
+    newSpeed = minSpeed;
+    Log('DEBUG: Speed clamped to minimum of ' + minSpeed + 'ms');
+  } else if (newSpeed > maxSpeed) {
+    newSpeed = maxSpeed;
+    Log('DEBUG: Speed clamped to maximum of ' + maxSpeed + 'ms');
+  }
+  
+  mainLoopDelay = newSpeed;
+  speedInput.value = newSpeed;
+  Log('DEBUG: AI speed changed to ' + mainLoopDelay + 'ms per action');
+}
+
+// Set speed preset from in-game menu
+function debugSetSpeedPreset(speed) {
+  mainLoopDelay = speed;
+  Log('AI speed set to ' + mainLoopDelay + 'ms per action');
+  
+  // Uncheck all speed checkboxes except the selected one - in-game menu
+  var speed1 = document.getElementById('speed-1');
+  var speed2 = document.getElementById('speed-2');
+  var speed3 = document.getElementById('speed-3');
+  if (speed1) speed1.checked = (speed === 1000);
+  if (speed2) speed2.checked = (speed === 350);
+  if (speed3) speed3.checked = (speed === 100);
+  
+  // Uncheck all speed checkboxes except the selected one - settings panel
+  var settingsSpeed1 = document.getElementById('speed-settings-1');
+  var settingsSpeed2 = document.getElementById('speed-settings-2');
+  var settingsSpeed3 = document.getElementById('speed-settings-3');
+  if (settingsSpeed1) settingsSpeed1.checked = (speed === 1000);
+  if (settingsSpeed2) settingsSpeed2.checked = (speed === 350);
+  if (settingsSpeed3) settingsSpeed3.checked = (speed === 100);
+  
+  // Save the speed change back to localStorage
+  try {
+    var savedJson = localStorage.getItem('chiriboga-settings');
+    var saved = {};
+    if (savedJson) {
+      saved = JSON.parse(savedJson);
+    }
+    saved.gameSpeed = speed;
+    localStorage.setItem('chiriboga-settings', JSON.stringify(saved));
+  } catch (e) {
+    console.warn('Could not save game speed to settings:', e);
+  }
+}
+
+// Load game speed from settings stored in localStorage
+function LoadGameSpeedFromSettings() {
+  try {
+    var savedJson = localStorage.getItem('chiriboga-settings');
+    if (savedJson) {
+      var saved = JSON.parse(savedJson);
+      if (typeof saved.gameSpeed === 'number') {
+        mainLoopDelay = saved.gameSpeed;
+        // Update in-game menu checkboxes to match
+        var speed1 = document.getElementById('speed-1');
+        var speed2 = document.getElementById('speed-2');
+        var speed3 = document.getElementById('speed-3');
+        if (speed1) speed1.checked = (saved.gameSpeed === 1000);
+        if (speed2) speed2.checked = (saved.gameSpeed === 350);
+        if (speed3) speed3.checked = (saved.gameSpeed === 100);
+      }
+    }
+  } catch (e) {
+    console.warn('Could not load game speed from settings:', e);
+  }
+}
+
+// Load debug menu setting from localStorage
+function LoadDebugMenuFromSettings() {
+  try {
+    var savedJson = localStorage.getItem('chiriboga-settings');
+    if (savedJson) {
+      var saved = JSON.parse(savedJson);
+      if (typeof saved.debugMenuEnabled === 'boolean') {
+        enableDebugMenu = saved.debugMenuEnabled;
+        var debugToggle = document.getElementById('debugmenu-toggle');
+        if (debugToggle) {
+          debugToggle.checked = saved.debugMenuEnabled;
+        }
+        // Show or hide debug menu button
+        ShowDebugMenuButtonIfEnabled();
+      }
+    }
+  } catch (e) {
+    console.warn('Could not load debug menu setting from settings:', e);
+  }
 }
