@@ -1956,7 +1956,7 @@ function SetHistoryThumbnail(imageFile, text = "", style = "") {
   if (imageFile != "")
     outstr +=
       '<img src="images/' +
-      imageFile +
+      ChangeImageFileToJPG(imageFile) +
       '" height="30px" style="grid-column: 1;  grid-row: 1; margin:auto; ' +
       style +
       '"/>';
