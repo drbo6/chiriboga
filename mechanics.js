@@ -442,11 +442,20 @@ function Install(
 			if (typeof onInstallResolve === "function")
 			  onInstallResolve.call(context);
 			//if clicks were spent, it was done before trash (or as part of callback) so no need to SpendClicks here
-			SpendCredits(
+			// DRBO6- Bling needs to know what costs were paid so we are making it global
+      /*SpendCredits(
 			  installingCard.player,
 			  InstallCost(installingCard, destination, ignoreAllCosts, position),
 			  "installing",
 			  installingCard,
+      */
+      intended.installCostPaid = InstallCost(installingCard, destination, ignoreAllCosts, position);
+      SpendCredits(
+        installingCard.player,
+        intended.installCostPaid,
+        "installing",
+        installingCard,     
+      //DRBO6 END   
 			  function () {
 				//payment done, callback fires
 				if (typeof onPaymentComplete === "function")

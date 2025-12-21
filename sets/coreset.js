@@ -778,14 +778,114 @@ coreSet[1038] = {
   installCost: 1,
   memoryUnits: 1,
 };
-// coreSet[1039] = {
-//   title: "Rabbit Hole",
-//   imageFile: "01039.png",
-//   player: runner,
-//   cardType: "hardware",
-//   installCost: 2,
-// };
-// TODO: Missing link property and on-install ability to search for and install another Rabbit Hole with 1 credit discount
+coreSet[1039] = {
+  title: "Rabbit Hole",
+  imageFile: "01039.png",
+  player: runner,
+  cardType: "hardware",
+  subTypes: ["Link"],
+  installCost: 2,
+  link: 1,
+  
+  // Flag to track if we're in the middle of a chain install
+  chainInstalling: false,
+  
+  // Use responseOnInstall for non-automatic install triggers with choices
+  responseOnInstall: {
+    Enumerate: function(card) {
+      if (card == this) {
+        var rabbitHoleCard = this;
+        
+        // Enable discount for affordability check
+        this.chainInstalling = true;
+        this.modifyInstallCost.availableWhenInactive = true;
+        
+        // Search stack for another Rabbit Hole that we can afford (with discount)
+        var choices = ChoicesArrayCards(runner.stack, function (stackCard) {
+          if (stackCard.title !== "Rabbit Hole") return false;
+          // Check affordability with discount (InstallCost will use modifyInstallCost)
+          return CheckCredits(runner, InstallCost(stackCard), "installing", stackCard);
+        });
+        
+        // Disable discount until actual install
+        this.chainInstalling = false;
+        this.modifyInstallCost.availableWhenInactive = false;
+        
+        if (choices.length === 0) {
+          // No affordable Rabbit Hole found, just shuffle
+          Shuffle(runner.stack);
+          return [];
+        }
+        
+        // Add option to decline
+        choices.push({ skip: true, label: "Do not install another Rabbit Hole", button: "Skip" });
+        
+        return choices;
+      }
+      return [];
+    },
+    
+    Resolve: function(params) {
+      if (params.skip) {
+        Shuffle(runner.stack);
+        return;
+      }
+      
+      var rabbitHoleCard = this;
+      
+      // Move to a temporary location for reveal
+      MoveCard(params.card, runner.resolvingCards);
+      
+      Reveal(
+        params.card,
+        function () {
+          params.card.faceUp = true;
+          
+          // Re-enable the install cost discount for the actual install
+          rabbitHoleCard.chainInstalling = true;
+          rabbitHoleCard.modifyInstallCost.availableWhenInactive = true;
+          
+          // Install the card (discount applied via modifyInstallCost)
+          // The newly installed Rabbit Hole will trigger its own responseOnInstall
+          Install(
+            params.card,
+            null,    // destination (auto for hardware)
+            false,   // ignoreAllCosts
+            null,    // position
+            true,    // returnToPhase
+            function () {
+              // On install complete
+              rabbitHoleCard.chainInstalling = false;
+              rabbitHoleCard.modifyInstallCost.availableWhenInactive = false;
+              Shuffle(runner.stack);
+            },
+            rabbitHoleCard,
+            function () {
+              // On cancel
+              rabbitHoleCard.chainInstalling = false;
+              rabbitHoleCard.modifyInstallCost.availableWhenInactive = false;
+              MoveCard(params.card, runner.stack);
+              Shuffle(runner.stack);
+            }
+          );
+        },
+        rabbitHoleCard
+      );
+    },
+  },
+  
+  modifyInstallCost: {
+    Resolve: function (card) {
+      // Apply -1 discount to Rabbit Hole being chain-installed
+      if (this.chainInstalling && card.title === "Rabbit Hole") {
+        return -1;
+      }
+      return 0;
+    },
+    automatic: true,
+    availableWhenInactive: false, // toggled dynamically during chain install
+  },
+};
 // coreSet[1040] = {
 //   title: "The Personal Touch",
 //   imageFile: "01040.png",
@@ -2214,4 +2314,3 @@ for (var i = 1; i < coreSet.length; i++) {
     cardSet[i] = coreSet[i];
   }
 }
-

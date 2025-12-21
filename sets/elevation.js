@@ -988,6 +988,141 @@ cardSet[35009] = {
   },
 };
 
+//Card 42: Bling
+//Anarch Hardware: Console
+//Cost: 2, +1 MU
+//Whenever you install a card without spending credits, you may host the top card
+//of your stack faceup on this hardware. (It is not installed.)
+//You can play or install hosted cards as if they were in your grip.
+//When your discard phase ends, trash all hosted cards.
+//Limit 1 console per player.
+cardSet[35006] = {
+  title: "Bling",
+  imageFile: "35006.png",
+  player: runner,
+  faction: "Anarch",
+  influence: 3,
+  cardType: "hardware",
+  subTypes: ["Console"],
+  installCost: 2,
+  unique: true,
+  memoryUnits: 1,
+  
+  hostedCards: [],
+  
+  //Whenever you install a card without spending credits, you may host the top card of stack
+  responseOnInstall: {
+    Enumerate: function(card) {
+      //Don't trigger for Bling itself
+      if (card === this) return [];
+      //Only trigger if install cost was 0
+      if (intended.installCostPaid !== 0) return [];
+      //Must have cards in stack
+      if (runner.stack.length === 0) return [];
+      return [{}];
+    },
+    Resolve: function(params) {
+      var cardRef = this;
+      var choices = [
+        { host: true, label: "Host top card of stack on Bling", button: "Host" },
+        { host: false, label: "Decline", button: "Decline" }
+      ];
+      
+      DecisionPhase(
+        runner,
+        choices,
+        function(choiceParams) {
+          if (choiceParams.host) {
+            //Get top card of stack
+            var topCard = runner.stack[runner.stack.length - 1];
+            MoveCard(topCard, cardRef.hostedCards);
+            topCard.faceUp = true;
+            topCard.notInstalled = true; //Don't count towards MU
+            Log(GetTitle(topCard, true) + " hosted on Bling");
+          }
+        },
+        "Bling",
+        "Host top card of stack?",
+        cardRef
+      );
+    },
+    text: "Host top card of stack on Bling",
+  },
+  
+  //You can play or install hosted cards as if they were in your grip
+  abilities: [
+    {
+      text: "Install a hosted card",
+      Enumerate: function() {
+        if (!CheckActionClicks(runner, 1)) return [];
+        var choices = [];
+        for (var i = 0; i < this.hostedCards.length; i++) {
+          var card = this.hostedCards[i];
+          if (CheckCardType(card, ["program", "hardware", "resource"])) {
+            //Check if can afford
+            if (ChoicesCardInstall(card).length > 0) {
+              choices.push({ card: card, label: "Install " + GetTitle(card, true) });
+            }
+          }
+        }
+        return choices;
+      },
+      Resolve: function(params) {
+        SpendClicks(runner, 1);
+        params.card.notInstalled = false; //Clear flag before installing
+        Install(params.card, null);
+      },
+    },
+    {
+      text: "Play a hosted event",
+      Enumerate: function() {
+        if (!CheckActionClicks(runner, 1)) return [];
+        var choices = [];
+        for (var i = 0; i < this.hostedCards.length; i++) {
+          var card = this.hostedCards[i];
+          if (CheckCardType(card, ["event"])) {
+            if (FullCheckPlay(card)) {
+              choices.push({ card: card, label: "Play " + GetTitle(card, true) });
+            }
+          }
+        }
+        return choices;
+      },
+      Resolve: function(params) {
+        SpendClicks(runner, 1);
+        params.card.notInstalled = false; //Clear flag before playing
+        Play(params.card);
+      },
+    },
+  ],
+  
+  //When your discard phase ends, trash all hosted cards
+  responseOnRunnerDiscardEnds: {
+    Enumerate: function() {
+      if (this.hostedCards.length > 0) return [{}];
+      return [];
+    },
+    Resolve: function() {
+      if (this.hostedCards.length === 0) return;
+      var numCards = this.hostedCards.length;
+      var cardsToTrash = this.hostedCards.slice(); //Copy array
+      for (var i = 0; i < cardsToTrash.length; i++) {
+        cardsToTrash[i].notInstalled = false; //Clear flag before trashing
+        Trash(cardsToTrash[i], false);
+      }
+      Log("Bling trashed " + numCards + " hosted card(s)");
+    },
+    automatic: true,
+  },
+  
+  //AI code
+  AIWorthKeeping: function(installedRunnerCards, spareMU) {
+    //Worth keeping if low on MU
+    if (spareMU <= 0) return true;
+    return false;
+  },
+};
+
 cardSet[35007] = {
   title: "Gourmand",
   imageFile: "35007.png",
