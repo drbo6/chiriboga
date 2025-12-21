@@ -523,6 +523,17 @@ function Install(
 				  //install done, card becomes active
 				  //first the automatic triggers
 				  AutomaticTriggers("automaticOnInstall", [installingCard]);
+				  
+				  //CRITICAL FIX: Temporarily change currentPhase before calling TriggeredResponsePhase
+				  //This prevents nested phases (like Bling's host selection) from returning to installTrashPhase,
+				  //which would cause re-enumeration and double-install bugs.
+				  //TriggeredResponsePhase sets responsePhase.next = currentPhase, so we temporarily set
+				  //currentPhase to the return phase before calling it.
+				  var savedPhase = currentPhase;
+				  if (returnToPhase) {
+					currentPhase = returnToPhase === true ? currentPhase.next : returnToPhase;
+				  }
+				  
 				  //then the Enumerate ones
 				  //currently giving whoever's turn it is priority...not sure this is always going to be right
 				  TriggeredResponsePhase(playerTurn, "responseOnInstall", [installingCard], function() {
