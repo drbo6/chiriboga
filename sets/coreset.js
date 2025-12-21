@@ -1,6 +1,6 @@
 //CARD DEFINITIONS FOR CORE SET
 var coreSet = [];
-coreSet[1] = {
+coreSet[1001] = {
   title: "Noise: Hacker Extraordinaire",
   imageFile: "01001.png",
   player: runner,
@@ -18,7 +18,7 @@ coreSet[1] = {
     },
   },
 };
-coreSet[2] = {
+coreSet[1002] = {
   title: "Déjà Vu",
   imageFile: "01002.png",
   player: runner,
@@ -47,7 +47,7 @@ coreSet[2] = {
     }
   },
 };
-coreSet[3] = {
+coreSet[1003] = {
   title: "Demolition Run",
   imageFile: "01003.png",
   player: runner,
@@ -83,7 +83,7 @@ coreSet[3] = {
     automatic: true,
   },
 };
-coreSet[4] = {
+coreSet[1004] = {
   title: "Stimhack",
   imageFile: "01004.png",
   player: runner,
@@ -105,7 +105,7 @@ coreSet[4] = {
     automatic: true,
   },
 };
-coreSet[5] = {
+coreSet[1005] = {
   title: "Cyberfeeder",
   imageFile: "01005.png",
   player: runner,
@@ -124,7 +124,7 @@ coreSet[5] = {
     return false;
   },
 };
-coreSet[6] = {
+coreSet[1006] = {
   title: "Grimoire",
   imageFile: "01006.png",
   player: runner,
@@ -141,7 +141,7 @@ coreSet[6] = {
     },
   },
 };
-// coreSet[7] = {
+// coreSet[1007] = {
 //   title: "Corroder",
 //   imageFile: "01007.png",
 //   player: runner,
@@ -212,7 +212,7 @@ coreSet[6] = {
 //   },
 // };
 // DUPLICATE: System Update 2021 has Corroder (card 31005)
-coreSet[8] = {
+coreSet[1008] = {
   title: "Datasucker",
   imageFile: "01008.png",
   player: runner,
@@ -253,7 +253,7 @@ coreSet[8] = {
     },
   ],
 };
-coreSet[9] = {
+coreSet[1009] = {
   title: "Djinn",
   imageFile: "01009.png",
   player: runner,
@@ -319,7 +319,7 @@ coreSet[9] = {
     },
   ],
 };
-coreSet[10] = {
+coreSet[1010] = {
   title: "Medium",
   imageFile: "01010.png",
   player: runner,
@@ -371,7 +371,7 @@ coreSet[10] = {
     automatic: true,
   },
 };
-// coreSet[11] = {
+// coreSet[1011] = {
 //   title: "Mimic",
 //   imageFile: "01011.png",
 //   player: runner,
@@ -406,7 +406,7 @@ coreSet[10] = {
 //   ],
 // };
 // DUPLICATE: System Update 2021 has Mimic (card 31007)
-coreSet[12] = {
+coreSet[1012] = {
   title: "Parasite",
   imageFile: "01012.png",
   player: runner,
@@ -443,7 +443,7 @@ coreSet[12] = {
     automatic: true, //for usability, this is not strict implementation
   },
 };
-coreSet[13] = {
+coreSet[1013] = {
   title: "Wyrm",
   imageFile: "01013.png",
   player: runner,
@@ -537,7 +537,7 @@ coreSet[13] = {
     automatic: true,
   },
 };
-coreSet[14] = {
+coreSet[1014] = {
   title: "Yog.0",
   imageFile: "01014.png",
   player: runner,
@@ -572,7 +572,7 @@ coreSet[14] = {
     },
   ],
 };
-// coreSet[15] = {
+// coreSet[1015] = {
 //   title: "Ice Carver",
 //   imageFile: "01015.png",
 //   player: runner,
@@ -589,7 +589,7 @@ coreSet[14] = {
 //   },
 // };
 // DUPLICATE: System Update 2021 has Ice Carver (card 31008)
-coreSet[16] = {
+coreSet[1016] = {
   title: "Wyldside",
   imageFile: "01016.png",
   player: runner,
@@ -605,14 +605,14 @@ coreSet[16] = {
     automatic: true, //for usability, this is not strict implementation
   },
 };
-// coreSet[17] = {
+// coreSet[1017] = {
 //   title: "Gabriel Santiago: Consummate Professional",
 //   imageFile: "01017.png",
 //   player: runner,
 //   cardType: "identity",
 // };  
 // TODO: Missing deckSize, influenceLimit, and identity ability (gain 2 credits on first successful HQ run each turn)
-// coreSet[20] = {
+// coreSet[1020] = {
 //   title: "Forged Activation Orders",
 //   imageFile: "01020.png",
 //   player: runner,
@@ -670,7 +670,7 @@ coreSet[16] = {
 //   text: "Choose an unrezzed piece of ice",
 // };
 // DUPLICATE: System Update 2021 has Forged Activation Orders (card 31014)
-// coreSet[30] = {
+// coreSet[1030] = {
 //   title: "Crash Space",
 //   imageFile: "01030.png",
 //   player: runner,
@@ -685,7 +685,7 @@ coreSet[16] = {
 //   //TODO Trash: prevent up to 3 meat damage.
 // };
 // TODO: Missing trash ability to prevent up to 3 meat damage
-coreSet[32] = {
+coreSet[1032] = {
   title: "Decoy",
   imageFile: "01032.png",
   player: runner,
@@ -713,7 +713,7 @@ coreSet[32] = {
     },
   },
 };
-coreSet[33] = {
+coreSet[1033] = {
   title: 'Kate "Mac" McCaffrey: Digital Tinker',
   imageFile: "01033.png",
   player: runner,
@@ -750,7 +750,7 @@ coreSet[33] = {
     automatic: true,
   },
 };
-// coreSet[34] = {
+// coreSet[1034] = {
 //   title: "Diesel",
 //   imageFile: "01034.png",
 //   player: runner,
@@ -761,7 +761,7 @@ coreSet[33] = {
 //   },
 // };
 // DUPLICATE: System Update 2021 has Diesel (card 31027)
-// coreSet[35] = {
+// coreSet[1035] = {
 //   title: "Modded",
 //   imageFile: "01035.png",
 //   player: runner,
@@ -769,7 +769,7 @@ coreSet[33] = {
 //   playCost: 0,
 // };
 // TODO: Missing implementation - should allow installing hardware/program with 3 credit discount
-coreSet[38] = {
+coreSet[1038] = {
   title: "Akamatsu Mem Chip",
   imageFile: "01038.png",
   player: runner,
@@ -778,7 +778,7 @@ coreSet[38] = {
   installCost: 1,
   memoryUnits: 1,
 };
-// coreSet[39] = {
+// coreSet[1039] = {
 //   title: "Rabbit Hole",
 //   imageFile: "01039.png",
 //   player: runner,
@@ -786,7 +786,7 @@ coreSet[38] = {
 //   installCost: 2,
 // };
 // TODO: Missing link property and on-install ability to search for and install another Rabbit Hole with 1 credit discount
-// coreSet[40] = {
+// coreSet[1040] = {
 //   title: "The Personal Touch",
 //   imageFile: "01040.png",
 //   player: runner,
@@ -801,7 +801,7 @@ coreSet[38] = {
 //   //TODO Host icebreaker has +1 strength
 // };
 // TODO: Missing modifyStrength implementation to give hosted icebreaker +1 strength
-coreSet[41] = {
+coreSet[1041] = {
   title: "The Toolbox",
   imageFile: "01041.png",
   player: runner,
@@ -818,7 +818,7 @@ coreSet[41] = {
     return false;
   },
 };
-// coreSet[43] = {
+// coreSet[1043] = {
 //   title: "Gordian Blade",
 //   imageFile: "01043.png",
 //   player: runner,
@@ -888,7 +888,7 @@ coreSet[41] = {
 // };
 // DUPLICATE: System Update 2021 has Gordian Blade (card 31033)
 var netShieldUsedThisTurn = false; //Multiple Net Shields cannot prevent more damage. [Official FAQ]
-coreSet[45] = {
+coreSet[1045] = {
   title: "Net Shield",
   imageFile: "01045.png",
   player: runner,
@@ -949,7 +949,7 @@ coreSet[45] = {
     },
   },
 };
-coreSet[48] = {
+coreSet[1048] = {
   title: "Sacrificial Construct",
   imageFile: "01048.png",
   player: runner,
@@ -999,7 +999,7 @@ coreSet[48] = {
     },
   },
 };
-coreSet[49] = {
+coreSet[1049] = {
   title: "Infiltration",
   imageFile: "01049.png",
   player: runner,
@@ -1038,7 +1038,7 @@ coreSet[49] = {
     }
   },
 };
-// coreSet[50] = {
+// coreSet[1050] = {
 //   title: "Sure Gamble",
 //   imageFile: "01050.png",
 //   player: runner,
@@ -1049,7 +1049,7 @@ coreSet[49] = {
 //   },
 // };
 // DUPLICATE: System Gateway has Sure Gamble (card 30033)
-coreSet[51] = {
+coreSet[1051] = {
   title: "Crypsis",
   imageFile: "01051.png",
   player: runner,
@@ -1154,7 +1154,7 @@ coreSet[51] = {
     automatic: true, //perhaps ideally this would use an enumerate to allow for manual ordering if simultaneous. If this is required, don't forget this.strengthBoost = 0 occurs in any case
   },
 };
-coreSet[52] = {
+coreSet[1052] = {
   title: "Access to Globalsec",
   imageFile: "01052.png",
   player: runner,
@@ -1163,7 +1163,7 @@ coreSet[52] = {
   installCost: 1,
   link: 1,
 };
-coreSet[53] = {
+coreSet[1053] = {
   title: "Armitage Codebusting",
   imageFile: "01053.png",
   player: runner,
@@ -1193,7 +1193,7 @@ coreSet[53] = {
     },
   ],
 };
-coreSet[57] = {
+coreSet[1057] = {
   title: "Aggressive Secretary",
   imageFile: "01057.png",
   player: corp,
@@ -1243,7 +1243,7 @@ coreSet[57] = {
     },
   },
 };
-coreSet[60] = {
+coreSet[1060] = {
   title: "Shipment from MirrorMorph",
   imageFile: "01060.png",
   player: corp,
@@ -1284,7 +1284,7 @@ coreSet[60] = {
     ChangePhase(mirrorMorphPhase);
   },
 };
-coreSet[61] = {
+coreSet[1061] = {
   title: "Heimdall 1.0",
   imageFile: "01061.png",
   player: corp,
@@ -1346,7 +1346,7 @@ coreSet[61] = {
     },
   ],
 };
-coreSet[63] = {
+coreSet[1063] = {
   title: "Viktor 1.0",
   imageFile: "01063.png",
   player: corp,
@@ -1402,7 +1402,7 @@ coreSet[63] = {
     },
   ],
 };
-// coreSet[64] = {
+// coreSet[1064] = {
 //   title: "Rototurret",
 //   imageFile: "01064.png",
 //   player: corp,
@@ -1426,7 +1426,7 @@ coreSet[63] = {
 //   ],
 // };
 // DUPLICATE: System Update 2021 has Rototurret (card 31055)
-// coreSet[65] = {
+// coreSet[1065] = {
 //   title: "Corporate Troubleshooter",
 //   imageFile: "01065.png",
 //   player: corp,
@@ -1436,7 +1436,7 @@ coreSet[63] = {
 //   trashCost: 2,
 // };
 // TODO: Missing trash ability - trash and pay X credits to give ice +X strength for current encounter
-// coreSet[67] = {
+// coreSet[1067] = {
 //   title: "Jinteki: Personal Evolution",
 //   imageFile: "01067.png",
 //   player: corp,
@@ -1454,7 +1454,7 @@ coreSet[63] = {
 //   },
 // };
 // DUPLICATE: System Update 2021 has Jinteki: Personal Evolution (card 31058)
-// coreSet[68] = {
+// coreSet[1068] = {
 //   title: "Nisei MK II",
 //   imageFile: "01068.png",
 //   player: corp,
@@ -1485,7 +1485,7 @@ coreSet[63] = {
 //   ],
 // };
 // DUPLICATE: System Update 2021 has Nisei MK II (card 31060)
-coreSet[69] = {
+coreSet[1069] = {
   title: "Project Junebug",
   imageFile: "01069.png",
   player: corp,
@@ -1537,7 +1537,7 @@ coreSet[69] = {
     },
   },
 };
-// coreSet[70] = {
+// coreSet[1070] = {
 //   title: "Snare!",
 //   imageFile: "01070.png",
 //   player: corp,
@@ -1590,7 +1590,7 @@ coreSet[69] = {
 // };
 // DUPLICATE: System Update 2021 has Snare! (card 31062)
 
-coreSet[71] = {
+coreSet[1071] = {
   title: "Zaibatsu Loyalty",
   imageFile: "01071.png",
   player: corp,
@@ -1668,7 +1668,7 @@ coreSet[71] = {
     availableWhenInactive: true,
   },
 };
-coreSet[72] = {
+coreSet[1072] = {
   title: "Neural EMP",
   imageFile: "01072.png",
   player: corp,
@@ -1708,7 +1708,7 @@ coreSet[72] = {
     Damage("net", 1, true);
   },
 };
-coreSet[73] = {
+coreSet[1073] = {
   title: "Precognition",
   imageFile: "01073.png",
   player: corp,
@@ -1750,7 +1750,7 @@ coreSet[73] = {
     }
   },
 };
-coreSet[74] = {
+coreSet[1074] = {
   title: "Cell Portal",
   imageFile: "01074.png",
   player: corp,
@@ -1774,7 +1774,7 @@ coreSet[74] = {
     },
   ],
 };
-coreSet[75] = {
+coreSet[1075] = {
   title: "Chum",
   imageFile: "01075.png",
   player: corp,
@@ -1823,7 +1823,7 @@ coreSet[75] = {
     automatic: true,
   },
 };
-coreSet[76] = {
+coreSet[1076] = {
   title: "Data Mine",
   imageFile: "01076.png",
   player: corp,
@@ -1843,7 +1843,7 @@ coreSet[76] = {
     },
   ],
 };
-coreSet[77] = {
+coreSet[1077] = {
   title: "Neural Katana",
   imageFile: "01077.png",
   player: corp,
@@ -1861,7 +1861,7 @@ coreSet[77] = {
     },
   ],
 };
-coreSet[78] = {
+coreSet[1078] = {
   title: "Wall of Thorns",
   imageFile: "01078.png",
   player: corp,
@@ -1885,7 +1885,7 @@ coreSet[78] = {
     },
   ],
 };
-coreSet[79] = {
+coreSet[1079] = {
   title: "Akitaro Watanabe",
   imageFile: "01079.png",
   player: corp,
@@ -1906,7 +1906,7 @@ coreSet[79] = {
     },
   },
 };
-coreSet[80] = {
+coreSet[1080] = {
   title: "NBN: Making News",
   imageFile: "01080.png",
   player: corp,
@@ -1918,7 +1918,7 @@ coreSet[80] = {
     return false;
   },
 };
-coreSet[88] = {
+coreSet[1088] = {
   title: "Data Raven",
   imageFile: "01088.png",
   player: corp,
@@ -1973,7 +1973,7 @@ coreSet[88] = {
     },
   ],
 };
-coreSet[89] = {
+coreSet[1089] = {
   title: "Matrix Analyzer",
   imageFile: "01089.png",
   player: corp,
@@ -2034,7 +2034,7 @@ coreSet[89] = {
     },
   ],
 };
-// coreSet[92] = {
+// coreSet[1092] = {
 //   title: "SanSan City Grid",
 //   imageFile: "01092.png",
 //   player: corp,
@@ -2055,7 +2055,7 @@ coreSet[89] = {
 //   },
 // };
 // DUPLICATE: System Update 2021 has SanSan City Grid (card 31082)
-// coreSet[94] = {
+// coreSet[1094] = {
 //   title: "Hostile Takeover",
 //   imageFile: "01094.png",
 //   player: corp,
@@ -2073,7 +2073,7 @@ coreSet[89] = {
 //   },
 // };
 // DUPLICATE: System Update 2021 has Hostile Takeover (card 31084)
-coreSet[107] = {
+coreSet[1107] = {
   title: "Private Security Force",
   imageFile: "01107.png",
   player: corp,
@@ -2097,7 +2097,7 @@ coreSet[107] = {
     },
   ],
 };
-coreSet[108] = {
+coreSet[1108] = {
   title: "Melange Mining Corp.",
   imageFile: "01108.png",
   player: corp,
@@ -2118,7 +2118,7 @@ coreSet[108] = {
     },
   ],
 };
-// coreSet[109] = {
+// coreSet[1109] = {
 //   title: "PAD Campaign",
 //   imageFile: "01109.png",
 //   player: corp,
@@ -2135,7 +2135,7 @@ coreSet[108] = {
 //   text: "Gain 1 credit.",
 // };
 // DUPLICATE: System Update 2021 has PAD Campaign (card 31095)
-// coreSet[110] = {
+// coreSet[1110] = {
 //   title: "Hedge Fund",
 //   imageFile: "01110.png",
 //   player: corp,
@@ -2147,7 +2147,7 @@ coreSet[108] = {
 //   },
 // };
 // DUPLICATE: System Gateway has Hedge Fund (card 30074)
-// coreSet[111] = {
+// coreSet[1111] = {
 //   title: "Enigma",
 //   imageFile: "01111.png",
 //   player: corp,
@@ -2171,7 +2171,7 @@ coreSet[108] = {
 //   ],
 // };
 // DUPLICATE: System Update 2021 has Enigma (card 31096)
-coreSet[112] = {
+coreSet[1112] = {
   title: "Hunter",
   imageFile: "01112.png",
   player: corp,
@@ -2190,7 +2190,7 @@ coreSet[112] = {
     },
   ],
 };
-coreSet[113] = {
+coreSet[1113] = {
   title: "Wall of Static",
   imageFile: "01113.png",
   player: corp,
@@ -2214,3 +2214,4 @@ for (var i = 1; i < coreSet.length; i++) {
     cardSet[i] = coreSet[i];
   }
 }
+

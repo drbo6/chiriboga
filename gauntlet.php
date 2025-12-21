@@ -87,7 +87,7 @@
 		echo '<script src="config-gauntlet.js?' . filemtime('config-gauntlet.js') . '"></script>';
 		
 		// Load card sets
-		$sets = ["systemgateway","systemupdate2021","elevation"];
+		$sets = ["coreset", "midnightsun", "systemgateway","systemupdate2021","elevation"];
 		foreach ($sets as $set) {
 			echo '<script src="sets/'.$set.'.js?' . filemtime('sets/'.$set.'.js') . '"></script>';
 		}
