@@ -13,21 +13,23 @@ function MakeRun(server) {
   attackedServer = server;
   Log("Run initiated attacking " + server.serverName);
   GainCredits(runner, corp.badPublicity, "bad publicity"); //(Nisei 2021 1.2)
-  AutomaticTriggers("automaticOnRunBegins", [server]); //(Nisei 2021 1.3) but only automatics at the moment
-  approachIce = attackedServer.ice.length - 1;
-  if (attackedServer.ice.length > 0) {
-	  //(Nisei 2021 1.4.1 sends to 2.1)
-	  ChangePhase(phases.runApproachIce);
-  }
-  else ChangePhase(phases.runDecideContinue); //(Nisei 2021 1.4.2 sends to 4; 4.1 doesn't apply so go directly to 4.2)
-  // Add run-active class to body for red CRT theme
-  document.body.classList.add('run-active');
-  // Change watermark to alert message
-  var watermark = document.querySelector('.netrunner-bg-watermark');
-  if (watermark) {
-    watermark.textContent = 'ALERT! RUN ACTIVE!';
-  }
-  Render(); //to update server glow
+  AutomaticTriggers("automaticOnRunBegins", [server]); //(Nisei 2021 1.3)
+  TriggeredResponsePhase(playerTurn, "responseOnRunBegins", [server], function() { //DRBO6 - enable Knickknack by adding a trigger
+    approachIce = attackedServer.ice.length - 1;
+    if (attackedServer.ice.length > 0) {
+      //(Nisei 2021 1.4.1 sends to 2.1)
+      ChangePhase(phases.runApproachIce);
+    }
+    else ChangePhase(phases.runDecideContinue); //(Nisei 2021 1.4.2 sends to 4; 4.1 doesn't apply so go directly to 4.2)
+    // Add run-active class to body for red CRT theme
+    document.body.classList.add('run-active');
+    // Change watermark to alert message
+    var watermark = document.querySelector('.netrunner-bg-watermark');
+    if (watermark) {
+      watermark.textContent = 'ALERT! RUN ACTIVE!';
+    }
+    Render(); //to update server glow
+  }, "Run Begins"); //DRBO6 - enable Knickknack by adding a trigger
 }
 
 /**

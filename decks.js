@@ -751,7 +751,7 @@ function LoadDecks() {
   // // ----------------------------------------------------------------------------
   // // You can enable the debug menu at the top of init.js
 
-  if (false) { // Use this to easily disable everything below
+  if (true) { // Use this to easily disable everything below
 
     debugging = true; //set true to log extra details and pause execution on error
     viewAllFronts = true; //set true to see all card fronts (for testing)
@@ -763,8 +763,8 @@ function LoadDecks() {
     RunnerTestField(35001, //identity
       [30032, 30032, 35009, 35008], //heapCards
       [35015, 35022, 35022, 30033, 35014, 35030, 35005, 35016, 35034, 35004, 35010, 35009, 35008, 35029, 35007,35005,35005,35005,35005], //stackCards
-      [35003, 30009, 30018, 31011, 35027, 31003], //gripCards
-      [35010, 30007,35018,31008,30015,30016,35009], //installed
+      [35017, 35019, 35032, 35031, 35033, 35025], //gripCards
+      [30015, 35009, 35020], //installed 35018
       [30069,30069], //stolen
       cardBackTexturesRunner,glowTextures,strengthTextures
     );
@@ -787,7 +787,7 @@ function LoadDecks() {
     // corp.archives.ice[0].rezzed=true;
     // corp.RnD.ice[0].rezzed=true;
     // corp.HQ.ice[0].rezzed=true;
-    // corp.remoteServers[0].ice[0].rezzed=true;
+    corp.remoteServers[0].ice[0].rezzed=true;
     // corp.remoteServers[0].ice[1].rezzed=true;
     // corp.remoteServers[0].ice[2].rezzed=true;
     // corp.remoteServers[1].ice[0].rezzed=true;
@@ -807,7 +807,7 @@ function LoadDecks() {
     // // ----------------------------------------
 
     GainCredits(runner,25);
-    // GainCredits(corp,25);
+    //GainCredits(corp,25);
     
     // // OTHER STUFF
     // // -----------
@@ -832,7 +832,7 @@ function LoadDecks() {
 
     // // SET THE PHASE TO START OF RUNNER TURN
     // // -------------------------------------
-    // ChangePhase(phases.runnerStartResponse); // Runner starts turn
+    ChangePhase(phases.runnerStartResponse); // Runner starts turn
     // ChangePhase(phases.corpStartDraw);    
   
     // // TO FORCE THE AI TO PLAY CARDS / MAKE DECISIONS, set preferred property on runner.AI or corp.AI

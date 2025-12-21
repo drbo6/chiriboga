@@ -2458,7 +2458,7 @@ cardSet[35041] = {
       for (var i = 0; i < trojans.length; i++) {
         choices.push({ card: trojans[i], label: "Trash " + trojans[i].title });
       }
-      choices.push({ label: "Decline", button: "Decline" });
+      choices.push({ card: null, label: "Decline", button: "Decline" });
       
       DecisionPhase(
         corp,
@@ -2470,7 +2470,8 @@ cardSet[35041] = {
         },
         "Bumi 1.0",
         "You may trash 1 installed trojan program",
-        cardRef
+        cardRef,
+        "trash"
       );
     },
     text: "Trash 1 installed trojan program",
@@ -3402,5 +3403,598 @@ cardSet[35037] = {
       );
     },
     text: "Runner may spend [click] or Corp gets +1 allotted click",
+  },
+};
+
+//Card 35: Transfer of Wealth
+//Criminal Event: Run
+//Cost: 0
+//Run HQ. If successful, take 1 tag and the Corp loses 3 credits.
+//Gain 2 credits for each credit lost this way.
+cardSet[35017] = {
+  title: "Transfer of Wealth",
+  imageFile: "35017.png",
+  player: runner,
+  faction: "Criminal",
+  influence: 4,
+  cardType: "event",
+  subTypes: ["Run"],
+  playCost: 0,
+  
+  runningWithThis: false,
+  
+  Enumerate: function() {
+    return [{}]; //Always run HQ
+  },
+  Resolve: function(params) {
+    this.runningWithThis = true;
+    MakeRun(corp.HQ);
+  },
+  
+  responseOnRunSuccessful: {
+    Resolve: function() {
+      if (!this.runningWithThis) return;
+      //Take 1 tag
+      AddTags(1);
+      //Corp loses 3 credits (or as many as they have)
+      var creditsToLose = Math.min(3, Credits(corp));
+      var creditsLost = LoseCredits(corp, creditsToLose);
+      //Gain 2 credits for each credit lost
+      var creditsToGain = creditsLost * 2;
+      if (creditsToGain > 0) {
+        GainCredits(runner, creditsToGain);
+      }
+    },
+    automatic: true,
+  },
+  
+  responseOnRunEnds: {
+    Resolve: function() {
+      this.runningWithThis = false;
+    },
+    automatic: true,
+  },
+  
+  //AI code
+  AIRunEventExtraPotential: function(server, potential) {
+    if (server !== corp.HQ) return 0;
+    //Require successful run
+    if (runner.AI._rootKnownToContainCopyOfCard(server, "Crisium Grid")) return 0;
+    //Value depends on Corp's credits - at 3+ credits, we get 6 credits for 1 tag
+    var corpCreds = Math.min(3, Credits(corp));
+    var netGain = (corpCreds * 2) - 0; //0 play cost
+    if (corpCreds >= 2) return 0.3; //Worth it if Corp has money
+    return 0;
+  },
+};
+
+//Card 36: Maglectric Rapid (748 Mod)
+//Criminal Hardware: Weapon
+//Cost: 1
+//Whenever you make a successful run on HQ, you may trash this hardware
+//to derez 1 installed Corp card.
+cardSet[35019] = {
+  title: "Maglectric Rapid (748 Mod)",
+  imageFile: "35019.png",
+  player: runner,
+  faction: "Criminal",
+  influence: 2,
+  cardType: "hardware",
+  subTypes: ["Weapon"],
+  installCost: 1,
+  unique: true,
+  
+  responseOnRunSuccessful: {
+    Enumerate: function() {
+      //Only trigger on HQ runs
+      if (attackedServer !== corp.HQ) return [];
+      //Check for rezzed Corp cards to derez
+      var rezzedCards = ChoicesInstalledCards(corp, function(card) {
+        return card.rezzed;
+      });
+      if (rezzedCards.length === 0) return [];
+      return [{}];
+    },
+    Resolve: function(params) {
+      var cardRef = this;
+      //Get rezzed Corp cards
+      var rezzedCards = ChoicesInstalledCards(corp, function(card) {
+        return card.rezzed;
+      });
+      rezzedCards.push({ skip: true, label: "Decline", button: "Decline" });
+      
+      DecisionPhase(
+        runner,
+        rezzedCards,
+        function(choiceParams) {
+          if (choiceParams.skip) return;
+          //Trash this hardware
+          Trash(cardRef, false, function() {
+            //Derez the chosen card
+            Derez(choiceParams.card);
+          });
+        },
+        "Maglectric Rapid (748 Mod)",
+        "Trash to derez a Corp card?",
+        cardRef
+      );
+    },
+    text: "Trash to derez 1 installed Corp card",
+  },
+  
+  //AI code
+  AIWorthKeeping: function(installedRunnerCards, spareMU) {
+    //Worth keeping if HQ runs are possible
+    if (runner.AI._getCachedCost(corp.HQ) !== Infinity) return true;
+    return false;
+  },
+};
+
+//Card 37: Sang Kancil
+//Criminal Program: Icebreaker - Decoder
+//Cost: 4, MU: 1, Strength: 1
+//Interface -> 1c: Break 1 code gate subroutine.
+//3c: +2 strength. If a run event is active, this costs 2c less.
+cardSet[35020] = {
+  title: "Sang Kancil",
+  imageFile: "35020.png",
+  player: runner,
+  faction: "Criminal",
+  influence: 2,
+  cardType: "program",
+  subTypes: ["Icebreaker", "Decoder"],
+  memoryCost: 1,
+  installCost: 3,
+  strength: 2,
+  
+  strengthBoost: 0,
+  modifyStrength: {
+    Resolve: function(card) {
+      if (card === this) return this.strengthBoost;
+      return 0;
+    },
+  },
+  
+  //Helper to check if a run event is active
+  runEventIsActive: function() {
+    for (var i = 0; i < runner.resolvingCards.length; i++) {
+      var card = runner.resolvingCards[i];
+      if (CheckCardType(card, ["event"]) && CheckSubType(card, "Run")) {
+        return true;
+      }
+    }
+    return false;
+  },
+  
+  abilities: [
+    {
+      text: "Break 1 code gate subroutine",
+      Enumerate: function() {
+        if (!CheckEncounter()) return [];
+        if (!CheckSubType(attackedServer.ice[approachIce], "Code Gate")) return [];
+        if (!CheckCredits(runner, 1, "using", this)) return [];
+        if (!CheckStrength(this)) return [];
+        return ChoicesEncounteredSubroutines();
+      },
+      Resolve: function(params) {
+        SpendCredits(runner, 1, "using", this, function() {
+          Break(params.subroutine);
+        }, this);
+      },
+    },
+    {
+      text: "+2 strength",
+      Enumerate: function() {
+        if (!CheckEncounter()) return [];
+        if (CheckStrength(this)) return [];
+        if (!CheckUnbrokenSubroutines()) return [];
+        if (!CheckSubType(attackedServer.ice[approachIce], "Code Gate")) return [];
+        //Cost is 3c, or 1c if run event is active
+        var cost = this.runEventIsActive() ? 1 : 3;
+        if (!CheckCredits(runner, cost, "using", this)) return [];
+        return [{}];
+      },
+      Resolve: function(params) {
+        var cost = this.runEventIsActive() ? 1 : 3;
+        SpendCredits(runner, cost, "using", this, function() {
+          BoostStrength(this, 2);
+        }, this);
+      },
+    },
+  ],
+  
+  responseOnEncounterEnds: {
+    Resolve: function() {
+      this.strengthBoost = 0;
+    },
+    automatic: true,
+  },
+  
+  //AI code
+  AIImplementIcebreaker: function() {
+    //Cost to break one subroutine
+    return { breakCost: 1, boostCost: 3, boostAmount: 2 };
+  },
+};
+
+//Card 38: Principia
+//Shaper Program: Icebreaker - Fracter
+//Cost: 6, MU: 1, Strength: 2
+//This program costs 1c less to install for each other installed icebreaker.
+//Interface -> 1c: Break 1 barrier subroutine.
+//2c: +2 strength.
+cardSet[35032] = {
+  title: "Principia",
+  imageFile: "35032.png",
+  player: runner,
+  faction: "Shaper",
+  influence: 1,
+  cardType: "program",
+  subTypes: ["Icebreaker", "Fracter"],
+  memoryCost: 1,
+  installCost: 4,
+  strength: 2,
+  
+  modifyInstallCost: {
+    Resolve: function(card) {
+      if (card !== this) return 0;
+      if (CheckInstalled(card)) return 0; //Already installed
+      //Count other installed icebreakers
+      var installedCards = InstalledCards(runner);
+      var icebreakerCount = 0;
+      for (var i = 0; i < installedCards.length; i++) {
+        if (CheckSubType(installedCards[i], "Icebreaker")) {
+          icebreakerCount++;
+        }
+      }
+      return -icebreakerCount; //1c less per icebreaker
+    },
+    automatic: true,
+    availableWhenInactive: true,
+  },
+  
+  strengthBoost: 0,
+  modifyStrength: {
+    Resolve: function(card) {
+      if (card === this) return this.strengthBoost;
+      return 0;
+    },
+  },
+  
+  abilities: [
+    {
+      text: "Break 1 barrier subroutine",
+      Enumerate: function() {
+        if (!CheckEncounter()) return [];
+        if (!CheckSubType(attackedServer.ice[approachIce], "Barrier")) return [];
+        if (!CheckCredits(runner, 1, "using", this)) return [];
+        if (!CheckStrength(this)) return [];
+        return ChoicesEncounteredSubroutines();
+      },
+      Resolve: function(params) {
+        SpendCredits(runner, 1, "using", this, function() {
+          Break(params.subroutine);
+        }, this);
+      },
+    },
+    {
+      text: "+2 strength",
+      Enumerate: function() {
+        if (!CheckEncounter()) return [];
+        if (CheckStrength(this)) return [];
+        if (!CheckUnbrokenSubroutines()) return [];
+        if (!CheckSubType(attackedServer.ice[approachIce], "Barrier")) return [];
+        if (!CheckCredits(runner, 2, "using", this)) return [];
+        return [{}];
+      },
+      Resolve: function(params) {
+        SpendCredits(runner, 2, "using", this, function() {
+          BoostStrength(this, 2);
+        }, this);
+      },
+    },
+  ],
+  
+  responseOnEncounterEnds: {
+    Resolve: function() {
+      this.strengthBoost = 0;
+    },
+    automatic: true,
+  },
+  
+  //AI code
+  AIImplementIcebreaker: function() {
+    return { breakCost: 1, boostCost: 2, boostAmount: 2 };
+  },
+};
+
+//Card 39: Devadatta Drone
+//Shaper Program
+//Cost: 1, MU: 1
+//When you install this program, place 2 power counters on it.
+//Whenever you breach R&D, you may remove 1 hosted power counter
+//to access 1 additional card.
+cardSet[35031] = {
+  title: "Devadatta Drone",
+  imageFile: "35031.png",
+  player: runner,
+  faction: "Shaper",
+  influence: 1,
+  cardType: "program",
+  memoryCost: 1,
+  installCost: 1,
+  power: 0,
+  
+  //When installed, place 2 power counters
+  automaticOnInstall: {
+    Resolve: function(card) {
+      if (card == this) AddCounters(this, "power", 2);
+    },
+  },
+  
+  //Track whether we're using the ability this run
+  usingThisRun: false,
+  
+  //Reset at run end
+  responseOnRunEnds: {
+    Resolve: function() {
+      this.usingThisRun = false;
+    },
+    automatic: true,
+  },
+  
+  //When breaching R&D, offer to use a counter
+  responseOnBreach: {
+    Enumerate: function(server) {
+      if (server !== corp.RnD) return [];
+      if (Counters(this, "power") < 1) return [];
+      return [{}];
+    },
+    Resolve: function(params) {
+      var cardRef = this;
+      var choices = [
+        { use: true, label: "Remove 1 power counter to access 1 additional card", button: "Use counter" },
+        { use: false, label: "Decline", button: "Decline" }
+      ];
+      
+      DecisionPhase(
+        runner,
+        choices,
+        function(choiceParams) {
+          if (choiceParams.use) {
+            RemoveCounters(cardRef, "power", 1);
+            cardRef.usingThisRun = true;
+          }
+        },
+        "Devadatta Drone",
+        "Remove counter for +1 R&D access?",
+        cardRef
+      );
+    },
+    text: "Remove 1 power counter to access 1 additional card",
+  },
+  
+  //Add extra access if we used the ability
+  modifyBreachAccess: {
+    Resolve: function() {
+      if (attackedServer !== corp.RnD) return 0;
+      if (this.usingThisRun) return 1;
+      return 0;
+    },
+  },
+  
+  //AI code
+  AIWorthKeeping: function(installedRunnerCards, spareMU) {
+    if (runner.AI._getCachedCost(corp.RnD) !== Infinity) return true;
+    return false;
+  },
+};
+
+//Card 40: "Knickknack" O'Brian
+//Shaper Resource: Connection
+//Cost: 2
+//The first time each turn a run begins, you may trash 1 of your other installed cards.
+//If you do, gain credits equal to its printed install cost and draw 1 card.
+cardSet[35033] = {
+  title: "\"Knickknack\" O'Brian",
+  imageFile: "35033.png",
+  player: runner,
+  faction: "Shaper",
+  influence: 3,
+  cardType: "resource",
+  subTypes: ["Connection"],
+  installCost: 2,
+  unique: true,
+  
+  triggeredThisTurn: false,
+  
+  responseOnRunnerTurnBegins: {
+    Resolve: function() {
+      this.triggeredThisTurn = false;
+    },
+    automatic: true,
+  },
+  
+  responseOnCorpTurnBegins: {
+    Resolve: function() {
+      this.triggeredThisTurn = false;
+    },
+    automatic: true,
+  },
+  
+  //When a run begins
+  responseOnRunBegins: {
+    Enumerate: function(server) {
+      if (this.triggeredThisTurn) return [];
+      //Check for other installed cards to trash
+      var otherCards = ChoicesInstalledCards(runner, function(card) {
+        return card !== this;
+      }.bind(this));
+      if (otherCards.length === 0) return [];
+      return [{}];
+    },
+    Resolve: function(params) {
+      this.triggeredThisTurn = true;
+      var cardRef = this;
+      
+      //Get other installed cards
+      var trashChoices = ChoicesInstalledCards(runner, function(card) {
+        return card !== cardRef;
+      });
+      trashChoices.push({ card: null, label: "Decline", button: "Decline" });
+      
+      DecisionPhase(
+        runner,
+        trashChoices,
+        function(choiceParams) {
+          if (choiceParams.card === null) return;
+          var printedCost = choiceParams.card.installCost || 0;
+          //Trash the chosen card
+          Trash(choiceParams.card, false, function() {
+            //Gain credits equal to printed install cost
+            if (printedCost > 0) {
+              GainCredits(runner, printedCost);
+            }
+            //Draw 1 card
+            Draw(runner, 1);
+          });
+        },
+        "\"Knickknack\" O'Brian",
+        "Trash an installed card for credits and a card?",
+        cardRef,
+        "trash"
+      );
+    },
+    text: "Trash another installed card to gain credits and draw",
+  },
+  
+  //AI code
+  AIWorthKeeping: function(installedRunnerCards, spareMU) {
+    return true; //Generally useful economy/card draw
+  },
+};
+
+//Card 41: Illumination
+//Shaper Event: Run
+//Cost: 2
+//Run R&D. If successful, install up to 3 cards from your grip (one at a time),
+//paying 1c less for each.
+cardSet[35025] = {
+  title: "Illumination",
+  imageFile: "35025.png",
+  player: runner,
+  faction: "Shaper",
+  influence: 3,
+  cardType: "event",
+  subTypes: ["Run"],
+  playCost: 0,
+  
+  runningWithThis: false,
+  installsRemaining: 0,
+  
+  Enumerate: function() {
+    return [{}]; //Always run R&D
+  },
+  
+  Resolve: function(params) {
+    this.runningWithThis = true;
+    this.installsRemaining = 0;
+    MakeRun(corp.RnD);
+  },
+  
+  responseOnRunSuccessful: {
+    Enumerate: function() {
+      if (!this.runningWithThis) return [];
+      return [{}];
+    },
+    Resolve: function() {
+      this.installsRemaining = 3;
+      this._illuminationInstallLoop();
+    },
+    automatic: true,
+  },
+  
+  responseOnRunEnds: {
+    Resolve: function() {
+      this.runningWithThis = false;
+      this.installsRemaining = 0;
+      this.modifyInstallCost.availableWhenInactive = false;
+    },
+    automatic: true,
+  },
+  
+  //Install loop as a method on the card
+  _illuminationInstallLoop: function() {
+    if (this.installsRemaining <= 0) {
+      //Cleanup
+      this.modifyInstallCost.availableWhenInactive = false;
+      return;
+    }
+    
+    var cardRef = this;
+    
+    //Enable discount for affordability check and installs
+    this.modifyInstallCost.availableWhenInactive = true;
+    var choices = ChoicesHandInstall(runner);
+    
+    if (choices.length === 0) {
+      //Cleanup
+      this.modifyInstallCost.availableWhenInactive = false;
+      return;
+    }
+    
+    choices.push({ skip: true, label: "Done installing", button: "Done" });
+    
+    DecisionPhase(
+      runner,
+      choices,
+      function(params) {
+        if (params.skip) {
+          cardRef.installsRemaining = 0;
+          cardRef.modifyInstallCost.availableWhenInactive = false;
+          return;
+        }
+        
+        //Install the card (discount applied via modifyInstallCost checking installingCards)
+        Install(params.card, params.host);
+        
+        //Continue loop
+        cardRef.installsRemaining--;
+        cardRef._illuminationInstallLoop();
+      },
+      "Illumination",
+      "Install a card (paying 1[c] less)? (" + this.installsRemaining + " remaining)",
+      this,
+      "install"
+    );
+  },
+  
+  modifyInstallCost: {
+    Resolve: function(card) {
+      //Discount any grip card or card currently being installed
+      if (runner.grip.includes(card) || runner.installingCards.includes(card)) {
+        if (CheckCardType(card, ["program", "hardware", "resource"])) {
+          return -1;
+        }
+      }
+      return 0;
+    },
+    automatic: true,
+    availableWhenInactive: false, //toggled dynamically
+  },
+  
+  //AI code
+  AIRunEventExtraPotential: function(server, potential) {
+    if (server !== corp.RnD) return 0;
+    if (runner.AI._rootKnownToContainCopyOfCard(server, "Crisium Grid")) return 0;
+    //Value based on installable cards in grip
+    var installableCount = 0;
+    for (var i = 0; i < runner.grip.length; i++) {
+      if (CheckCardType(runner.grip[i], ["program", "hardware", "resource"])) {
+        installableCount++;
+      }
+    }
+    if (installableCount > 0) return 0.2 * Math.min(installableCount, 3);
+    return 0;
   },
 };

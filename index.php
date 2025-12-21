@@ -166,11 +166,11 @@
                       <input type="checkbox" id="set-elev" onchange="toggleAllowedSet('elev')">
                       <span class="checkbox-text">Elevation (Untested)</span>
                     </label>
-                    <label class="checkbox-label hidden-set-option" id="core-option" title="Original Core Set cards (hidden option)" style="display: none;">
+                    <label class="checkbox-label hidden-set-option" id="core-option" title="Original Core Set cards" style="display: none;">
                       <input type="checkbox" id="set-core" onchange="toggleAllowedSet('core')">
-                      <span class="checkbox-text">Core Set (Legacy)</span>
+                      <span class="checkbox-text">Core Set (Untested)</span>
                     </label>
-                    <label class="checkbox-label hidden-set-option" id="ms-option" title="Midnight Sun expansion cards (hidden option)" style="display: none;">
+                    <label class="checkbox-label hidden-set-option" id="ms-option" title="Midnight Sun expansion cards" style="display: none;">
                       <input type="checkbox" id="set-ms" onchange="toggleAllowedSet('ms')">
                       <span class="checkbox-text">Midnight Sun (Untested)</span>
                     </label>

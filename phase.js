@@ -1418,7 +1418,10 @@ phases.runBreachServer = {
   title: "Run: Breach", //was 'Access' (i.e. access cards in server) but Nisei changed it so it's not confused with each individual access
   identifier: "Run 5.2",
   Init: function() {
-	AutomaticTriggers("automaticOnBreach", [attackedServer]); //automatic only for now
+	AutomaticTriggers("automaticOnBreach", [attackedServer]);
+  // DRBO6 - enable Devadatta
+  TriggeredResponsePhase(playerTurn, "responseOnBreach", [attackedServer], function () {}, "Breach");
+  // DRBO6 END
   },
   Enumerate: {
     access: function () {
