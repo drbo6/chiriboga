@@ -275,7 +275,6 @@
         hiddenSetsRevealed = true;
         document.getElementById('core-option').style.display = '';
         document.getElementById('ms-option').style.display = '';
-        saveSettings();
       }
     }
     
@@ -324,13 +323,6 @@
       document.getElementById('set-core').checked = settingsOverrides.allowedSets.indexOf('core') !== -1;
       document.getElementById('set-ms').checked = settingsOverrides.allowedSets.indexOf('ms') !== -1;
       
-      // Show hidden set options if they were previously revealed
-      if (saved && saved.hiddenSetsRevealed) {
-        document.getElementById('core-option').style.display = '';
-        document.getElementById('ms-option').style.display = '';
-        hiddenSetsRevealed = true;
-      }
-      
       // Update stepper button states
       updateStepperButtons();
       
@@ -346,8 +338,7 @@
           alternateFactions: settingsOverrides.alternateFactions,
           balancedFactions: settingsOverrides.balancedFactions,
           allowedSets: settingsOverrides.allowedSets,
-          preconOverrides: settingsOverrides.preconOverrides,
-          hiddenSetsRevealed: hiddenSetsRevealed
+          preconOverrides: settingsOverrides.preconOverrides
         };
         localStorage.setItem('chiriboga-settings', JSON.stringify(toSave));
       } catch (e) {
