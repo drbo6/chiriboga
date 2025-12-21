@@ -296,7 +296,7 @@ cardSet[35079] = {
       Resolve: function () {
         EndTheRun();
       },
-      visual: { y: 102, h: 16 },
+      visual: { y: 93, h: 16 },
     },
   ],
   AIImplementIce: function(rc, result, maxCorpCred, incomplete) {
@@ -2472,14 +2472,14 @@ cardSet[35042] = {
           "install"
         );
       },
-      visual: { y: 72, h: 22 },
+      visual: { y: 95, h: 16 },
     },
     {
       text: "End the run.",
       Resolve: function() {
         EndTheRun();
       },
-      visual: { y: 94, h: 17 },
+      visual: { y: 115, h: 16 },
     },
   ],
   
@@ -2668,14 +2668,14 @@ cardSet[35075] = {
       Resolve: function() {
         EndTheRun();
       },
-      visual: { y: 89, h: 17 },
+      visual: { y: 93, h: 16 },
     },
     {
       text: "End the run.",
       Resolve: function() {
         EndTheRun();
       },
-      visual: { y: 106, h: 17 },
+      visual: { y: 114, h: 16 },
     },
   ],
   
@@ -2822,14 +2822,14 @@ cardSet[35041] = {
           "trash"
         );
       },
-      visual: { y: 89, h: 17 },
+      visual: { y: 145, h: 16 },
     },
     {
       text: "Do 1 core damage.",
       Resolve: function() {
         Damage("core", 1, true); //true = can be prevented
       },
-      visual: { y: 106, h: 17 },
+      visual: { y: 167, h: 16 },
     },
   ],
   
@@ -3459,6 +3459,7 @@ cardSet[35053] = {
           this
         );
       },
+      visual: { y: 58, h: 31 },
     },
     {
       //↳ You may rez 1 installed piece of ice, paying 2 credits less.
@@ -3495,6 +3496,7 @@ cardSet[35053] = {
           this
         );
       },
+      visual: { y: 95, h: 31 },
     },
     {
       //↳ Resolve 1 subroutine on a rezzed sentry.
@@ -3503,6 +3505,7 @@ cardSet[35053] = {
         var cardRef = this;
         mycowebResolveSubroutine(cardRef, "Sentry", false); //false = don't exclude self
       },
+      visual: { y: 128, h: 31 },
     },
     {
       //↳ Resolve 1 subroutine on another rezzed code gate.
@@ -3511,6 +3514,7 @@ cardSet[35053] = {
         var cardRef = this;
         mycowebResolveSubroutine(cardRef, "Code Gate", true); //true = exclude self
       },
+      visual: { y: 166, h: 31 },
     },
   ],
   

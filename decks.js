@@ -776,7 +776,7 @@ function LoadDecks() {
       [], //archivesInstalled
       [35041], //rndInstalled
       [35042], //hqInstalled
-      [[35038,30072,30072,35075],[35038,35042],[30037, 35053],[30037, 35053]], //remotes (array of arrays)
+      [[35038,30072,30072,35075],[35038,35042],[30037, 35053],[30037, 35053,35079]], //remotes (array of arrays)
       [35037], //scored
       cardBackTexturesCorp,glowTextures,strengthTextures
     );
@@ -807,7 +807,7 @@ function LoadDecks() {
     // // ----------------------------------------
 
     GainCredits(runner,25);
-    //GainCredits(corp,25);
+    GainCredits(corp,25);
     
     // // OTHER STUFF
     // // -----------
