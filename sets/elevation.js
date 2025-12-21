@@ -1677,6 +1677,163 @@ cardSet[35001] = {
   },
 };
 
+//Topan: Ormas Leader
+//Once per turn -> [click]: Install 1 card from your grip, paying 2[c] less.
+//When you install that card, suffer 1 meat damage.
+cardSet[35002] = {
+  title: "Topan: Ormas Leader",
+  imageFile: "35002.png",
+  player: runner,
+  faction: "Anarch",
+  cardType: "identity",
+  deckSize: 45,
+  influenceLimit: 12,
+  link: 0,
+  
+  //Track which card is being installed via Topan's ability
+  topanInstallingCard: null,
+  topanAbilityActive: false,
+  usedThisTurn: false,
+  
+  //Reset "once per turn" flag
+  responseOnRunnerTurnBegins: {
+    Resolve: function() {
+      this.usedThisTurn = false;
+    },
+    automatic: true,
+  },
+  
+  responseOnCorpTurnBegins: {
+    Resolve: function() {
+      this.usedThisTurn = false;
+    },
+    automatic: true,
+  },
+  
+  //Once per turn -> [click]: Install 1 card from your grip, paying 2[c] less
+  abilities: [
+    {
+      text: "Install 1 card from grip, paying 2[c] less",
+      Enumerate: function() {
+        if (this.usedThisTurn) return [];
+        if (!CheckActionClicks(runner, 1)) return [];
+        
+        return [{}];
+      },
+      Resolve: function(params) {
+        this.usedThisTurn = true;
+        SpendClicks(runner, 1);
+        
+        //NOW activate the ability and enable discount
+        this.topanAbilityActive = true;
+        this.modifyInstallCost.availableWhenInactive = true;
+        
+        //Get choices with discount active
+        var choices = ChoicesHandInstall(runner);
+        
+        if (choices.length === 0) {
+          //No valid choices, cleanup
+          this.topanAbilityActive = false;
+          this.modifyInstallCost.availableWhenInactive = false;
+          return;
+        }
+        
+        var cardRef = this;
+        
+        DecisionPhase(
+          runner,
+          choices,
+          function(installParams) {
+            //Mark this specific card for damage tracking
+            cardRef.topanInstallingCard = installParams.card;
+            
+            //Install the card
+            Install(
+              installParams.card, 
+              installParams.host, 
+              false, 
+              null, 
+              true,
+              function() {
+                //On install complete - cleanup happens in automaticOnInstall
+              },
+              cardRef,
+              function() {
+                //On cancel: cleanup
+                cardRef.topanInstallingCard = null;
+                cardRef.topanAbilityActive = false;
+                cardRef.modifyInstallCost.availableWhenInactive = false;
+              }
+            );
+          },
+          "Topan: Ormas Leader",
+          "Install 1 card from grip (paying 2[c] less)",
+          this,
+          "install"
+        );
+      },
+    },
+  ],
+  
+  //Provide 2 credit discount for card installed via ability
+  modifyInstallCost: {
+    Resolve: function(card) {
+      //Only apply discount when Topan's ability is active
+      if (!this.topanAbilityActive) return 0;
+      
+      //Discount all cards in grip for display
+      if (runner.grip.includes(card)) {
+        if (CheckCardType(card, ["program", "hardware", "resource"])) {
+          return -2;
+        }
+      }
+      //Also discount the specific card being installed
+      if (card == this.topanInstallingCard) {
+        return -2;
+      }
+      return 0;
+    },
+    automatic: true,
+    availableWhenInactive: false, //toggled dynamically
+  },
+  
+  //When you install that card, suffer 1 meat damage
+  automaticOnInstall: {
+    Resolve: function(card) {
+      if (card == this.topanInstallingCard) {
+        //Cleanup before damage
+        this.topanInstallingCard = null;
+        this.topanAbilityActive = false;
+        this.modifyInstallCost.availableWhenInactive = false;
+        
+        //Damage can be prevented
+        Damage("meat", 1, true);
+      }
+    },
+  },
+  
+  //**AI code
+  AIWouldTrigger: function() {
+    //Use if we have installable cards and would save credits
+    var installedRunnerCards = InstalledCards(runner);
+    for (var i = 0; i < runner.grip.length; i++) {
+      var card = runner.grip[i];
+      if (CheckCardType(card, ["program", "hardware", "resource"])) {
+        var installCost = InstallCost(card);
+        //Worth using if saves at least 2 credits and we can afford even with discount
+        if (installCost >= 2) {
+          var discountedCost = Math.max(0, installCost - 2);
+          if (CheckCredits(runner, discountedCost, "installing", card)) {
+            //Check if we can afford to lose a card to meat damage
+            if (runner.grip.length > 2) return true;
+          }
+        }
+      }
+    }
+    return false;
+  },
+};
+
 //Charm Offensive
 //Run Archives. When that run ends, you may trash 1 rezzed copy of a card 
 //you accessed in Archives during that run.

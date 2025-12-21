@@ -760,7 +760,7 @@ function LoadDecks() {
     // SET UP THE MAIN STATES FOR THE RUNNER AND CORP
     // ----------------------------------------------
 
-    RunnerTestField(35001, //identity
+    RunnerTestField(35002, //identity
       [30032, 30032, 35009, 35008], //heapCards
       [35015, 35022, 35022, 30033, 35014, 1039, 35030, 35005, 35016, 35034, 35004, 35010, 35007, 35009, 35008, 35029], //stackCards
       [35017, 35019, 35032, 35032, 35031, 35033, 35025, 1039], //gripCards
