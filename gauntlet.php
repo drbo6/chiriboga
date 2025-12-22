@@ -384,6 +384,11 @@
 				UpdateCardCountsUI();
 				RenderAllCardsList();
 				Parse(); // Update deck stats including credits display
+				
+				// Reapply current sort and filters
+				SortCardsBySort();
+				ApplyTypeFilter();
+				if (showingOnlySelected) ApplyFilter();
 			}
 
 			// Global variables for shop
@@ -540,6 +545,8 @@
 						gauntletCardCounts[cardId]++;
 					} else {
 						gauntletCardCounts[cardId] = 1;
+						// Add new card to the gauntletCardIds subset
+						gauntletCardIds.push(cardId);
 					}
 				}
 				
@@ -1313,17 +1320,10 @@
 				UpdateDeckTextareaFromCounts();
 				UpdateCardCountsUI();
 				Parse();
-			if (showingOnlySelected) ApplyFilter();
-			UpdatePlayDeckButtonState();
-		}
-
-		var pendingSellCardId = null; // Track which card is pending sale
-		var pendingSellQuantity = 1; // Track quantity to sell
-
-		function ShowSellConfirmModal(id) {
-			// Check if there are any copies in the gauntlet to sell
-			if (typeof gauntletCardCounts[id] === 'undefined' || gauntletCardCounts[id] <= 0) return;
 			
+			// Reapply current sort and filters
+			SortCardsBySort();
+			ApplyTypeFilter();
 			pendingSellCardId = id;
 			pendingSellQuantity = 1; // Reset to default
 			var cardName = cardSet[id] ? cardSet[id].title : 'Unknown Card';
@@ -1433,6 +1433,10 @@
 			deckModified = true;
 			UpdateCardCountsUI();
 			Parse();
+			
+			// Reapply current sort and filters
+			SortCardsBySort();
+			ApplyTypeFilter();
 			if (showingOnlySelected) ApplyFilter();
 			UpdatePlayDeckButtonState();
 			

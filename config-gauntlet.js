@@ -91,10 +91,10 @@ var gauntletConfig = {
   randomCardRequirements: [
     // Hardware
     { quantity: 2, cardType: 'hardware', matchSubtypes: ['Console'], excludeSubtypes: [] },
-    { quantity: 4, cardType: 'hardware', matchSubtypes: [], excludeSubtypes: ['Console'] },
+    { quantity: 3, cardType: 'hardware', matchSubtypes: [], excludeSubtypes: ['Console'] },
     
     // Resources (any subtype)
-    { quantity: 12, cardType: 'resource', matchSubtypes: [], excludeSubtypes: [] },
+    { quantity: 10, cardType: 'resource', matchSubtypes: [], excludeSubtypes: [] },
     
     // Programs - Icebreakers
     { quantity: 2, cardType: 'program', matchSubtypes: ['Icebreaker', 'Killer'], excludeSubtypes: [] },
@@ -106,7 +106,7 @@ var gauntletConfig = {
     { quantity: 8, cardType: 'program', matchSubtypes: [], excludeSubtypes: ['Icebreaker'] },
     
     // Events
-    { quantity: 15, cardType: 'event', matchSubtypes: [], excludeSubtypes: [] }
+    { quantity: 12, cardType: 'event', matchSubtypes: [], excludeSubtypes: [] }
   ],
 
   // ===== CARD PACK CONFIGURATIONS =====

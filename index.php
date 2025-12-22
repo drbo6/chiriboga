@@ -178,7 +178,7 @@
                   </div>
                 </div>
                 <div class="settings-group" title="Card sets available for building your runner deck in Gauntlet mode">
-                  <label class="settings-label" id="allowed-sets-label" onclick="handleAllowedSetsClick()" style="cursor: pointer;">ALLOWED<br />PLAYER SETS</label>
+                  <label class="settings-label" id="allowed-sets-label" onclick="handleAllowedSetsClick();">ALLOWED<br />PLAYER SETS</label>
                   <div class="settings-checkboxes">
                     <label class="checkbox-label checkbox-disabled" title="Core set, always included">
                       <input type="checkbox" id="set-sg" checked disabled>
