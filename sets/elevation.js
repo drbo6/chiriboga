@@ -3913,7 +3913,203 @@ cardSet[35020] = {
   },
 };
 
-//Card 38: Principia
+//Card 38: Fransofia Ward
+//Criminal Resource: Connection
+//Cost: 3
+//The rez cost of each piece of ice is increased by 1c.
+//Whenever you encounter a piece of ice, if the Corp has 15c or more,
+//you may trash this resource to bypass that ice.
+cardSet[35021] = {
+  title: "Fransofia Ward",
+  imageFile: "35021.png",
+  player: runner,
+  faction: "Criminal",
+  influence: 3,
+  cardType: "resource",
+  subTypes: ["Connection"],
+  installCost: 3,
+  unique: true,
+  
+  //The rez cost of each piece of ice is increased by 1c
+  modifyRezCost: {
+    Resolve: function (card) {
+      if (CheckCardType(card, ["ice"])) return 1;
+      return 0;
+    },
+  },
+  
+  //Whenever you encounter a piece of ice, if the Corp has 15c or more,
+  //you may trash this resource to bypass that ice
+  responseOnEncounter: {
+    Enumerate: function (card) {
+      //Only trigger if Corp has 15+ credits
+      if (Credits(corp) < 15) return [];
+      
+      var choices = [
+        { id: 0, label: "Trash to bypass", button: "Trash to bypass", alt: "fransofia_bypass" },
+        { id: 1, label: "Decline", button: "Decline", alt: "continue" }
+      ];
+      
+      //**AI code
+      if (runner.AI) {
+        //Evaluate if bypass is worth trashing this resource
+        var iceCard = attackedServer.ice[approachIce];
+        var shouldBypass = this.AIShouldBypass(iceCard);
+        
+        if (shouldBypass) {
+          runner.AI.preferred = { title: this.title, option: choices[0] };
+        } else {
+          runner.AI.preferred = { title: this.title, option: choices[1] };
+        }
+      }
+      
+      return choices;
+    },
+    Resolve: function (params) {
+      if (params.id == 0) {
+        var cardRef = this;
+        Trash(cardRef, false, function() {
+          Bypass();
+        }, cardRef);
+      }
+    },
+  },
+  
+  //AI helper: Should we bypass this ice?
+  AIShouldBypass: function(iceCard) {
+    //Don't bypass if we have other good options
+    var installedCards = InstalledCards(runner);
+    
+    //Check if we have a strong matching breaker
+    var hasMatchingBreaker = false;
+    for (var i = 0; i < installedCards.length; i++) {
+      var card = installedCards[i];
+      if (CheckSubType(card, "Icebreaker")) {
+        if (typeof card.AIMatchingBreakerInstalled === "function") {
+          if (card.AIMatchingBreakerInstalled(iceCard)) {
+            hasMatchingBreaker = true;
+            break;
+          }
+        } else if (BreakerMatchesIce(card, iceCard)) {
+          hasMatchingBreaker = true;
+          break;
+        }
+      }
+    }
+    
+    //If we have a good breaker and plenty of credits, save Fransofia for later
+    if (hasMatchingBreaker && Credits(runner) > 10) return false;
+    
+    //Calculate the value of this run
+    var runPotential = 0;
+    if (runner.AI) {
+      runPotential = runner.AI._getCachedPotential(attackedServer);
+    }
+    
+    //High-value runs (>2.0): consider bypass if ice is expensive
+    if (runPotential > 2.0) {
+      //Expensive ice (rez cost 4+): worth bypassing
+      if (RezCost(iceCard) >= 4) return true;
+      
+      //Unknown ice when low on credits: bypass to be safe
+      if (Credits(runner) < 5 && !iceCard.rezzed) return true;
+    }
+    
+    //Critical situations: low clicks remaining
+    if (!CheckClicks(runner, 2) && runPotential > 1.5) {
+      //Bypass to ensure success
+      return true;
+    }
+    
+    //Very expensive ice (rez cost 6+): almost always bypass
+    if (RezCost(iceCard) >= 6 && runPotential > 1.0) return true;
+    
+    //Default: don't waste the resource
+    return false;
+  },
+  
+  //AI: Include bypass option in run calculator
+  AIImplementBreaker: function(rc, result, point, server, cardStrength, iceAI, iceStrength, clicksLeft, creditsLeft) {
+    //Don't reuse if already trashed
+    if (!rc.PersistentsUse(point, this)) {
+      //Check if Corp has 15+ credits in the simulation
+      var corpCreditsInSim = creditsLeft.corp !== undefined ? creditsLeft.corp : Credits(corp);
+      
+      if (corpCreditsInSim >= 15) {
+        //Evaluate if bypass is worthwhile
+        var runPotential = runner.AI._getCachedPotential(server);
+        var iceRezCost = RezCost(iceAI.ice);
+        
+        //Only offer bypass for valuable runs or expensive ice
+        if (runPotential > 1.5 || iceRezCost >= 4) {
+          var pointCopy = rc.CopyPoint(point);
+          pointCopy.persistents = pointCopy.persistents.concat([
+            {use: this, target: iceAI.ice, iceIdx: point.iceIdx, action: "bypass", alt: "fransofia_bypass"}
+          ]);
+          //Mark as serious consideration (higher priority than normal breaks)
+          pointCopy.effects = pointCopy.effects.concat([["misc_serious", "misc_serious"]]);
+          result = result.concat([pointCopy]);
+        }
+      }
+    }
+    return result;
+  },
+  
+  //AI: Worth keeping?
+  AIWorthKeeping: function(installedRunnerCards, spareMU) {
+    //Keep if Corp is rich (15+ credits)
+    if (Credits(corp) >= 15) return true;
+    
+    //Keep if Corp is approaching 15 credits
+    if (Credits(corp) >= 12) return true;
+    
+    //Keep if Corp has expensive ice that we struggle with
+    var allIce = [];
+    for (var i = 0; i < corp.remoteServers.length; i++) {
+      allIce = allIce.concat(corp.remoteServers[i].ice);
+    }
+    allIce = allIce.concat(corp.HQ.ice);
+    allIce = allIce.concat(corp.RnD.ice);
+    allIce = allIce.concat(corp.archives.ice);
+    
+    for (var i = 0; i < allIce.length; i++) {
+      if (RezCost(allIce[i]) >= 5) return true;
+    }
+    
+    //Otherwise, not critical
+    return false;
+  },
+  
+  //AI: Should we install this?
+  AIPreferredInstallChoice: function(choices) {
+    //Don't install on last click
+    if (runner.clickTracker < 2) return -1;
+    
+    //Install if Corp is rich or approaching rich
+    if (Credits(corp) >= 12) return 0;
+    
+    //Install if we see expensive ice
+    var allIce = [];
+    for (var i = 0; i < corp.remoteServers.length; i++) {
+      allIce = allIce.concat(corp.remoteServers[i].ice);
+    }
+    allIce = allIce.concat(corp.HQ.ice);
+    allIce = allIce.concat(corp.RnD.ice);
+    allIce = allIce.concat(corp.archives.ice);
+    
+    var expensiveIceCount = 0;
+    for (var i = 0; i < allIce.length; i++) {
+      if (RezCost(allIce[i]) >= 4) expensiveIceCount++;
+    }
+    
+    if (expensiveIceCount >= 2) return 0;
+    
+    //Otherwise, maybe later
+    return -1;
+  },
+};
+
+//Card 39: Principia
 //Shaper Program: Icebreaker - Fracter
 //Cost: 6, MU: 1, Strength: 2
 //This program costs 1c less to install for each other installed icebreaker.
@@ -4004,7 +4200,7 @@ cardSet[35032] = {
   },
 };
 
-//Card 39: Devadatta Drone
+//Card 40: Devadatta Drone
 //Shaper Program
 //Cost: 1, MU: 1
 //When you install this program, place 2 power counters on it.
@@ -4086,7 +4282,7 @@ cardSet[35031] = {
   },
 };
 
-//Card 40: "Knickknack" O'Brian
+//Card 41: "Knickknack" O'Brian
 //Shaper Resource: Connection
 //Cost: 2
 //The first time each turn a run begins, you may trash 1 of your other installed cards.
@@ -4170,7 +4366,7 @@ cardSet[35033] = {
   },
 };
 
-//Card 41: Illumination
+//Card 42: Illumination
 //Shaper Event: Run
 //Cost: 2
 //Run R&D. If successful, install up to 3 cards from your grip (one at a time),
