@@ -336,6 +336,134 @@ cardSet[35012] = {
   },
 };
 
+//MuslihaT: Multifarious Marketeer  
+//Criminal Identity: Natural
+//Deck: 45, Influence: 15
+//When your turn begins, look at the top card of your stack. If that card is an icebreaker 
+//or a run event, you may reveal it and add it to your grip.
+cardSet[35013] = {
+  title: "MuslihaT: Multifarious Marketeer",
+  imageFile: "35013.png",
+  player: runner,
+  faction: "Criminal",
+  link: 0,
+  cardType: "identity",
+  deckSize: 45,
+  influenceLimit: 15,
+  subTypes: ["Natural"],
+  
+  //When your turn begins, look at the top card of your stack.
+  //If that card is an icebreaker or a run event, you may reveal it and add it to your grip.
+  responseOnRunnerTurnBegins: {
+    Enumerate: function() {
+      //Check if stack has cards
+      if (runner.stack.length === 0) return [];
+      
+      var topCard = runner.stack[runner.stack.length - 1];
+      
+      //Always make the top card visible to Runner (so they can see it)
+      topCard.knownToRunner = true;
+      
+      //Check if it's an icebreaker or run event
+      var isIcebreaker = CheckSubType(topCard, "Icebreaker");
+      var isRunEvent = CheckCardType(topCard, ["event"]) && CheckSubType(topCard, "Run");
+      
+      if (!isIcebreaker && !isRunEvent) {
+        //Not a qualifying card - Runner sees it but can't reveal it
+        //Return empty array (no choices), but card remains knownToRunner
+        return [];
+      }
+      
+      //Valid card - offer to reveal and add to grip
+      var choices = [
+        { id: 0, label: "Reveal and add to grip: " + GetTitle(topCard, true), button: "Reveal" },
+        { id: 1, label: "Decline (leave on top)", button: "Decline" }
+      ];
+      
+      //**AI code
+      if (runner.AI) {
+        //AI evaluates whether to take the card
+        var shouldTake = this.AIShouldTakeCard(topCard);
+        
+        if (shouldTake) {
+          runner.AI.preferred = { title: this.title, option: choices[0] };
+        } else {
+          runner.AI.preferred = { title: this.title, option: choices[1] };
+        }
+      }
+      
+      return choices;
+    },
+    Resolve: function(params) {
+      var topCard = runner.stack[runner.stack.length - 1];
+      
+      if (params.id === 1) {
+        //Declined - leave card on top (keep knownToRunner flag)
+        Log("MuslihaT: Top card left on stack");
+        return;
+      }
+      
+      var cardRef = this;
+      
+      //Reveal the card (shows to Corp)
+      Reveal(topCard, function() {
+        //Add to grip
+        var idx = runner.stack.indexOf(topCard);
+        if (idx > -1) {
+          runner.stack.splice(idx, 1);
+          runner.grip.push(topCard);
+          topCard.cardLocation = runner.grip;
+          //knownToRunner flag will persist (doesn't matter once in grip)
+          Log(GetTitle(topCard, true) + " added to grip from top of stack");
+        }
+      }, cardRef);
+    },
+    text: "Look at top of stack; reveal if icebreaker or run event",
+  },
+  
+  //AI helper: Should we take this card?
+  AIShouldTakeCard: function(card) {
+    //Always take icebreakers if we don't have a full suite
+    if (CheckSubType(card, "Icebreaker")) {
+      var installedCards = InstalledCards(runner);
+      var hasDecoder = false;
+      var hasKiller = false;
+      var hasFracter = false;
+      
+      for (var i = 0; i < installedCards.length; i++) {
+        if (CheckSubType(installedCards[i], "Decoder")) hasDecoder = true;
+        if (CheckSubType(installedCards[i], "Killer")) hasKiller = true;
+        if (CheckSubType(installedCards[i], "Fracter")) hasFracter = true;
+      }
+      
+      //Take if it fills a gap
+      if (!hasDecoder && CheckSubType(card, "Decoder")) return true;
+      if (!hasKiller && CheckSubType(card, "Killer")) return true;
+      if (!hasFracter && CheckSubType(card, "Fracter")) return true;
+      
+      //Take if we have no breakers at all
+      if (!hasDecoder && !hasKiller && !hasFracter) return true;
+      
+      //Otherwise maybe keep it on top for later
+      return false;
+    }
+    
+    //For run events, evaluate based on current needs
+    if (CheckCardType(card, ["event"]) && CheckSubType(card, "Run")) {
+      //Take if we're low on cards
+      if (runner.grip.length < 4) return true;
+      
+      //Take if we have clicks to use it
+      if (runner.clickTracker >= 2) return true;
+      
+      //Otherwise decline (might want to draw other cards first)
+      return false;
+    }
+    
+    return false;
+  },
+};
+
 cardSet[35034] = {
   title: "Side Hustle",
   imageFile: "35034.png",
