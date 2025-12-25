@@ -781,6 +781,298 @@ cardSet[35029] = {
   },
 };
 
+//Card: Madani
+//Shaper Hardware: Console
+//Cost: 2, Influence: 3
+//[click]: Host any number of programs from your grip faceup on this hardware. 
+//(They are not installed.)
+//Once per turn → 0[credit]: Install 1 hosted program (paying its install cost).
+//Limit 1 console per player.
+cardSet[35028] = {
+  title: "Madani",
+  imageFile: "35028.png",
+  player: runner,
+  faction: "Shaper",
+  influence: 3,
+  cardType: "hardware",
+  subTypes: ["Console"],
+  installCost: 2,
+  unique: true,
+  
+  //Initialize hostedCards array on install
+  automaticOnInstall: {
+    Resolve: function(card) {
+      if (card === this) {
+        this.hostedCards = [];
+      }
+    },
+  },
+  
+  //Track "once per turn" for install ability
+  usedThisTurn: false,
+  
+  responseOnRunnerTurnBegins: {
+    Resolve: function() {
+      this.usedThisTurn = false;
+    },
+    automatic: true,
+  },
+  
+  responseOnCorpTurnBegins: {
+    Resolve: function() {
+      this.usedThisTurn = false;
+    },
+    automatic: true,
+  },
+  
+  //When Madani is trashed, return hosted programs to grip
+  automaticOnTrash: {
+    Resolve: function(card) {
+      if (card === this && this.hostedCards && this.hostedCards.length > 0) {
+        for (var i = 0; i < this.hostedCards.length; i++) {
+          var program = this.hostedCards[i];
+          program.notInstalled = false; //Clear flag
+          program.host = null;
+          runner.grip.push(program);
+          program.cardLocation = runner.grip;
+          Log(GetTitle(program, true) + " returned to grip");
+        }
+        this.hostedCards = [];
+      }
+    },
+  },
+  
+  abilities: [
+    {
+      text: "Host any number of programs from grip",
+      Enumerate: function() {
+        if (!CheckActionClicks(runner, 1)) return [];
+        
+        //Get all programs from grip
+        var programs = [];
+        for (var i = 0; i < runner.grip.length; i++) {
+          if (CheckCardType(runner.grip[i], ["program"])) {
+            programs.push({
+              card: runner.grip[i],
+              label: GetTitle(runner.grip[i], true)
+            });
+          }
+        }
+        
+        if (programs.length === 0) return [];
+        
+        //Add button choice (just the button, no label so it doesn't show as a choice)
+        programs.push({
+          id: "hostButton",
+          button: "Host 0 programs",
+          multiSelectDynamicButtonText: function(numSelected) {
+            if (numSelected === 0) return "Host 0 programs";
+            if (numSelected === 1) return "Host 1 program";
+            return "Host " + numSelected + " programs";
+          }
+        });
+        
+        //Set up multi-select array for ALL choices
+        for (var i = 0; i < programs.length; i++) {
+          programs[i].cards = Array(programs.length - 1).fill(null);
+        }
+        
+        //**AI code
+        if (runner.AI) {
+          //AI auto-selects programs to host
+          var programsByExpensive = [];
+          for (var i = 0; i < programs.length - 1; i++) {
+            programsByExpensive.push(programs[i]);
+          }
+          programsByExpensive.sort(function(a, b) {
+            return InstallCost(b.card) - InstallCost(a.card);
+          });
+          
+          //Host up to 3 most expensive, or all if grip > 5
+          var numToHost = runner.grip.length > 5 ? programsByExpensive.length : Math.min(3, programsByExpensive.length);
+          
+          //Fill the .cards array
+          for (var i = 0; i < numToHost; i++) {
+            programs[programs.length - 1].cards[i] = programsByExpensive[i].card;
+          }
+        }
+        
+        return programs;
+      },
+      Resolve: function(params) {
+        SpendClicks(runner, 1);
+        
+        //Collect selected programs
+        var selectedPrograms = [];
+        if (params.cards) {
+          for (var i = 0; i < params.cards.length; i++) {
+            if (params.cards[i]) selectedPrograms.push(params.cards[i]);
+          }
+        }
+        
+        //Host each program
+        for (var i = 0; i < selectedPrograms.length; i++) {
+          var program = selectedPrograms[i];
+          
+          //Initialize hostedCards if needed
+          if (typeof this.hostedCards === 'undefined') {
+            this.hostedCards = [];
+          }
+          
+          //Remove from grip
+          var idx = runner.grip.indexOf(program);
+          if (idx > -1) runner.grip.splice(idx, 1);
+          
+          //Add to hosted
+          this.hostedCards.push(program);
+          program.cardLocation = this.hostedCards;
+          program.notInstalled = true;
+          program.faceUp = true;
+          program.host = this;
+          
+          Log(GetTitle(program, true) + " hosted on Madani");
+        }
+        
+        if (selectedPrograms.length === 0) {
+          Log("No programs hosted on Madani");
+        }
+      },
+    },
+    {
+      text: "Install 1 hosted program (once per turn, can use during runs)",
+      Enumerate: function() {
+        if (this.usedThisTurn) return [];
+        if (!this.hostedCards || this.hostedCards.length === 0) return [];
+        
+        var choices = [];
+        for (var i = 0; i < this.hostedCards.length; i++) {
+          var card = this.hostedCards[i];
+          //Check if can afford install cost
+          if (ChoicesCardInstall(card).length > 0) {
+            choices.push({ 
+              card: card, 
+              label: "Install " + GetTitle(card, true) + " (" + InstallCost(card) + "[c])"
+            });
+          }
+        }
+        
+        //**AI code
+        if (runner.AI && choices.length > 0) {
+          //AI picks which program to install
+          //Prioritize missing breaker types
+          var bestChoice = this.AISelectBestProgramToInstall(choices);
+          if (bestChoice !== null) {
+            runner.AI.preferred = { title: this.title, option: choices[bestChoice] };
+          }
+        }
+        
+        return choices;
+      },
+      Resolve: function(params) {
+        this.usedThisTurn = true;
+        
+        //Clear notInstalled flag before installing
+        params.card.notInstalled = false;
+        
+        //Install the program (pays install cost)
+        Install(params.card, null);
+      },
+    },
+  ],
+  
+  //AI helper: Which program should we install from hosted?
+  AISelectBestProgramToInstall: function(choices) {
+    if (choices.length === 0) return null;
+    
+    var installedCards = InstalledCards(runner);
+    
+    //Check which breaker types we're missing
+    var hasDecoder = false;
+    var hasKiller = false;
+    var hasFracter = false;
+    
+    for (var i = 0; i < installedCards.length; i++) {
+      if (CheckSubType(installedCards[i], "Decoder")) hasDecoder = true;
+      if (CheckSubType(installedCards[i], "Killer")) hasKiller = true;
+      if (CheckSubType(installedCards[i], "Fracter")) hasFracter = true;
+    }
+    
+    //Prioritize missing breaker types
+    for (var i = 0; i < choices.length; i++) {
+      var card = choices[i].card;
+      if (!hasDecoder && CheckSubType(card, "Decoder")) return i;
+      if (!hasKiller && CheckSubType(card, "Killer")) return i;
+      if (!hasFracter && CheckSubType(card, "Fracter")) return i;
+    }
+    
+    //Otherwise, install cheapest program first
+    var cheapest = 0;
+    var cheapestCost = InstallCost(choices[0].card);
+    for (var i = 1; i < choices.length; i++) {
+      var cost = InstallCost(choices[i].card);
+      if (cost < cheapestCost) {
+        cheapest = i;
+        cheapestCost = cost;
+      }
+    }
+    
+    return cheapest;
+  },
+  
+  //AI: Worth keeping?
+  AIWorthKeeping: function(installedRunnerCards, spareMU) {
+    //Keep if we have hosted programs
+    if (this.hostedCards && this.hostedCards.length > 0) return true;
+    
+    //Keep if we have expensive programs in hand
+    var expensivePrograms = 0;
+    for (var i = 0; i < runner.grip.length; i++) {
+      if (CheckCardType(runner.grip[i], ["program"])) {
+        if (InstallCost(runner.grip[i]) >= 3) {
+          expensivePrograms++;
+        }
+      }
+    }
+    if (expensivePrograms >= 2) return true;
+    
+    //Keep if MU is tight
+    if (spareMU <= 1) return true;
+    
+    //Otherwise not critical
+    return false;
+  },
+  
+  //AI: Should we install this?
+  AIPreferredInstallChoice: function(choices) {
+    //Don't install on last click
+    if (runner.clickTracker < 2) return -1;
+    
+    //Install if we have 2+ expensive programs in hand
+    var expensivePrograms = 0;
+    for (var i = 0; i < runner.grip.length; i++) {
+      if (CheckCardType(runner.grip[i], ["program"])) {
+        if (InstallCost(runner.grip[i]) >= 3) {
+          expensivePrograms++;
+        }
+      }
+    }
+    if (expensivePrograms >= 2) return 0;
+    
+    //Install if MU is tight and we have programs
+    var spareMU = MemoryUnits() - InstalledMemoryCost();
+    var programsInHand = 0;
+    for (var i = 0; i < runner.grip.length; i++) {
+      if (CheckCardType(runner.grip[i], ["program"])) {
+        programsInHand++;
+      }
+    }
+    if (spareMU <= 1 && programsInHand >= 2) return 0;
+    
+    //Otherwise, maybe later
+    return -1;
+  },
+};
+
 cardSet[35008] = {
   title: "Hantu",
   imageFile: "35008.png",

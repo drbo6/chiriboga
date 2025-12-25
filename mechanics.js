@@ -531,7 +531,13 @@ function Install(
 				  //currentPhase to the return phase before calling it.
 				  var savedPhase = currentPhase;
 				  if (returnToPhase) {
-					currentPhase = returnToPhase === true ? currentPhase.next : returnToPhase;
+					//BUG FIX: If returnToPhase is true, we want to return to savedPhase, not advance
+					//The old code had: currentPhase = returnToPhase === true ? currentPhase.next : returnToPhase;
+					//This was WRONG - it advanced the phase when it should stay put
+					if (returnToPhase !== true) {
+					  currentPhase = returnToPhase; //returnToPhase is a specific phase object
+					}
+					//If returnToPhase === true, currentPhase stays as savedPhase (don't modify it)
 				  }
 				  
 				  //then the Enumerate ones

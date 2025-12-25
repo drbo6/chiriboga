@@ -751,7 +751,7 @@ function LoadDecks() {
   // // ----------------------------------------------------------------------------
   // // You can enable the debug menu at the top of init.js
 
-  if (false) { // Use this to easily disable everything below
+  if (true) { // Use this to easily disable everything below
 
     debugging = true; //set true to log extra details and pause execution on error
     viewAllFronts = true; //set true to see all card fronts (for testing)
@@ -760,11 +760,11 @@ function LoadDecks() {
     // SET UP THE MAIN STATES FOR THE RUNNER AND CORP
     // ----------------------------------------------
 
-    RunnerTestField(35002, //identity
+    RunnerTestField(31002, //identity
       [30032, 30032, 35009, 35008], //heapCards
       [35015, 35022, 35022, 30033, 35014, 1039, 35030, 35005, 35016, 35034, 35004, 35010, 35007, 35009, 35008, 35029], //stackCards
-      [35017, 35019, 35032, 35032, 35031, 35033, 35025, 1039], //gripCards
-      [35006, 30015, 35009, 35020, 35020], //installed 
+      [35021, 35033, 35025, 1039, 35009, 35020], //gripCards
+      [35028, 30015], //installed 
       [30069,30069], //stolen
       cardBackTexturesRunner,glowTextures,strengthTextures
     );
@@ -807,7 +807,7 @@ function LoadDecks() {
     // // ----------------------------------------
 
     GainCredits(runner,25);
-    GainCredits(corp,25);
+    GainCredits(corp,50);
     
     // // OTHER STUFF
     // // -----------
