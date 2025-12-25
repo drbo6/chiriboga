@@ -203,6 +203,139 @@ cardSet[35011] = {
   },
 };
 
+//Barry "Baz" Wong: Tri-Maf Veteran
+//Criminal Identity: Cyborg
+//Deck: 45, Influence: 15
+//Whenever the Corp rezzes a piece of ice, you may install 1 resource or piece of hardware from your grip.
+cardSet[35012] = {
+  title: 'Barry "Baz" Wong: Tri-Maf Veteran',
+  imageFile: "35012.png",
+  player: runner,
+  faction: "Criminal",
+  link: 0,
+  cardType: "identity",
+  deckSize: 45,
+  influenceLimit: 15,
+  subTypes: ["Cyborg"],
+  
+  //Whenever the Corp rezzes a piece of ice, you may install 1 resource or piece of hardware from your grip
+  responseOnRez: {
+    Enumerate: function(card) {
+      //Only trigger when ice is rezzed
+      if (!CheckCardType(card, ["ice"])) return [];
+      
+      //Check if we have resources or hardware in grip
+      var installables = [];
+      for (var i = 0; i < runner.grip.length; i++) {
+        var gripCard = runner.grip[i];
+        if (CheckCardType(gripCard, ["resource", "hardware"])) {
+          //Check if can afford and install
+          if (ChoicesCardInstall(gripCard).length > 0) {
+            installables.push({
+              card: gripCard,
+              label: "Install " + GetTitle(gripCard, true) + " (" + InstallCost(gripCard) + "[c])"
+            });
+          }
+        }
+      }
+      
+      if (installables.length === 0) return [];
+      
+      //Add decline option
+      installables.push({ skip: true, label: "Decline", button: "Decline" });
+      
+      //**AI code
+      if (runner.AI && installables.length > 1) {
+        //AI decides whether to install something
+        var shouldInstall = this.AIShouldInstallOnRez(card, installables);
+        
+        if (shouldInstall && installables.length > 1) {
+          //Choose best card to install
+          var bestChoice = this.AIChooseBestInstall(installables);
+          if (bestChoice !== null) {
+            runner.AI.preferred = { title: this.title, option: installables[bestChoice] };
+          }
+        } else {
+          //Decline
+          runner.AI.preferred = { title: this.title, option: installables[installables.length - 1] };
+        }
+      }
+      
+      return installables;
+    },
+    Resolve: function(params) {
+      if (params.skip) return;
+      
+      //Install the chosen card
+      Install(params.card, params.host);
+    },
+    text: "Install 1 resource or hardware from grip",
+  },
+  
+  //AI helper: Should we install on this rez?
+  AIShouldInstallOnRez: function(rezzedIce, installables) {
+    //Don't install if low on clicks (need clicks for runs)
+    if (runner.clickTracker < 2) return false;
+    
+    //Don't install if last click
+    if (runner.clickTracker < 1) return false;
+    
+    //Install if the rezzed ice is expensive (Corp is committing resources)
+    if (RezCost(rezzedIce) >= 4) return true;
+    
+    //Install if we have cheap cards (<2 cost) in hand
+    for (var i = 0; i < installables.length - 1; i++) { //-1 for Decline
+      if (InstallCost(installables[i].card) <= 1) return true;
+    }
+    
+    //Install if we're setting up and have important cards
+    var installedCards = InstalledCards(runner);
+    if (installedCards.length < 5) {
+      //Early game - be aggressive about installing
+      return true;
+    }
+    
+    //Otherwise decline (save for better timing)
+    return false;
+  },
+  
+  //AI helper: Choose best card to install
+  AIChooseBestInstall: function(installables) {
+    if (installables.length <= 1) return null; //Only Decline option
+    
+    //Prioritize by card type and cost
+    var consoles = [];
+    var cheapResources = [];
+    var expensiveResources = [];
+    var cheapHardware = [];
+    var expensiveHardware = [];
+    
+    for (var i = 0; i < installables.length - 1; i++) { //-1 for Decline
+      var card = installables[i].card;
+      var cost = InstallCost(card);
+      
+      if (CheckSubType(card, "Console")) {
+        consoles.push(i);
+      } else if (CheckCardType(card, ["resource"])) {
+        if (cost <= 2) cheapResources.push(i);
+        else expensiveResources.push(i);
+      } else if (CheckCardType(card, ["hardware"])) {
+        if (cost <= 2) cheapHardware.push(i);
+        else expensiveHardware.push(i);
+      }
+    }
+    
+    //Priority: Consoles > Cheap resources > Cheap hardware > Expensive resources > Expensive hardware
+    if (consoles.length > 0) return consoles[0];
+    if (cheapResources.length > 0) return cheapResources[0];
+    if (cheapHardware.length > 0) return cheapHardware[0];
+    if (expensiveResources.length > 0) return expensiveResources[0];
+    if (expensiveHardware.length > 0) return expensiveHardware[0];
+    
+    return 0; //Default to first option
+  },
+};
+
 cardSet[35034] = {
   title: "Side Hustle",
   imageFile: "35034.png",
