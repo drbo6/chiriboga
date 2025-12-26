@@ -29,6 +29,25 @@
 		</script>
 
 		<script>
+		// Map faction names to unicode icons for displaying in identity dropdown
+		function GetFactionIcon(faction) {
+			if (!faction) return '⚪ ';
+			var f = faction.toLowerCase().replace(/[^a-z]/g,'');
+			switch(f) {
+				case 'anarch': return '🟠 ';
+				case 'criminal': return '🔵 ';
+				case 'shaper': return '🟢 ';
+				case 'haasbioroid': return '🟣 ';
+				case 'jinteki': return '🔴 ';
+				case 'weylandconsortium': return '🟢 ';
+				case 'nbn': return '🟡 ';
+				case 'neutral': return '⚪ ';
+				default: return '⚪ ';
+			}
+		}
+		</script>
+
+		<script>
 		// Restore opponent accordion interactions
 		(function(){
 			// Lightbox for opponent deck list
@@ -760,6 +779,23 @@
 					}
 				}
 			}
+			// Sort identities alphabetically by display title
+			playerIdentities.sort(function(a,b){
+				var fullTitleA = cardSet[a].title || '';
+				var fullTitleB = cardSet[b].title || '';
+				var shortTitleA = fullTitleA;
+				var shortTitleB = fullTitleB;
+				if (deckPlayer === corp) {
+					var colonIdxA = fullTitleA.indexOf(': ');
+					if (colonIdxA > -1) shortTitleA = fullTitleA.substring(colonIdxA + 2).trim();
+					var colonIdxB = fullTitleB.indexOf(': ');
+					if (colonIdxB > -1) shortTitleB = fullTitleB.substring(colonIdxB + 2).trim();
+				} else {
+					if (fullTitleA.indexOf(':') > -1) shortTitleA = fullTitleA.split(':')[0].trim();
+					if (fullTitleB.indexOf(':') > -1) shortTitleB = fullTitleB.split(':')[0].trim();
+				}
+				return shortTitleA.localeCompare(shortTitleB);
+			});
 
 			function UpdateLaunchStrings() {
 			  //console.log(json);
@@ -1706,7 +1742,7 @@
 				  "<option value=" +
 					playerIdentities[i] +
 					">" +
-					shortTitle +
+GetFactionIcon(cardSet[playerIdentities[i]].faction) + shortTitle +
 					"</option>\n"
 				);
 			  }
@@ -1962,13 +1998,38 @@
 										playerIdentities.push({ id: i, title: cardSet[i].title });
 									}
 								}
-								playerIdentities.sort(function(a, b) { return a.title.localeCompare(b.title); });
-								
-								// Rebuild identity dropdown
-								var identityHTML = '';
-								for (var i = 0; i < playerIdentities.length; i++) {
-									var selected = (playerIdentities[i].id == currentIdentity) ? ' selected' : '';
-									identityHTML += '<option value="' + playerIdentities[i].id + '"' + selected + '>' + playerIdentities[i].title + '</option>';
+// Sort identities by display short title
+					playerIdentities.sort(function(a,b){
+						var fullA = a.title || '';
+						var fullB = b.title || '';
+						var shortA = fullA;
+						var shortB = fullB;
+						if (deckPlayer === corp) {
+							var ca = fullA.indexOf(': ');
+							if (ca > -1) shortA = fullA.substring(ca+2).trim();
+							var cb = fullB.indexOf(': ');
+							if (cb > -1) shortB = fullB.substring(cb+2).trim();
+						} else {
+							if (fullA.indexOf(':') > -1) shortA = fullA.split(':')[0].trim();
+							if (fullB.indexOf(':') > -1) shortB = fullB.split(':')[0].trim();
+						}
+						return shortA.localeCompare(shortB);
+					});
+					
+					// Rebuild identity dropdown
+					var identityHTML = '';
+					for (var i = 0; i < playerIdentities.length; i++) {
+						var selected = (playerIdentities[i].id == currentIdentity) ? ' selected' : '';
+						var fullTitle = playerIdentities[i].title || '';
+						var shortTitle = fullTitle;
+						if (deckPlayer === corp) {
+							var colonIdx = fullTitle.indexOf(': ');
+							if (colonIdx > -1) shortTitle = fullTitle.substring(colonIdx + 2).trim();
+						} else {
+							if (fullTitle.indexOf(':') > -1) shortTitle = fullTitle.split(':')[0].trim();
+						}
+						var icon = GetFactionIcon(cardSet[playerIdentities[i].id].faction);
+						identityHTML += '<option value="' + playerIdentities[i].id + '"' + selected + '>' + icon + shortTitle + '</option>';
 								}
 								$('#identityselect').html(identityHTML);
 								

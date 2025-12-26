@@ -640,6 +640,23 @@
 		}
 		?>
 		<script>
+			// Map faction names to unicode icons for displaying in identity dropdown
+			function GetFactionIcon(faction) {
+				if (!faction) return '⚪ ';
+				var f = faction.toLowerCase().replace(/[^a-z]/g,'');
+				switch(f) {
+					case 'anarch': return '🟠 ';
+					case 'criminal': return '🔵 ';
+					case 'shaper': return '🟢 ';
+					case 'haasbioroid': return '🟣 ';
+					case 'jinteki': return '🔴 ';
+					case 'weylandconsortium': return '🟢 ';
+					case 'nbn': return '🟡 ';
+					case 'neutral': return '⚪ ';
+					default: return '⚪ ';
+				}
+			}
+
 			// DRBO6: Gauntlet Mode - Build playerIdentities and populate dropdown after card sets load
 			function PopulateIdentityDropdown() {
 				// Rebuild playerIdentities for current deckPlayer
@@ -699,7 +716,7 @@
 					  "<option value=" +
 						playerIdentities[i] +
 						">" +
-						shortTitle +
+						GetFactionIcon(cardSet[playerIdentities[i]].faction) + shortTitle +
 						"</option>\n"
 					);
 				}
