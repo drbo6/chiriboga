@@ -22,7 +22,7 @@
   </script>
   <?php
   echo '<script src="utility.js?' . filemtime('utility.js') . '"></script>';
-  echo '<script src="config-gauntlet.js?' . filemtime('config-gauntlet.js') . '"></script>';
+  echo '<script src="config.js?' . filemtime('config.js') . '"></script>';
 
   // Load card sets
   $sets = ["coreset","systemgateway","systemupdate2021","midnightsun","elevation"];

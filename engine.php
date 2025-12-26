@@ -27,7 +27,7 @@
 		<script>var accessibilityMode="default";</script>
 		<?php
 		echo '<link rel="stylesheet" type="text/css" href="style.css?' . filemtime('style.css') . '" />';
-		$jsfiles = array('init','phase', 'command', 'checks', 'mechanics', 'utility', 'config-gauntlet');
+		$jsfiles = array('init','phase', 'command', 'checks', 'mechanics', 'utility', 'config');
 
 		// Load card sets
 		$sets = ["coreset","systemgateway","systemupdate2021","midnightsun","elevation"];
