@@ -19,6 +19,22 @@
     function registerPrecon(deck) {
       preconDecks.push(deck);
     }
+
+    // Early shim so menu clicks before scripts load won't throw ReferenceError
+    (function(){
+      if (typeof window.handleMenu === 'undefined') {
+        window._queuedMenuClicks = [];
+        window.handleMenu = function(option, evt) {
+          // queue option; evt may not be available later
+          window._queuedMenuClicks.push(option);
+        };
+        window._flushQueuedMenuClicks = function() {
+          if (!window._queuedMenuClicks || !window.handleMenuImpl) return;
+          var q = window._queuedMenuClicks.slice(); window._queuedMenuClicks = [];
+          q.forEach(function(opt){ try { window.handleMenuImpl(opt); } catch(e){} });
+        };
+      }
+    })();
   </script>
   <?php
   echo '<script src="utility.js?' . filemtime('utility.js') . '"></script>';
@@ -89,12 +105,12 @@
         <div class="menu-items">
           <div class="menu-layout">
             <div class="menu-buttons" id="menu-buttons">
-              <div class="menu-item" onclick="handleMenu('quick')">QUICK GAME</div>
-              <div class="menu-item" onclick="handleMenu('custom')">CUSTOM GAME</div>
-              <div class="menu-item" onclick="handleMenu('tournament')">GAUNTLET</div>
-              <div class="menu-item" onclick="handleMenu('tutorial')">TUTORIAL</div>
-              <div class="menu-item" onclick="handleMenu('achievements')">ACHIEVEMENTS <span class="achievement-percent">[0%]</span></div>
-              <div class="menu-item" onclick="handleMenu('settings')">SETTINGS</div>
+              <div class="menu-item" onclick="handleMenu('quick', event)">QUICK GAME</div>
+              <div class="menu-item" onclick="handleMenu('custom', event)">CUSTOM GAME</div>
+              <div class="menu-item" onclick="handleMenu('tournament', event)">GAUNTLET</div>
+              <div class="menu-item" onclick="handleMenu('tutorial', event)">TUTORIAL</div>
+              <div class="menu-item" onclick="handleMenu('achievements', event)">ACHIEVEMENTS <span class="achievement-percent">[0%]</span></div>
+              <div class="menu-item" onclick="handleMenu('settings', event)">SETTINGS</div>
             </div>
             <div class="credits-panel" id="credits-panel" style="display:none;">
               <div class="credits-header-row">
@@ -152,6 +168,14 @@
                   <div class="settings-switch">
                     <input type="checkbox" id="debug-menu-settings-toggle" onchange="toggleDebugMenu()">
                     <label for="debug-menu-settings-toggle" class="switch-label"></label>
+                  </div>
+                </div>
+
+                <div class="settings-group" title="Use high-resolution card art when available">
+                  <label class="settings-label">HI-RES CARD ART</label>
+                  <div class="settings-switch">
+                    <input type="checkbox" id="enable-hires-toggle" onchange="toggleEnableHiRes()">
+                    <label for="enable-hires-toggle" class="switch-label"></label>
                   </div>
                 </div>
                 <div class="settings-section-header">GAUNTLET SETTINGS</div>
@@ -349,6 +373,11 @@
       settingsOverrides.debugMenuEnabled = (saved && typeof saved.debugMenuEnabled === 'boolean')
         ? saved.debugMenuEnabled
         : false;
+
+      // Load hi-res preference (default from config or false)
+      settingsOverrides.enableHiRes = (saved && typeof saved.enableHiRes === 'boolean')
+        ? saved.enableHiRes
+        : (typeof gauntletConfig !== 'undefined' && typeof gauntletConfig.enableHiRes === 'boolean' ? gauntletConfig.enableHiRes : false);
       
       // Update UI to match
       document.getElementById('gauntlet-length-value').textContent = settingsOverrides.gauntletLength;
@@ -366,6 +395,8 @@
       
       // Set debug menu toggle
       document.getElementById('debug-menu-settings-toggle').checked = settingsOverrides.debugMenuEnabled;
+      // Set hi-res toggle
+      document.getElementById('enable-hires-toggle').checked = settingsOverrides.enableHiRes;
       
       // Update stepper button states
       updateStepperButtons();
@@ -384,7 +415,8 @@
           allowedSets: settingsOverrides.allowedSets,
           preconOverrides: settingsOverrides.preconOverrides,
           gameSpeed: settingsOverrides.gameSpeed,
-          debugMenuEnabled: settingsOverrides.debugMenuEnabled
+          debugMenuEnabled: settingsOverrides.debugMenuEnabled,
+          enableHiRes: settingsOverrides.enableHiRes
         };
         localStorage.setItem('chiriboga-settings', JSON.stringify(toSave));
       } catch (e) {
@@ -432,6 +464,11 @@
     
     function toggleDebugMenu() {
       settingsOverrides.debugMenuEnabled = document.getElementById('debug-menu-settings-toggle').checked;
+      saveSettings();
+    }
+
+    function toggleEnableHiRes() {
+      settingsOverrides.enableHiRes = document.getElementById('enable-hires-toggle').checked;
       saveSettings();
     }
     
@@ -920,8 +957,27 @@
       initResolutionAutoRefresh();
     });
     
-    function handleMenu(option) {
-      const item = event.target.closest('.menu-item');
+    function handleMenu(option, evt) {
+      // Register implementation so early queued clicks can be flushed
+      try { window.handleMenuImpl = handleMenu; } catch(e) {}
+      try { if (window._flushQueuedMenuClicks) window._flushQueuedMenuClicks(); } catch(e) {}
+
+      var item = null;
+      if (evt && evt.target) {
+        item = evt.target.closest('.menu-item');
+      } else {
+        // Try to locate the menu item using the onclick attribute matching
+        try {
+          item = document.querySelector('.menu-item[onclick*="handleMenu(\'' + option + "'" + ')"]');
+        } catch(e) { item = null; }
+        if (!item) {
+          // Fallback: find by text
+          var nodes = document.querySelectorAll('.menu-item');
+          for (var i=0;i<nodes.length;i++) {
+            if (nodes[i].textContent.trim().toLowerCase().indexOf(option) !== -1) { item = nodes[i]; break; }
+          }
+        }
+      }
       
       // Handle tutorial
       if (option === 'tutorial') {

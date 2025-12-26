@@ -1137,33 +1137,48 @@ var CardRenderer = {
         if (this.zoomed && (this.faceUp || this.canView)) {
           scalingratio = fieldZoom;
 		  //load high-res version, if not already loaded/loading
-		  // Respect config flag: enableHiRes (defaults to false)
-		  if (typeof gauntletConfig === 'undefined' || gauntletConfig.enableHiRes) {
-			  if (this.hiresTexture) {
-				  this.frontTexture = this.hiresTexture;
-			  }
-			  else {
-				  const imgaddr = "images/hires/"+ChangeImageFileToJPG(this.card.imageFile);
-				  if (!this.app.loadingHiresTextures) {
-					  this.app.loadingHiresTextures = {};
-					  this.app.loadedHiresTextures = {};
-				  }
-				  if (!this.app.loadingHiresTextures[imgaddr]) {
-					  this.app.loadingHiresTextures[imgaddr] = PIXI.BaseTexture.from(imgaddr);
-					  this.app.loadingHiresTextures[imgaddr].resolution = 2;
-					  this.app.loadingHiresTextures[imgaddr].once('loaded', () => {
+		  // Determine whether to use hi-res images: LocalStorage setting overrides gauntletConfig
+		  var useHiRes = false;
+		  try {
+			var savedJson = localStorage.getItem('chiriboga-settings');
+			if (savedJson) {
+				var savedSettings = JSON.parse(savedJson);
+				if (savedSettings && typeof savedSettings.enableHiRes === 'boolean') {
+					useHiRes = savedSettings.enableHiRes;
+				} else if (typeof gauntletConfig !== 'undefined' && typeof gauntletConfig.enableHiRes === 'boolean') {
+					useHiRes = gauntletConfig.enableHiRes;
+				}
+			} else if (typeof gauntletConfig !== 'undefined' && typeof gauntletConfig.enableHiRes === 'boolean') {
+				useHiRes = gauntletConfig.enableHiRes;
+			}
+		  } catch (e) { /* ignore JSON parse/localStorage errors */ }
+
+		  if (useHiRes) {
+			if (this.hiresTexture) {
+				this.frontTexture = this.hiresTexture;
+			}
+			else {
+				const imgaddr = "images/hires/"+ChangeImageFileToJPG(this.card.imageFile);
+				if (!this.app.loadingHiresTextures) {
+					this.app.loadingHiresTextures = {};
+					this.app.loadedHiresTextures = {};
+				}
+				if (!this.app.loadingHiresTextures[imgaddr]) {
+					this.app.loadingHiresTextures[imgaddr] = PIXI.BaseTexture.from(imgaddr);
+					this.app.loadingHiresTextures[imgaddr].resolution = 2;
+					this.app.loadingHiresTextures[imgaddr].once('loaded', () => {
 						this.app.loadedHiresTextures[imgaddr] = new PIXI.Texture(this.app.loadingHiresTextures[imgaddr]);
-					  });
-				  }
-				  if (this.app.loadedHiresTextures[imgaddr]) {
-					  this.hiresTexture = this.app.loadedHiresTextures[imgaddr];
-					  this.frontTexture = this.hiresTexture;
-				  }
-			  }
+					});
+				}
+				if (this.app.loadedHiresTextures[imgaddr]) {
+					this.hiresTexture = this.app.loadedHiresTextures[imgaddr];
+					this.frontTexture = this.hiresTexture;
+				}
+			}
 		  }
 		  else {
-			  // configured to disable hires fallback; use low-res image
-			  this.frontTexture = this.loresTexture;
+			// configured to disable hires; use low-res image
+			this.frontTexture = this.loresTexture;
 		  }
 		}
 		else {
