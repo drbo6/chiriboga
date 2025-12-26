@@ -750,13 +750,22 @@ coreSet[1030] = {
         });
       }
       
+      // Add option to not use Crash Space
+      choices.push({
+        prevent: 0,
+        label: "Don't use Crash Space"
+      });
+      
       return choices;
     },
     Resolve: function (params) {
-      Trash(this, false, function(cardsTrashed) {
-        intended.damage -= params.prevent;
-        Log(params.prevent + " meat damage prevented");
-      }, this);
+      if (params.prevent > 0) {
+        Trash(this, false, function(cardsTrashed) {
+          intended.damage -= params.prevent;
+          Log(params.prevent + " meat damage prevented");
+        }, this);
+      }
+      // If prevent is 0, do nothing (don't trash, don't prevent)
     },
   },
 };

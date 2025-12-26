@@ -751,7 +751,7 @@ function LoadDecks() {
   // // ----------------------------------------------------------------------------
   // // You can enable the debug menu at the top of init.js
 
-  if (true) { // Use this to easily disable everything below
+  if (false) { // Use this to easily disable everything below
 
     // debugging = true; //set true to log extra details and pause execution on error
     // viewAllFronts = true; //set true to see all card fronts (for testing)

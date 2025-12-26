@@ -1090,58 +1090,103 @@ canvas {
 }
 
 .modal-content {
-		display: inline-block;
-    background-color: var(--modal-bg);
-    margin: auto;
-		padding-top: 20px;
-		padding-bottom: 20px;
-		padding-left: 40px;
-		padding-right: 40px;
-    border: 1px solid var(--modal-border);
-		color:var(--modal-border);
+	display: inline-block;
+	background: var(--bg-dark);
+	margin: auto;
+	padding: 28px 48px;
+	border: 1px solid var(--border-green);
+	border-radius: 10px;
+	color: var(--crt-green);
+	box-shadow: 
+		0 0 20px rgba(51, 255, 51, 0.25),
+		inset 0 0 20px rgba(51, 255, 51, 0.12);
+	font-family: "Share Tech Mono", "Courier New", monospace;
+	position: relative;
+}
+
+/* CRT scanline effect */
+.modal-content::after {
+	content: "";
+	position: absolute;
+	inset: 0;
+	pointer-events: none;
+	background: repeating-linear-gradient(
+		to bottom,
+		rgba(51, 255, 51, 0.08) 0px,
+		rgba(51, 255, 51, 0.08) 2px,
+		rgba(0, 0, 0, 0.15) 3px,
+		rgba(0, 0, 0, 0.15) 4px
+	);
+	border-radius: 10px;
+	z-index: 1;
+}
+
+/* Keep content above scanlines */
+.modal-content > * {
+	position: relative;
+	z-index: 2;
 }
 
 .modal-content p,
-.modal-content span
- {
-	 	font-weight: 550;
-		color:var(--modal-border);
-		-webkit-touch-callout: none; /* iOS Safari */
-	    -webkit-user-select: none; /* Safari */
-	     -khtml-user-select: none; /* Konqueror HTML */
-	       -moz-user-select: none; /* Firefox */
-	        -ms-user-select: none; /* Internet Explorer/Edge */
-	            user-select: none; /* Non-prefixed version, currently
-	                                  supported by Chrome and Opera */
+.modal-content span {
+	font-weight: 550;
+	color: var(--crt-green);
+	text-shadow: 0 0 3px var(--glow-green);
+	-webkit-touch-callout: none;
+	-webkit-user-select: none;
+	-khtml-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
 }
 
 .modal-content span {
-	padding:20px;
-	line-height: 4;
-	font-size: 120%;
+	padding: 12px 20px;
+	line-height: 2.5;
+	font-size: 110%;
+	display: inline-block;
+	margin: 4px 2px;
+	border: 1px solid var(--border-green-dark);
+	background: rgba(12, 24, 12, 0.5);
+	border-radius: 8px;
+	transition: all 0.1s ease;
+	cursor: pointer;
+	position: relative;
+}
+
+/* Chevron indicator */
+.modal-content span::before {
+	content: "> ";
+	position: absolute;
+	left: 6px;
+	opacity: 0;
+	color: var(--bg-dark);
+	transition: opacity 0.1s ease;
 }
 
 .modal-content p:hover,
-.modal-content span:hover
- {
-    text-decoration: underline;
-		cursor: pointer;
+.modal-content span:hover {
+	background-color: var(--crt-green);
+	color: var(--bg-dark);
+	text-shadow: none;
+	border-color: var(--crt-green);
+	box-shadow: 
+		0 0 12px rgba(51, 255, 51, 0.6),
+		inset 0 0 10px rgba(51, 255, 51, 0.3);
+}
+
+.modal-content span:hover::before {
+	opacity: 1;
 }
 
 .modal-content p:active,
 .modal-content span:active {
-		text-decoration: none;
-		background-color: black;
-		cursor: pointer;
-}
-
-.modal-content span:hover {
-	background-color: var(--highlight-light);
-	border-radius: 10px;
-}
-.modal-content span:active {
-	background-color: var(--highlight-bright);
-	border-radius: 10px;
+	background-color: var(--crt-green-light);
+	color: var(--bg-dark);
+	transform: translateY(1px);
+	box-shadow: 
+		0 0 15px rgba(102, 255, 102, 0.8),
+		inset 0 0 15px rgba(102, 255, 102, 0.4);
 }
 
 .modal-content-inactive {
