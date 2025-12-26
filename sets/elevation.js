@@ -1888,6 +1888,183 @@ cardSet[35022] = {
   },
 };
 
+//Dewi Subrotoputri: Pedagogical Dhalang
+//Shaper Identity: Natural (FLIP IDENTITY)
+//Deck: 45, Influence: 15
+//Side A: Whenever you make a successful run, if your MU is full, you may flip and gain 1c.
+//Side B: Whenever you make a successful run, if you have at least 1 unused MU, you may flip and draw 1 card.
+cardSet[35023] = {
+  title: "Dewi Subrotoputri: Pedagogical Dhalang",
+  imageFile: "35023.jpg",
+  player: runner,
+  faction: "Shaper",
+  link: 0,
+  cardType: "identity",
+  deckSize: 45,
+  influenceLimit: 15,
+  subTypes: ["Natural"],
+  
+  //Track flip state (false = Side A, true = Side B)
+  flipped: false,
+  
+  //Helper function to get current side name
+  getCurrentSide: function() {
+    return this.flipped ? "Side B" : "Side A";
+  },
+  
+  //Helper function to get current image file based on flip state
+  getCurrentImageFile: function() {
+    return this.flipped ? "35023-0.jpg" : "35023.jpg";
+  },
+  
+  //Whenever you make a successful run, check conditions and offer flip
+  responseOnRunSuccessful: {
+    Enumerate: function() {
+      var installedMU = InstalledMemoryCost();
+      var totalMU = MemoryUnits();
+      
+      if (!this.flipped) {
+        //Side A: if MU is full, may flip and gain 1c
+        if (installedMU >= totalMU) {
+          var choices = [
+            { id: 0, label: "Flip to Side B and gain 1[c]", button: "Flip for 1[c]" },
+            { id: 1, label: "Decline", button: "Decline" }
+          ];
+          
+          //**AI code
+          if (runner.AI) {
+            var shouldFlip = this.AIShouldFlipToB();
+            if (shouldFlip) {
+              runner.AI.preferred = { title: this.title, option: choices[0] };
+            } else {
+              runner.AI.preferred = { title: this.title, option: choices[1] };
+            }
+          }
+          
+          return choices;
+        }
+      } else {
+        //Side B: if you have at least 1 unused MU, may flip and draw 1 card
+        if (installedMU < totalMU) {
+          var choices = [
+            { id: 0, label: "Flip to Side A and draw 1 card", button: "Flip to draw" },
+            { id: 1, label: "Decline", button: "Decline" }
+          ];
+          
+          //**AI code
+          if (runner.AI) {
+            var shouldFlip = this.AIShouldFlipToA();
+            if (shouldFlip) {
+              runner.AI.preferred = { title: this.title, option: choices[0] };
+            } else {
+              runner.AI.preferred = { title: this.title, option: choices[1] };
+            }
+          }
+          
+          return choices;
+        }
+      }
+      
+      return []; //Conditions not met, no flip offered
+    },
+    Resolve: function(params) {
+      if (params.id === 1) return; //Declined
+      
+      //Flip the identity
+      this.flipped = !this.flipped;
+      
+      //Update the image file to show flipped side  
+      this.imageFile = this.getCurrentImageFile();
+      
+      //Update the renderer's textures (but not masks - they should stay the same)
+      if (typeof this.renderer !== 'undefined') {
+        //Load the new texture
+        var newFrontTexture = cardRenderer.LoadTexture("images/" + this.imageFile);
+        
+        //Update texture references
+        this.renderer.frontTexture = newFrontTexture;
+        this.renderer.loresTexture = newFrontTexture;
+        
+        //Update the dummy sprite texture
+        if (this.renderer.dummy) {
+          this.renderer.dummy.texture = newFrontTexture;
+        }
+        
+        //Apply the texture
+        this.renderer.SetTextureToFront();
+      }
+      
+      Log("Dewi Subrotoputri flipped to " + this.getCurrentSide());
+      
+      if (this.flipped) {
+        //Just flipped FROM Side A TO Side B
+        //Side A gives 1 credit when flipping
+        GainCredits(runner, 1);
+      } else {
+        //Just flipped FROM Side B TO Side A
+        //Side B gives 1 card when flipping
+        Draw(runner, 1);
+      }
+      
+      //Render to update display
+      Render();
+    },
+    text: "Flip identity based on MU state",
+  },
+  
+  //AI helper: Should we flip from Side A to Side B?
+  AIShouldFlipToB: function() {
+    //Side A → Side B means: trading "gain 1c when MU full" for "draw 1 when MU not full"
+    
+    //Flip if: We're about to free up MU and want card draw
+    var installedCards = InstalledCards(runner);
+    
+    //Check if we have a complete breaker suite
+    var hasDecoder = false;
+    var hasKiller = false;
+    var hasFracter = false;
+    
+    for (var i = 0; i < installedCards.length; i++) {
+      if (CheckSubType(installedCards[i], "Decoder")) hasDecoder = true;
+      if (CheckSubType(installedCards[i], "Killer")) hasKiller = true;
+      if (CheckSubType(installedCards[i], "Fracter")) hasFracter = true;
+    }
+    
+    var hasCompleteBreakers = hasDecoder && hasKiller && hasFracter;
+    
+    //Flip if: Suite complete, low on cards, want draw more than credits
+    if (hasCompleteBreakers && runner.grip.length < 4) return true;
+    
+    //Flip if: Have lots of credits, need cards
+    if (Credits(runner) > 10 && runner.grip.length < 5) return true;
+    
+    //Otherwise, stay on Side A (credits are valuable)
+    return false;
+  },
+  
+  //AI helper: Should we flip from Side B to Side A?
+  AIShouldFlipToA: function() {
+    //Side B → Side A means: trading "draw 1 when MU not full" for "gain 1c when MU full"
+    
+    //Flip if: We're about to fill MU and want credits more than cards
+    
+    //Flip if: Low on credits, have plenty of cards
+    if (Credits(runner) < 5 && runner.grip.length > 5) return true;
+    
+    //Flip if: About to install programs (will fill MU)
+    var programsInGrip = 0;
+    for (var i = 0; i < runner.grip.length; i++) {
+      if (CheckCardType(runner.grip[i], ["program"])) {
+        programsInGrip++;
+      }
+    }
+    if (programsInGrip >= 2 && Credits(runner) < 8) return true;
+    
+    //Otherwise, stay on Side B (card draw is valuable)
+    return false;
+  },
+};
+
 cardSet[35027] = {
   title: "GAMEDRAGON™ Pro",
   imageFile: "35027.png",
