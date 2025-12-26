@@ -763,7 +763,7 @@ function LoadDecks() {
     RunnerTestField(1017, //identity
       [30032, 30032, 35009, 35008], //heapCards
       [35015, 35022, 35022, 30033, 35014, 1039, 35030, 35005, 35016, 35034, 35004, 35010, 35007, 35009, 35008, 35029, 35025], //stackCards
-      [1030, 1030, 1030, 1030, 1030, 1030, 1030], //gripCards
+      [1030, 1030, 1030, 1030, 1030, 1040, 1035], //gripCards
       [35028, 30015, 35009, 35020], //installed 
       [], //stolen
       cardBackTexturesRunner,glowTextures,strengthTextures

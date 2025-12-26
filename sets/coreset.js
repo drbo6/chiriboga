@@ -848,14 +848,64 @@ coreSet[1033] = {
 //   },
 // };
 // DUPLICATE: System Update 2021 has Diesel (card 31027)
-// coreSet[1035] = {
-//   title: "Modded",
-//   imageFile: "01035.png",
-//   player: runner,
-//   cardType: "event",
-//   playCost: 0,
-// };
-// TODO: Missing implementation - should allow installing hardware/program with 3 credit discount
+coreSet[1035] = {
+  title: "Modded",
+  imageFile: "01035.png",
+  player: runner,
+  faction: "Shaper",
+  influence: 2,
+  cardType: "event",
+  playCost: 0,
+  usingThisToInstallCard: null,
+  modifyInstallCost: {
+    Resolve: function (card) {
+      if (!this.usingThisToInstallCard) {
+        // Pre-enumerate discount check (only for cards in grip)
+        if (CheckCardType(card, ["program", "hardware"]) && runner.grip.includes(card)) {
+          return -3;
+        }
+      } else if (card == this.usingThisToInstallCard) {
+        // Actual install discount
+        return -3;
+      }
+      return 0;
+    },
+  },
+  Enumerate: function () {
+    // Pre-simulate the discount
+    this.modifyInstallCost.availableWhenInactive = true;
+    var allInstallChoices = ChoicesHandInstall(runner);
+    this.modifyInstallCost.availableWhenInactive = false;
+    
+    // Filter to programs and hardware only
+    var choices = [];
+    for (var i = 0; i < allInstallChoices.length; i++) {
+      if (CheckCardType(allInstallChoices[i].card, ["program", "hardware"])) {
+        choices.push(allInstallChoices[i]);
+      }
+    }
+    return choices;
+  },
+  Resolve: function (params) {
+    this.modifyInstallCost.availableWhenInactive = true;
+    this.usingThisToInstallCard = params.card;
+    Install(
+      params.card,
+      params.host,
+      false,
+      null,
+      true,
+      null,
+      this,
+      null,
+      function () {
+        // On complete callback
+        this.modifyInstallCost.availableWhenInactive = false;
+        this.usingThisToInstallCard = null;
+      }
+    );
+  },
+};
 coreSet[1038] = {
   title: "Akamatsu Mem Chip",
   imageFile: "01038.png",
@@ -977,21 +1027,27 @@ coreSet[1039] = {
     availableWhenInactive: false, // toggled dynamically during chain install
   },
 };
-// coreSet[1040] = {
-//   title: "The Personal Touch",
-//   imageFile: "01040.png",
-//   player: runner,
-//   cardType: "hardware",
-//   subTypes: ["Mod"],
-//   installCost: 2,
-//   installOnlyOn: function (card) {
-//     if (!CheckCardType(card, ["program"])) return false;
-//     if (!CheckSubType(card, "Icebreaker")) return false;
-//     return true;
-//   },
-//   //TODO Host icebreaker has +1 strength
-// };
-// TODO: Missing modifyStrength implementation to give hosted icebreaker +1 strength
+coreSet[1040] = {
+  title: "The Personal Touch",
+  imageFile: "01040.png",
+  player: runner,
+  faction: "Shaper",
+  influence: 1,
+  cardType: "hardware",
+  subTypes: ["Mod"],
+  installCost: 2,
+  installOnlyOn: function (card) {
+    if (!CheckCardType(card, ["program"])) return false;
+    if (!CheckSubType(card, "Icebreaker")) return false;
+    return true;
+  },
+  modifyStrength: {
+    Resolve: function (card) {
+      if (card == this.host) return 1;
+      return 0; // no modification to strength
+    },
+  },
+};
 coreSet[1041] = {
   title: "The Toolbox",
   imageFile: "01041.png",
