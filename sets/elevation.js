@@ -1849,24 +1849,26 @@ cardSet[35022] = {
     Resolve: function () {
       if (CheckCounters(this, "credits", 1)) {
         TakeCredits(runner, this, 1);
-        //When it is empty, trash it
+        //When it is empty, trash it (use MoveCard to avoid phase change in automatic trigger)
         if (!CheckCounters(this, "credits", 1)) {
-          Trash(this, false);
+          Log(GetTitle(this, true) + " trashed (empty)");
+          MoveCard(this, runner.heap);
+          this.faceUp = true;
         }
       }
     },
     automatic: true,
   },
   //When it is empty, trash it.
-  //This catches credits being spent via canUseCredits (SpendCredits doesn't fire triggers)
-  automaticOnAnyChange: {
-    Resolve: function() {
-      //Check if empty and still installed (avoid double-trash)
-      if (!CheckInstalled(this)) return;
-      if (typeof this.credits === 'undefined' || this.credits <= 0) {
-        Trash(this, false);
-      }
-    },
+  //This fires when credits are spent via canUseCredits
+  onCreditsSpent: function(amount) {
+    //Check if empty and still installed
+    if (!CheckInstalled(this)) return;
+    if (typeof this.credits === 'undefined' || this.credits <= 0) {
+      Log(GetTitle(this, true) + " trashed (empty)");
+      MoveCard(this, runner.heap);
+      this.faceUp = true;
+    }
   },
   AIEconomyInstall: function() {
     //Good drip economy, especially if you have Connection/Job resources to install

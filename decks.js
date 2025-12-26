@@ -751,7 +751,7 @@ function LoadDecks() {
   // // ----------------------------------------------------------------------------
   // // You can enable the debug menu at the top of init.js
 
-  if (false) { // Use this to easily disable everything below
+  if (true) { // Use this to easily disable everything below
 
     // debugging = true; //set true to log extra details and pause execution on error
     // viewAllFronts = true; //set true to see all card fronts (for testing)
@@ -760,26 +760,26 @@ function LoadDecks() {
     // SET UP THE MAIN STATES FOR THE RUNNER AND CORP
     // ----------------------------------------------
 
-    RunnerTestField(1017, //identity
-      [30032, 30032, 35009, 35008], //heapCards
-      [35015, 35022, 35022, 30033, 35014, 1039, 35030, 35005, 35016, 35034, 35004, 35010, 35007, 35009, 35008, 35029, 35025], //stackCards
-      [1030, 1030, 1030, 1030, 1030, 1040, 1035], //gripCards
-      [35028, 30015, 35009, 35020], //installed 
-      [], //stolen
-      cardBackTexturesRunner,glowTextures,strengthTextures
-    );
+    // RunnerTestField(1017, //identity
+    //   [30032, 30032, 35009, 35008], //heapCards
+    //   [35015, 35022, 35022, 30033, 35014, 1039, 35030, 35005, 35016, 35034, 35004, 35010, 35007, 35009, 35008, 35029, 35025], //stackCards
+    //   [1030, 1030, 1030, 1030, 1030, 1040, 1035], //gripCards
+    //   [35028, 30015, 35009, 35020], //installed 
+    //   [], //stolen
+    //   cardBackTexturesRunner,glowTextures,strengthTextures
+    // );
 
-    CorpTestField(35036, //identity
-      [30037, 30047,30073,35075,30074], //archivesCards
-      [30073,30072,30047,30073,30073,30039,30039,30039,30039,30039,30039,30039,30039,30039,30039,30039,30039,30039,30039,30039,35044,35044,35044,35045], //rndCards
-      [35072,35040,35082,35037], //hqCards
-      [], //archivesInstalled
-      [35041], //rndInstalled
-      [35042], //hqInstalled
-      [[30068,30072,30072,35075],[30068,35042],[30068, 35053],[30068, 35053,35079],[30068]], //remotes (array of arrays)
-      [35037], //scored
-      cardBackTexturesCorp,glowTextures,strengthTextures
-    );
+    // CorpTestField(35036, //identity
+    //   [30037, 30047,30073,35075,30074], //archivesCards
+    //   [30073,30072,30047,30073,30073,30039,30039,30039,30039,30039,30039,30039,30039,30039,30039,30039,30039,30039,30039,30039,35044,35044,35044,35045], //rndCards
+    //   [35072,35040,35082,35037], //hqCards
+    //   [], //archivesInstalled
+    //   [35041], //rndInstalled
+    //   [35042], //hqInstalled
+    //   [[30068,30072,30072,35075],[30068,35042],[30068, 35053],[30068, 35053,35079],[30068]], //remotes (array of arrays)
+    //   [35037], //scored
+    //   cardBackTexturesCorp,glowTextures,strengthTextures
+    // );
 
     // // REZ ICE
     // // -------
@@ -787,7 +787,7 @@ function LoadDecks() {
     // corp.archives.ice[0].rezzed=true;
     // corp.RnD.ice[0].rezzed=true;
     // corp.HQ.ice[0].rezzed=true;
-    corp.remoteServers[0].ice[0].rezzed=true;
+    // corp.remoteServers[0].ice[0].rezzed=true;
     // corp.remoteServers[0].ice[1].rezzed=true;
     // corp.remoteServers[0].ice[2].rezzed=true;
     // corp.remoteServers[1].ice[0].rezzed=true;
@@ -801,19 +801,19 @@ function LoadDecks() {
     // // ----------------
 
     // corp.remoteServers[0].root[0].advancement=5;
-    corp.remoteServers[1].root[0].advancement=3;
+    // corp.remoteServers[1].root[0].advancement=3;
     
     // // GIVE EVERYONE SOME CREDITS TO START WITH
     // // ----------------------------------------
 
-    GainCredits(runner,25);
-    GainCredits(corp,50);
+    // GainCredits(runner,25);
+    // GainCredits(corp,50);
     
     // // OTHER STUFF
     // // -----------
 
     // ChangePhase(phases.runnerEndOfTurn);
-    AddTags(3);
+    // AddTags(3);
     // runner.clickTracker = 0;  
     // runner.rig.resources[0].power = 4;
     // corp.clickTracker = 6;
@@ -832,7 +832,7 @@ function LoadDecks() {
 
     // // SET THE PHASE TO START OF RUNNER TURN
     // // -------------------------------------
-    ChangePhase(phases.runnerStartResponse); // Runner starts turn
+    // ChangePhase(phases.runnerStartResponse); // Runner starts turn
     // ChangePhase(phases.corpStartDraw);    
   
     // // TO FORCE THE AI TO PLAY CARDS / MAKE DECISIONS, set preferred property on runner.AI or corp.AI
@@ -845,6 +845,41 @@ function LoadDecks() {
     //     chooseServer: corp.remoteServers[0]
     //   }
     // }
+
+    RunnerTestField(35023, [30030,30007,30030,30027,35022,35034,35026], [30007,35031,30018,30020,35028,35033,30032,35027,35028,35033,35034,35031,30026,35030,35004,35032,35030,30030,35026,30020,35026,30027,30032,35034,30007,30027,30032,35025,30020], [30022,35025], [35033,35022,30018,30022,30025,35031,35029], [31062], cardBackTexturesRunner,glowTextures,strengthTextures);
+CorpTestField(31060, [30075,30056,30056,30040], [31081,31065,31048,30053,30073,30053,31062,31043,31069,30067,31067,30073,30038,31080,31080,30068,31063,31063,31042,30067,31080,30073,31042,30067,30075,31069,30053,30040,30075,31066], [30068,31069,30056,31065,31062], [], [31043], [31043], [[31081,31067],[31042,31065]], [30052,31061,31061], cardBackTexturesCorp,glowTextures,strengthTextures);
+runner.scoreArea[0].rezzed=false;
+runner.heap[1].host=null;
+runner.heap[3].host=null;
+runner.heap[4].host=null;
+runner.heap[5].host=null;
+runner.rig.resources[1].credits=2;
+runner.rig.resources[2].credits=9;
+runner.rig.programs[1].power=2;
+runner.rig.programs[2].credits=2;
+corp.scoreArea[0].faceUp=true;
+corp.scoreArea[0].AITurnsInstalled=2;
+corp.scoreArea[1].faceUp=true;
+corp.scoreArea[1].AITurnsInstalled=2;
+corp.scoreArea[2].faceUp=true;
+corp.scoreArea[2].AITurnsInstalled=2;
+corp.archives.cards[0].faceUp=true;
+corp.archives.cards[1].faceUp=true;
+corp.archives.cards[2].faceUp=true;
+corp.archives.cards[3].faceUp=true;
+corp.archives.cards[3].cardsInstalledThisTurn=[];
+corp.archives.cards[3].AIPreferredTarget=corp.scoreArea[0];
+corp.RnD.ice[0].rezzed=true;
+corp.RnD.cards[18].host=null;
+corp.RnD.cards[27].cardsInstalledThisTurn=[];
+corp.remoteServers[0].ice[1].rezzed=true;
+corp.remoteServers[1].root[0].rezzed=true;
+corp.remoteServers[1].root[0].credits=6;
+corp.remoteServers[1].root[0].AITurnsInstalled=3;
+corp.remoteServers[1].root[0].host=null;
+corp.archives.AISuccessfulRuns=1;
+corp.HQ.AISuccessfulRuns=2;
+
   
   }
 

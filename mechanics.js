@@ -955,6 +955,7 @@ function SpendCredits(
   if (num > 0) {
     var oldNum = num;
     var activeCards = ActiveCards(player);
+    var cardsSpentFrom = []; //track cards we spent from for callbacks
     for (var i = 0; i < activeCards.length; i++) {
       if (typeof activeCards[i].credits !== "undefined") {
         if (typeof activeCards[i].canUseCredits === "function") {
@@ -976,11 +977,22 @@ function SpendCredits(
                   " credits from " +
                   GetTitle(activeCards[i], true)
               );
+            //track this card for callback
+            if (spendCred_card > 0) {
+              cardsSpentFrom.push({ card: activeCards[i], amount: spendCred_card });
+            }
           }
         }
       }
     }
     if (num != oldNum) UpdateCounters();
+    //fire onCreditsSpent callbacks for cards we spent from (e.g., for "when empty, trash it")
+    for (var i = 0; i < cardsSpentFrom.length; i++) {
+      var cardWithCredits = cardsSpentFrom[i].card;
+      if (typeof cardWithCredits.onCreditsSpent === "function") {
+        cardWithCredits.onCreditsSpent.call(cardWithCredits, cardsSpentFrom[i].amount);
+      }
+    }
   }
   //lastly, credit pool
   if (num > 0) {
