@@ -1137,26 +1137,33 @@ var CardRenderer = {
         if (this.zoomed && (this.faceUp || this.canView)) {
           scalingratio = fieldZoom;
 		  //load high-res version, if not already loaded/loading
-		  if (this.hiresTexture) {
-			  this.frontTexture = this.hiresTexture;
-		  }
-      else {
-        const imgaddr = "images/hires/"+ChangeImageFileToJPG(this.card.imageFile);
-			  if (!this.app.loadingHiresTextures) {
-				  this.app.loadingHiresTextures = {};
-				  this.app.loadedHiresTextures = {};
-			  }
-			  if (!this.app.loadingHiresTextures[imgaddr]) {
-				  this.app.loadingHiresTextures[imgaddr] = PIXI.BaseTexture.from(imgaddr);
-				  this.app.loadingHiresTextures[imgaddr].resolution = 2;
-				  this.app.loadingHiresTextures[imgaddr].once('loaded', () => {
-					this.app.loadedHiresTextures[imgaddr] = new PIXI.Texture(this.app.loadingHiresTextures[imgaddr]);
-				  });
-			  }
-			  if (this.app.loadedHiresTextures[imgaddr]) {
-				  this.hiresTexture = this.app.loadedHiresTextures[imgaddr];
+		  // Respect config flag: enableHiresFallback (defaults to true)
+		  if (typeof gauntletConfig === 'undefined' || gauntletConfig.enableHiresFallback) {
+			  if (this.hiresTexture) {
 				  this.frontTexture = this.hiresTexture;
 			  }
+			  else {
+				  const imgaddr = "images/hires/"+ChangeImageFileToJPG(this.card.imageFile);
+				  if (!this.app.loadingHiresTextures) {
+					  this.app.loadingHiresTextures = {};
+					  this.app.loadedHiresTextures = {};
+				  }
+				  if (!this.app.loadingHiresTextures[imgaddr]) {
+					  this.app.loadingHiresTextures[imgaddr] = PIXI.BaseTexture.from(imgaddr);
+					  this.app.loadingHiresTextures[imgaddr].resolution = 2;
+					  this.app.loadingHiresTextures[imgaddr].once('loaded', () => {
+						this.app.loadedHiresTextures[imgaddr] = new PIXI.Texture(this.app.loadingHiresTextures[imgaddr]);
+					  });
+				  }
+				  if (this.app.loadedHiresTextures[imgaddr]) {
+					  this.hiresTexture = this.app.loadedHiresTextures[imgaddr];
+					  this.frontTexture = this.hiresTexture;
+				  }
+			  }
+		  }
+		  else {
+			  // configured to disable hires fallback; use low-res image
+			  this.frontTexture = this.loresTexture;
 		  }
 		}
 		else {
