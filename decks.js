@@ -751,7 +751,7 @@ function LoadDecks() {
   // // ----------------------------------------------------------------------------
   // // You can enable the debug menu at the top of init.js
 
-  if (false) { // Use this to easily disable everything below
+  if (true) { // Use this to easily disable everything below
 
     // debugging = true; //set true to log extra details and pause execution on error
     // viewAllFronts = true; //set true to see all card fronts (for testing)
@@ -760,10 +760,10 @@ function LoadDecks() {
     // SET UP THE MAIN STATES FOR THE RUNNER AND CORP
     // ----------------------------------------------
 
-    RunnerTestField(35024, //identity
+    RunnerTestField(1017, //identity
       [30032, 30032, 35009, 35008], //heapCards
       [35015, 35022, 35022, 30033, 35014, 1039, 35030, 35005, 35016, 35034, 35004, 35010, 35007, 35009, 35008, 35029, 35025], //stackCards
-      [35021, 35033, 35025, 1039, 35009, 35020], //gripCards
+      [1030, 1030, 1030, 1030, 1030, 1030, 1030], //gripCards
       [35028, 30015, 35009, 35020], //installed 
       [], //stolen
       cardBackTexturesRunner,glowTextures,strengthTextures
@@ -776,7 +776,7 @@ function LoadDecks() {
       [], //archivesInstalled
       [35041], //rndInstalled
       [35042], //hqInstalled
-      [[35038,30072,30072,35075],[35038,35042],[30037, 35053],[30037, 35053,35079]], //remotes (array of arrays)
+      [[30068,30072,30072,35075],[30068,35042],[30068, 35053],[30068, 35053,35079],[30068]], //remotes (array of arrays)
       [35037], //scored
       cardBackTexturesCorp,glowTextures,strengthTextures
     );
@@ -801,19 +801,19 @@ function LoadDecks() {
     // // ----------------
 
     // corp.remoteServers[0].root[0].advancement=5;
-    // corp.remoteServers[1].root[0].advancement=2;
+    corp.remoteServers[1].root[0].advancement=3;
     
     // // GIVE EVERYONE SOME CREDITS TO START WITH
     // // ----------------------------------------
 
     GainCredits(runner,25);
-    // GainCredits(corp,50);
+    GainCredits(corp,50);
     
     // // OTHER STUFF
     // // -----------
 
     // ChangePhase(phases.runnerEndOfTurn);
-    // AddTags(1);
+    AddTags(3);
     // runner.clickTracker = 0;  
     // runner.rig.resources[0].power = 4;
     // corp.clickTracker = 6;

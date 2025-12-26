@@ -222,7 +222,7 @@ coreSet[1006] = {
 //     automatic: true,
 //   },
 // };
-// DUPLICATE: System Update 2021 has Corroder (card 31005)
+// DUPLICATE: System Update 2021 has Corroder (card 31006)
 coreSet[1008] = {
   title: "Datasucker",
   imageFile: "01008.png",
@@ -422,7 +422,7 @@ coreSet[1010] = {
 //     },
 //   ],
 // };
-// DUPLICATE: System Update 2021 has Mimic (card 31007)
+// DUPLICATE: System Update 2021 has Mimic (card 31008)
 coreSet[1012] = {
   title: "Parasite",
   imageFile: "01012.png",
@@ -610,7 +610,7 @@ coreSet[1014] = {
 //     },
 //   },
 // };
-// DUPLICATE: System Update 2021 has Ice Carver (card 31008)
+// DUPLICATE: System Update 2021 has Ice Carver (card 31009)
 coreSet[1016] = {
   title: "Wyldside",
   imageFile: "01016.png",
@@ -627,13 +627,41 @@ coreSet[1016] = {
     automatic: true, //for usability, this is not strict implementation
   },
 };
-// coreSet[1017] = {
-//   title: "Gabriel Santiago: Consummate Professional",
-//   imageFile: "01017.png",
-//   player: runner,
-//   cardType: "identity",
-// };  
-// TODO: Missing deckSize, influenceLimit, and identity ability (gain 2 credits on first successful HQ run each turn)
+var gabrielSantiagoMadeSuccessfulRunOnHQThisTurn = false;
+coreSet[1017] = {
+  title: "Gabriel Santiago: Consummate Professional",
+  imageFile: "01017.png",
+  player: runner,
+  faction: "Criminal",
+  link: 0,
+  cardType: "identity",
+  deckSize: 45,
+  influenceLimit: 15,
+  responseOnRunnerTurnBegins: {
+    Resolve: function () {
+      gabrielSantiagoMadeSuccessfulRunOnHQThisTurn = false;
+    },
+    automatic: true,
+  },
+  responseOnCorpTurnBegins: {
+    Resolve: function () {
+      gabrielSantiagoMadeSuccessfulRunOnHQThisTurn = false;
+    },
+    automatic: true,
+  },
+  responseOnRunSuccessful: {
+    Enumerate: function () {
+      if (attackedServer != corp.HQ) return [];
+      if (gabrielSantiagoMadeSuccessfulRunOnHQThisTurn) return [];
+      return [{}];
+    },
+    Resolve: function () {
+      gabrielSantiagoMadeSuccessfulRunOnHQThisTurn = true;
+      GainCredits(runner, 2, "Gabriel Santiago");
+    },
+    // NOT automatic - we need Enumerate to be checked!
+  },
+};
 // coreSet[1020] = {
 //   title: "Forged Activation Orders",
 //   imageFile: "01020.png",
@@ -691,22 +719,47 @@ coreSet[1016] = {
 //   },
 //   text: "Choose an unrezzed piece of ice",
 // };
-// DUPLICATE: System Update 2021 has Forged Activation Orders (card 31014)
-// coreSet[1030] = {
-//   title: "Crash Space",
-//   imageFile: "01030.png",
-//   player: runner,
-//   cardType: "resource",
-//   subTypes: ["Location"],
-//   installCost: 2,
-//   recurringCredits: 2,
-//   canUseCredits: function (doing, card) {
-//     if (doing == "removing tags") return true;
-//     return false;
-//   },
-//   //TODO Trash: prevent up to 3 meat damage.
-// };
-// TODO: Missing trash ability to prevent up to 3 meat damage
+// DUPLICATE: System Update 2021 has Forged Activation Orders (card 31017)
+coreSet[1030] = {
+  title: "Crash Space",
+  imageFile: "01030.png",
+  player: runner,
+  faction: "Criminal",
+  influence: 1,
+  cardType: "resource",
+  subTypes: ["Location"],
+  installCost: 2,
+  recurringCredits: 2,
+  canUseCredits: function (doing, card) {
+    if (doing == "removing tags") return true;
+    return false;
+  },
+  responsePreventableDamage: {
+    Enumerate: function () {
+      if (intended.damageType != "meat") return [];
+      if (intended.damage <= 0) return [];
+      
+      var maxPrevent = Math.min(3, intended.damage);
+      var choices = [];
+      
+      // Create separate options for preventing 1, 2, or 3 damage
+      for (var i = 1; i <= maxPrevent; i++) {
+        choices.push({
+          prevent: i,
+          label: "Trash: Prevent " + i + " meat damage"
+        });
+      }
+      
+      return choices;
+    },
+    Resolve: function (params) {
+      Trash(this, false, function(cardsTrashed) {
+        intended.damage -= params.prevent;
+        Log(params.prevent + " meat damage prevented");
+      }, this);
+    },
+  },
+};
 coreSet[1032] = {
   title: "Decoy",
   imageFile: "01032.png",
@@ -1185,7 +1238,7 @@ coreSet[1049] = {
 //     GainCredits(runner, 9);
 //   },
 // };
-// DUPLICATE: System Gateway has Sure Gamble (card 30033)
+// DUPLICATE: System Gateway has Sure Gamble (card 30030)
 coreSet[1051] = {
   title: "Crypsis",
   imageFile: "01051.png",
@@ -1576,7 +1629,7 @@ coreSet[1063] = {
 //     },
 //   ],
 // };
-// DUPLICATE: System Update 2021 has Rototurret (card 31055)
+// DUPLICATE: System Update 2021 has Rototurret (card 31046)
 // coreSet[1065] = {
 //   title: "Corporate Troubleshooter",
 //   imageFile: "01065.png",
@@ -1604,7 +1657,7 @@ coreSet[1063] = {
 //     },
 //   },
 // };
-// DUPLICATE: System Update 2021 has Jinteki: Personal Evolution (card 31058)
+// DUPLICATE: System Update 2021 has Jinteki: Personal Evolution (card 31050)
 // coreSet[1068] = {
 //   title: "Nisei MK II",
 //   imageFile: "01068.png",
@@ -1635,7 +1688,7 @@ coreSet[1063] = {
 //     },
 //   ],
 // };
-// DUPLICATE: System Update 2021 has Nisei MK II (card 31060)
+// DUPLICATE: System Update 2021 has Nisei MK II (card 31052)
 coreSet[1069] = {
   title: "Project Junebug",
   imageFile: "01069.png",
@@ -1741,7 +1794,7 @@ coreSet[1069] = {
 //     },
 //   },
 // };
-// DUPLICATE: System Update 2021 has Snare! (card 31062)
+// DUPLICATE: System Update 2021 has Snare! (card 31054)
 
 coreSet[1071] = {
   title: "Zaibatsu Loyalty",
@@ -2230,7 +2283,7 @@ coreSet[1089] = {
 //     },
 //   },
 // };
-// DUPLICATE: System Update 2021 has SanSan City Grid (card 31082)
+// DUPLICATE: System Update 2021 has SanSan City Grid (card 31069)
 // coreSet[1094] = {
 //   title: "Hostile Takeover",
 //   imageFile: "01094.png",
@@ -2248,7 +2301,7 @@ coreSet[1089] = {
 //     },
 //   },
 // };
-// DUPLICATE: System Update 2021 has Hostile Takeover (card 31084)
+// DUPLICATE: System Update 2021 has Hostile Takeover (card 31071)
 coreSet[1107] = {
   title: "Private Security Force",
   imageFile: "01107.png",
@@ -2314,7 +2367,7 @@ coreSet[1108] = {
 //   },
 //   text: "Gain 1 credit.",
 // };
-// DUPLICATE: System Update 2021 has PAD Campaign (card 31095)
+// DUPLICATE: System Update 2021 has PAD Campaign (card 31080)
 // coreSet[1110] = {
 //   title: "Hedge Fund",
 //   imageFile: "01110.png",
@@ -2326,7 +2379,7 @@ coreSet[1108] = {
 //     GainCredits(corp, 9);
 //   },
 // };
-// DUPLICATE: System Gateway has Hedge Fund (card 30074)
+// DUPLICATE: System Gateway has Hedge Fund (card 30075)
 // coreSet[1111] = {
 //   title: "Enigma",
 //   imageFile: "01111.png",
@@ -2350,7 +2403,7 @@ coreSet[1108] = {
 //     },
 //   ],
 // };
-// DUPLICATE: System Update 2021 has Enigma (card 31096)
+// DUPLICATE: System Update 2021 has Enigma (card 31081)
 coreSet[1112] = {
   title: "Hunter",
   imageFile: "01112.png",
