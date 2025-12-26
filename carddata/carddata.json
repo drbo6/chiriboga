@@ -11468,7 +11468,7 @@
          "side_code":"runner",
          "stripped_text":"Whenever you make a successful run, if your  mu is full, you may flip this identity and gain 1 credit. Flip side: Whenever you make a successful run, if you have at least 1 unused  mu, you may flip this identity and draw 1 card.",
          "stripped_title":"Dewi Subrotoputri: Pedagogical Dhalang",
-         "text":"Whenever you make a successful run, if your [mu] is full, you may flip this identity and gain 1[credit].\nFlip side:\nWhenever you make a successful run, if you have at least 1 unused [mu], you may flip this identity and draw 1 card.",
+         "text":"Whenever you make a successful run, if your [mu] is full, you may flip this identity and gain 1[credit].\n\nFlip side:\nWhenever you make a successful run, if you have at least 1 unused [mu], you may flip this identity and draw 1 card.",
          "title":"Dewi Subrotoputri: Pedagogical Dhalang",
          "type_code":"identity",
          "uniqueness":false
