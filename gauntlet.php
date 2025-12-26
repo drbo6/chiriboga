@@ -30,6 +30,27 @@
 		</script>
 
 		<script>
+		// Helper function to get image path with hi-res support if enabled
+		function GetImagePath(imageFile) {
+			var useHiRes = false;
+			try {
+				var savedJson = localStorage.getItem('chiriboga-settings');
+				if (savedJson) {
+					var savedSettings = JSON.parse(savedJson);
+					if (savedSettings && typeof savedSettings.enableHiRes === 'boolean') {
+						useHiRes = savedSettings.enableHiRes;
+					} else if (typeof gauntletConfig !== 'undefined' && typeof gauntletConfig.enableHiRes === 'boolean') {
+						useHiRes = gauntletConfig.enableHiRes;
+					}
+				} else if (typeof gauntletConfig !== 'undefined' && typeof gauntletConfig.enableHiRes === 'boolean') {
+					useHiRes = gauntletConfig.enableHiRes;
+				}
+			} catch (e) { /* ignore JSON parse/localStorage errors */ }
+			
+			var basePath = useHiRes ? 'images/hires/' : 'images/';
+			return basePath + ChangeImageFileToJPG(imageFile);
+		}
+
 		// Restore opponent accordion interactions
 		(function(){
 			// Lightbox for opponent deck list
@@ -48,7 +69,7 @@
 				var oppJSON;
 				try { oppJSON = JSON.parse(LZString.decompressFromEncodedURIComponent(compressed)); } catch(e) {}
 				if (!oppJSON || !oppJSON.identity || !Array.isArray(oppJSON.cards)) return;
-				var identImg = 'images/'+ChangeImageFileToJPG(cardSet[oppJSON.identity].imageFile);
+				var identImg = GetImagePath(cardSet[oppJSON.identity].imageFile);
 				$('#lightbox-img').attr('src', identImg);
 				var counts = {};
 				for (var i=0;i<oppJSON.cards.length;i++) counts[oppJSON.cards[i]] = (counts[oppJSON.cards[i]]||0)+1;
@@ -108,6 +129,27 @@
 			// Function to register a precon deck
 			function registerPrecon(deck) {
 				preconDecks.push(deck);
+			}
+
+			// Helper function to get image path with hi-res support if enabled
+			function GetImagePath(imageFile) {
+				var useHiRes = false;
+				try {
+					var savedJson = localStorage.getItem('chiriboga-settings');
+					if (savedJson) {
+						var savedSettings = JSON.parse(savedJson);
+						if (savedSettings && typeof savedSettings.enableHiRes === 'boolean') {
+							useHiRes = savedSettings.enableHiRes;
+						} else if (typeof gauntletConfig !== 'undefined' && typeof gauntletConfig.enableHiRes === 'boolean') {
+							useHiRes = gauntletConfig.enableHiRes;
+						}
+					} else if (typeof gauntletConfig !== 'undefined' && typeof gauntletConfig.enableHiRes === 'boolean') {
+						useHiRes = gauntletConfig.enableHiRes;
+					}
+				} catch (e) { /* ignore JSON parse/localStorage errors */ }
+				
+				var basePath = useHiRes ? 'images/hires/' : 'images/';
+				return basePath + ChangeImageFileToJPG(imageFile);
 			}
 
 			// Function to show gauntlet welcome modal
@@ -591,7 +633,7 @@
 					var cardId = sortedCardsGenerated[i];
 					shopDisplayCardIds.push(cardId);
 					var cardTitle = cardSet[cardId].title || 'Unknown Card';
-					var imgSrc = 'images/' + ChangeImageFileToJPG(cardSet[cardId].imageFile);
+					var imgSrc = GetImagePath(cardSet[cardId].imageFile);
 					
 					listHtml += '<div style="position: relative; text-align: center; cursor: pointer;" onclick="ShowLightbox(' + cardId + ');">';
 					listHtml += '<img src="' + imgSrc + '" alt="' + cardTitle + '" style="width: 120px; height: auto; border: 2px solid var(--glow-green); border-radius: 4px; transition: transform 0.2s; opacity: 0.9;" onmouseover="this.style.transform=\'scale(1.05)\'; this.style.opacity=\'1\';" onmouseout="this.style.transform=\'scale(1)\'; this.style.opacity=\'0.9\';">';
@@ -968,7 +1010,7 @@
 				var firstIdentity = $("#identityselect option:first").val();
 				if (firstIdentity && cardSet[firstIdentity]) {
 					json.identity = parseInt(firstIdentity);
-					$("#identity").prop("src", "images/" + ChangeImageFileToJPG(cardSet[firstIdentity].imageFile));
+					$("#identity").prop("src", GetImagePath(cardSet[firstIdentity].imageFile));
 				}
 			}
 			
@@ -1348,8 +1390,7 @@
 				pendingSellCardId = id;
 				pendingSellQuantity = 1; // Reset to default
 				var cardName = cardSet[id] ? cardSet[id].title : 'Unknown Card';
-				var imgSrc = 'images/' + ChangeImageFileToJPG(cardSet[id].imageFile);
-				var availableCount = gauntletCardCounts[id];
+			var imgSrc = GetImagePath(cardSet[id].imageFile);
 				
 				var modalHtml = '<div class="solo-menu" style="display: flex; flex-direction: column; align-items: center; max-width: 400px;">';
 				modalHtml += '<div class="solo-logo" style="width: 100%;">';
@@ -2050,8 +2091,7 @@
 				if (!cardSet[cardId]) return;
 				
 				var card = cardSet[cardId];
-				var imgSrc = 'images/' + ChangeImageFileToJPG(card.imageFile);
-				$('#lightbox-img').attr('src', imgSrc);
+			var imgSrc = GetImagePath(card.imageFile);
 				
 				// Find matching card in cardData by title
 				var cardInfo = null;
@@ -2141,6 +2181,8 @@
 				
 				// Track which card is shown in lightbox
 				window.currentLightboxCardId = cardId;
+				console.log('Setting card lightbox image to:', imgSrc);
+				$('#lightbox-img').attr('src', imgSrc);
 				$('#lightbox').addClass('active');
 			}
 			function HideLightbox() { $('#lightbox').removeClass('active'); }
@@ -2593,7 +2635,7 @@
 				);
 				$("#identity").prop(
 				  "src",
-				  "images/" + ChangeImageFileToJPG(cardSet[json.identity].imageFile)
+				  GetImagePath(cardSet[json.identity].imageFile)
 				);
 				for (var i = 0; i < json.cards.length; i++) {
 			      //increment count, add to playerCards if not present yet
@@ -2738,7 +2780,7 @@
 					json.identity = $("select#identityselect option:checked").val();
 					$("#identity").prop(
 						"src",
-						"images/" + ChangeImageFileToJPG(cardSet[json.identity].imageFile)
+						GetImagePath(cardSet[json.identity].imageFile)
 					);
 					// In gauntlet mode, keep deckPlayer as runner (don't allow side switching)
 					// The selected identity should always be a runner identity
@@ -3040,7 +3082,7 @@
 				
 				// Set identity
 				$('#identityselect').val(identityIdx);
-				$('#identity').prop('src', 'images/' + ChangeImageFileToJPG(cardSet[identityIdx].imageFile));
+				$('#identity').prop('src', GetImagePath(cardSet[identityIdx].imageFile));
 				json.identity = identityIdx;
 				deckPlayer = cardSet[identityIdx].player;
 				

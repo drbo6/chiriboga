@@ -48,10 +48,33 @@
 		</script>
 
 		<script>
+		// Helper function to get image path with hi-res support if enabled
+		function GetImagePath(imageFile) {
+			var useHiRes = false;
+			try {
+				var savedJson = localStorage.getItem('chiriboga-settings');
+				if (savedJson) {
+					var savedSettings = JSON.parse(savedJson);
+					if (savedSettings && typeof savedSettings.enableHiRes === 'boolean') {
+						useHiRes = savedSettings.enableHiRes;
+					} else if (typeof gauntletConfig !== 'undefined' && typeof gauntletConfig.enableHiRes === 'boolean') {
+						useHiRes = gauntletConfig.enableHiRes;
+					}
+				} else if (typeof gauntletConfig !== 'undefined' && typeof gauntletConfig.enableHiRes === 'boolean') {
+					useHiRes = gauntletConfig.enableHiRes;
+				}
+			} catch (e) { /* ignore JSON parse/localStorage errors */ }
+			
+			var basePath = useHiRes ? 'images/hires/' : 'images/';
+			return basePath + ChangeImageFileToJPG(imageFile);
+		}
+
 		// Restore opponent accordion interactions
 		(function(){
+			console.log('Opponent accordion IIFE starting');
 			// Lightbox for opponent deck list
 			function ShowOpponentDeckLightbox(){
+				console.log('ShowOpponentDeckLightbox called');
 				if (!opponentdeckstr) return;
 				var eqIdx = opponentdeckstr.indexOf('=');
 				if (eqIdx < 0) return;
@@ -66,7 +89,8 @@
 				var oppJSON;
 				try { oppJSON = JSON.parse(LZString.decompressFromEncodedURIComponent(compressed)); } catch(e) {}
 				if (!oppJSON || !oppJSON.identity || !Array.isArray(oppJSON.cards)) return;
-				var identImg = 'images/'+ChangeImageFileToJPG(cardSet[oppJSON.identity].imageFile);
+				var identImg = GetImagePath(cardSet[oppJSON.identity].imageFile);
+				console.log('Setting lightbox image to:', identImg);
 				$('#lightbox-img').attr('src', identImg);
 				var counts = {};
 				for (var i=0;i<oppJSON.cards.length;i++) counts[oppJSON.cards[i]] = (counts[oppJSON.cards[i]]||0)+1;
@@ -79,14 +103,22 @@
 				$('#lightbox-text').html(html);
 				$('#lightbox').addClass('active');
 			}
-			$(document).on('click','#opponentid .opponent-body', ShowOpponentDeckLightbox);
+			$(document).on('click','#opponentid .opponent-body', function(){
+				console.log('Click handler triggered on opponent-body');
+				ShowOpponentDeckLightbox();
+			});
 			$(document).on('click','#opponentid .opponent-header', function(){
+				console.log('Click handler triggered on opponent-header');
 				var box = $('#opponentid'); box.toggleClass('collapsed');
+			});
+			$(document).on('click','#opponentid', function(){
+				console.log('Click handler triggered on #opponentid');
 			});
 		})();
 		</script>
 		<?php
 		echo '<script src="utility.js?' . filemtime('utility.js') . '"></script>';
+		echo '<script src="config.js?' . filemtime('config.js') . '"></script>';
 		
 		// Load card sets
 		$sets = ["systemgateway","systemupdate2021","elevation"];
@@ -401,8 +433,7 @@
 				if (!cardSet[cardId]) return;
 				
 				var card = cardSet[cardId];
-				var imgSrc = 'images/' + ChangeImageFileToJPG(card.imageFile);
-				$('#lightbox-img').attr('src', imgSrc);
+			var imgSrc = GetImagePath(card.imageFile);
 				
 				// Find matching card in cardData by title
 				var cardInfo = null;
@@ -487,6 +518,8 @@
 				
 				// Track which card is shown in lightbox
 				window.currentLightboxCardId = cardId;
+				console.log('Setting card lightbox image to:', imgSrc);
+				$('#lightbox-img').attr('src', imgSrc);
 				$('#lightbox').addClass('active');
 			}
 			function HideLightbox() { $('#lightbox').removeClass('active'); }
@@ -1681,7 +1714,7 @@
 				
 				// Set identity
 				$('#identityselect').val(identityIdx);
-				$('#identity').prop('src', 'images/' + ChangeImageFileToJPG(cardSet[identityIdx].imageFile));
+				$('#identity').prop('src', GetImagePath(cardSet[identityIdx].imageFile));
 				json.identity = identityIdx;
 				deckPlayer = cardSet[identityIdx].player;
 				

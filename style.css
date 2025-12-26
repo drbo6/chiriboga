@@ -1697,7 +1697,7 @@ body::-webkit-scrollbar-track {
 	max-height: calc(95vh - 40px);
 }
 #lightbox-img { 
-	max-width: 450px; 
+	max-width: 270px; 
 	max-height: 100%; 
 	height: auto;
 	border-radius: 13px; 
