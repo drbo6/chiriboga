@@ -5220,3 +5220,187 @@ cardSet[35025] = {
     return 0;
   },
 };
+
+//Magdalene Keino-Chemutai: Cryptarchitect
+//Shaper Identity: Cyborg
+//Deck: 45, Influence: 15
+//Whenever you discard cards to reach your maximum hand size, you may install 1 program 
+//or piece of hardware from among those cards.
+cardSet[35024] = {
+  title: "Magdalene Keino-Chemutai: Cryptarchitect",
+  imageFile: "35024.png",
+  player: runner,
+  faction: "Shaper",
+  link: 0,
+  cardType: "identity",
+  deckSize: 45,
+  influenceLimit: 15,
+  subTypes: ["Cyborg"],
+  
+  //Whenever you discard cards to reach your maximum hand size, you may install 1 program 
+  //or piece of hardware from among those cards.
+  responseOnDiscardToMaxHandSize: {
+    Enumerate: function(discardedCards) {
+      //Filter for programs and hardware that are still in the heap
+      //(they should be, but just in case something moved them)
+      var installableCards = [];
+      for (var i = 0; i < discardedCards.length; i++) {
+        var card = discardedCards[i];
+        //Check if it's a program or hardware
+        if (!CheckCardType(card, ["program", "hardware"])) continue;
+        //Check if it's still in the heap
+        if (!runner.heap.includes(card)) continue;
+        //Check if we can afford to install it (MU for programs, credits, etc.)
+        //We'll build choices for each installable card
+        var installChoices = ChoicesCardInstall(card);
+        if (installChoices.length > 0) {
+          installableCards.push({
+            card: card,
+            label: "Install " + GetTitle(card, true) + " (" + InstallCost(card) + "[c])",
+            installChoices: installChoices
+          });
+        }
+      }
+      
+      if (installableCards.length === 0) return [];
+      
+      //Add decline option
+      installableCards.push({ skip: true, label: "Decline", button: "Decline" });
+      
+      //**AI code
+      if (runner.AI && installableCards.length > 1) {
+        var bestChoice = this.AIChooseBestInstall(installableCards, discardedCards);
+        if (bestChoice !== null) {
+          runner.AI.preferred = { title: this.title, option: installableCards[bestChoice] };
+        } else {
+          //Decline
+          runner.AI.preferred = { title: this.title, option: installableCards[installableCards.length - 1] };
+        }
+      }
+      
+      return installableCards;
+    },
+    Resolve: function(params) {
+      if (params.skip) return;
+      
+      var cardRef = this;
+      var cardToInstall = params.card;
+      
+      //Move the card from heap to grip temporarily for the install process
+      //This is needed because Install expects cards to be in a valid location
+      MoveCard(cardToInstall, runner.grip);
+      
+      //Bring the card sprite to the front so it's visible during install
+      //This fixes z-index issues when installing from heap
+      if (cardToInstall.renderer && cardToInstall.renderer.sprite && cardToInstall.renderer.sprite.parent) {
+        var parent = cardToInstall.renderer.sprite.parent;
+        parent.removeChild(cardToInstall.renderer.sprite);
+        parent.addChild(cardToInstall.renderer.sprite);
+      }
+      
+      //If there are multiple install choices (e.g., host options), let the player choose
+      if (params.installChoices && params.installChoices.length > 1) {
+        DecisionPhase(
+          runner,
+          params.installChoices,
+          function(choiceParams) {
+            Install(cardToInstall, choiceParams.host);
+          },
+          "Magdalene",
+          "Choose install destination",
+          cardRef,
+          "install"
+        );
+      } else {
+        //Single install option, just do it
+        var host = null;
+        if (params.installChoices && params.installChoices.length === 1) {
+          host = params.installChoices[0].host;
+        }
+        Install(cardToInstall, host);
+      }
+    },
+    text: "Install 1 program or hardware",
+  },
+  
+  //AI helper: Choose best card to install from discards
+  AIChooseBestInstall: function(installableCards, discardedCards) {
+    if (installableCards.length <= 1) return null; //Only Decline option
+    
+    var bestIndex = null;
+    var bestScore = -1;
+    
+    for (var i = 0; i < installableCards.length - 1; i++) { //-1 for Decline
+      var card = installableCards[i].card;
+      var cost = InstallCost(card);
+      var score = 0;
+      
+      //Prioritize by card type and value
+      if (CheckCardType(card, ["program"])) {
+        //Programs are generally higher priority
+        if (CheckSubType(card, "Icebreaker")) {
+          //Icebreakers are very valuable
+          score = 100;
+          //Extra value if we don't have this type of breaker installed
+          var breakerTypes = ["Fracter", "Decoder", "Killer"];
+          for (var j = 0; j < breakerTypes.length; j++) {
+            if (CheckSubType(card, breakerTypes[j])) {
+              var hasType = false;
+              var installedCards = InstalledCards(runner);
+              for (var k = 0; k < installedCards.length; k++) {
+                if (CheckSubType(installedCards[k], breakerTypes[j])) {
+                  hasType = true;
+                  break;
+                }
+              }
+              if (!hasType) score += 50;
+              break;
+            }
+          }
+        } else {
+          //Other programs
+          score = 50;
+        }
+        
+        //Check MU availability
+        var memoryCost = card.memoryCost || 0;
+        var availableMU = MemoryUnits() - InstalledMemoryCost();
+        if (memoryCost > availableMU) {
+          score = -10; //Can't install without trashing something
+        }
+      } else if (CheckCardType(card, ["hardware"])) {
+        if (CheckSubType(card, "Console")) {
+          //Console is valuable if we don't have one
+          var hasConsole = false;
+          var installedCards = InstalledCards(runner);
+          for (var j = 0; j < installedCards.length; j++) {
+            if (CheckSubType(installedCards[j], "Console")) {
+              hasConsole = true;
+              break;
+            }
+          }
+          score = hasConsole ? 5 : 80; //Low value if we already have a console
+        } else {
+          score = 40;
+        }
+      }
+      
+      //Adjust by cost (higher cost cards are better value to get installed this way)
+      score += cost * 2;
+      
+      //Check affordability
+      if (!CheckCredits(runner, cost, "installing", card)) {
+        score = -20; //Can't afford
+      }
+      
+      if (score > bestScore) {
+        bestScore = score;
+        bestIndex = i;
+      }
+    }
+    
+    //Only return an index if the score is positive (worth installing)
+    if (bestScore > 0) return bestIndex;
+    return null;
+  },
+};

@@ -261,7 +261,13 @@ phaseTemplates.corpScorableResponse.Resolve.score = function (params) {
   Score(params.card);
 };
 //discard template
+//discardedToMaxHandSize tracks cards discarded during this discard phase (for triggers like Magdalene)
+var discardedToMaxHandSize = [];
 phaseTemplates.discardStart = {
+  Init: function() {
+    //reset tracking at start of discard phase
+    discardedToMaxHandSize = [];
+  },
   Enumerate: {
     n: function () {
       var discardDownTo = MaxHandSize(activePlayer);
@@ -287,9 +293,20 @@ phaseTemplates.discardStart = {
           return;
         }
       }
-      IncrementPhase();
+      //fire trigger if cards were discarded to max hand size (e.g. for Magdalene)
+      if (discardedToMaxHandSize.length > 0) {
+        var discardedCards = discardedToMaxHandSize.slice(); //copy array
+        discardedToMaxHandSize = []; //reset before trigger fires
+        TriggeredResponsePhase(activePlayer, "responseOnDiscardToMaxHandSize", [discardedCards], function() {
+          IncrementPhase();
+        }, "Discarded to Hand Size");
+      } else {
+        IncrementPhase();
+      }
     },
     discard: function (params) {
+      //track the discarded card for triggers
+      discardedToMaxHandSize.push(params.card);
       Discard(params.card);
     },
   },
@@ -2064,4 +2081,3 @@ function BinaryDecision(
   DecisionPhase(player, choices, decisionCallback, title, "", context); //there are buttons so no footer text
   return choices;
 }
-
