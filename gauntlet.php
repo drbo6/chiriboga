@@ -1338,55 +1338,60 @@
 				UpdateCardCountsUI();
 				Parse();
 			
-			// Reapply current sort and filters
-			SortCardsBySort();
-			ApplyTypeFilter();
-			pendingSellCardId = id;
-			pendingSellQuantity = 1; // Reset to default
-			var cardName = cardSet[id] ? cardSet[id].title : 'Unknown Card';
-			var imgSrc = 'images/' + ChangeImageFileToJPG(cardSet[id].imageFile);
-			var availableCount = gauntletCardCounts[id];
-			
-			var modalHtml = '<div class="solo-menu" style="display: flex; flex-direction: column; align-items: center; max-width: 400px;">';
-			modalHtml += '<div class="solo-logo" style="width: 100%;">';
-			modalHtml += '<h1 class="logo-text" style="color: var(--crt-red); text-shadow: 0 0 5px var(--crt-red), 0 0 15px var(--glow-red), 0 0 35px var(--glow-red-dark); font-size: 1.5em;">SELL CARD</h1>';
-			modalHtml += '</div>';
-			modalHtml += '<div style="text-align: center; margin: 10px 0;">';
-			modalHtml += '<img src="' + imgSrc + '" style="max-height: 200px; border-radius: 8px;" />';
-			modalHtml += '</div>';
-			modalHtml += '<div style="color: var(--crt-red); font-family: monospace; padding: 10px; text-align: center;">';
-			modalHtml += '<p style="font-size: 16px;"><strong>' + cardName + '</strong></p>';
-			modalHtml += '<p class="sell-modal-text">How many would you like to sell?</p>';
-			modalHtml += '</div>';
-			// Quantity stepper
-			modalHtml += '<div class="settings-stepper sell-modal-stepper">';
-			modalHtml += '<button type="button" class="stepper-btn" onclick="AdjustSellQuantity(-1);" id="sell-qty-minus">-</button>';
-			modalHtml += '<span class="stepper-value sell-modal-qty" id="sell-qty-value">1</span>';
-			modalHtml += '<button type="button" class="stepper-btn" onclick="AdjustSellQuantity(1);" id="sell-qty-plus"' + (availableCount <= 1 ? ' disabled' : '') + '>+</button>';
-			modalHtml += '</div>';
-			// Credit display
-			modalHtml += '<p class="sell-modal-credit">You will receive <span id="sell-credit-value" class="sell-modal-credit-value">1</span> <img src="images/nsg/NSG_CREDIT.svg" class="card-icon" alt="credit" style="filter: invert(1) brightness(0.5) sepia(1) saturate(5) hue-rotate(80deg);"></p>';
-			// Buttons
-			modalHtml += '<div style="display: flex; justify-content: center; gap: 20px; margin-top: 15px; width: 100%;">';
-			modalHtml += '<button class="button" onclick="CloseSellConfirmModal();">CANCEL</button>';
-			modalHtml += '<button class="button button-red" onclick="ConfirmSellCard();">SELL</button>';
-			modalHtml += '</div>';
-			modalHtml += '</div>';
-
-			var modal = document.getElementById('sell-confirm-modal');
-			if (!modal) {
-				modal = document.createElement('div');
-				modal.id = 'sell-confirm-modal';
-				modal.className = 'modal';
-				modal.style.display = 'flex';
-				modal.style.zIndex = '10000';
-				document.body.appendChild(modal);
+				// Reapply current sort and filters
+				SortCardsBySort();
+				ApplyTypeFilter();
+				UpdatePlayDeckButtonState();
 			}
-			
-			modal.innerHTML = modalHtml;
-			modal.style.display = 'flex';
-			UpdateSellQuantityButtons();
-		}
+
+			// Show confirmation modal for selling a card (separate from removing it from deck)
+			function ShowSellConfirmModal(id) {
+				pendingSellCardId = id;
+				pendingSellQuantity = 1; // Reset to default
+				var cardName = cardSet[id] ? cardSet[id].title : 'Unknown Card';
+				var imgSrc = 'images/' + ChangeImageFileToJPG(cardSet[id].imageFile);
+				var availableCount = gauntletCardCounts[id];
+				
+				var modalHtml = '<div class="solo-menu" style="display: flex; flex-direction: column; align-items: center; max-width: 400px;">';
+				modalHtml += '<div class="solo-logo" style="width: 100%;">';
+				modalHtml += '<h1 class="logo-text" style="color: var(--crt-red); text-shadow: 0 0 5px var(--crt-red), 0 0 15px var(--glow-red), 0 0 35px var(--glow-red-dark); font-size: 1.5em;">SELL CARD</h1>';
+				modalHtml += '</div>';
+				modalHtml += '<div style="text-align: center; margin: 10px 0;">';
+				modalHtml += '<img src="' + imgSrc + '" style="max-height: 200px; border-radius: 8px;" />';
+				modalHtml += '</div>';
+				modalHtml += '<div style="color: var(--crt-red); font-family: monospace; padding: 10px; text-align: center;">';
+				modalHtml += '<p style="font-size: 16px;"><strong>' + cardName + '</strong></p>';
+				modalHtml += '<p class="sell-modal-text">How many would you like to sell?</p>';
+				modalHtml += '</div>';
+				// Quantity stepper
+				modalHtml += '<div class="settings-stepper sell-modal-stepper">';
+				modalHtml += '<button type="button" class="stepper-btn" onclick="AdjustSellQuantity(-1);" id="sell-qty-minus">-</button>';
+				modalHtml += '<span class="stepper-value sell-modal-qty" id="sell-qty-value">1</span>';
+				modalHtml += '<button type="button" class="stepper-btn" onclick="AdjustSellQuantity(1);" id="sell-qty-plus"' + (availableCount <= 1 ? ' disabled' : '') + '>+</button>';
+				modalHtml += '</div>';
+				// Credit display
+				modalHtml += '<p class="sell-modal-credit">You will receive <span id="sell-credit-value" class="sell-modal-credit-value">1</span> <img src="images/nsg/NSG_CREDIT.svg" class="card-icon" alt="credit" style="filter: invert(1) brightness(0.5) sepia(1) saturate(5) hue-rotate(80deg);"></p>';
+				// Buttons
+				modalHtml += '<div style="display: flex; justify-content: center; gap: 20px; margin-top: 15px; width: 100%;">';
+				modalHtml += '<button class="button" onclick="CloseSellConfirmModal();">CANCEL</button>';
+				modalHtml += '<button class="button button-red" onclick="ConfirmSellCard();">SELL</button>';
+				modalHtml += '</div>';
+				modalHtml += '</div>';
+
+				var modal = document.getElementById('sell-confirm-modal');
+				if (!modal) {
+					modal = document.createElement('div');
+					modal.id = 'sell-confirm-modal';
+					modal.className = 'modal';
+					modal.style.display = 'flex';
+					modal.style.zIndex = '10000';
+					document.body.appendChild(modal);
+				}
+				
+				modal.innerHTML = modalHtml;
+				modal.style.display = 'flex';
+				UpdateSellQuantityButtons();
+			}
 
 		function AdjustSellQuantity(delta) {
 			var availableCount = gauntletCardCounts[pendingSellCardId] || 0;
