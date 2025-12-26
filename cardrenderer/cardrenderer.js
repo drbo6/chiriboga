@@ -1137,8 +1137,8 @@ var CardRenderer = {
         if (this.zoomed && (this.faceUp || this.canView)) {
           scalingratio = fieldZoom;
 		  //load high-res version, if not already loaded/loading
-		  // Respect config flag: enableHiresFallback (defaults to true)
-		  if (typeof gauntletConfig === 'undefined' || gauntletConfig.enableHiresFallback) {
+		  // Respect config flag: enableHiRes (defaults to false)
+		  if (typeof gauntletConfig === 'undefined' || gauntletConfig.enableHiRes) {
 			  if (this.hiresTexture) {
 				  this.frontTexture = this.hiresTexture;
 			  }

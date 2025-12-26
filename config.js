@@ -6,10 +6,10 @@ var gauntletConfig = {
   // Number of opponents in a gauntlet run (one from each faction)
   gauntletLength: 4,
 
-  // ===== HI-RES IMAGE FALLBACK =====
-  // If true, the renderer will try to load high-resolution images from "images/hires"
-  // and fall back to low-res images if not found. Set to false to always use low-res images.
-  enableHiresFallback: true,
+  // ===== HI-RES IMAGES =====
+  // If true, the renderer will use high-resolution images from "images/hires" when available.
+  // Set to false to always use low-res images.
+  enableHiRes: false,
 
   // ===== STARTING CREDITS =====
   // Number of credits the player starts with in gauntlet mode
