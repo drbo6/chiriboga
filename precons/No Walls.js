@@ -13,7 +13,7 @@ registerPrecon({
     // deck_set: The set or category this deck belongs to
     deck_set: "Girometics SG+SU21",
     URL: "https://netrunnerdb.com/en/decklist/96e99a2f-4220-40e9-a3da-d2d27c0ab3c2/-sg-su21-quetzal-no-walls",
-    Notes: "This deck is built around the identity ability to break one barrier subroutine for free each turn, which means you only need a single real barrier-breaking program—saving you clicks, credits, and deck space. Cards like Security Testing make it profitable to run on servers protected by cheap barriers, while simple support cards (extra draw, more memory, and easy installs) keep your key tools available and your economy steady.",
+    notes: "This deck is built around the identity ability to break one barrier subroutine for free each turn, which means you only need a single real barrier-breaking program—saving you clicks, credits, and deck space. Cards like Security Testing make it profitable to run on servers protected by cheap barriers, while simple support cards (extra draw, more memory, and easy installs) keep your key tools available and your economy steady.",
     cards: {
         "30002": 3,  // Wildcat Strike
         "30004": 3,  // Botulus

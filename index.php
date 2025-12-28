@@ -1071,7 +1071,7 @@
         if (option === 'custom' && playerDeck && aiDeck) {
           // Build compressed deck strings from precon format
           var playerJson = {identity: parseInt(playerDeck.identity), cards: []};
-          if (playerDeck.Notes) playerJson.notes = playerDeck.Notes;
+          if (playerDeck.notes) playerJson.notes = playerDeck.notes;
           if (playerDeck.name) playerJson.name = playerDeck.name;
           if (playerDeck.URL) playerJson.url = playerDeck.URL;
           for (var cardId in playerDeck.cards) {
@@ -1081,7 +1081,7 @@
             }
           }
           var aiJson = {identity: parseInt(aiDeck.identity), cards: []};
-          if (aiDeck.Notes) aiJson.notes = aiDeck.Notes;
+          if (aiDeck.notes) aiJson.notes = aiDeck.notes;
           if (aiDeck.name) aiJson.name = aiDeck.name;
           if (aiDeck.URL) aiJson.url = aiDeck.URL;
           for (var cardId in aiDeck.cards) {
@@ -1104,7 +1104,7 @@
         } else if (option === 'quick' && playerDeck && aiDeck) {
           // Build compressed deck strings from precon format
           var playerJson = {identity: parseInt(playerDeck.identity), cards: []};
-          if (playerDeck.Notes) playerJson.notes = playerDeck.Notes;
+          if (playerDeck.notes) playerJson.notes = playerDeck.notes;
           if (playerDeck.name) playerJson.name = playerDeck.name;
           if (playerDeck.URL) playerJson.url = playerDeck.URL;
           for (var cardId in playerDeck.cards) {
@@ -1114,7 +1114,7 @@
             }
           }
           var aiJson = {identity: parseInt(aiDeck.identity), cards: []};
-          if (aiDeck.Notes) aiJson.notes = aiDeck.Notes;
+          if (aiDeck.notes) aiJson.notes = aiDeck.notes;
           if (aiDeck.name) aiJson.name = aiDeck.name;
           if (aiDeck.URL) aiJson.url = aiDeck.URL;
           for (var cardId in aiDeck.cards) {

@@ -13,7 +13,7 @@ registerPrecon({
     // deck_set: The set or category this deck belongs to
     deck_set: "Girometics SG+SU21",
     URL: "https://netrunnerdb.com/en/decklist/c61cbd7f-4c52-4406-8fad-d263009f27eb/-sg-su21-ren-loup-arcemont-trash-king",
-    Notes: "Loup's identity gives you money for trashing the corporation's cards, so this deck uses virus programs like Carnivore and Imp to aggressively destroy the corp's resources, with DZMZ Optimizer to afford installing all those viruses and Diesel to draw enough cards to feed Carnivore.",
+    notes: "Loup's identity gives you money for trashing the corporation's cards, so this deck uses virus programs like Carnivore and Imp to aggressively destroy the corp's resources, with DZMZ Optimizer to afford installing all those viruses and Diesel to draw enough cards to feed Carnivore.",
     cards: {
         "30003": 3,  // Carnivore
         "30004": 3,  // Botulus

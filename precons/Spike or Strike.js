@@ -13,7 +13,7 @@ registerPrecon({
     // deck_set: The set or category this deck belongs to
     deck_set: "Girometics SG+SU21",
     URL: "https://netrunnerdb.com/en/decklist/303cdc17-adc2-469c-be8c-4f8e55119ff7/-sg-su21-building-a-better-world-spike-or-strike",
-    Notes: "This deck builds an expensive server to either score it yourself or let the hacker steal Send a Message and hopefully deplete their credits. If the hacker steals the expensive agenda, you follow up with 2 copies of a kill card like either Punitive Counterstrike or Neurospike and eliminate them outright.",
+    notes: "This deck builds an expensive server to either score it yourself or let the hacker steal Send a Message and hopefully deplete their credits. If the hacker steals the expensive agenda, you follow up with 2 copies of a kill card like either Punitive Counterstrike or Neurospike and eliminate them outright.",
     cards: {
         "30041": 1,  // Sprint
         "30049": 2,  // Neurospike

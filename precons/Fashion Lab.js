@@ -13,7 +13,7 @@ registerPrecon({
     // deck_set: The set or category this deck belongs to
     deck_set: "Girometics NSG Core",
     URL: "https://netrunnerdb.com/en/decklist/8d182470-77e1-4d5e-b55e-19f08dc44470/-nsg-core-fashion-lab",
-    Notes: "Poétrï plays a different style of HB that floods the board with assets like Anthill Excavation Contract and Nico Campaign, protected by cheap ice like Scatter Field. The Runner has to spend credits trashing all your assets, and once you score an Aggressive Trendsetting, the increased trash costs might stop them from contesting entirely. This lets you finish an Otto Campaign undisturbed, giving you the Dividends to score a Project Ingatan for free.",
+    notes: "Poétrï plays a different style of HB that floods the board with assets like Anthill Excavation Contract and Nico Campaign, protected by cheap ice like Scatter Field. The Runner has to spend credits trashing all your assets, and once you score an Aggressive Trendsetting, the increased trash costs might stop them from contesting entirely. This lets you finish an Otto Campaign undisturbed, giving you the Dividends to score a Project Ingatan for free.",
     cards: {
         "30036": 1,  // Luminal Transubstantiation
         "30037": 3,  // Nico Campaign

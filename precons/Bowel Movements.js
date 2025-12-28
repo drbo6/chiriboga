@@ -13,7 +13,7 @@ registerPrecon({
     // deck_set: The set or category this deck belongs to
     deck_set: "Girometics NSG Core",
     URL: "https://netrunnerdb.com/en/decklist/81c60189-b0b9-429b-83a8-0cd6611fcff1/-nsg-core-bowel-movements",
-    Notes: "Loup gives you credits whenever you trash Corp cards, and this deck leans into that hard. Your main goal is to build up Cacophony by trashing everything you can, then use it to force the Corp to discard from their hand and deck. If they run out of cards in R&D, you win! Carnivore, Gourmand, and Verbal Plasticity keep your hand full so you always have cards to fuel the trashing, while Maintenance Access and Botulus help you get into servers to find more things to eat.",
+    notes: "Loup gives you credits whenever you trash Corp cards, and this deck leans into that hard. Your main goal is to build up Cacophony by trashing everything you can, then use it to force the Corp to discard from their hand and deck. If they run out of cards in R&D, you win! Carnivore, Gourmand, and Verbal Plasticity keep your hand full so you always have cards to fuel the trashing, while Maintenance Access and Botulus help you get into servers to find more things to eat.",
     cards: {
         "30003": 3,  // Carnivore
         "30004": 2,  // Botulus

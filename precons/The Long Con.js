@@ -13,7 +13,7 @@ registerPrecon({
     // deck_set: The set or category this deck belongs to
     deck_set: "Girometics SG+SU21",
     URL: "https://netrunnerdb.com/en/decklist/70985518-9780-4cae-9582-e75f02b89342/-sg-su21-steve-cambridge-the-long-con",
-    Notes: "This deck aims to drain the Corp’s resources by forcing them to either rez expensive ice or trash it, then repeatedly recovers powerful derez tools like Emergency Shutdown and Forged Activation Orders with his ID ability. While not as immediately punishing as Reina, Steve stays rich and disruptive by farming centrals with Red Team and Security Testing, using Tread Lightly early and Inside Job later to break open scoring servers.",
+    notes: "This deck aims to drain the Corp's resources by forcing them to either rez expensive ice or trash it, then repeatedly recovers powerful derez tools like Emergency Shutdown and Forged Activation Orders with his ID ability. While not as immediately punishing as Reina, Steve stays rich and disruptive by farming centrals with Red Team and Security Testing, using Tread Lightly early and Inside Job later to break open scoring servers.",
     cards: {
         "30004": 2,  // Botulus
         "30005": 1,  // Buzzsaw

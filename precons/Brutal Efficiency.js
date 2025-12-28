@@ -13,7 +13,7 @@ registerPrecon({
     // deck_set: The set or category this deck belongs to
     deck_set: "Girometics NSG Core",
     URL: "https://netrunnerdb.com/en/decklist/b441510e-00e7-42b7-a559-a7eba52b31a4/-nsg-core-brutal-efficiency",
-    Notes: "Precision Design is a straightforward, reliable Corp deck that all players should learn. Your identity ability lets you reuse Seamless Launch repeatedly, enabling a strategy called 'never-advance': you score agendas the same turn you install them, so the Runner can never tell if you just installed an Offworld Office or a Regolith Mining License. The combination of Manegarm Skunkworks and Anoetic Void is especially strong; the Runner has to pay through Skunkworks first, and then you can still use Anoetic Void to end the run and deny the access entirely.",
+    notes: "Precision Design is a straightforward, reliable Corp deck that all players should learn. Your identity ability lets you reuse Seamless Launch repeatedly, enabling a strategy called 'never-advance': you score agendas the same turn you install them, so the Runner can never tell if you just installed an Offworld Office or a Regolith Mining License. The combination of Manegarm Skunkworks and Anoetic Void is especially strong; the Runner has to pay through Skunkworks first, and then you can still use Anoetic Void to end the run and deny the access entirely.",
     cards: {
         "30036": 1,  // Luminal Transubstantiation
         "30038": 1,  // Ansel 1.0

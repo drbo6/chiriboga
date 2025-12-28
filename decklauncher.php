@@ -1749,7 +1749,7 @@
 				$('#preconselect').val('-1');
 				// Add metadata and mark unmodified so URI includes it
 				json.name = precon.name || '';
-				if (precon.Notes) json.notes = precon.Notes;
+				if (precon.notes) json.notes = precon.notes;
 				if (precon.URL) json.url = precon.URL;
 				deckModified = false;
 				UpdateLaunchStrings();

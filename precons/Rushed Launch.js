@@ -13,7 +13,7 @@ registerPrecon({
     // deck_set: The set or category this deck belongs to
     deck_set: "Girometics SG+SU21",
     URL: "https://netrunnerdb.com/en/decklist/c9d80538-46a7-45ea-b89a-2287e9bc50be/-sg-su21-precision-design-rushed-launch",
-    Notes: "This deck builds a heavily defended remote server with taxing ice like Eli 1.0 and Tollbooth, then uses SanSan City Grid and Seamless Launch to quickly score four agendas behind those defenses before the hacker can break through.",
+    notes: "This deck builds a heavily defended remote server with taxing ice like Eli 1.0 and Tollbooth, then uses SanSan City Grid and Seamless Launch to quickly score four agendas behind those defenses before the hacker can break through.",
     cards: {
         "30036": 1,  // Luminal Transubstantiation
         "30037": 3,  // Nico Campaign

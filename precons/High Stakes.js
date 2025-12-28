@@ -13,7 +13,7 @@ registerPrecon({
     // deck_set: The set or category this deck belongs to
     deck_set: "Girometics SG+SU21",
     URL: "https://netrunnerdb.com/en/decklist/28811205-6f7c-48e5-a407-6e6b020d4ed3/-sg-su21-restoring-humanity-high-stakes-updated-",
-    Notes: "This deck is all about deception. Clearinghouse can flatline the runner if ignored, while Urtica Cypher can do the same when accessed—and they look identical facedown. Your job is to sell the lie and advance your assets until the runner bites.\n\nIf the game goes too long you can shift gears with Anoetic Void to brute force out a large Clearinghouse or score your agendas. You can also use Spin Doctor to recycle your assets and keep the guessing game going!",
+    notes: "This deck is all about deception. Clearinghouse can flatline the runner if ignored, while Urtica Cypher can do the same when accessed—and they look identical facedown. Your job is to sell the lie and advance your assets until the runner bites.\n\nIf the game goes too long you can shift gears with Anoetic Void to brute force out a large Clearinghouse or score your agendas. You can also use Spin Doctor to recycle your assets and keep the guessing game going!",
     cards: {
         "30044": 1,  // Longevity Serum
         "30045": 2,  // Urtica Cipher
