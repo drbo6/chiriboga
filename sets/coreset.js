@@ -662,6 +662,85 @@ coreSet[1017] = {
     // NOT automatic - we need Enumerate to be checked!
   },
 };
+// coreSet[1018] = Account Siphon - NOT IMPLEMENTED (very complex)
+coreSet[1019] = {
+  title: "Easy Mark",
+  imageFile: "01019.png",
+  player: runner,
+  faction: "Criminal",
+  influence: 1,
+  cardType: "event",
+  subTypes: ["Job"],
+  playCost: 0,
+  Resolve: function (params) {
+    GainCredits(runner, 3, "Easy Mark");
+  },
+};
+// coreSet[1021] = Inside Job - DUPLICATE: System Update 2021 has Inside Job
+coreSet[1022] = {
+  title: "Special Order",
+  imageFile: "01022.png",
+  player: runner,
+  faction: "Criminal",
+  influence: 2,
+  cardType: "event",
+  playCost: 1,
+  Enumerate: function () {
+    return [{}]; // Can always play, even if no icebreakers in stack
+  },
+  Resolve: function (params) {
+    var choices = ChoicesArrayCards(runner.stack, function (card) {
+      if (!CheckCardType(card, ["program"])) return false;
+      return CheckSubType(card, "Icebreaker");
+    });
+    
+    if (choices.length == 0) {
+      Log("Failed (no icebreakers found).");
+      Shuffle(runner.stack);
+      return;
+    }
+    
+    function decisionCallback(params) {
+      MoveCard(params.card, runner.stack); // Move to top for reveal
+      Render();
+      Reveal(
+        params.card,
+        function () {
+          MoveCard(params.card, runner.grip);
+          Shuffle(runner.stack);
+        },
+        this
+      );
+    }
+    
+    DecisionPhase(
+      runner,
+      choices,
+      decisionCallback,
+      null,
+      "Special Order",
+      this
+    );
+  },
+};
+// coreSet[1023] = Lemuria Codecracker - NOT IMPLEMENTED
+// coreSet[1024] = Desperado - NOT IMPLEMENTED
+// coreSet[1025-1027] = (unknown cards)
+// coreSet[1028] = Sneakdoor Beta - DUPLICATE: System Update 2021 has Sneakdoor Beta
+// coreSet[1029] = Bank Job - NOT IMPLEMENTED
+coreSet[1019] = {
+  title: "Easy Mark",
+  imageFile: "01019.png",
+  player: runner,
+  faction: "Criminal",
+  influence: 1,
+  cardType: "event",
+  subTypes: ["Job"],
+  playCost: 0,
+  Resolve: function (params) {
+    GainCredits(runner, 3, "Easy Mark");
+  },
+};
 // coreSet[1020] = {
 //   title: "Forged Activation Orders",
 //   imageFile: "01020.png",
