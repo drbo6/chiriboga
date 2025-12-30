@@ -1391,6 +1391,7 @@
 				pendingSellQuantity = 1; // Reset to default
 				var cardName = cardSet[id] ? cardSet[id].title : 'Unknown Card';
 			var imgSrc = GetImagePath(cardSet[id].imageFile);
+			var availableCount = gauntletCardCounts[id] || 0;
 				
 				var modalHtml = '<div class="solo-menu" style="display: flex; flex-direction: column; align-items: center; max-width: 400px;">';
 				modalHtml += '<div class="solo-logo" style="width: 100%;">';
