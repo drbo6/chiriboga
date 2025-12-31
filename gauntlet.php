@@ -311,6 +311,120 @@
 				}
 			}
 
+			// Function to show select opponent modal
+			function ShowSelectOpponentModal() {
+				if (!gauntletOpponents || gauntletOpponents.length === 0) {
+					// No gauntlet opponents, just launch directly
+					var launchHref = $('#launch').prop('href');
+					if (launchHref) window.location.href = launchHref;
+					return;
+				}
+				
+				var modalHtml = '<div class="solo-menu" style="display: flex; flex-direction: column; align-items: center;">';
+				modalHtml += '<div class="solo-logo" style="width: 100%;">';
+				modalHtml += '<h1 class="logo-text" style="color: var(--crt-red); text-shadow: 0 0 5px var(--crt-red), 0 0 15px var(--glow-red), 0 0 35px var(--glow-red-dark); font-size: 28px;">SELECT NEXT OPPONENT</h1>';
+				modalHtml += '</div>';
+				modalHtml += '<div class="select-opponent-gallery" style="display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; padding: 20px; max-width: 500px;">';
+				
+				for (var i = 0; i < gauntletOpponents.length; i++) {
+					var opp = gauntletOpponents[i];
+					var oppIdentityId = opp.identity;
+					var oppImgSrc = 'images/glow_outline.png';
+					if (cardSet[oppIdentityId] && cardSet[oppIdentityId].imageFile) {
+						oppImgSrc = GetImagePath(cardSet[oppIdentityId].imageFile);
+					}
+					
+					var isDefeated = opp.hasbeendefeated === true;
+					var defeatedClass = isDefeated ? ' defeated' : '';
+					var clickHandler = isDefeated ? '' : ' onclick="SelectOpponent(' + i + ');"';
+					var cursorStyle = isDefeated ? 'cursor: default;' : 'cursor: pointer;';
+					
+					modalHtml += '<img class="select-opponent-img' + defeatedClass + '" src="' + oppImgSrc + '" style="width: 70px; height: auto; border-radius: 6px; ' + cursorStyle + ' transition: transform 0.2s ease, box-shadow 0.2s ease;"' + clickHandler + '/>';
+				}
+				
+				modalHtml += '</div>';
+				modalHtml += '<div style="display: flex; justify-content: center; margin-top: 10px; width: 100%;">';
+				modalHtml += '<button class="button" onclick="CloseSelectOpponentModal();">CANCEL</button>';
+				modalHtml += '</div>';
+				modalHtml += '</div>';
+				
+				var modal = document.getElementById('select-opponent-modal');
+				if (!modal) {
+					modal = document.createElement('div');
+					modal.id = 'select-opponent-modal';
+					modal.className = 'modal';
+					modal.style.display = 'flex';
+					modal.style.zIndex = '10000';
+					document.body.appendChild(modal);
+				}
+				
+				modal.innerHTML = modalHtml;
+				modal.style.display = 'flex';
+			}
+			
+			// Function to close the select opponent modal
+			function CloseSelectOpponentModal() {
+				var modal = document.getElementById('select-opponent-modal');
+				if (modal) {
+					modal.style.display = 'none';
+				}
+			}
+			
+			// Function to select an opponent and launch the game
+			function SelectOpponent(opponentIndex) {
+				if (!gauntletOpponents || opponentIndex < 0 || opponentIndex >= gauntletOpponents.length) return;
+				
+				var selectedOpp = gauntletOpponents[opponentIndex];
+				if (selectedOpp.hasbeendefeated) return; // Can't select defeated opponent
+				
+				// Build the opponent deck object
+				var oppDeckObj = {
+					identity: selectedOpp.identity,
+					cards: selectedOpp.cards || []
+				};
+				
+				// Compress the opponent deck
+				var oppCompressed = LZString.compressToEncodedURIComponent(JSON.stringify(oppDeckObj));
+				
+				// Build the player deck
+				var deckForUri;
+				if (deckModified) {
+					deckForUri = { identity: json.identity, cards: json.cards.slice() };
+				} else {
+					deckForUri = {};
+					for (var k in json) { if (Object.prototype.hasOwnProperty.call(json,k)) deckForUri[k] = json[k]; }
+				}
+				var playerCompressed = LZString.compressToEncodedURIComponent(JSON.stringify(deckForUri));
+				
+				// Update gauntlet state with selected opponent index
+				var gauntletParam = URIParameter("g");
+				var updatedGauntletParam = gauntletParam;
+				
+				if (gauntletParam !== "") {
+					try {
+						var gauntletState = JSON.parse(LZString.decompressFromEncodedURIComponent(gauntletParam));
+						gauntletState.shopPurchaseCount = shopPurchaseCount;
+						gauntletState.credits = gauntletCredits;
+						gauntletState.subset = gauntletCardCounts;
+						gauntletState.creditsWon = 0;
+						gauntletState.currentOpponentIndex = opponentIndex; // Track which opponent was selected
+						updatedGauntletParam = LZString.compressToEncodedURIComponent(JSON.stringify(gauntletState));
+					} catch (e) {
+						console.error("Failed to update gauntlet state:", e);
+					}
+				}
+				
+				// Build launch address
+				var launchAddress = "engine.php?p=r&c=" + oppCompressed + "&r=" + playerCompressed;
+				if (updatedGauntletParam !== "") {
+					launchAddress += "&g=" + updatedGauntletParam;
+				}
+				
+				// Close modal and navigate
+				CloseSelectOpponentModal();
+				window.location.href = launchAddress;
+			}
+
 			// Function to check if there are cards to sell
 			function HasCardsToSell() {
 				for (var cardId in gauntletCardCounts) {
@@ -3413,7 +3527,7 @@
 					</div>
 				</div>
 			<div class="leftrow buttons">
-				<button id="launch" class="button button-red" onclick="if(!$(this).prop('disabled')) window.location.href=$(this).prop('href');">PLAY<br>DECK</button>
+				<button id="launch" class="button button-red" onclick="if(!$(this).prop('disabled')) ShowSelectOpponentModal();">PLAY<br>DECK</button>
 				<button id="buycards" onclick="ShowBuyCardsModal();" class="button">BUY/SELL<br>CARDS</button>
 				<button id="addnoninfluence" onclick="AddNonInfluence();" class="button">ADD IN-<br>FACTION</button>
 				<button id="cleardeck" onclick="ClearDeck();" class="button">CLEAR<br>DECK</button>

@@ -2264,6 +2264,22 @@ select::-ms-expand { display: none; }
 	opacity: 0.85;
 }
 
+/* Select Opponent Modal styles */
+.select-opponent-img {
+	box-shadow: 0 0 8px rgba(122,197,232,0.5);
+}
+
+.select-opponent-img:not(.defeated):hover {
+	transform: scale(1.1);
+	box-shadow: 0 0 15px rgba(122,197,232,0.8), 0 0 25px rgba(122,197,232,0.4);
+}
+
+.select-opponent-img.defeated {
+	filter: grayscale(80%) brightness(0.5);
+	opacity: 0.5;
+	box-shadow: 0 0 4px rgba(100,100,100,0.3);
+}
+
 /* Deck launcher responsive styles */
 @media (max-width: 1024px) {
 	#cardcontainer { 
