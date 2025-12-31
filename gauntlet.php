@@ -330,8 +330,12 @@
 					var opp = gauntletOpponents[i];
 					var oppIdentityId = opp.identity;
 					var oppImgSrc = 'images/glow_outline.png';
-					if (cardSet[oppIdentityId] && cardSet[oppIdentityId].imageFile) {
-						oppImgSrc = GetImagePath(cardSet[oppIdentityId].imageFile);
+					var oppName = 'Unknown';
+					if (cardSet[oppIdentityId]) {
+						if (cardSet[oppIdentityId].imageFile) {
+							oppImgSrc = GetImagePath(cardSet[oppIdentityId].imageFile);
+						}
+						oppName = cardSet[oppIdentityId].title || 'Unknown';
 					}
 					
 					var isDefeated = opp.hasbeendefeated === true;
@@ -339,7 +343,10 @@
 					var clickHandler = isDefeated ? '' : ' onclick="SelectOpponent(' + i + ');"';
 					var cursorStyle = isDefeated ? 'cursor: default;' : 'cursor: pointer;';
 					
-					modalHtml += '<img class="select-opponent-img' + defeatedClass + '" src="' + oppImgSrc + '" style="width: 70px; height: auto; border-radius: 6px; ' + cursorStyle + ' transition: transform 0.2s ease, box-shadow 0.2s ease;"' + clickHandler + '/>';
+					modalHtml += '<div class="select-opponent-item' + defeatedClass + '" style="display: flex; flex-direction: column; align-items: center; ' + cursorStyle + '"' + clickHandler + '>';
+					modalHtml += '<img class="select-opponent-img' + defeatedClass + '" src="' + oppImgSrc + '" style="width: 90px; height: auto; border-radius: 6px; transition: transform 0.2s ease, box-shadow 0.2s ease;"/>';
+					modalHtml += '<span class="select-opponent-name" style="margin-top: 6px; font-size: 11px; color: var(--crt-green); text-align: center; max-width: 90px; word-wrap: break-word; line-height: 1.2;">' + oppName + '</span>';
+					modalHtml += '</div>';
 				}
 				
 				modalHtml += '</div>';

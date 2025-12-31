@@ -2268,19 +2268,35 @@ select::-ms-expand { display: none; }
 }
 
 /* Select Opponent Modal styles */
+.select-opponent-item {
+	transition: transform 0.2s ease;
+}
+
+.select-opponent-item:not(.defeated):hover {
+	transform: scale(1.08);
+}
+
+.select-opponent-item:not(.defeated):hover .select-opponent-img {
+	box-shadow: 0 0 15px rgba(122,197,232,0.8), 0 0 25px rgba(122,197,232,0.4);
+}
+
 .select-opponent-img {
 	box-shadow: 0 0 8px rgba(122,197,232,0.5);
 }
 
-.select-opponent-img:not(.defeated):hover {
-	transform: scale(1.1);
-	box-shadow: 0 0 15px rgba(122,197,232,0.8), 0 0 25px rgba(122,197,232,0.4);
+.select-opponent-item.defeated {
+	pointer-events: none;
 }
 
-.select-opponent-img.defeated {
+.select-opponent-item.defeated .select-opponent-img {
 	filter: grayscale(80%) brightness(0.5);
 	opacity: 0.5;
 	box-shadow: 0 0 4px rgba(100,100,100,0.3);
+}
+
+.select-opponent-item.defeated .select-opponent-name {
+	color: var(--crt-green-muted);
+	opacity: 0.5;
 }
 
 /* Deck launcher responsive styles */
