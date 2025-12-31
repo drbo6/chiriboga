@@ -289,9 +289,9 @@ tutorial[5] = {
         currentPhase.requireHumanInput=true;
 		TutorialCommandMessage = {}
 		TutorialWhitelist = null; //not using whitelist
-        TutorialMessage("You have learned the basics!\n\nYou are ready to try free play with the starter decks.");
+        TutorialMessage("You have learned the basics!\n\nYou are ready to try a full game with the starter deck now.\n\nClick Continue to start the game.", true);
         TutorialReplacer = function (input) {
-		  window.location.href = 'engine.php?ap=6&p=r&r=N4IglgJgpgdgLmOBPEAuEB2AbCANCAZyQLigFsBxAQ1IHcqVUBtLXVgRgCZcueBmHgBYeAVlE8AHLk4AGaXM7tpSzq1XSMG6VM46dATmmG+ck7jN9ul8wL63BAXQC+QA&c=N4IglgJgpgdgLmOBPEAuEB2DIA0IDOS+cUAtgOICGJA7pSqgNoDMGOr7AnFzgCwAMfQbwBMfAKwS+ANhl82vNtN45lqpRtXdp3DIL04MARkMmMY84YvNDNjCvuHJGZ+IC6AXyA';
+		      window.location.href = 'engine.php?ap=6&p=r&r=N4IglgJgpgdgLmOBPEAuEB2AbCANCAZyQLigFsBxAQ1IHcqVUBtLXVgRgCZcueBmHgBYeAVlE8AHLk4AGaXM7tpSzq1XSMG6VM46dATmmG+ck7jN9ul8wL63BAXQC+QA&c=N4IglgJgpgdgLmOBPEAuEB2DIA0IDOS+cUAtgOICGJA7pSqgNoDMGOr7AnFzgCwAMfQbwBMfAKwS+ANhl82vNtN45lqpRtXdp3DIL04MARkMmMY84YvNDNjCvuHJGZ+IC6AXyA';
           return true;
         };
       },
@@ -397,7 +397,7 @@ tutorial[4] = {
       str: "Corp 3.1",
       action: function () {
         TutorialMessage("The Corp reached the advancement requirement of an agenda and chose to SCORE it.\n\nScoring an agenda does not use a click but can only be done either at the start of the Corp's turn or after the Corp finishes an action.",true,function(){
-			TutorialMessage("The Corp currently has 2 agenda points in their SCORE AREA.\n\nThe Corp wins the game once they have scored 7 agenda points (6 if using the starter deck).",true);
+			TutorialMessage("The Corp currently has 2 agenda points in their SCORE AREA.\n\nThe Corp wins the game once they have scored 7 agenda points (6 when using the starter decks in this tutorial).",true);
 		});
       },
     },
@@ -453,7 +453,7 @@ tutorial[4] = {
 	  //Finish encounter
       str: "Run EncounterEnd",
       action: function () {
-		  TutorialMessage("Since the ice is a corp card, the text is from the Corp's perspective.\n\nSo when the 'Gain 1 credit' subroutine fired, the Corp gained 1 credit (not the Runner).",true);
+		  TutorialMessage("Since the ice is a Corp card, the text is from the Corp's perspective.\n\nSo when the 'Gain 1 credit' subroutine fired, the Corp gained 1 credit (not the Runner).",true);
 	  },
     },
     {
@@ -718,7 +718,7 @@ tutorial[3] = {
     Resolve: function () {
       if ((accessingCard.cardType == 'operation')&&!this.hedgeFundAlreadySeen) {
 		  this.hedgeFundAlreadySeen=true;
-		  TutorialMessage("This is an OPERATION card. The corp plays these in the same way the Runner plays event cards.",true);
+		  TutorialMessage("This is an OPERATION card. The Corp plays these in the same way the Runner plays event cards.",true);
 	  }
     },
     automatic: true,
@@ -1182,7 +1182,7 @@ tutorial[0] = {
         );
 		runner.identityCard.hideClicks = false;
 		Render();
-		TutorialCommandMessage.run = "The corp has three starting servers: ARCHIVES (discard pile), HQ (hand of cards) and R&D (deck of cards).\n\nSince Archives is empty, choose R&D or HQ.";
+		TutorialCommandMessage.run = "The Corp has three starting servers: ARCHIVES (discard pile), HQ (hand of cards) and R&D (deck of cards).\n\nSince Archives is empty, choose R&D or HQ.";
 		TutorialWhitelist = null; //not using whitelist
 		TutorialBlacklist = ['gain','draw',corp.archives];
         TutorialReplacer = function (input) {
@@ -1239,7 +1239,7 @@ tutorial[0] = {
 		currentPhase.requireHumanInput=true;
 		TutorialCommandMessage = {}
 		TutorialWhitelist = null; //not using whitelist
-        TutorialMessage("The agenda you have stolen is worth 2 AGENDA POINTS.\nYou win if you steal 7 agenda points from the Corp (6 if using the starter deck).\n\nClick Continue to move to the next part of this tutorial.");
+        TutorialMessage("The agenda you have stolen is worth 2 AGENDA POINTS.\nYou win if you steal 7 agenda points from the Corp (6 when using the starter decks in this tutorial).\n\nClick Continue to move to the next part of this tutorial.");
         TutorialReplacer = function (input) {
 		  window.location.href = 'engine.php?p=r&mentor=1';
           return true;
