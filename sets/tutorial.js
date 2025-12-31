@@ -1169,7 +1169,7 @@ tutorial[0] = {
 		corp.identityCard.faceUp=true; //not sure why this is needed but it is
         ChangePhase(phases.runnerStartResponse);
 		corp.clickTracker=0;
-        TutorialMessage("Welcome to Netrunner!\n\nYou are the RUNNER (your cards have red backs), and your opponent is the CORP (cards with blue backs).",true);
+        TutorialMessage("Welcome to Netrunner!\n\nYou are the RUNNER (your cards have red backs), and your opponent is the CORP (cards with blue backs).\n\nIf you ever have questions during this tutorial, click the booklet icon next to the menu button to read through the rules.",true);
       },
     },
     {
