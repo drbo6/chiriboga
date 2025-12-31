@@ -125,7 +125,7 @@
 				
 				$('#lightbox').addClass('active');
 			}
-			$(document).on('click','#opponentid .opponent-identity-img', function(){
+			$(document).on('click','#opponentid .opponent-identity-img:not(.defeated)', function(){
 				var identityId = $(this).data('identity-id');
 				if (identityId) ShowOpponentIdentityLightbox(identityId);
 			});

@@ -1121,6 +1121,13 @@ function PlayerWin(player, msgstr) {
           // Parse the gauntlet state
           var gauntletState = JSON.parse(LZString.decompressFromEncodedURIComponent(gauntletParam));
           
+          // Mark the current opponent as defeated
+          var currentOpponentIndex = gauntletState.currentOpponentIndex;
+          if (typeof currentOpponentIndex === 'number' && gauntletState.opponents && gauntletState.opponents[currentOpponentIndex]) {
+            gauntletState.opponents[currentOpponentIndex].hasbeendefeated = true;
+            console.log("Marked opponent " + currentOpponentIndex + " as defeated");
+          }
+          
           // Increment defeated count
           gauntletState.defeated = (gauntletState.defeated || 0) + 1;
           
