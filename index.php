@@ -819,7 +819,7 @@
           if (candidateDecks.length > 0) {
             var chosen = candidateDecks[Math.floor(Math.random() * candidateDecks.length)];
             var chosenIdentity = cardSet[chosen.identity];
-            var opponent = {identity: parseInt(chosen.identity), cards: [], name: chosen.name || 'Unknown Deck', faction: chosenIdentity.faction || 'Unknown', URL: chosen.URL || ''};
+            var opponent = {identity: parseInt(chosen.identity), cards: [], name: chosen.name || 'Unknown Deck', faction: chosenIdentity.faction || 'Unknown', URL: chosen.URL || '', hasbeendefeated: false};
             selectedOpponents.push(opponent);
             // Populate cards from precon
             for (var cc in chosen.cards) {
@@ -864,7 +864,7 @@
           
           var chosen = candidateDecks[deckIndex];
           var chosenIdentity = cardSet[chosen.identity];
-          var opponent = {identity: parseInt(chosen.identity), cards: [], name: chosen.name || 'Unknown Deck', faction: chosenIdentity.faction || 'Unknown', URL: chosen.URL || ''};
+          var opponent = {identity: parseInt(chosen.identity), cards: [], name: chosen.name || 'Unknown Deck', faction: chosenIdentity.faction || 'Unknown', URL: chosen.URL || '', hasbeendefeated: false};
           selectedOpponents.push(opponent);
           // Populate cards from precon
           for (var cc in chosen.cards) {

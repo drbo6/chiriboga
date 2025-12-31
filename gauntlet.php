@@ -53,36 +53,82 @@
 
 		// Restore opponent accordion interactions
 		(function(){
-			// Lightbox for opponent deck list
-			function ShowOpponentDeckLightbox(){
-				if (!opponentdeckstr) return;
-				var eqIdx = opponentdeckstr.indexOf('=');
-				if (eqIdx < 0) return;
-				var ampIdx = opponentdeckstr.indexOf('&', eqIdx+1);
-				var compressed = opponentdeckstr.substring(eqIdx+1, ampIdx > -1 ? ampIdx : opponentdeckstr.length);
-				if (!compressed || compressed === 'random') {
-					$('#lightbox-img').attr('src', opponentdeckimg || 'images/glow_outline.png');
-					$('#lightbox-text').html('<div class="card-text-info"><h2>Opponent Deck</h2><p>Deck will be generated at game start.</p></div>');
-					$('#lightbox').addClass('active');
-					return;
-				}
-				var oppJSON;
-				try { oppJSON = JSON.parse(LZString.decompressFromEncodedURIComponent(compressed)); } catch(e) {}
-				if (!oppJSON || !oppJSON.identity || !Array.isArray(oppJSON.cards)) return;
-				var identImg = GetImagePath(cardSet[oppJSON.identity].imageFile);
+			// Lightbox for opponent identity card info only
+			function ShowOpponentIdentityLightbox(identityId){
+				if (!identityId || !cardSet[identityId]) return;
+				
+				var card = cardSet[identityId];
+				var identImg = GetImagePath(card.imageFile);
 				$('#lightbox-img').attr('src', identImg);
-				var counts = {};
-				for (var i=0;i<oppJSON.cards.length;i++) counts[oppJSON.cards[i]] = (counts[oppJSON.cards[i]]||0)+1;
-				var grouped = {};
-				for (var cid in counts) { if (cardSet[cid]) { var ct = cardSet[cid].cardType||'other'; (grouped[ct]=grouped[ct]||[]).push(cid);} }
-				var order = ['identity','agenda','operation','event','asset','upgrade','hardware','program','resource','ice','other'];
-				var lines = [];
-				for (var gi=0; gi<order.length; gi++) { var g=order[gi]; if (!grouped[g]) continue; grouped[g].sort(function(a,b){return cardSet[a].title.localeCompare(cardSet[b].title);}); lines.push('['+g.toUpperCase()+']'); for (var k=0;k<grouped[g].length;k++){ var id=grouped[g][k]; lines.push(counts[id]+' '+cardSet[id].title);} lines.push(''); }
-				var html = '<div class="card-text-info"><h2>'+cardSet[oppJSON.identity].title+'</h2><p class="card-type">Total Cards: '+oppJSON.cards.length+'</p><pre style="white-space:pre-wrap; font-size:13px; line-height:1.4;">'+lines.join('\n')+'</pre></div>';
-				$('#lightbox-text').html(html);
+				
+				// Find matching card in cardData by title
+				var cardInfo = null;
+				if (cardData && cardData.data) {
+					for (var i = 0; i < cardData.data.length; i++) {
+						if (cardData.data[i].title === card.title || cardData.data[i].stripped_title === card.title) {
+							cardInfo = cardData.data[i];
+							break;
+						}
+					}
+				}
+				
+				// Build card text display
+				if (cardInfo) {
+					var infoHTML = '<div class="card-text-info">';
+					infoHTML += '<h2>' + cardInfo.title + '</h2>';
+					
+					// Faction
+					var factionDisplay = '';
+					if (cardInfo.faction_code === 'nbn') {
+						factionDisplay = 'NBN';
+					} else if (cardInfo.faction_code === 'hb') {
+						factionDisplay = 'HB';
+					} else if (cardInfo.faction_code === 'neutral-corp' || cardInfo.faction_code === 'neutral-runner') {
+						factionDisplay = 'Neutral';
+					} else {
+						var fc = cardInfo.faction_code || '';
+						factionDisplay = fc.charAt(0).toUpperCase() + fc.slice(1).toLowerCase();
+					}
+					infoHTML += '<p class="card-faction">' + factionDisplay + '</p>';
+					
+					// Type line
+					var typeCode = cardInfo.type_code || '';
+					var typeLine = typeCode.charAt(0).toUpperCase() + typeCode.slice(1).toLowerCase();
+					if (cardInfo.keywords) {
+						typeLine += ': ' + cardInfo.keywords;
+					}
+					infoHTML += '<p class="card-type">' + typeLine + '</p>';
+					
+					// Card text
+					if (cardInfo.text) {
+						var cardText = cardInfo.text.replace(/\[([^\]]+)\]/g, function(match, word) {
+							var iconName = word.toUpperCase();
+							if (iconName === 'TRASH') iconName = 'TRASH_ABILITY';
+							iconName = iconName.replace(/-/g, '_');
+							return '<img src="images/nsg/NSG_' + iconName + '.svg" class="card-icon" alt="' + word + '">';
+						});
+						cardText = cardText.replace(/\\n/g, '<br>').replace(/\n/g, '<br>');
+						infoHTML += '<div class="card-text">' + cardText + '</div>';
+					}
+					
+					// Flavor text
+					if (cardInfo.flavor) {
+						var flavorText = cardInfo.flavor.replace(/\\n/g, '<br>').replace(/\n/g, '<br>');
+						infoHTML += '<p class="card-flavor">' + flavorText + '</p>';
+					}
+					
+					infoHTML += '</div>';
+					$('#lightbox-text').html(infoHTML);
+				} else {
+					$('#lightbox-text').html('<div class="card-text-info"><h2>' + card.title + '</h2><p>Card data not found</p></div>');
+				}
+				
 				$('#lightbox').addClass('active');
 			}
-			$(document).on('click','#opponentid .opponent-body', ShowOpponentDeckLightbox);
+			$(document).on('click','#opponentid .opponent-identity-img', function(){
+				var identityId = $(this).data('identity-id');
+				if (identityId) ShowOpponentIdentityLightbox(identityId);
+			});
 			$(document).on('click','#opponentid .opponent-header', function(){
 				var box = $('#opponentid'); box.toggleClass('collapsed');
 			});
@@ -124,6 +170,7 @@
 			var gauntletCardIds = []; // Set of 40 different runner cards available in gauntlet
 			var gauntletCardCounts = {}; // Count of each card in gauntlet (typically 3 or 1)
 			var gauntletCredits = 0; // Credits from gauntlet state
+			var gauntletOpponents = []; // Array of opponent data from gauntlet state
 			var shopDisplayCardIds = []; // Cards currently displayed in shop modal for lightbox cycling
 			
 			// Function to register a precon deck
@@ -1113,6 +1160,9 @@
 				// Restore shop purchase count from gauntlet state for persistence across reloads
 				shopPurchaseCount = gauntletState.shopPurchaseCount || 0;
 				
+				// Store opponents globally for opponent display
+				gauntletOpponents = gauntletState.opponents || [];
+				
 				// Log opponent names and URLs
 				if (gauntletState.opponents && gauntletState.opponents.length > 0) {
 					console.log("Gauntlet Opponents:");
@@ -1120,7 +1170,8 @@
 						var opponentName = gauntletState.opponents[i].name || 'Unknown Opponent';
 						var opponentFaction = gauntletState.opponents[i].faction || 'Unknown Faction';
 						var opponentURL = gauntletState.opponents[i].URL || 'No URL';
-						console.log((i + 1) + ". " + opponentName + " (" + opponentFaction + ") - URL: " + opponentURL);
+						var opponentDefeated = gauntletState.opponents[i].hasbeendefeated || false;
+						console.log((i + 1) + ". " + opponentName + " (" + opponentFaction + ") - URL: " + opponentURL + " - Defeated: " + opponentDefeated);
 					}
 				}
 				
@@ -1186,8 +1237,25 @@
 			validityOutput += '</div>';
 			$("#output").html(validityOutput);
 			
-			// Update opponent image (accordion restored)
-			if (opponentdeckimg != "") {
+			// Update opponent display to show all opponent identity images
+			if (gauntletOpponents && gauntletOpponents.length > 0) {
+				var oppHTML = '' +
+					'<div class="opponent-header"><span class="opponent-title">Opponents</span><span class="opponent-arrow" aria-hidden="true">&#9660;</span></div>' +
+					'<div class="opponent-body opponent-gallery">';
+				for (var i = 0; i < gauntletOpponents.length; i++) {
+					var opp = gauntletOpponents[i];
+					var oppIdentityId = opp.identity;
+					var oppImgSrc = 'images/glow_outline.png';
+					if (cardSet[oppIdentityId] && cardSet[oppIdentityId].imageFile) {
+						oppImgSrc = GetImagePath(cardSet[oppIdentityId].imageFile);
+					}
+					var defeatedClass = opp.hasbeendefeated ? ' defeated' : '';
+					oppHTML += '<img class="opponent-identity-img' + defeatedClass + '" src="' + oppImgSrc + '" data-identity-id="' + oppIdentityId + '"/>';
+				}
+				oppHTML += '</div>';
+				$("#opponentid").html(oppHTML).addClass('collapsed').show();
+			} else if (opponentdeckimg != "") {
+				// Fallback for non-gauntlet mode with single opponent
 				var oppHTML = '' +
 					'<div class="opponent-header"><span class="opponent-title">Opponent Deck</span><span class="opponent-arrow" aria-hidden="true">&#9660;</span></div>' +
 					'<div class="opponent-body"><img src="'+opponentdeckimg+'"/></div>';
@@ -3278,8 +3346,24 @@
 			  }
 		  $("#launch").html("PLAY<br>DECK");
 		  UpdateLaunchStrings();
-		  //update opponent image (accordion restored) - always visible
-		  if (opponentdeckimg != "") {
+		  //update opponent display to show all opponent identity images
+		  if (gauntletOpponents && gauntletOpponents.length > 0) {
+			  var oppHTML = '' +
+				'<div class="opponent-header"><span class="opponent-title">Opponents</span><span class="opponent-arrow" aria-hidden="true">&#9660;</span></div>' +
+				'<div class="opponent-body opponent-gallery">';
+			  for (var i = 0; i < gauntletOpponents.length; i++) {
+				  var opp = gauntletOpponents[i];
+				  var oppIdentityId = opp.identity;
+				  var oppImgSrc = 'images/glow_outline.png';
+				  if (cardSet[oppIdentityId] && cardSet[oppIdentityId].imageFile) {
+					  oppImgSrc = GetImagePath(cardSet[oppIdentityId].imageFile);
+				  }
+				  var defeatedClass = opp.hasbeendefeated ? ' defeated' : '';
+				  oppHTML += '<img class="opponent-identity-img' + defeatedClass + '" src="' + oppImgSrc + '" data-identity-id="' + oppIdentityId + '"/>';
+			  }
+			  oppHTML += '</div>';
+			  $("#opponentid").html(oppHTML).addClass('collapsed');
+		  } else if (opponentdeckimg != "") {
 			  var oppHTML = '' +
 				'<div class="opponent-header"><span class="opponent-title">Opponent Deck</span><span class="opponent-arrow" aria-hidden="true">&#9660;</span></div>' +
 				'<div class="opponent-body"><img src="'+opponentdeckimg+'"/></div>';

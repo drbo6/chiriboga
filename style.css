@@ -2229,6 +2229,41 @@ select::-ms-expand { display: none; }
 	margin-right:auto;
 }
 
+/* Opponent gallery for multiple opponents */
+#opponentid .opponent-gallery {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: center;
+	gap: 8px;
+	padding: 8px 0;
+}
+
+#opponentid .opponent-identity-img {
+	width: 45px;
+	height: auto;
+	border-radius: 4px;
+	cursor: pointer;
+	transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+	box-shadow: 0 0 6px rgba(122,197,232,0.4);
+	margin: 0;
+}
+
+#opponentid .opponent-identity-img:hover {
+	transform: scale(1.1);
+	box-shadow: 0 0 12px rgba(122,197,232,0.7);
+}
+
+#opponentid .opponent-identity-img.defeated {
+	filter: grayscale(80%) brightness(0.6);
+	opacity: 0.7;
+	box-shadow: 0 0 4px rgba(100,100,100,0.3);
+}
+
+#opponentid .opponent-identity-img.defeated:hover {
+	filter: grayscale(60%) brightness(0.8);
+	opacity: 0.85;
+}
+
 /* Deck launcher responsive styles */
 @media (max-width: 1024px) {
 	#cardcontainer { 
