@@ -13,7 +13,7 @@ var gauntletConfig = {
 
   // ===== STARTING CREDITS =====
   // Number of credits the player starts with in gauntlet mode
-  startingCredits: 15,
+  startingCredits: 25,
 
   // ===== MATCH REWARDS =====
   // Credits awarded or deducted based on game outcomes
@@ -102,16 +102,15 @@ var gauntletConfig = {
     { quantity: 10, cardType: 'resource', matchSubtypes: [], excludeSubtypes: [] },
     
     // Programs - Icebreakers
-    { quantity: 2, cardType: 'program', matchSubtypes: ['Icebreaker', 'Killer'], excludeSubtypes: [] },
-    { quantity: 2, cardType: 'program', matchSubtypes: ['Icebreaker', 'Fracter'], excludeSubtypes: [] },
-    { quantity: 2, cardType: 'program', matchSubtypes: ['Icebreaker', 'Decoder'], excludeSubtypes: [] },
-    { quantity: 1, cardType: 'program', matchSubtypes: ['Icebreaker', 'AI'], excludeSubtypes: [] },
+    { quantity: 1, cardType: 'program', matchSubtypes: ['Icebreaker', 'Killer'], excludeSubtypes: [] },
+    { quantity: 1, cardType: 'program', matchSubtypes: ['Icebreaker', 'Fracter'], excludeSubtypes: [] },
+    { quantity: 1, cardType: 'program', matchSubtypes: ['Icebreaker', 'Decoder'], excludeSubtypes: [] },
     
     // Programs - Other
-    { quantity: 6, cardType: 'program', matchSubtypes: [], excludeSubtypes: ['Icebreaker'] },
+    { quantity: 4, cardType: 'program', matchSubtypes: [], excludeSubtypes: ['Icebreaker'] },
     
     // Events
-    { quantity: 12, cardType: 'event', matchSubtypes: [], excludeSubtypes: [] }
+    { quantity: 8, cardType: 'event', matchSubtypes: [], excludeSubtypes: [] }
   ],
 
   // ===== CARD PACK CONFIGURATIONS =====

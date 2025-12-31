@@ -164,7 +164,7 @@
 				welcomeHtml += '<p style="margin-top: 20px;">Every agenda point that you steal wins you more credits, but every agenda point that the corp scores costs you some of those credits.</p>';
 				welcomeHtml += '<p style="margin-top: 20px;">After your first game, you can no longer change your identity.</p>';							
 				welcomeHtml += '<p style="margin-top: 20px;">To save your progress, simply create a bookmark in your browser.</p>';	
-				welcomeHtml += '<p style="margin-top: 20px;">Good luck!</p>';
+				welcomeHtml += '<p style="margin-top: 20px;">Start by buying card packs from the shop to build your deck. Good luck!</p>';
 				welcomeHtml += '</div>';
 				welcomeHtml += '<div style="display: flex; justify-content: center; margin-top: 0px; width: 100%;"><button class="button" onclick="CloseGauntletWelcomeModal();">CONTINUE</button></div>';
 				welcomeHtml += '</div>';
