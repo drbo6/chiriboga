@@ -776,7 +776,7 @@ function LoadDecks() {
       [], //archivesInstalled
       [35041], //rndInstalled
       [35042], //hqInstalled
-      [[35070,30072,30072,35075, 35063,35074,35080],[30067,35054],[31071, 35053],[31072, 35053, 35076],[35062, 35079]], //remotes (array of arrays)
+      [[35070,30072,30072,35075, 35063,35074,35080],[30067,35064],[31071, 35053],[31072, 35053, 35076],[35062, 35079]], //remotes (array of arrays)
       [35070, 35070, 30068], //scored 35042,35052, 31075
       cardBackTexturesCorp,glowTextures,strengthTextures
     );

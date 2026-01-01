@@ -144,6 +144,7 @@ const replicationCodeBlacklist = [
   
   //on-card properties to ignore (this assumes they will be constant...)
   "abilities",
+  "runnerAbilities",
   "subroutines",
 ];
 
@@ -2793,28 +2794,29 @@ function ChoicesHandInstall(player, ignoreCreditCost = false, cardCheck) {
  * @method ChoicesAbility
  * @param {Card} card the card to get abilities from
  * @param {String} limitTo set to include abilities which check for specific things: 'click': clicks remaining, 'access': accessing a card
+ * @param {String} abilitiesProperty name of the abilities array property (default: "abilities")
  * @returns {Params[]} list of abilities to choose from (each object has .ability, .label, and .choices)
  */
-function ChoicesAbility(card, limitTo = "") {
+function ChoicesAbility(card, limitTo = "", abilitiesProperty = "abilities") {
   var ret = [];
   if (card == null) {
     Log("Card not found for ability");
     return [];
   }
-  if (typeof card.abilities !== "undefined") {
-	if (!CheckHasAbilities(card)) return [];
-    for (var i = 0; i < card.abilities.length; i++) {
+  if (typeof card[abilitiesProperty] !== "undefined") {
+	if (abilitiesProperty === "abilities" && !CheckHasAbilities(card)) return [];
+    for (var i = 0; i < card[abilitiesProperty].length; i++) {
       checkedClick = false;
       checkedAccess = false;
-      var choices = card.abilities[i].Enumerate.call(card);
+      var choices = card[abilitiesProperty][i].Enumerate.call(card);
       var acceptable = true;
       if (limitTo == "click") acceptable = checkedClick;
       else if (limitTo == "access") acceptable = checkedAccess;
       if (acceptable && choices.length > 0) {
         var params = {};
-        params.ability = card.abilities[i];
-        params.label = card.abilities[i].text;
-		if (typeof card.abilities[i].alt != 'undefined') params.alt = card.abilities[i].alt; //if buttons are required
+        params.ability = card[abilitiesProperty][i];
+        params.label = card[abilitiesProperty][i].text;
+		if (typeof card[abilitiesProperty][i].alt != 'undefined') params.alt = card[abilitiesProperty][i].alt; //if buttons are required
         params.choices = choices;
         ret.push(params);
       }
@@ -2908,6 +2910,28 @@ function ChoicesTriggerableAbilities(player, limitTo = "") {
       ret.push(choiceObj);
     }
   }
+  
+  //For Runner, also check for runnerAbilities on Corp cards (e.g. N-Pot)
+  if (player === runner) {
+    var corpCards = ActiveCards(corp);
+    for (var i = 0; i < corpCards.length; i++) {
+      if (typeof corpCards[i].runnerAbilities !== 'undefined') {
+        var abilities = ChoicesAbility(corpCards[i], limitTo, "runnerAbilities");
+        for (var j = 0; j < abilities.length; j++) {
+          var choiceLabel =
+            "(" + GetTitle(corpCards[i], true) + ") " + abilities[j].ability.text;
+          var choiceObj = {
+            card: corpCards[i],
+            ability: abilities[j].ability,
+            label: choiceLabel,
+          };
+          if (typeof abilities[j].ability.alt != 'undefined') choiceObj.alt = abilities[j].ability.alt;
+          ret.push(choiceObj);
+        }
+      }
+    }
+  }
+  
   return ret;
 }
 

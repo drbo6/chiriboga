@@ -818,6 +818,10 @@ function TriggerAbility(card, ability, onTriggerResolve, context) {
     if (player == runner) player = corp;
     else if (player == corp) player = runner;
   }
+  //For runnerAbilities on Corp cards (e.g. N-Pot), the Runner uses the ability
+  if (ability.runnerAbility) {
+    player = runner;
+  }
   return DecisionPhase(
     player,
     choices,

@@ -6861,3 +6861,87 @@ cardSet[35054] = {
     return result;
   },
 };
+
+//N-Pot
+//NBN Ice: Code Gate
+//Rez: 4, Strength: 4, Influence: 2
+//3 credits: Break 1 subroutine on this ice. Only the Runner can use this ability.
+//Sub: End the run.
+//Sub: If the threat level is 2 or greater, end the run.
+//Sub: If the threat level is 4 or greater, end the run.
+cardSet[35064] = {
+  title: "N-Pot",
+  imageFile: "35064.png",
+  player: corp,
+  faction: "NBN",
+  influence: 2,
+  cardType: "ice",
+  rezCost: 4,
+  strength: 4,
+  subTypes: ["Code Gate"],
+  
+  //Runner ability to break subroutines on this ice
+  //This is a special case - a Corp card with a Runner-only ability
+  runnerAbilities: [
+    {
+      text: "Break 1 subroutine on N-Pot",
+      runnerAbility: true, //Flag to indicate this ability is used by Runner, not card owner
+      Enumerate: function () {
+        //Only available during encounter with this ice
+        if (!CheckEncounter()) return [];
+        if (GetApproachEncounterIce() !== this) return [];
+        if (!CheckCredits(runner, 3, "using", this)) return [];
+        return ChoicesEncounteredSubroutines();
+      },
+      Resolve: function (params) {
+        runner.creditPool -= 3;
+        Log("Runner spent 3[c] to break subroutine on N-Pot");
+        Break(params.subroutine);
+      },
+    },
+  ],
+  
+  subroutines: [
+    {
+      text: "End the run.",
+      Resolve: function () {
+        EndTheRun();
+      },
+      visual: { y: 79, h: 16 },
+    },
+    {
+      text: "If the threat level is 2 or greater, end the run.",
+      Resolve: function () {
+        var threatLevel = Math.max(AgendaPoints(corp), AgendaPoints(runner));
+        if (threatLevel >= 2) {
+          EndTheRun();
+        }
+      },
+      visual: { y: 95, h: 22 },
+    },
+    {
+      text: "If the threat level is 4 or greater, end the run.",
+      Resolve: function () {
+        var threatLevel = Math.max(AgendaPoints(corp), AgendaPoints(runner));
+        if (threatLevel >= 4) {
+          EndTheRun();
+        }
+      },
+      visual: { y: 117, h: 22 },
+    },
+  ],
+  
+  AIImplementIce: function(rc, result, maxCorpCred, incomplete) {
+    var threatLevel = Math.max(AgendaPoints(corp), AgendaPoints(runner));
+    
+    //Sub 1 always ETR
+    var sub1 = [["endTheRun"]];
+    //Sub 2 ETR if threat >= 2
+    var sub2 = threatLevel >= 2 ? [["endTheRun"]] : [["nothing"]];
+    //Sub 3 ETR if threat >= 4
+    var sub3 = threatLevel >= 4 ? [["endTheRun"]] : [["nothing"]];
+    
+    result.sr = [sub1, sub2, sub3];
+    return result;
+  },
+};
