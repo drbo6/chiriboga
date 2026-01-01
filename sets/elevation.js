@@ -6383,3 +6383,165 @@ cardSet[35055] = {
     );
   },
 };
+
+//Biawak
+//Weyland Ice: Sentry - Destroyer
+//Rez: 14, Strength: 6, Influence: 3
+//You can forfeit 1 agenda as you rez this ice to pay for 10 credits of its rez cost.
+//Sub: Trash 1 installed program or end the run.
+//Sub: Trash 1 installed resource or end the run.
+//Sub: End the run.
+cardSet[35074] = {
+  title: "Biawak",
+  imageFile: "35074.png",
+  player: corp,
+  faction: "Weyland Consortium",
+  influence: 3,
+  cardType: "ice",
+  rezCost: 14,
+  strength: 6,
+  subTypes: ["Sentry", "Destroyer"],
+  
+  //You can forfeit 1 agenda as you rez this ice to pay for 10 credits of its rez cost.
+  optionalForfeitRezReduction: 10,
+  
+  //Helper for AI decisions
+  AIWouldTrashProgram: function() {
+    var thisServer = GetServer(this);
+    if (corp.AI._agendasInServer(thisServer) > 0) {
+      if (Math.random() < 0.5) return false;
+    }
+    return true;
+  },
+  AIWouldTrashResource: function() {
+    var thisServer = GetServer(this);
+    if (corp.AI._agendasInServer(thisServer) > 0) {
+      if (Math.random() < 0.5) return false;
+    }
+    return true;
+  },
+  
+  subroutines: [
+    {
+      text: "Trash 1 installed program or end the run.",
+      Resolve: function () {
+        var iceCard = this;
+        var choicesA = [];
+        var choicesB = ChoicesInstalledCards(runner, function (card) {
+          if (CheckCardType(card, ["program"]) && CheckTrash(card)) return true;
+          return false;
+        });
+        if (choicesB.length > 0)
+          choicesA.push({
+            id: 0,
+            label: "Trash 1 program",
+            button: "Trash 1 program",
+          });
+        choicesA.push({ id: 1, label: "End the run", button: "End the run" });
+        var decisionCallbackA = function (params) {
+          if (params.id == 0) {
+            var decisionCallbackB = function (params) {
+              Trash(params.card, true);
+            };
+            DecisionPhase(
+              corp,
+              choicesB,
+              decisionCallbackB,
+              "Biawak",
+              "Trash a program",
+              iceCard,
+              "trash"
+            );
+          } else EndTheRun();
+        };
+        DecisionPhase(
+          corp,
+          choicesA,
+          decisionCallbackA,
+          "Biawak",
+          "Biawak",
+          this
+        );
+        //**AI code
+        if (corp.AI != null && choicesA.length > 1) {
+          var choice = choicesA[0]; //trash program by default
+          if (!this.AIWouldTrashProgram()) choice = choicesA[1]; //end the run
+          corp.AI.preferred = { title: "Biawak", option: choice };
+        }
+      },
+      visual: { y: 79, h: 31 },
+    },
+    {
+      text: "Trash 1 installed resource or end the run.",
+      Resolve: function () {
+        var iceCard = this;
+        var choicesA = [];
+        var choicesB = ChoicesInstalledCards(runner, function (card) {
+          if (CheckCardType(card, ["resource"]) && CheckTrash(card)) return true;
+          return false;
+        });
+        if (choicesB.length > 0)
+          choicesA.push({
+            id: 0,
+            label: "Trash 1 resource",
+            button: "Trash 1 resource",
+          });
+        choicesA.push({ id: 1, label: "End the run", button: "End the run" });
+        var decisionCallbackA = function (params) {
+          if (params.id == 0) {
+            var decisionCallbackB = function (params) {
+              Trash(params.card, true);
+            };
+            DecisionPhase(
+              corp,
+              choicesB,
+              decisionCallbackB,
+              "Biawak",
+              "Trash a resource",
+              iceCard,
+              "trash"
+            );
+          } else EndTheRun();
+        };
+        DecisionPhase(
+          corp,
+          choicesA,
+          decisionCallbackA,
+          "Biawak",
+          "Biawak",
+          this
+        );
+        //**AI code
+        if (corp.AI != null && choicesA.length > 1) {
+          var choice = choicesA[0]; //trash resource by default
+          if (!this.AIWouldTrashResource()) choice = choicesA[1]; //end the run
+          corp.AI.preferred = { title: "Biawak", option: choice };
+        }
+      },
+      visual: { y: 110, h: 31 },
+    },
+    {
+      text: "End the run.",
+      Resolve: function () {
+        EndTheRun();
+      },
+      visual: { y: 141, h: 16 },
+    },
+  ],
+  
+  AIImplementIce: function(rc, result, maxCorpCred, incomplete) {
+    var installedPrograms = ChoicesInstalledCards(runner, function (card) {
+      return CheckCardType(card, ["program"]);
+    });
+    var installedResources = ChoicesInstalledCards(runner, function (card) {
+      return CheckCardType(card, ["resource"]);
+    });
+    
+    var sub1 = installedPrograms.length > 0 ? [["misc_serious"]] : [["endTheRun"]];
+    var sub2 = installedResources.length > 0 ? [["misc_serious"]] : [["endTheRun"]];
+    var sub3 = [["endTheRun"]];
+    
+    result.sr = [sub1, sub2, sub3];
+    return result;
+  },
+};

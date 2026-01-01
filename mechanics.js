@@ -93,9 +93,14 @@ function Rez(card, ignoreAllCosts=false, onRezResolve=null, context=null, allowC
   if (!ignoreAllCosts) {
 	//forfeit agenda first if relevant
 	var payCreditsAndRez = function() {
+	  //Calculate rez cost, applying any reduction from optional forfeit
+	  var costToPay = RezCost(card);
+	  if (typeof card._rezReduction === 'number') {
+		costToPay = Math.max(0, costToPay - card._rezReduction);
+	  }
 	  SpendCredits(
 		corp,
-		RezCost(card),
+		costToPay,
 		"rezzing",
 		card,
 		function () {
@@ -111,7 +116,64 @@ function Rez(card, ignoreAllCosts=false, onRezResolve=null, context=null, allowC
 		Cancel();
 	};
 	if (!allowCancel) cancelCallback = undefined;
-	if (card.additionalRezCostForfeitAgenda) {
+	//Optional forfeit to reduce rez cost (e.g. Biawak)
+	if (typeof card.optionalForfeitRezReduction === 'number' && corp.scoreArea.length > 0) {
+		var oldPhase = currentPhase;
+		var oldActivePlayer = activePlayer;
+		var rezReduction = card.optionalForfeitRezReduction;
+		var choices = ChoicesArrayCards(corp.scoreArea);
+		//Add decline option
+		choices.push({
+			card: null,
+			id: choices.length,
+			label: "Pay full rez cost (" + RezCost(card) + "[c])",
+			button: "Pay " + RezCost(card) + "[c]"
+		});
+		//**AI code - forfeit if it saves significant credits and we have a low-value agenda
+		if (corp.AI != null) {
+			var shouldForfeit = false;
+			var lowestPointAgenda = null;
+			var lowestPoints = 999;
+			for (var i = 0; i < corp.scoreArea.length; i++) {
+				var pts = corp.scoreArea[i].agendaPoints || 0;
+				if (pts < lowestPoints) {
+					lowestPoints = pts;
+					lowestPointAgenda = choices[i];
+				}
+			}
+			//Forfeit if reduction is significant (>= 6 credits) and we have a 1-point agenda
+			if (rezReduction >= 6 && lowestPoints <= 1 && lowestPointAgenda) {
+				shouldForfeit = true;
+				corp.AI.preferred = { title: "Rezzing " + card.title, option: lowestPointAgenda };
+			} else {
+				corp.AI.preferred = { title: "Rezzing " + card.title, option: choices[choices.length - 1] };
+			}
+		}
+		DecisionPhase(
+			corp,
+			choices,
+			function(fparams) {
+				if (fparams.card) {
+					//Forfeiting - temporarily reduce rez cost
+					card._rezReduction = rezReduction;
+					Forfeit(fparams.card, function() {
+						payCreditsAndRez();
+						delete card._rezReduction;
+					});
+				} else {
+					//Declined - pay full cost
+					payCreditsAndRez();
+				}
+			},
+			"Rezzing " + card.title,
+			"Forfeit an agenda to reduce rez cost by " + rezReduction + "[c]?",
+			this,
+			"forfeit",
+			cancelCallback
+		);
+	}
+	//Mandatory forfeit (e.g. Archer)
+	else if (card.additionalRezCostForfeitAgenda) {
 		var oldPhase = currentPhase; //in case of cancel
 		var oldActivePlayer = activePlayer; //also for cancel
 		var forfdec = DecisionPhase(

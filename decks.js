@@ -751,7 +751,7 @@ function LoadDecks() {
   // // ----------------------------------------------------------------------------
   // // You can enable the debug menu at the top of init.js
 
-  if (false) { // Use this to easily disable everything below
+  if (true) { // Use this to easily disable everything below
 
      debugging = true; //set true to log extra details and pause execution on error
      viewAllFronts = true; //set true to see all card fronts (for testing)
@@ -764,7 +764,7 @@ function LoadDecks() {
       [30032, 30032, 35009, 35008], //heapCards
       [35015, 35022, 35022, 30033, 35014, 1039, 35030, 35005, 35016, 35034, 35004, 35010, 35007, 35009, 35008, 35029, 35025], //stackCards
       [1030, 1030, 1030, 1030, 1030, 1040, 1035], //gripCards
-      [35028, 30015, 35009, 35020], //installed 
+      [35028, 30015, 35009, 35020, 35022], //installed 
       [], //stolen
       cardBackTexturesRunner,glowTextures,strengthTextures
     );
@@ -776,7 +776,7 @@ function LoadDecks() {
       [], //archivesInstalled
       [35041], //rndInstalled
       [35042], //hqInstalled
-      [[35070,30072,30072,35075, 35063],[30067,35042,35052, 31075],[31071, 35053],[31072, 35053, 35076],[35062, 35079]], //remotes (array of arrays)
+      [[35070,30072,30072,35075, 35063,35074],[30067,35042,35052, 31075],[31071, 35053],[31072, 35053, 35076],[35062, 35079]], //remotes (array of arrays)
       [35070, 30068], //scored
       cardBackTexturesCorp,glowTextures,strengthTextures
     );
@@ -808,14 +808,14 @@ function LoadDecks() {
     // // GIVE EVERYONE SOME CREDITS TO START WITH
     // // ----------------------------------------
 
-    GainCredits(runner,25);
+    // GainCredits(runner,25);
     GainCredits(corp,25);
     
     // // SET THE PHASE
     // // -------------
 
-    // ChangePhase(phases.runnerStartResponse); // Runner starts turn
-    ChangePhase(phases.corpStartDraw);    
+    ChangePhase(phases.runnerStartResponse); // Runner starts turn
+    // ChangePhase(phases.corpStartDraw);    
 
     // // OTHER STUFF
     // // -----------
@@ -834,8 +834,8 @@ function LoadDecks() {
     // // RUN REMOTE
     // // ----------
 
-    // attackedServer = corp.remoteServers[4];    
-    // MakeRun(corp.remoteServers[4]); // Run remote
+    attackedServer = corp.remoteServers[0];    
+    MakeRun(corp.remoteServers[0]); // Run remote
 
     // // INSTALL TROJAN (requires setting it on the ice and then hosting it)
     // // -------------------------------------------------------------------
