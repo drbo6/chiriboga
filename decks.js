@@ -812,8 +812,8 @@ function LoadDecks() {
     // // SET THE PHASE
     // // -------------
 
-    // ChangePhase(phases.runnerStartResponse); // Runner starts turn
-    ChangePhase(phases.corpStartDraw);    
+    ChangePhase(phases.runnerStartResponse); // Runner starts turn
+    // ChangePhase(phases.corpStartDraw);    
 
     // // OTHER STUFF
     // // -----------
@@ -832,14 +832,15 @@ function LoadDecks() {
     // // RUN REMOTE
     // // ----------
 
-    // attackedServer = corp.remoteServers[1];    
-    // MakeRun(corp.remoteServers[1]); // Run remote
+    attackedServer = corp.remoteServers[4];    
+    MakeRun(corp.remoteServers[4]); // Run remote
 
     // // INSTALL TROJAN (requires setting it on the ice and then hosting it)
     // // -------------------------------------------------------------------
 
-    // corp.remoteServers[0].ice[2].hostedCards = [];
-    // InstanceCardsPush(30004, corp.remoteServers[0].ice[2].hostedCards, 1, cardBackTexturesCorp, glowTextures, strengthTextures)[0].host = corp.remoteServers[0].ice[2];
+    corp.remoteServers[0].ice[2].hostedCards = [];
+    InstanceCardsPush(30004, corp.remoteServers[0].ice[2].hostedCards, 1, cardBackTexturesCorp, glowTextures, strengthTextures)[0].host = corp.remoteServers[0].ice[2];
+    corp.remoteServers[0].ice[2].hostedCards[0].virus = 2;
   
     // // TO FORCE THE AI TO PLAY CARDS / MAKE DECISIONS, set preferred property on runner.AI or corp.AI
     // // ----------------------------------------------------------------------------------------------
