@@ -5621,21 +5621,14 @@ cardSet[35070] = {
     automatic: true,
   },
   //When you forfeit this agenda, gain 4[credit].
-  //Implemented as an ability since there's no responseOnForfeit trigger
-  abilities: [
-    {
-      text: "Forfeit Greenmail: Gain 4[c].",
-      Enumerate: function() {
-        //Only available when this agenda is in Corp's score area
-        if (!corp.scoreArea.includes(this)) return [];
-        return [{}];
-      },
-      Resolve: function() {
-        Forfeit(this);
-        GainCredits(corp, 4);
-      },
+  //Uses automaticOnForfeit trigger added to Forfeit() in mechanics.js
+  automaticOnForfeit: {
+    Resolve: function(card) {
+      //Only trigger if this card was forfeited
+      if (card !== this) return;
+      GainCredits(corp, 4);
     },
-  ],
+  },
   //AI: Consider forfeiting if desperately need credits for a key rez
   AIWouldTrigger: function() {
     //Forfeit if very low on credits and have important ice to rez

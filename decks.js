@@ -776,8 +776,8 @@ function LoadDecks() {
       [], //archivesInstalled
       [35041], //rndInstalled
       [35042], //hqInstalled
-      [[30068,30072,30072,35075, 35063],[30068,35042,35052],[35070, 35053],[35061, 35053, 35076],[35062, 35079]], //remotes (array of arrays)
-      [35037], //scored
+      [[35070,30072,30072,35075, 35063],[30068,35042,35052, 31075],[35070, 35053],[35061, 35053, 35076],[35062, 35079]], //remotes (array of arrays)
+      [35070, 30068], //scored
       cardBackTexturesCorp,glowTextures,strengthTextures
     );
 
@@ -812,8 +812,8 @@ function LoadDecks() {
     // // SET THE PHASE
     // // -------------
 
-    ChangePhase(phases.runnerStartResponse); // Runner starts turn
-    // ChangePhase(phases.corpStartDraw);    
+    // ChangePhase(phases.runnerStartResponse); // Runner starts turn
+    ChangePhase(phases.corpStartDraw);    
 
     // // OTHER STUFF
     // // -----------
@@ -832,8 +832,8 @@ function LoadDecks() {
     // // RUN REMOTE
     // // ----------
 
-    attackedServer = corp.remoteServers[1];    
-    MakeRun(corp.remoteServers[1]); // Run remote
+    // attackedServer = corp.remoteServers[1];    
+    // MakeRun(corp.remoteServers[1]); // Run remote
 
     // // INSTALL TROJAN (requires setting it on the ice and then hosting it)
     // // -------------------------------------------------------------------

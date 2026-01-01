@@ -201,6 +201,10 @@ function RemoveFromGame(card) {
  * @param {Card} card the card to forfeit
  */
 function Forfeit(card) {
+  //Trigger automaticOnForfeit BEFORE moving the card (so it's still in scoreArea and active)
+  //This allows cards like Greenmail to gain credits when forfeited
+  AutomaticTriggers("automaticOnForfeit", [card]);
+  
   card.host = null;
   MoveCard(card, removedFromGame);
   Log(GetTitle(card, true) + " forfeited");
