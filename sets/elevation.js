@@ -5768,11 +5768,15 @@ cardSet[35062] = {
   
   //Track if card was rezzed when trashed (for the tag condition)
   wasRezzedWhenTrashed: false,
+  wasBeingAccessed: false,
   
   automaticOnWouldTrash: {
     Resolve: function(cards) {
       if (cards.includes(this)) {
         this.wasRezzedWhenTrashed = this.rezzed;
+        //Check if this card was being accessed when trashed
+        this.wasBeingAccessed = (typeof accessingCard !== 'undefined' && accessingCard === this);
+        console.log("PAP automaticOnWouldTrash: rezzed=" + this.wasRezzedWhenTrashed + ", wasBeingAccessed=" + this.wasBeingAccessed + ", accessingCard=" + (typeof accessingCard !== 'undefined' ? accessingCard : "undefined"));
       }
     },
   },
@@ -5780,15 +5784,17 @@ cardSet[35062] = {
   //Threat 2 → When the Runner trashes this asset (while it is rezzed), give them 1 tag.
   responseOnTrash: {
     Enumerate: function(cards) {
+      console.log("PAP responseOnTrash Enumerate: cards.includes(this)=" + cards.includes(this) + ", wasRezzedWhenTrashed=" + this.wasRezzedWhenTrashed + ", wasBeingAccessed=" + this.wasBeingAccessed);
       //Check if this card was trashed
       if (!cards.includes(this)) return [];
-      //Check threat level (Runner has 2+ agenda points)
-      if (AgendaPoints(runner) < 2) return [];
+      //Check threat level (max of both players' agenda points >= 2)
+      var threatLevel = Math.max(AgendaPoints(corp), AgendaPoints(runner));
+      console.log("PAP responseOnTrash: threatLevel=" + threatLevel);
+      if (threatLevel < 2) return [];
       //Check if it was rezzed when trashed
       if (!this.wasRezzedWhenTrashed) return [];
-      //Check if Runner trashed it (during access)
-      if (typeof accessingCard === 'undefined' || accessingCard === null) return [];
-      if (accessingCard !== this) return [];
+      //Check if Runner trashed it (was being accessed)
+      if (!this.wasBeingAccessed) return [];
       return [{}];
     },
     Resolve: function(params) {
@@ -5796,6 +5802,7 @@ cardSet[35062] = {
       Log("Public Access Plaza gives the Runner 1 tag (Threat 2)");
     },
     automatic: true,
+    availableWhenInactive: true, //Card is in Archives when this fires
   },
   
   RezUsability: function() {
