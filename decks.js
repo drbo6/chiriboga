@@ -751,10 +751,10 @@ function LoadDecks() {
   // // ----------------------------------------------------------------------------
   // // You can enable the debug menu at the top of init.js
 
-  if (true) { // Use this to easily disable everything below
+  if (false) { // Use this to easily disable everything below
 
      debugging = true; //set true to log extra details and pause execution on error
-     // viewAllFronts = true; //set true to see all card fronts (for testing)
+     viewAllFronts = true; //set true to see all card fronts (for testing)
      mainLoopDelay = 50; //for speedy AI vs AI testing (any faster than this and funny things happen at end-of-game)
 
     // SET UP THE MAIN STATES FOR THE RUNNER AND CORP
@@ -776,7 +776,7 @@ function LoadDecks() {
       [], //archivesInstalled
       [35041], //rndInstalled
       [35042], //hqInstalled
-      [[35070,30072,30072,35075, 35063,35074,35080],[30067,35064],[31071, 35053],[31072, 35053, 35076],[35062, 35079]], //remotes (array of arrays)
+      [[35070,35079,35064, 35063,35052,35074,35080,35076],[30067,35064],[31071, 35053],[31072, 35053, 35076],[35062, 35079]], //remotes (array of arrays)
       [35070, 35070, 30068], //scored 35042,35052, 31075
       cardBackTexturesCorp,glowTextures,strengthTextures
     );
@@ -808,8 +808,8 @@ function LoadDecks() {
     // // GIVE EVERYONE SOME CREDITS TO START WITH
     // // ----------------------------------------
 
-    GainCredits(runner,25);
-    GainCredits(corp,25);
+    GainCredits(runner,75);
+    GainCredits(corp,75);
     
     // // SET THE PHASE
     // // -------------

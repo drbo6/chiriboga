@@ -5482,7 +5482,7 @@ cardSet[35052] = {
           );
         });
       },
-      visual: { y: 57, h: 31 },
+      visual: { y: 59, h: 32 },
     },
     {
       text: "Do 1 net damage. Give the Runner 1 tag.",
@@ -5491,14 +5491,14 @@ cardSet[35052] = {
           AddTags(1);
         });
       },
-      visual: { y: 92, h: 16 },
+      visual: { y: 94, h: 32 },
     },
     {
       text: "Do 2 net damage.",
       Resolve: function() {
         Damage("net", 2, true);
       },
-      visual: { y: 112, h: 16 },
+      visual: { y: 121, h: 16 },
     },
   ],
   AIImplementIce: function(rc, result, maxCorpCred, incomplete) {
@@ -5539,14 +5539,14 @@ cardSet[35063] = {
       Resolve: function() {
         AddTags(1);
       },
-      visual: { y: 57, h: 16 },
+      visual: { y: 51, h: 16 },
     },
     {
       text: "Do 1 net damage.",
       Resolve: function() {
         Damage("net", 1, true);
       },
-      visual: { y: 73, h: 16 },
+      visual: { y: 71, h: 16 },
     },
     {
       text: "Do 2 net damage if the Runner has at least 2 tags.",
@@ -5557,7 +5557,7 @@ cardSet[35063] = {
           Log("Runner does not have 2 tags");
         }
       },
-      visual: { y: 89, h: 31 },
+      visual: { y: 99, h: 32 },
     },
   ],
   AIImplementIce: function(rc, result, maxCorpCred, incomplete) {
@@ -5964,21 +5964,21 @@ cardSet[35076] = {
           cardRef
         );
       },
-      visual: { y: 89, h: 31 },
+      visual: { y: 137, h: 32 },
     },
     {
       text: "The Runner loses 2[credit].",
       Resolve: function() {
         LoseCredits(runner, 2);
       },
-      visual: { y: 124, h: 16 },
+      visual: { y: 161, h: 16 },
     },
     {
       text: "Do 1 net damage.",
       Resolve: function() {
         Damage("net", 1, true);
       },
-      visual: { y: 144, h: 16 },
+      visual: { y: 180, h: 16 },
     },
   ],
   
@@ -6048,7 +6048,7 @@ cardSet[35079] = {
       Resolve: function() {
         EndTheRun();
       },
-      visual: { y: 80, h: 16 },
+      visual: { y: 88, h: 16 },
     },
   ],
   
@@ -6469,7 +6469,7 @@ cardSet[35074] = {
           corp.AI.preferred = { title: "Biawak", option: choice };
         }
       },
-      visual: { y: 79, h: 31 },
+      visual: { y: 86, h: 16 },
     },
     {
       text: "Trash 1 installed resource or end the run.",
@@ -6518,14 +6518,14 @@ cardSet[35074] = {
           corp.AI.preferred = { title: "Biawak", option: choice };
         }
       },
-      visual: { y: 110, h: 31 },
+      visual: { y: 106, h: 16 },
     },
     {
       text: "End the run.",
       Resolve: function () {
         EndTheRun();
       },
-      visual: { y: 141, h: 16 },
+      visual: { y: 125, h: 16 },
     },
   ],
   
@@ -6764,7 +6764,7 @@ cardSet[35080] = {
           this
         );
       },
-      visual: { y: 79, h: 31 },
+      visual: { y: 94, h: 36 },
     },
     {
       text: "End the run if the Runner is tagged.",
@@ -6773,7 +6773,7 @@ cardSet[35080] = {
           EndTheRun();
         }
       },
-      visual: { y: 110, h: 16 },
+      visual: { y: 120, h: 16 },
     },
   ],
   
@@ -6845,7 +6845,7 @@ cardSet[35054] = {
           this
         );
       },
-      visual: { y: 79, h: 31 },
+      visual: { y: 109, h: 32 },
     },
   ],
   
@@ -6907,7 +6907,7 @@ cardSet[35064] = {
       Resolve: function () {
         EndTheRun();
       },
-      visual: { y: 79, h: 16 },
+      visual: { y: 86, h: 16 },
     },
     {
       text: "If the threat level is 2 or greater, end the run.",
@@ -6917,7 +6917,7 @@ cardSet[35064] = {
           EndTheRun();
         }
       },
-      visual: { y: 95, h: 22 },
+      visual: { y: 114, h: 29 },
     },
     {
       text: "If the threat level is 4 or greater, end the run.",
@@ -6927,7 +6927,7 @@ cardSet[35064] = {
           EndTheRun();
         }
       },
-      visual: { y: 117, h: 22 },
+      visual: { y: 148, h: 29 },
     },
   ],
   
