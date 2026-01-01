@@ -5406,3 +5406,819 @@ cardSet[35024] = {
     return null;
   },
 };
+
+//Empiricist
+//Jinteki Ice: Code Gate - AP
+//Rez: 7, Strength: 5
+//[sub] Draw 1 card. You may add 1 card from HQ to the top of R&D.
+//[sub] Do 1 net damage. Give the Runner 1 tag.
+//[sub] Do 2 net damage.
+cardSet[35052] = {
+  title: "Empiricist",
+  imageFile: "35052.png",
+  player: corp,
+  faction: "Jinteki",
+  influence: 3,
+  cardType: "ice",
+  subTypes: ["Code Gate", "AP"],
+  rezCost: 7,
+  strength: 5,
+  subroutines: [
+    {
+      text: "Draw 1 card. You may add 1 card from HQ to the top of R&D.",
+      Resolve: function() {
+        var cardRef = this;
+        Draw(corp, 1, function() {
+          //After drawing, offer to add card from HQ to top of R&D
+          if (corp.HQ.cards.length === 0) return;
+          
+          var choices = ChoicesHandCards(corp);
+          
+          //Add server to each option for drag-and-drop on R&D
+          choices.forEach(function(item) {
+            item.server = corp.RnD;
+          });
+          
+          //Add decline option
+          choices.push({ card: null, label: "Decline", button: "Decline" });
+          
+          //**AI code
+          if (corp.AI != null) {
+            //AI prefers to put back agendas if HQ is vulnerable, or low-value cards
+            var bestChoice = null;
+            var agendaInHQ = null;
+            for (var i = 0; i < choices.length - 1; i++) {
+              var card = choices[i].card;
+              if (CheckCardType(card, ["agenda"])) {
+                agendaInHQ = choices[i];
+              }
+            }
+            //Put agenda on R&D if runner might access HQ soon
+            if (agendaInHQ && corp.HQ.ice.length < 2) {
+              bestChoice = agendaInHQ;
+            }
+            if (bestChoice) {
+              choices = [bestChoice];
+            } else {
+              //Decline by default
+              choices = [{ card: null, label: "Decline", button: "Decline" }];
+            }
+          }
+          
+          DecisionPhase(
+            corp,
+            choices,
+            function(params) {
+              if (params.card !== null) {
+                //Move card from HQ to top of R&D using MoveCard
+                var cardTitle = GetTitle(params.card);
+                MoveCard(params.card, corp.RnD.cards); //top of R&D (end of array)
+                Log(cardTitle + " added to top of R&D");
+              }
+            },
+            "Empiricist",
+            "Add card from HQ to top of R&D?",
+            cardRef,
+            null, //no special type
+            null, //no cancel callback
+            "Drag to R&D" //footerText for drag-and-drop instruction
+          );
+        });
+      },
+      visual: { y: 57, h: 31 },
+    },
+    {
+      text: "Do 1 net damage. Give the Runner 1 tag.",
+      Resolve: function() {
+        Damage("net", 1, true, function() {
+          AddTags(1);
+        });
+      },
+      visual: { y: 92, h: 16 },
+    },
+    {
+      text: "Do 2 net damage.",
+      Resolve: function() {
+        Damage("net", 2, true);
+      },
+      visual: { y: 112, h: 16 },
+    },
+  ],
+  AIImplementIce: function(rc, result, maxCorpCred, incomplete) {
+    //Sub 1: draw + optional R&D top (misc benefit)
+    //Sub 2: 1 net damage + 1 tag
+    //Sub 3: 2 net damage
+    result.sr = [
+      [["misc_moderate"]],
+      [["netDamage"], ["tag"]],
+      [["netDamage", "netDamage"]]
+    ];
+    return result;
+  },
+  AIRezReasons: function() {
+    return { facecheck: true, damage: true };
+  },
+};
+
+//Doomscroll
+//NBN Ice: Sentry
+//Rez: 3, Strength: 3
+//[sub] Give the Runner 1 tag.
+//[sub] Do 1 net damage.
+//[sub] Do 2 net damage if the Runner has at least 2 tags.
+cardSet[35063] = {
+  title: "Doomscroll",
+  imageFile: "35063.png",
+  player: corp,
+  faction: "NBN",
+  influence: 2,
+  cardType: "ice",
+  subTypes: ["Sentry"],
+  rezCost: 3,
+  strength: 3,
+  subroutines: [
+    {
+      text: "Give the Runner 1 tag.",
+      Resolve: function() {
+        AddTags(1);
+      },
+      visual: { y: 57, h: 16 },
+    },
+    {
+      text: "Do 1 net damage.",
+      Resolve: function() {
+        Damage("net", 1, true);
+      },
+      visual: { y: 73, h: 16 },
+    },
+    {
+      text: "Do 2 net damage if the Runner has at least 2 tags.",
+      Resolve: function() {
+        if (CheckTags(2)) {
+          Damage("net", 2, true);
+        } else {
+          Log("Runner does not have 2 tags");
+        }
+      },
+      visual: { y: 89, h: 31 },
+    },
+  ],
+  AIImplementIce: function(rc, result, maxCorpCred, incomplete) {
+    //Sub 1: tag
+    //Sub 2: 1 net damage
+    //Sub 3: conditional 2 net damage (if 2+ tags)
+    //If runner already tagged, sub 3 is very dangerous
+    if (CheckTags(2)) {
+      result.sr = [
+        [["tag"]],
+        [["netDamage"]],
+        [["netDamage", "netDamage"]]
+      ];
+    } else if (CheckTags(1)) {
+      //Runner has 1 tag - if sub 1 fires first, sub 3 becomes active
+      result.sr = [
+        [["tag"]],
+        [["netDamage"]],
+        [["netDamage", "netDamage"]]
+      ];
+    } else {
+      //Runner not tagged - sub 3 won't fire unless sub 1 does first
+      result.sr = [
+        [["tag"]],
+        [["netDamage"]],
+        [["misc_minor"]]  //conditional, may not fire
+      ];
+    }
+    return result;
+  },
+  AIRezReasons: function() {
+    //Better value if runner is already tagged
+    if (CheckTags(1)) {
+      return { facecheck: true, damage: true, tag: true };
+    }
+    return { facecheck: true, tag: true };
+  },
+};
+
+//Greenmail
+//Weyland Agenda: Security
+//Advancement: 2, Points: 1
+//When you score this agenda, gain 2[credit].
+//When you forfeit this agenda, gain 4[credit].
+cardSet[35070] = {
+  title: "Greenmail",
+  imageFile: "35070.png",
+  player: corp,
+  faction: "Weyland Consortium",
+  cardType: "agenda",
+  subTypes: ["Security"],
+  agendaPoints: 1,
+  advancementRequirement: 2,
+  //When you score this agenda, gain 2[credit].
+  responseOnScored: {
+    Resolve: function() {
+      if (intended.score == this) {
+        GainCredits(corp, 2);
+      }
+    },
+    automatic: true,
+  },
+  //When you forfeit this agenda, gain 4[credit].
+  //Implemented as an ability since there's no responseOnForfeit trigger
+  abilities: [
+    {
+      text: "Forfeit Greenmail: Gain 4[c].",
+      Enumerate: function() {
+        //Only available when this agenda is in Corp's score area
+        if (!corp.scoreArea.includes(this)) return [];
+        return [{}];
+      },
+      Resolve: function() {
+        Forfeit(this);
+        GainCredits(corp, 4);
+      },
+    },
+  ],
+  //AI: Consider forfeiting if desperately need credits for a key rez
+  AIWouldTrigger: function() {
+    //Forfeit if very low on credits and have important ice to rez
+    if (Credits(corp) < 3) {
+      //Check if there's unrezzed ice that could be rezzed with 4 more credits
+      var allServers = [corp.HQ, corp.RnD, corp.archives].concat(corp.remoteServers);
+      for (var s = 0; s < allServers.length; s++) {
+        for (var i = 0; i < allServers[s].ice.length; i++) {
+          var ice = allServers[s].ice[i];
+          if (!ice.rezzed && RezCost(ice) <= Credits(corp) + 4) {
+            return true;
+          }
+        }
+      }
+    }
+    //Forfeit if we have many scored agendas and this is just 1 point
+    if (AgendaPoints(corp) >= 5 && corp.scoreArea.length >= 3) {
+      return true;
+    }
+    return false;
+  },
+};
+
+//Idiosyncresis
+//NBN Asset
+//Rez: 1, Trash: 2
+//You can advance this asset.
+//When your turn begins, you may trash this asset. If you do, for each hosted 
+//advancement counter, gain 3[credit] and the Runner loses 2[credit].
+cardSet[35061] = {
+  title: "Idiosyncresis",
+  imageFile: "35061.png",
+  player: corp,
+  faction: "NBN",
+  influence: 2,
+  cardType: "asset",
+  rezCost: 1,
+  trashCost: 2,
+  canBeAdvanced: true,
+  advancement: 0,
+  
+  //When your turn begins, you may trash this asset for credits
+  responseOnCorpTurnBegins: {
+    Enumerate: function() {
+      //Only offer if there's at least 1 advancement counter
+      if (CheckCounters(this, "advancement", 1)) return [{}];
+      return [];
+    },
+    Resolve: function(params) {
+      var advCounters = Counters(this, "advancement");
+      var creditsToGain = advCounters * 3;
+      var creditsToLose = advCounters * 2;
+      
+      var cardRef = this;
+      var binaryChoices = BinaryDecision(
+        corp,
+        "Gain " + creditsToGain + "[c], Runner loses " + creditsToLose + "[c]",
+        "Decline",
+        "Idiosyncresis",
+        this,
+        function() {
+          Trash(
+            cardRef,
+            false,  //cannot be prevented (it's a cost)
+            function(cardsTrashed) {
+              GainCredits(corp, creditsToGain);
+              LoseCredits(runner, creditsToLose);
+            },
+            cardRef
+          );
+        }
+      );
+      
+      //**AI code
+      if (corp.AI != null) {
+        var choice = binaryChoices[0]; //activate by default
+        if (!cardRef.AIWouldTrigger()) choice = binaryChoices[1];
+        corp.AI.preferred = { title: "Idiosyncresis", option: choice };
+      }
+    },
+    text: "Trash for credits",
+  },
+  
+  //AI: Should we trigger the ability?
+  AIWouldTrigger: function() {
+    var advCounters = Counters(this, "advancement");
+    //Always trigger if we have advancement counters (net gain of 3 per counter is great)
+    if (advCounters >= 1) return true;
+    return false;
+  },
+  
+  //AI: How many advancement counters to put on this
+  AIAdvancementLimit: function() {
+    //Cap at a reasonable number - diminishing returns after a point
+    //3-4 counters = 9-12 credits gain, 6-8 runner credit loss
+    return 4;
+  },
+  
+  //AI: Should we over-advance past the limit?
+  AIOverAdvance: false,
+  
+  //AI: Rush to finish advancing if possible
+  AIRushToFinish: function() {
+    //Rush if the server is well-protected
+    return (corp.AI._serverToProtect() != GetServer(this));
+  },
+  
+  RezUsability: function() {
+    //Can rez during runner's turn for defense
+    if (currentPhase.identifier == "Runner 2.2") return true;
+    return false;
+  },
+};
+
+//Public Access Plaza
+//NBN Asset
+//Rez: 1, Trash: 2
+//When your turn begins, gain 1[credit].
+//Threat 2 → When the Runner trashes this asset (while it is rezzed), give them 1 tag.
+cardSet[35062] = {
+  title: "Public Access Plaza",
+  imageFile: "35062.png",
+  player: corp,
+  faction: "NBN",
+  influence: 1,
+  cardType: "asset",
+  rezCost: 1,
+  trashCost: 2,
+  
+  //When your turn begins, gain 1[credit].
+  responseOnCorpTurnBegins: {
+    Resolve: function(params) {
+      GainCredits(corp, 1);
+    },
+    automatic: true,
+  },
+  
+  //Track if card was rezzed when trashed (for the tag condition)
+  wasRezzedWhenTrashed: false,
+  
+  automaticOnWouldTrash: {
+    Resolve: function(cards) {
+      if (cards.includes(this)) {
+        this.wasRezzedWhenTrashed = this.rezzed;
+      }
+    },
+  },
+  
+  //Threat 2 → When the Runner trashes this asset (while it is rezzed), give them 1 tag.
+  responseOnTrash: {
+    Enumerate: function(cards) {
+      //Check if this card was trashed
+      if (!cards.includes(this)) return [];
+      //Check threat level (Runner has 2+ agenda points)
+      if (AgendaPoints(runner) < 2) return [];
+      //Check if it was rezzed when trashed
+      if (!this.wasRezzedWhenTrashed) return [];
+      //Check if Runner trashed it (during access)
+      if (typeof accessingCard === 'undefined' || accessingCard === null) return [];
+      if (accessingCard !== this) return [];
+      return [{}];
+    },
+    Resolve: function(params) {
+      AddTags(1);
+      Log("Public Access Plaza gives the Runner 1 tag (Threat 2)");
+    },
+    automatic: true,
+  },
+  
+  RezUsability: function() {
+    if (currentPhase.identifier == "Runner 2.2") return true;
+    return false;
+  },
+  
+  AIAvoidInstallingOverThis: true,
+  
+  //AI: Worth installing as economy
+  AIWorthInstalling: function(emptyProtectedRemotes) {
+    //Install if we need economy
+    if (!corp.AI._sufficientEconomy(false) || this.cardLocation == corp.archives.cards) {
+      //Choose the first non-scoring server
+      for (var j = 0; j < emptyProtectedRemotes.length; j++) {
+        if (!corp.AI._isAScoringServer(emptyProtectedRemotes[j])) return j;
+      }
+      return emptyProtectedRemotes.length;
+    }
+    return -1;
+  },
+};
+
+//Syailendra
+//Weyland Ice: Barrier
+//Rez: 4, Strength: 5
+//You can advance this ice.
+//When the Runner encounters this ice, if it has 3 or more hosted advancement counters, 
+//you may place 1 advancement counter on an installed card you can advance.
+//[sub] You may place 1 advancement counter on an installed card you can advance.
+//[sub] The Runner loses 2[credit].
+//[sub] Do 1 net damage.
+cardSet[35076] = {
+  title: "Syailendra",
+  imageFile: "35076.png",
+  player: corp,
+  faction: "Weyland Consortium",
+  influence: 2,
+  cardType: "ice",
+  subTypes: ["Barrier"],
+  rezCost: 4,
+  strength: 5,
+  canBeAdvanced: true,
+  advancement: 0,
+  
+  //When the Runner encounters this ice, if it has 3+ advancement counters,
+  //you may place 1 advancement counter on an installed card you can advance.
+  responseOnEncounter: {
+    Enumerate: function(card) {
+      if (card !== this) return [];
+      if (!CheckCounters(this, "advancement", 3)) return [];
+      //Check if there are advanceable cards
+      var advanceableCards = ChoicesInstalledCards(corp, function(c) {
+        return CheckAdvance(c);
+      });
+      if (advanceableCards.length === 0) return [];
+      return [{}];
+    },
+    Resolve: function(params) {
+      var cardRef = this;
+      var advanceableCards = ChoicesInstalledCards(corp, function(c) {
+        return CheckAdvance(c);
+      });
+      
+      //Add decline option
+      advanceableCards.push({ card: null, label: "Decline", button: "Decline" });
+      
+      //**AI code
+      if (corp.AI != null) {
+        //Prefer to advance agendas that can be scored soon
+        var bestTarget = null;
+        for (var i = 0; i < advanceableCards.length - 1; i++) {
+          var target = advanceableCards[i].card;
+          if (CheckCardType(target, ["agenda"])) {
+            if (corp.AI._cardShouldBeFastAdvanced(target)) {
+              bestTarget = advanceableCards[i];
+              break;
+            }
+          }
+        }
+        if (bestTarget) {
+          advanceableCards = [bestTarget];
+        } else {
+          //Decline if no good target
+          advanceableCards = [{ card: null, label: "Decline", button: "Decline" }];
+        }
+      }
+      
+      DecisionPhase(
+        corp,
+        advanceableCards,
+        function(targetParams) {
+          if (targetParams.card !== null) {
+            AddCounters(targetParams.card, "advancement", 1);
+            Log("Syailendra places 1 advancement counter on " + GetTitle(targetParams.card, true));
+          }
+        },
+        "Syailendra",
+        "Place advancement counter?",
+        cardRef
+      );
+    },
+    text: "Place advancement counter (3+ counters)",
+  },
+  
+  subroutines: [
+    {
+      text: "You may place 1 advancement counter on an installed card you can advance.",
+      Resolve: function() {
+        var cardRef = this;
+        var advanceableCards = ChoicesInstalledCards(corp, function(c) {
+          return CheckAdvance(c);
+        });
+        
+        if (advanceableCards.length === 0) {
+          Log("No advanceable cards installed");
+          return;
+        }
+        
+        //Add decline option
+        advanceableCards.push({ card: null, label: "Decline", button: "Decline" });
+        
+        //**AI code
+        if (corp.AI != null) {
+          var bestTarget = null;
+          for (var i = 0; i < advanceableCards.length - 1; i++) {
+            var target = advanceableCards[i].card;
+            if (CheckCardType(target, ["agenda"])) {
+              if (corp.AI._cardShouldBeFastAdvanced(target)) {
+                bestTarget = advanceableCards[i];
+                break;
+              }
+            }
+          }
+          //Also consider advancing this ice if no good agenda target
+          if (!bestTarget) {
+            for (var i = 0; i < advanceableCards.length - 1; i++) {
+              if (advanceableCards[i].card === cardRef) {
+                bestTarget = advanceableCards[i];
+                break;
+              }
+            }
+          }
+          if (bestTarget) {
+            advanceableCards = [bestTarget];
+          } else {
+            advanceableCards = [{ card: null, label: "Decline", button: "Decline" }];
+          }
+        }
+        
+        DecisionPhase(
+          corp,
+          advanceableCards,
+          function(targetParams) {
+            if (targetParams.card !== null) {
+              AddCounters(targetParams.card, "advancement", 1);
+              Log("Syailendra places 1 advancement counter on " + GetTitle(targetParams.card, true));
+            }
+          },
+          "Syailendra",
+          "Place advancement counter?",
+          cardRef
+        );
+      },
+      visual: { y: 89, h: 31 },
+    },
+    {
+      text: "The Runner loses 2[credit].",
+      Resolve: function() {
+        LoseCredits(runner, 2);
+      },
+      visual: { y: 124, h: 16 },
+    },
+    {
+      text: "Do 1 net damage.",
+      Resolve: function() {
+        Damage("net", 1, true);
+      },
+      visual: { y: 144, h: 16 },
+    },
+  ],
+  
+  //AI: How many advancement counters to put on this
+  AIAdvancementLimit: function() {
+    //Only advance once rezzed to preserve secrecy
+    if (!this.rezzed) return 0;
+    //Aim for 3 counters to activate the encounter ability
+    return 3;
+  },
+  
+  AIImplementIce: function(rc, result, maxCorpCred, incomplete) {
+    //Sub 1: advancement placement (minor benefit)
+    //Sub 2: Runner loses 2 credits
+    //Sub 3: 1 net damage
+    result.sr = [
+      [["misc_minor"]],
+      [["loseCredits", "loseCredits"]],
+      [["netDamage"]]
+    ];
+    //If fully advanced, encounter effect adds value
+    if (CheckCounters(this, "advancement", 3)) {
+      result.encounterEffects = [["misc_moderate"]];
+    }
+    return result;
+  },
+  
+  AIRezReasons: function() {
+    return { facecheck: true, etr: false, taxing: true };
+  },
+};
+
+//Flyswatter
+//Neutral Corp Ice: Barrier
+//Rez: 2, Strength: 0
+//When you rez this ice during a run against this server, purge virus counters.
+//[sub] End the run.
+cardSet[35079] = {
+  title: "Flyswatter",
+  imageFile: "35079.png",
+  player: corp,
+  faction: "Neutral",
+  influence: 0,
+  cardType: "ice",
+  subTypes: ["Barrier"],
+  rezCost: 2,
+  strength: 0,
+  
+  //When you rez this ice during a run against this server, purge virus counters.
+  responseOnRez: {
+    Enumerate: function(card) {
+      if (card !== this) return [];
+      //Must be during a run against this server
+      if (attackedServer === null) return [];
+      if (attackedServer !== GetServer(this)) return [];
+      return [{}];
+    },
+    Resolve: function(params) {
+      Purge();
+    },
+    automatic: true,
+  },
+  
+  subroutines: [
+    {
+      text: "End the run.",
+      Resolve: function() {
+        EndTheRun();
+      },
+      visual: { y: 80, h: 16 },
+    },
+  ],
+  
+  AIImplementIce: function(rc, result, maxCorpCred, incomplete) {
+    result.sr = [[["endTheRun"]]];
+    return result;
+  },
+  
+  AIRezReasons: function() {
+    return { facecheck: true, etr: true };
+  },
+  
+  //AI: Prefer rezzing this when viruses are a problem
+  AIRezForFree: function() {
+    //Only rez for free if in attacked server
+    if (attackedServer !== GetServer(this)) return false;
+    //Extra incentive to rez if there are virus counters to purge
+    var virusCounters = 0;
+    var installedRunnerCards = InstalledCards(runner);
+    for (var i = 0; i < installedRunnerCards.length; i++) {
+      if (typeof installedRunnerCards[i].virus !== 'undefined') {
+        virusCounters += installedRunnerCards[i].virus;
+      }
+    }
+    if (virusCounters >= 3) return true;
+    return true; //still rez for ETR even without viruses
+  },
+};
+
+//The Zwicky Group: Invisible Hands
+//Weyland Identity: Megacorp
+//Deck: 45, Influence: 15
+//The first time each turn you gain credits through an ability on an agenda or operation, 
+//you may draw 1 card.
+cardSet[35069] = {
+  title: "The Zwicky Group: Invisible Hands",
+  imageFile: "35069.png",
+  player: corp,
+  faction: "Weyland Consortium",
+  cardType: "identity",
+  deckSize: 45,
+  influenceLimit: 15,
+  subTypes: ["Megacorp"],
+  
+  //Track if ability has been used this turn
+  usedThisTurn: false,
+  
+  responseOnCorpTurnBegins: {
+    Resolve: function() {
+      this.usedThisTurn = false;
+    },
+    automatic: true,
+  },
+  
+  responseOnRunnerTurnBegins: {
+    Resolve: function() {
+      this.usedThisTurn = false;
+    },
+    automatic: true,
+  },
+  
+  //Helper function to offer the draw
+  _offerDraw: function(sourceName) {
+    if (this.usedThisTurn) return;
+    this.usedThisTurn = true;
+    
+    var cardRef = this;
+    var choices = [
+      { id: 0, label: "Draw 1 card", button: "Draw 1" },
+      { id: 1, label: "Decline", button: "Decline" }
+    ];
+    
+    //**AI code
+    if (corp.AI != null) {
+      //Usually want to draw unless hand is very full
+      if (PlayerHand(corp).length < MaxHandSize(corp)) {
+        choices = [choices[0]];
+      } else {
+        choices = [choices[1]];
+      }
+    }
+    
+    DecisionPhase(
+      corp,
+      choices,
+      function(params) {
+        if (params.id === 0) {
+          Draw(corp, 1);
+        }
+      },
+      "The Zwicky Group",
+      "Gained credits from " + sourceName + ". Draw 1 card?",
+      cardRef
+    );
+  },
+  
+  //Trigger when an operation is played that gains credits
+  //This covers most credit-gaining operations (Hedge Fund, IPO, etc.)
+  automaticOnPlay: {
+    Resolve: function(card) {
+      if (this.usedThisTurn) return;
+      if (card.player !== corp) return;
+      if (!CheckCardType(card, ["operation"])) return;
+      
+      //Check if this operation grants credits
+      //We detect this by checking common patterns:
+      //1. Transaction subtype (most credit-gaining ops are transactions)
+      //2. Cards with known credit-gaining effects
+      var grantsCredits = false;
+      
+      if (CheckSubType(card, "Transaction")) {
+        grantsCredits = true;
+      }
+      
+      //Also check for specific non-transaction operations that gain credits
+      //This list can be expanded as needed
+      var creditGainingOps = [
+        "Hedge Fund", "IPO", "Beanstalk Royalties", "Medical Research Fundraiser",
+        "Restructure", "Green Level Clearance", "Blue Level Clearance",
+        "Predictive Planogram", "Government Subsidy", "Hansei Review",
+        "Subliminal Messaging", "Celebrity Gift", "Successful Demonstration"
+      ];
+      
+      if (creditGainingOps.includes(card.title)) {
+        grantsCredits = true;
+      }
+      
+      if (grantsCredits) {
+        this._offerDraw(card.title);
+      }
+    },
+  },
+  
+  //Trigger when an agenda is scored (many agendas grant credits on score)
+  responseOnScored: {
+    Enumerate: function() {
+      if (this.usedThisTurn) return [];
+      if (!intended.score) return [];
+      
+      //Check if the scored agenda grants credits
+      var agenda = intended.score;
+      var grantsCredits = false;
+      
+      //Check for common credit-granting agendas
+      var creditGainingAgendas = [
+        "Hostile Takeover", "Corporate Sales Team", "Oaktown Renovation",
+        "Geothermal Fracking", "Private Security Force", "Profiteering",
+        "License Acquisition", "Market Research", "Project Atlas",
+        "SSL Endorsement", "SDS Drone Deployment", "Offworld Office",
+        "Longevity Serum", "Above the Law", "Send a Message",
+        "Vulnerability Audit", "Superconducting Hub", "Tomorrow's Headline",
+        "Bellona", "Global Food Initiative", "Architect Deployment Test",
+        "Greenmail", "Project Ingatan", "Aggressive Trendsetting"
+      ];
+      
+      if (creditGainingAgendas.includes(agenda.title)) {
+        grantsCredits = true;
+      }
+      
+      if (grantsCredits) return [{}];
+      return [];
+    },
+    Resolve: function(params) {
+      this._offerDraw(intended.score.title);
+    },
+  },
+};

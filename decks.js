@@ -751,35 +751,35 @@ function LoadDecks() {
   // // ----------------------------------------------------------------------------
   // // You can enable the debug menu at the top of init.js
 
-  if (false) { // Use this to easily disable everything below
+  if (true) { // Use this to easily disable everything below
 
-    // debugging = true; //set true to log extra details and pause execution on error
-    // viewAllFronts = true; //set true to see all card fronts (for testing)
-    // mainLoopDelay = 50; //for speedy AI vs AI testing (any faster than this and funny things happen at end-of-game)
+     debugging = true; //set true to log extra details and pause execution on error
+     viewAllFronts = true; //set true to see all card fronts (for testing)
+     mainLoopDelay = 50; //for speedy AI vs AI testing (any faster than this and funny things happen at end-of-game)
 
     // SET UP THE MAIN STATES FOR THE RUNNER AND CORP
     // ----------------------------------------------
 
-    // RunnerTestField(1017, //identity
-    //   [30032, 30032, 35009, 35008], //heapCards
-    //   [35015, 35022, 35022, 30033, 35014, 1039, 35030, 35005, 35016, 35034, 35004, 35010, 35007, 35009, 35008, 35029, 35025], //stackCards
-    //   [1030, 1030, 1030, 1030, 1030, 1040, 1035], //gripCards
-    //   [35028, 30015, 35009, 35020], //installed 
-    //   [], //stolen
-    //   cardBackTexturesRunner,glowTextures,strengthTextures
-    // );
+    RunnerTestField(1017, //identity
+      [30032, 30032, 35009, 35008], //heapCards
+      [35015, 35022, 35022, 30033, 35014, 1039, 35030, 35005, 35016, 35034, 35004, 35010, 35007, 35009, 35008, 35029, 35025], //stackCards
+      [1030, 1030, 1030, 1030, 1030, 1040, 1035], //gripCards
+      [35028, 30015, 35009, 35020], //installed 
+      [], //stolen
+      cardBackTexturesRunner,glowTextures,strengthTextures
+    );
 
-    // CorpTestField(35036, //identity
-    //   [30037, 30047,30073,35075,30074], //archivesCards
-    //   [30073,30072,30047,30073,30073,30039,30039,30039,30039,30039,30039,30039,30039,30039,30039,30039,30039,30039,30039,30039,35044,35044,35044,35045], //rndCards
-    //   [35072,35040,35082,35037], //hqCards
-    //   [], //archivesInstalled
-    //   [35041], //rndInstalled
-    //   [35042], //hqInstalled
-    //   [[30068,30072,30072,35075],[30068,35042],[30068, 35053],[30068, 35053,35079],[30068]], //remotes (array of arrays)
-    //   [35037], //scored
-    //   cardBackTexturesCorp,glowTextures,strengthTextures
-    // );
+    CorpTestField(35036, //identity
+      [30037, 30047,30073,35075,30074], //archivesCards
+      [30073,30072,30047,30073,30073,30039,30039,30039,30039,30039,30039,30039,30039,30039,30039,30039,30039,30039,30039,30039,35044,35044,35044,35045], //rndCards
+      [35072,35040,35082,35037], //hqCards
+      [], //archivesInstalled
+      [35041], //rndInstalled
+      [35042], //hqInstalled
+      [[30068,30072,30072,35075, 35063],[30068,35042,35052],[35070, 35053],[35061, 35053, 35076],[35062, 35079]], //remotes (array of arrays)
+      [35037], //scored
+      cardBackTexturesCorp,glowTextures,strengthTextures
+    );
 
     // // REZ ICE
     // // -------
@@ -807,19 +807,19 @@ function LoadDecks() {
     // // ----------------------------------------
 
     // GainCredits(runner,25);
-    // GainCredits(corp,50);
+    GainCredits(corp,25);
     
     // // OTHER STUFF
     // // -----------
 
     // ChangePhase(phases.runnerEndOfTurn);
-    // AddTags(3);
+    AddTags(3);
     // runner.clickTracker = 0;  
     // runner.rig.resources[0].power = 4;
     // corp.clickTracker = 6;
     // ChangePhase(phases.corpActionMain);
     // ChangePhase(phases.corpDiscardStart);
-    // MakeRun(corp.remoteServers[2]);
+    MakeRun(corp.remoteServers[2]); // Run remote
     // MakeRun(corp.RnD);
     // attackedServer = corp.RnD;
     // ChangePhase(phases.runApproachServer); //i.e. skip all the ice
@@ -832,7 +832,8 @@ function LoadDecks() {
 
     // // SET THE PHASE TO START OF RUNNER TURN
     // // -------------------------------------
-    // ChangePhase(phases.runnerStartResponse); // Runner starts turn
+
+    ChangePhase(phases.runnerStartResponse); // Runner starts turn
     // ChangePhase(phases.corpStartDraw);    
   
     // // TO FORCE THE AI TO PLAY CARDS / MAKE DECISIONS, set preferred property on runner.AI or corp.AI
