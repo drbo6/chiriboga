@@ -6140,3 +6140,246 @@ cardSet[35069] = {
     text: "Draw 1 card?",
   },
 };
+//Peer Review
+//Jinteki Operation: Transaction
+//Cost: 4, Influence: 2
+//Reveal all but 1 card in HQ. Gain 7[credit]. You may install 1 card from HQ in the root of a remote server.
+
+//Peer Review
+//Jinteki Operation: Transaction
+//Cost: 4, Influence: 2
+//Reveal all but 1 card in HQ. Gain 7[credit]. You may install 1 card from HQ in the root of a remote server.
+cardSet[35055] = {
+  title: "Peer Review",
+  imageFile: "35055.png",
+  player: corp,
+  faction: "Jinteki",
+  influence: 2,
+  cardType: "operation",
+  subTypes: ["Transaction"],
+  playCost: 4,
+  
+  //Reveal all but 1 card in HQ.
+  //Gain 7[credit].
+  //You may install 1 card from HQ in the root of a remote server.
+  Enumerate: function () {
+    //Multi-select: player chooses which cards to reveal (all but 1)
+    var thisCard = this;
+    var choices = ChoicesHandCards(corp, function(card) {
+      return card !== thisCard;
+    });
+    
+    var numToReveal = choices.length - 1; //reveal all but 1
+    
+    //If 0 or 1 other cards, numToReveal is 0 or less - just return single option (no reveal needed)
+    if (numToReveal <= 0) {
+      return [{ cards: [] }]; //reveal nothing, still gain credits and may install
+    }
+    
+    //**AI code
+    if (corp.AI) {
+      //Decide whether to use - need reasonable hand size
+      if (choices.length < 3) return [{ cards: [] }]; //small hand, just take the credits
+      
+      //Pick which cards to reveal (hide the most valuable)
+      //Sort by "want to hide" score descending
+      var scored = choices.map(function(item) {
+        var card = item.card;
+        var hideScore = 0;
+        if (CheckCardType(card, ["agenda"])) {
+          hideScore = 100 + (card.agendaPoints || 0) * 10;
+        } else if (CheckCardType(card, ["asset"]) && CheckSubType(card, "Ambush")) {
+          hideScore = 50;
+        } else if (CheckCardType(card, ["ice"])) {
+          hideScore = 20;
+        } else if (CheckCardType(card, ["operation"])) {
+          hideScore = 5; //safe to reveal
+        }
+        return { item: item, hideScore: hideScore };
+      });
+      scored.sort(function(a, b) { return b.hideScore - a.hideScore; });
+      
+      //Check if safe to play (don't reveal too many agendas)
+      var agendasToReveal = 0;
+      for (var i = 1; i < scored.length; i++) { //skip first (hidden card)
+        if (CheckCardType(scored[i].item.card, ["agenda"])) agendasToReveal++;
+      }
+      if (agendasToReveal > 1) return []; //too many agendas would be revealed
+      
+      //Return cards to reveal (all except the one we want to hide)
+      var cardsToReveal = [];
+      for (var i = 1; i < scored.length; i++) {
+        cardsToReveal.push(scored[i].item.card);
+      }
+      return [{ cards: cardsToReveal }];
+    }
+    
+    //Human player: multi-select UI
+    var requiredCount = numToReveal;
+    choices.push({
+      id: choices.length,
+      label: "Reveal",
+      multiSelectDynamicButtonText: function(numSelected) {
+        return "Reveal " + numSelected + "/" + requiredCount + " card" + (numSelected == 1 ? '' : 's');
+      },
+      multiSelectDynamicButtonEnabler: function(numSelected) {
+        return numSelected === requiredCount;
+      },
+      button: "Reveal 0/" + numToReveal + " cards",
+    });
+    for (var i = 0; i < choices.length; i++) {
+      choices[i].cards = Array(numToReveal).fill(null);
+    }
+    return choices;
+  },
+  
+  ResolveCommon: function(toReveal, original, callback) {
+    //Reveal cards recursively
+    if (toReveal.length < 1) {
+      original.forEach(function(item) {
+        item.faceUp = false;
+      });
+      if (runner.AI != null) runner.AI.GainInfoAboutHQCards(original);
+      if (typeof callback === "function") callback();
+      return;
+    }
+    var cardRef = this;
+    Reveal(toReveal[0], function() {
+      toReveal[0].faceUp = true;
+      toReveal.splice(0, 1);
+      cardRef.ResolveCommon(toReveal, original, callback);
+    }, this);
+  },
+  
+  Resolve: function (params) {
+    //Create a list containing no nulls
+    var toReveal = [];
+    if (params.cards) {
+      params.cards.forEach(function(item) {
+        if (item) toReveal.push(item);
+      });
+    }
+    
+    var cardRef = this;
+    
+    if (toReveal.length < 1) {
+      Log("No cards revealed");
+      GainCredits(corp, 7, "", this);
+      this._offerInstall();
+      return;
+    }
+    
+    //Reveal them all, then gain credits and offer install
+    this.ResolveCommon(toReveal, toReveal.concat([]), function() {
+      GainCredits(corp, 7, "", cardRef);
+      cardRef._offerInstall();
+    });
+  },
+  
+  _offerInstall: function() {
+    //You may install 1 card from HQ in the root of a remote server
+    var thisCard = this;
+    
+    //Use ChoicesCardInstall for each installable card - gives drag-and-drop to servers
+    var choices = [];
+    var handCards = PlayerHand(corp).filter(function(card) {
+      if (card === thisCard) return false;
+      //Can install assets, agendas, or upgrades in root (not ice)
+      return CheckCardType(card, ["asset", "agenda", "upgrade"]);
+    });
+    
+    for (var i = 0; i < handCards.length; i++) {
+      var cardChoices = ChoicesCardInstall(handCards[i]);
+      //Filter to only remote servers (not central servers)
+      for (var j = 0; j < cardChoices.length; j++) {
+        var choice = cardChoices[j];
+        //server === null means new remote, otherwise check it's not a central
+        if (choice.server === null || 
+            (choice.server !== corp.HQ && choice.server !== corp.RnD && choice.server !== corp.archives)) {
+          choices.push(choice);
+        }
+      }
+    }
+    
+    if (choices.length === 0) {
+      //Reset faceUp on any revealed cards still in hand
+      PlayerHand(corp).forEach(function(card) {
+        card.faceUp = false;
+      });
+      return;
+    }
+    
+    //Add decline option
+    choices.push({
+      card: null,
+      label: "Decline",
+      button: "Decline"
+    });
+    
+    //**AI code
+    if (corp.AI != null) {
+      //Usually want to install an agenda or ambush if we have one
+      var bestChoice = null;
+      var bestScore = 0;
+      for (var i = 0; i < choices.length; i++) {
+        if (choices[i].card === null) continue;
+        var card = choices[i].card;
+        var server = choices[i].server;
+        var score = 0;
+        if (CheckCardType(card, ["agenda"])) {
+          score = 80;
+          //Prefer new server for agendas
+          if (server === null) score += 10;
+        } else if (CheckCardType(card, ["asset"]) && CheckSubType(card, "Ambush")) {
+          score = 70;
+        } else if (CheckCardType(card, ["asset"])) {
+          score = 40;
+        } else if (CheckCardType(card, ["upgrade"])) {
+          score = 30;
+          //Prefer existing server with agenda for upgrades
+          if (server !== null) {
+            var hasAgenda = server.root.some(function(c) {
+              return CheckCardType(c, ["agenda"]);
+            });
+            if (hasAgenda) score += 20;
+          }
+        }
+        if (score > bestScore) {
+          bestScore = score;
+          bestChoice = choices[i];
+        }
+      }
+      if (bestChoice && bestScore > 0) {
+        choices = [bestChoice];
+      } else {
+        choices = [{ card: null, label: "Decline", button: "Decline" }];
+      }
+    }
+    
+    var cardRef = this;
+    DecisionPhase(
+      corp,
+      choices,
+      function(installParams) {
+        //Reset faceUp on revealed cards first
+        PlayerHand(corp).forEach(function(card) {
+          card.faceUp = false;
+        });
+        
+        if (installParams.card === null) {
+          return; //declined
+        }
+        
+        //Install in the chosen server
+        var targetServer = installParams.server;
+        if (targetServer === null) {
+          targetServer = NewRemoteServer();
+        }
+        Install(installParams.card, targetServer);
+      },
+      "Peer Review",
+      "Drag a card to a remote server or click Decline",
+      this
+    );
+  },
+};

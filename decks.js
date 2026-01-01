@@ -751,7 +751,7 @@ function LoadDecks() {
   // // ----------------------------------------------------------------------------
   // // You can enable the debug menu at the top of init.js
 
-  if (true) { // Use this to easily disable everything below
+  if (false) { // Use this to easily disable everything below
 
      debugging = true; //set true to log extra details and pause execution on error
      viewAllFronts = true; //set true to see all card fronts (for testing)
@@ -772,7 +772,7 @@ function LoadDecks() {
     CorpTestField(35069, //identity
       [30037, 30047,30073,35075,30074], //archivesCards
       [30073,30072,30047,30073,30073,30039,30039,30039,30039,30039,30039,30039,30039,30039,30039,30039,30039,30039,30039,30039,35044,35044,35044,35045], //rndCards
-      [35072,35040,35082,35037,30075], //hqCards
+      [35055,35072,35040,35082,35037,30075,31057], //hqCards 
       [], //archivesInstalled
       [35041], //rndInstalled
       [35042], //hqInstalled
