@@ -1524,11 +1524,8 @@ body::-webkit-scrollbar-track {
 	grid-template-rows: auto minmax(30px, auto) auto; 
 	align-content:start; 
 	max-width: 250px;
-	/* Mobile rendering fix: force GPU layer to prevent blank cards on scroll */
-	-webkit-transform: translateZ(0);
-	transform: translateZ(0);
-	-webkit-backface-visibility: hidden;
-	backface-visibility: hidden;
+	/* Mobile rendering fix: ensure content is always visible */
+	content-visibility: visible;
 }
 #cardcontainer .card-item::after {
 	content:"";
@@ -1563,9 +1560,8 @@ body::-webkit-scrollbar-track {
 	border-radius:6px; 
 	display:block; 
 	position:relative; 
-	/* Mobile fix: ensure images paint correctly with lazy loading */
-	-webkit-transform: translateZ(0);
-	transform: translateZ(0);
+	/* Mobile fix: force immediate render */
+	content-visibility: visible;
 }
 #cardcontainer .card-title { 
 	font-size:12px; 
@@ -1587,9 +1583,8 @@ body::-webkit-scrollbar-track {
 	justify-content:space-between; 
 	margin-top:6px; 
 	align-self:start; 
-	/* Mobile fix: ensure controls are painted */
-	-webkit-transform: translateZ(0);
-	transform: translateZ(0);
+	/* Mobile fix: force immediate render */
+	content-visibility: visible;
 }
 #cardcontainer .card-controls button { 
 	flex:1; 
@@ -1618,10 +1613,6 @@ body::-webkit-scrollbar-track {
 	transform:translate3d(-50%,-50%,0); 
 	-webkit-backface-visibility: hidden;
 	backface-visibility: hidden;
-	/* Mobile paint fix: hint browser to optimize layer for opacity/visibility changes */
-	will-change: opacity, visibility, transform;
-	-webkit-perspective: 1000;
-	perspective: 1000;
 	background:var(--bg-dark); 
 	color:var(--crt-green); 
 	padding:6px 10px; 
@@ -1630,19 +1621,15 @@ body::-webkit-scrollbar-track {
 	border-radius:50%; 
 	min-width:40px; 
 	min-height:40px; 
-	display:flex; 
+	display:none; /* Mobile fix: Use display instead of opacity/visibility for faster paint */
 	align-items:center; 
 	justify-content:center; 
 	pointer-events:none; 
-	opacity:0; 
-	visibility:hidden;
 	box-shadow:0 0 8px rgba(31,109,31,0.4), inset 0 0 12px rgba(31,109,31,0.25); 
-	transition:opacity .2s, visibility .2s; 
 	z-index:2; 
 }
 #cardcontainer .count-badge.has-copies { 
-	opacity:1; 
-	visibility:visible;
+	display:flex; /* Mobile fix: Show via display instead of opacity */
 	background:#0e1a0e; 
 	box-shadow:0 0 14px rgba(51,255,51,0.25); 
 }
@@ -2356,12 +2343,24 @@ select::-ms-expand { display: none; }
 	}
 	#cardcontainer .card-item { 
 		padding:1px !important; 
+		/* Mobile paint fix: disable GPU hints that can delay paint */
+		-webkit-transform: none !important;
+		transform: none !important;
+		-webkit-backface-visibility: visible !important;
+		backface-visibility: visible !important;
+	}
+	/* Mobile paint fix: disable complex pseudo-element that delays paint */
+	#cardcontainer .card-item::after {
+		display: none !important;
 	}
 	#cardcontainer .count-badge { 
 		font-size:16px; 
 		min-width:34px; 
 		min-height:34px; 
 		padding:4px 6px; 
+		/* Mobile paint fix: simplified transform for faster paint */
+		-webkit-transform: translate(-50%, -50%);
+		transform: translate(-50%, -50%);
 	}
 	#cardcontainer .card-controls button { 
 		flex:1; 
@@ -2373,6 +2372,14 @@ select::-ms-expand { display: none; }
 	#cardcontainer .card-controls { 
 		margin-top:1px !important; 
 		gap:1px !important; 
+		/* Mobile paint fix */
+		-webkit-transform: none !important;
+		transform: none !important;
+	}
+	#cardcontainer .card-item img {
+		/* Mobile paint fix */
+		-webkit-transform: none !important;
+		transform: none !important;
 	}
 	#opponentid { font-size:12px; padding:8px 10px; }
 	#opponentid img { width:40px; }
@@ -2401,13 +2408,30 @@ select::-ms-expand { display: none; }
 	#cardcontainer .card-item { 
 		padding:2px; 
 		border-radius:6px; 
+		/* Mobile paint fix: disable GPU hints that can delay paint */
+		-webkit-transform: none !important;
+		transform: none !important;
+		-webkit-backface-visibility: visible !important;
+		backface-visibility: visible !important;
 	}
-	#cardcontainer .card-item img { border-radius:4px; }
+	/* Mobile paint fix: disable complex pseudo-element that delays paint */
+	#cardcontainer .card-item::after {
+		display: none !important;
+	}
+	#cardcontainer .card-item img { 
+		border-radius:4px; 
+		/* Mobile paint fix */
+		-webkit-transform: none !important;
+		transform: none !important;
+	}
 	#cardcontainer .count-badge { 
 		font-size:14px; 
 		min-width:28px; 
 		min-height:28px; 
 		padding:3px 5px; 
+		/* Mobile paint fix: simplified transform for faster paint */
+		-webkit-transform: translate(-50%, -50%);
+		transform: translate(-50%, -50%);
 	}
 	#cardcontainer .card-controls button { 
 		font-size:12px; 
@@ -2417,6 +2441,9 @@ select::-ms-expand { display: none; }
 	#cardcontainer .card-controls { 
 		margin-top:2px; 
 		gap:1px; 
+		/* Mobile paint fix */
+		-webkit-transform: none !important;
+		transform: none !important;
 	}
 }
 

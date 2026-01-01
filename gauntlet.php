@@ -2212,6 +2212,9 @@
 						}
 					}
 				}
+				
+				// Build all card HTML first, then insert in one batch (helps mobile paint)
+				var allCardsHtml = '';
 				for (var i=0;i<cardsToShow.length;i++) {
 					var cardId = cardsToShow[i];
 					if (typeof cardSet[cardId] !== 'undefined' && cardSet[cardId].player == deckPlayer && cardSet[cardId].cardType !== 'identity') {
@@ -2220,23 +2223,66 @@
 						var gauntletQty = gauntletCardCounts[cardId] || 0;
 						var deckQty = deckCounts[cardId] || 0;
 						// Show both quantities in format: gauntlet | deck
-						var cardHtml = '<div class="card-item" data-id="'+cardId+'">'
+						// Mobile fix: loading="eager" prevents browser lazy-loading, decoding="sync" ensures immediate decode
+						allCardsHtml += '<div class="card-item" data-id="'+cardId+'">'
 							+'<div class="count-badge" data-id="'+cardId+'">'+gauntletQty+' | '+deckQty+'</div>'
-							+'<img class="card-image" loading="lazy" src="'+imgSrc+'" alt="'+cardSet[cardId].title+'" />'
+							+'<img class="card-image" src="'+imgSrc+'" alt="'+cardSet[cardId].title+'" loading="eager" decoding="sync" />'
 							+'<div class="card-title">'+cardSet[cardId].title+'</div>'
 							+'<div class="card-controls">'
 								+'<button type="button" class="remove-btn" data-id="'+cardId+'">-</button>'
-								+'<button type="button" class="sell-btn" data-id="'+cardId+'"><img src="images/nsg/NSG_CREDIT.svg" class="card-icon" alt="sell" style="height: 14px; filter: brightness(0) saturate(100%) invert(76%) sepia(85%) saturate(2206%) hue-rotate(81deg) brightness(118%) contrast(119%);"></button>'
+								+'<button type="button" class="sell-btn" data-id="'+cardId+'"><img src="images/nsg/NSG_CREDIT.svg" class="card-icon" alt="sell" style="height: 14px; filter: brightness(0) saturate(100%) invert(76%) sepia(85%) saturate(2206%) hue-rotate(81deg) brightness(118%) contrast(119%);" loading="eager" /></button>'
 								+'<button type="button" class="add-btn" data-id="'+cardId+'">+</button>'
 							+'</div>'
 						+'</div>';
-						$("#cardcontainer").append(cardHtml);
 					}
 				}
+				// Insert all cards at once
+				$("#cardcontainer").html(allCardsHtml);
+				
 				AttachCardListEvents();
 				UpdateCardCountsUI();
 				// Apply current sort after rendering
 				SortCardContainer();
+				
+				// Mobile fix: Force repaint after async rendering to ensure cards display
+				// without requiring user to scroll. Use multiple strategies for different browsers.
+				setTimeout(function() {
+					var container = document.getElementById('cardcontainer');
+					if (!container) return;
+					
+					// Strategy 1: Force layout recalculation
+					container.offsetHeight;
+					document.body.offsetHeight;
+					
+					// Strategy 2: Touch each card to force paint (helps with WebKit)
+					var cards = container.querySelectorAll('.card-item');
+					for (var i = 0; i < cards.length; i++) {
+						cards[i].offsetHeight;
+					}
+					
+					// Strategy 3: Brief visibility toggle to force repaint
+					container.style.visibility = 'hidden';
+					container.offsetHeight; // Force sync reflow
+					container.style.visibility = '';
+					
+					// Strategy 4: Scroll micro-adjustment to trigger paint
+					var scrollY = window.scrollY || window.pageYOffset;
+					window.scrollTo(0, scrollY + 1);
+					requestAnimationFrame(function() {
+						window.scrollTo(0, scrollY);
+					});
+				}, 10);
+				
+				// Secondary repaint after images may have loaded
+				setTimeout(function() {
+					var container = document.getElementById('cardcontainer');
+					if (container) {
+						container.style.opacity = '0.99';
+						requestAnimationFrame(function() {
+							container.style.opacity = '';
+						});
+					}
+				}, 100);
 			}
 
 			function AttachCardListEvents() {
@@ -2248,6 +2294,31 @@
 					var cardId = parseInt($(this).closest('.card-item').attr('data-id'));
 					ShowLightbox(cardId); 
 				});
+				
+				// Mobile fix: Use IntersectionObserver to force repaint when cards become visible
+				// This handles the case where cards don't paint until scrolled
+				if ('IntersectionObserver' in window) {
+					var mobileRepaintObserver = new IntersectionObserver(function(entries) {
+						entries.forEach(function(entry) {
+							if (entry.isIntersecting) {
+								// Force repaint by briefly toggling a property
+								var el = entry.target;
+								el.style.opacity = '0.999';
+								requestAnimationFrame(function() {
+									el.style.opacity = '';
+								});
+							}
+						});
+					}, {
+						rootMargin: '50px', // Start loading slightly before visible
+						threshold: 0.01
+					});
+					
+					// Observe all card items
+					document.querySelectorAll('#cardcontainer .card-item').forEach(function(card) {
+						mobileRepaintObserver.observe(card);
+					});
+				}
 			}
 
 			function UpdateCardCountsUI() {
