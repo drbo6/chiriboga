@@ -6638,3 +6638,152 @@ cardSet[35078] = {
     return 5;
   },
 };
+
+//Lamplighter
+//Neutral Ice: Sentry - Observer
+//Rez: 2, Strength: 3, Influence: 0
+//When an agenda is scored or stolen from this server or its root, trash this ice.
+//Sub: Give the Runner 1 tag unless they pay 3 credits.
+//Sub: End the run if the Runner is tagged.
+
+//Lamplighter
+//Neutral Ice: Sentry - Observer
+//Rez: 2, Strength: 3, Influence: 0
+//When an agenda is scored or stolen from this server or its root, trash this ice.
+//Sub: Give the Runner 1 tag unless they pay 3 credits.
+//Sub: End the run if the Runner is tagged.
+cardSet[35080] = {
+  title: "Lamplighter",
+  imageFile: "35080.png",
+  player: corp,
+  faction: "Neutral",
+  influence: 0,
+  cardType: "ice",
+  rezCost: 2,
+  strength: 3,
+  subTypes: ["Sentry", "Observer"],
+  
+  //When an agenda is stolen from this server, trash this ice
+  //During stealing, attackedServer is still set to the server being run
+  responseOnStolen: {
+    Resolve: function(params) {
+      if (!this.rezzed) return;
+      
+      var myServer = GetServer(this);
+      if (!myServer) return;
+      
+      //During a run, attackedServer tells us where the steal happened
+      if (attackedServer !== myServer) return;
+      
+      Log("Lamplighter trashed (agenda stolen from this server)");
+      Trash(this, false); //false = cannot be prevented
+    },
+    automatic: true,
+    availableWhenInactive: true,
+  },
+  
+  //When an agenda is scored from this server, trash this ice
+  //We use responseOnScored and check intended.score's original location
+  //Since intended.score is set before MoveCard, we store the server in automaticOnBeginScore
+  _agendaScoredFromMyServer: false,
+  
+  //Track when an agenda in our server is about to be scored
+  //This fires at start of corp turn and when actions begin
+  responseOnCorpActionPhaseBegins: {
+    Resolve: function() {
+      this._agendaScoredFromMyServer = false;
+    },
+    automatic: true,
+    availableWhenInactive: true,
+  },
+  
+  //Check right before score happens
+  responsePreventableScore: {
+    Resolve: function() {
+      if (!this.rezzed) return;
+      
+      //Check if the agenda being scored is in our server
+      var myServer = GetServer(this);
+      if (!myServer) return;
+      if (!intended.score) return;
+      
+      var agendaServer = GetServer(intended.score);
+      if (agendaServer === myServer) {
+        this._agendaScoredFromMyServer = true;
+      }
+    },
+    automatic: true,
+    availableWhenInactive: true,
+  },
+  
+  responseOnScored: {
+    Resolve: function(params) {
+      if (!this.rezzed) return;
+      
+      if (!this._agendaScoredFromMyServer) return;
+      
+      this._agendaScoredFromMyServer = false;
+      Log("Lamplighter trashed (agenda scored from this server)");
+      Trash(this, false); //false = cannot be prevented
+    },
+    automatic: true,
+    availableWhenInactive: true,
+  },
+  
+  subroutines: [
+    {
+      text: "Give the Runner 1 tag unless they pay 3[c].",
+      Resolve: function () {
+        var choices = [];
+        if (CheckCredits(runner, 3)) {
+          choices.push({ id: 0, label: "Pay 3[c]", button: "Pay 3[c]" });
+        }
+        choices.push({ id: 1, label: "Take 1 tag", button: "Take 1 tag" });
+        
+        //**AI code
+        if (runner.AI != null) {
+          //Pay to avoid tag if we can afford it
+          if (choices.length > 1 && choices[0].id === 0) {
+            runner.AI.preferred = { title: "Lamplighter", option: choices[0] };
+          }
+        }
+        
+        function decisionCallback(params) {
+          if (params.id == 0) {
+            SpendCredits(runner, 3);
+          } else {
+            AddTags(1);
+          }
+        }
+        DecisionPhase(
+          runner,
+          choices,
+          decisionCallback,
+          "Lamplighter",
+          "Lamplighter",
+          this
+        );
+      },
+      visual: { y: 79, h: 31 },
+    },
+    {
+      text: "End the run if the Runner is tagged.",
+      Resolve: function () {
+        if (runner.tags > 0) {
+          EndTheRun();
+        }
+      },
+      visual: { y: 110, h: 16 },
+    },
+  ],
+  
+  AIImplementIce: function(rc, result, maxCorpCred, incomplete) {
+    //Sub 1: Tag unless pay 3
+    //Sub 2: ETR if tagged
+    var sub1 = [["tag", "misc_minor"]]; //tag or lose 3 credits
+    var sub2 = runner.tags > 0 ? [["endTheRun"]] : [["nothing"]];
+    
+    result.sr = [sub1, sub2];
+    return result;
+  },
+};

@@ -754,7 +754,7 @@ function LoadDecks() {
   if (true) { // Use this to easily disable everything below
 
      debugging = true; //set true to log extra details and pause execution on error
-     viewAllFronts = true; //set true to see all card fronts (for testing)
+     // viewAllFronts = true; //set true to see all card fronts (for testing)
      mainLoopDelay = 50; //for speedy AI vs AI testing (any faster than this and funny things happen at end-of-game)
 
     // SET UP THE MAIN STATES FOR THE RUNNER AND CORP
@@ -776,8 +776,8 @@ function LoadDecks() {
       [], //archivesInstalled
       [35041], //rndInstalled
       [35042], //hqInstalled
-      [[35070,30072,30072,35075, 35063,35074],[30067,35042,35052, 31075],[31071, 35053],[31072, 35053, 35076],[35062, 35079]], //remotes (array of arrays)
-      [35070, 35070], //scored
+      [[35070,30072,30072,35075, 35063,35074,35080],[30067,35080],[31071, 35053],[31072, 35053, 35076],[35062, 35079]], //remotes (array of arrays)
+      [35070, 35070, 30068], //scored 35042,35052, 31075
       cardBackTexturesCorp,glowTextures,strengthTextures
     );
 
@@ -809,7 +809,7 @@ function LoadDecks() {
     // // ----------------------------------------
 
     GainCredits(runner,25);
-    GainCredits(corp,0);
+    GainCredits(corp,25);
     
     // // SET THE PHASE
     // // -------------
@@ -834,8 +834,8 @@ function LoadDecks() {
     // // RUN REMOTE
     // // ----------
 
-    attackedServer = corp.remoteServers[0];    
-    MakeRun(corp.remoteServers[0]); // Run remote
+    attackedServer = corp.remoteServers[1];    
+    MakeRun(corp.remoteServers[1]); // Run remote
 
     // // INSTALL TROJAN (requires setting it on the ice and then hosting it)
     // // -------------------------------------------------------------------
