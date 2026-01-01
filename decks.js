@@ -772,12 +772,12 @@ function LoadDecks() {
     CorpTestField(35069, //identity
       [30037, 30047,30073,35075,30074], //archivesCards
       [30073,30072,30047,30073,30073,30039,30039,30039,30039,30039,30039,30039,30039,30039,30039,30039,30039,30039,30039,30039,35044,35044,35044,35045], //rndCards
-      [35055,35072,35040,35082,35037,30075,31057], //hqCards 
+      [35055,35072,35040,35082,35037,30075,35078], //hqCards 
       [], //archivesInstalled
       [35041], //rndInstalled
       [35042], //hqInstalled
       [[35070,30072,30072,35075, 35063,35074],[30067,35042,35052, 31075],[31071, 35053],[31072, 35053, 35076],[35062, 35079]], //remotes (array of arrays)
-      [35070, 30068], //scored
+      [35070, 35070], //scored
       cardBackTexturesCorp,glowTextures,strengthTextures
     );
 
@@ -808,7 +808,7 @@ function LoadDecks() {
     // // GIVE EVERYONE SOME CREDITS TO START WITH
     // // ----------------------------------------
 
-    // GainCredits(runner,25);
+    GainCredits(runner,25);
     GainCredits(corp,0);
     
     // // SET THE PHASE

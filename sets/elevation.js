@@ -6545,3 +6545,96 @@ cardSet[35074] = {
     return result;
   },
 };
+
+//Measured Response
+//Weyland Operation: Black Ops
+//Cost: 5, Influence: 4
+//Play only if the threat level is 4 or greater, and only if the Runner made a successful run during their last turn.
+//Do 4 meat damage unless the Runner pays 8 credits.
+cardSet[35078] = {
+  title: "Measured Response",
+  imageFile: "35078.png",
+  player: corp,
+  faction: "Weyland Consortium",
+  influence: 4,
+  cardType: "operation",
+  subTypes: ["Black Ops"],
+  playCost: 5,
+  
+  //Track successful runs from last turn (same pattern as Public Trail)
+  successfulRunLastTurn: false,
+  responseOnRunnerTurnBegins: {
+    Resolve: function () {
+      this.successfulRunLastTurn = false;
+    },
+    automatic: true,
+    availableWhenInactive: true,
+  },
+  responseOnRunSuccessful: {
+    Resolve: function () {
+      this.successfulRunLastTurn = true;
+    },
+    automatic: true,
+    availableWhenInactive: true,
+  },
+  
+  //Play only if threat level >= 4 and Runner made successful run last turn
+  Enumerate: function () {
+    //Check threat level (max of both players' agenda points)
+    var threatLevel = Math.max(AgendaPoints(corp), AgendaPoints(runner));
+    if (threatLevel < 4) return [];
+    
+    //Check if Runner made successful run last turn
+    if (!this.successfulRunLastTurn) return [];
+    
+    return [{}];
+  },
+  
+  //Do 4 meat damage unless the Runner pays 8 credits
+  Resolve: function (params) {
+    var choices = [];
+    if (CheckCredits(runner, 8)) {
+      choices.push({ id: 0, label: "Pay 8[c]", button: "Pay 8[c]" });
+    }
+    choices.push({ id: 1, label: "Take 4 meat damage", button: "Take 4 damage" });
+    
+    //**AI code
+    if (runner.AI != null) {
+      //Pay if we can afford it and it would save us from death/significant damage
+      if (choices.length > 1 && choices[0].id === 0) {
+        var handSize = PlayerHand(runner).length;
+        //Pay to avoid damage if it would kill us or leave us very vulnerable
+        if (handSize <= 4 || Credits(runner) > 12) {
+          runner.AI.preferred = { title: "Measured Response", option: choices[0] };
+        } else {
+          runner.AI.preferred = { title: "Measured Response", option: choices[choices.length - 1] };
+        }
+      }
+    }
+    
+    function decisionCallback(params) {
+      if (params.id == 0) {
+        SpendCredits(runner, 8);
+      } else {
+        Damage("meat", 4, true); //true = can be prevented
+      }
+    }
+    DecisionPhase(
+      runner,
+      choices,
+      decisionCallback,
+      "Measured Response",
+      "Measured Response",
+      this
+    );
+  },
+  
+  //AI: Play if Runner made successful run and we can threaten lethal or significant damage
+  AIPriority: function (cardToInstall) {
+    var handSize = PlayerHand(runner).length;
+    //High priority if it could kill or leave Runner very low
+    if (handSize <= 4) return 20;
+    if (handSize <= 6) return 10;
+    return 5;
+  },
+};
