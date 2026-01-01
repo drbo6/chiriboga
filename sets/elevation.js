@@ -5439,7 +5439,7 @@ cardSet[35052] = {
             item.server = corp.RnD;
           });
           
-          //Add decline option
+          //Add decline option as a regular choice
           choices.push({ card: null, label: "Decline", button: "Decline" });
           
           //**AI code
@@ -5477,11 +5477,8 @@ cardSet[35052] = {
               }
             },
             "Empiricist",
-            "Add card from HQ to top of R&D?",
-            cardRef,
-            null, //no special type
-            null, //no cancel callback
-            "Drag to R&D" //footerText for drag-and-drop instruction
+            "Drag a card to R&D or click Decline",
+            cardRef
           );
         });
       },

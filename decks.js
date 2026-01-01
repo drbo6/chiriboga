@@ -800,8 +800,8 @@ function LoadDecks() {
     // // SET ADVANCEMENTS
     // // ----------------
 
-    // corp.remoteServers[0].root[0].advancement=5;
-    corp.remoteServers[3].ice[1].advancement=3;
+    corp.remoteServers[3].root[0].advancement=2; // root/agenda/asset
+    corp.remoteServers[3].ice[1].advancement=3; // ice
     
     // // GIVE EVERYONE SOME CREDITS TO START WITH
     // // ----------------------------------------
@@ -827,9 +827,13 @@ function LoadDecks() {
     // ChangePhase(phases.corpDiscardStart);
     // MakeRun(corp.RnD);
     // attackedServer = corp.RnD;
-    attackedServer = corp.remoteServers[3];    
-    MakeRun(corp.remoteServers[3]); // Run remote
     // ChangePhase(phases.runApproachServer); //i.e. skip all the ice
+
+    // // RUN REMOTE
+    // // ----------
+
+    attackedServer = corp.remoteServers[1];    
+    MakeRun(corp.remoteServers[1]); // Run remote
 
     // // INSTALL TROJAN (requires setting it on the ice and then hosting it)
     // // -------------------------------------------------------------------
