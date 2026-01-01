@@ -809,7 +809,7 @@ function LoadDecks() {
     // // ----------------------------------------
 
     // GainCredits(runner,25);
-    GainCredits(corp,25);
+    GainCredits(corp,0);
     
     // // SET THE PHASE
     // // -------------

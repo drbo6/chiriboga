@@ -2868,6 +2868,15 @@ function FullCheckRez(card,validTypes=["upgrade", "asset", "ice"]) {
 		return card.RezUsability.call(card);
 	  else return true;
 	}
+	//Check if can afford reduced rez cost with optional forfeit (e.g. Biawak)
+	if (typeof card.optionalForfeitRezReduction === 'number' && card.player.scoreArea.length > 0) {
+	  var reducedCost = Math.max(0, currentRezCost - card.optionalForfeitRezReduction);
+	  if (CheckCredits(corp, reducedCost, "rezzing", card)) {
+		if (activePlayer.AI && typeof card.RezUsability == "function")
+		  return card.RezUsability.call(card);
+		else return true;
+	  }
+	}
   }
   //other cards cannot be rezzed
   return false;

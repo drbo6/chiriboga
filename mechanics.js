@@ -121,14 +121,17 @@ function Rez(card, ignoreAllCosts=false, onRezResolve=null, context=null, allowC
 		var oldPhase = currentPhase;
 		var oldActivePlayer = activePlayer;
 		var rezReduction = card.optionalForfeitRezReduction;
+		var fullRezCost = RezCost(card);
 		var choices = ChoicesArrayCards(corp.scoreArea);
-		//Add decline option
-		choices.push({
-			card: null,
-			id: choices.length,
-			label: "Pay full rez cost (" + RezCost(card) + "[c])",
-			button: "Pay " + RezCost(card) + "[c]"
-		});
+		//Add decline option only if player can afford full rez cost
+		if (CheckCredits(corp, fullRezCost, "rezzing", card)) {
+			choices.push({
+				card: null,
+				id: choices.length,
+				label: "Pay full rez cost (" + fullRezCost + "[c])",
+				button: "Pay " + fullRezCost + "[c]"
+			});
+		}
 		//**AI code - forfeit if it saves significant credits and we have a low-value agenda
 		if (corp.AI != null) {
 			var shouldForfeit = false;
