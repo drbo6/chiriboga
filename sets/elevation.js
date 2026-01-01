@@ -5613,20 +5613,24 @@ cardSet[35070] = {
   advancementRequirement: 2,
   //When you score this agenda, gain 2[credit].
   responseOnScored: {
-    Resolve: function() {
-      if (intended.score == this) {
-        GainCredits(corp, 2);
-      }
+    Enumerate: function() {
+      if (intended.score == this) return [{}];
+      return [];
     },
-    automatic: true,
+    Resolve: function() {
+      GainCredits(corp, 2, "", this);
+    },
   },
   //When you forfeit this agenda, gain 4[credit].
-  //Uses automaticOnForfeit trigger added to Forfeit() in mechanics.js
-  automaticOnForfeit: {
-    Resolve: function(card) {
+  //Uses responseOnForfeit trigger added to Forfeit() in mechanics.js
+  responseOnForfeit: {
+    Enumerate: function(card) {
       //Only trigger if this card was forfeited
-      if (card !== this) return;
-      GainCredits(corp, 4);
+      if (card !== this) return [];
+      return [{}];
+    },
+    Resolve: function(params) {
+      GainCredits(corp, 4, "", this);
     },
   },
   //AI: Consider forfeiting if desperately need credits for a key rez
@@ -5776,28 +5780,21 @@ cardSet[35062] = {
         this.wasRezzedWhenTrashed = this.rezzed;
         //Check if this card was being accessed when trashed
         this.wasBeingAccessed = (typeof accessingCard !== 'undefined' && accessingCard === this);
-        console.log("PAP automaticOnWouldTrash: rezzed=" + this.wasRezzedWhenTrashed + ", wasBeingAccessed=" + this.wasBeingAccessed + ", accessingCard=" + (typeof accessingCard !== 'undefined' ? accessingCard : "undefined"));
       }
     },
   },
   
   //Threat 2 → When the Runner trashes this asset (while it is rezzed), give them 1 tag.
   responseOnTrash: {
-    Enumerate: function(cards) {
-      console.log("PAP responseOnTrash Enumerate: cards.includes(this)=" + cards.includes(this) + ", wasRezzedWhenTrashed=" + this.wasRezzedWhenTrashed + ", wasBeingAccessed=" + this.wasBeingAccessed);
-      //Check if this card was trashed
-      if (!cards.includes(this)) return [];
+    Resolve: function() {
+      //wasRezzedWhenTrashed and wasBeingAccessed are set by automaticOnWouldTrash
       //Check threat level (max of both players' agenda points >= 2)
       var threatLevel = Math.max(AgendaPoints(corp), AgendaPoints(runner));
-      console.log("PAP responseOnTrash: threatLevel=" + threatLevel);
-      if (threatLevel < 2) return [];
+      if (threatLevel < 2) return;
       //Check if it was rezzed when trashed
-      if (!this.wasRezzedWhenTrashed) return [];
+      if (!this.wasRezzedWhenTrashed) return;
       //Check if Runner trashed it (was being accessed)
-      if (!this.wasBeingAccessed) return [];
-      return [{}];
-    },
-    Resolve: function(params) {
+      if (!this.wasBeingAccessed) return;
       AddTags(1);
       Log("Public Access Plaza gives the Runner 1 tag (Threat 2)");
     },
@@ -6113,109 +6110,33 @@ cardSet[35069] = {
     automatic: true,
   },
   
-  //Helper function to offer the draw
-  _offerDraw: function(sourceName) {
-    if (this.usedThisTurn) return;
-    this.usedThisTurn = true;
-    
-    var cardRef = this;
-    var choices = [
-      { id: 0, label: "Draw 1 card", button: "Draw 1" },
-      { id: 1, label: "Decline", button: "Decline" }
-    ];
-    
-    //**AI code
-    if (corp.AI != null) {
-      //Usually want to draw unless hand is very full
-      if (PlayerHand(corp).length < MaxHandSize(corp)) {
-        choices = [choices[0]];
-      } else {
-        choices = [choices[1]];
-      }
-    }
-    
-    DecisionPhase(
-      corp,
-      choices,
-      function(params) {
-        if (params.id === 0) {
-          Draw(corp, 1);
-        }
-      },
-      "The Zwicky Group",
-      "Gained credits from " + sourceName + ". Draw 1 card?",
-      cardRef
-    );
-  },
-  
-  //Trigger when an operation is played that gains credits
-  //This covers most credit-gaining operations (Hedge Fund, IPO, etc.)
-  automaticOnPlay: {
-    Resolve: function(card) {
-      if (this.usedThisTurn) return;
-      if (card.player !== corp) return;
-      if (!CheckCardType(card, ["operation"])) return;
-      
-      //Check if this operation grants credits
-      //We detect this by checking common patterns:
-      //1. Transaction subtype (most credit-gaining ops are transactions)
-      //2. Cards with known credit-gaining effects
-      var grantsCredits = false;
-      
-      if (CheckSubType(card, "Transaction")) {
-        grantsCredits = true;
-      }
-      
-      //Also check for specific non-transaction operations that gain credits
-      //This list can be expanded as needed
-      var creditGainingOps = [
-        "Hedge Fund", "IPO", "Beanstalk Royalties", "Medical Research Fundraiser",
-        "Restructure", "Green Level Clearance", "Blue Level Clearance",
-        "Predictive Planogram", "Government Subsidy", "Hansei Review",
-        "Subliminal Messaging", "Celebrity Gift", "Successful Demonstration"
-      ];
-      
-      if (creditGainingOps.includes(card.title)) {
-        grantsCredits = true;
-      }
-      
-      if (grantsCredits) {
-        this._offerDraw(card.title);
-      }
-    },
-  },
-  
-  //Trigger when an agenda is scored (many agendas grant credits on score)
-  responseOnScored: {
-    Enumerate: function() {
+  //The first time each turn you gain credits through an ability on an agenda or operation,
+  //you may draw 1 card.
+  //Uses responseOnGainCreditsFromCard trigger - fired by GainCredits() when sourceCard is provided
+  responseOnGainCreditsFromCard: {
+    Enumerate: function(num, sourceCard) {
       if (this.usedThisTurn) return [];
-      if (!intended.score) return [];
       
-      //Check if the scored agenda grants credits
-      var agenda = intended.score;
-      var grantsCredits = false;
-      
-      //Check for common credit-granting agendas
-      var creditGainingAgendas = [
-        "Hostile Takeover", "Corporate Sales Team", "Oaktown Renovation",
-        "Geothermal Fracking", "Private Security Force", "Profiteering",
-        "License Acquisition", "Market Research", "Project Atlas",
-        "SSL Endorsement", "SDS Drone Deployment", "Offworld Office",
-        "Longevity Serum", "Above the Law", "Send a Message",
-        "Vulnerability Audit", "Superconducting Hub", "Tomorrow's Headline",
-        "Bellona", "Global Food Initiative", "Architect Deployment Test",
-        "Greenmail", "Project Ingatan", "Aggressive Trendsetting"
-      ];
-      
-      if (creditGainingAgendas.includes(agenda.title)) {
-        grantsCredits = true;
+      //**AI code
+      if (corp.AI != null) {
+        if (PlayerHand(corp).length < MaxHandSize(corp)) {
+          return [{ id: 0, label: "Draw 1 card", button: "Draw 1" }];
+        } else {
+          return []; //decline
+        }
       }
       
-      if (grantsCredits) return [{}];
-      return [];
+      return [
+        { id: 0, label: "Draw 1 card", button: "Draw 1" },
+        { id: 1, label: "Decline", button: "Decline" }
+      ];
     },
     Resolve: function(params) {
-      this._offerDraw(intended.score.title);
+      this.usedThisTurn = true;
+      if (params.id === 0) {
+        Draw(corp, 1);
+      }
     },
+    text: "Draw 1 card?",
   },
 };

@@ -58,6 +58,8 @@ function Advance(card) {
   card.advancement++;
   Log("Card advanced");
   AutomaticTriggers("automaticOnAdvance", [card]);
+  //Also fire responseOnAdvance for triggers that may cause phase changes (e.g. Oaktown + Zwicky)
+  TriggeredResponsePhase(corp, "responseOnAdvance", [card], null, "Advanced");
 }
 
 /**
@@ -116,8 +118,9 @@ function Rez(card, ignoreAllCosts=false, onRezResolve=null, context=null, allowC
 		  corp,
 		  ChoicesArrayCards(corp.scoreArea),
 		  function(fparams) {
-			  Forfeit(fparams.card);
-			  payCreditsAndRez();
+			  Forfeit(fparams.card, function() {
+				  payCreditsAndRez();
+			  });
 		  },
 		  "Rezzing "+card.title,
 		  "Rezzing "+card.title,
@@ -199,15 +202,21 @@ function RemoveFromGame(card) {
  *
  * @method Forfeit
  * @param {Card} card the card to forfeit
+ * @param {function} [afterForfeit] callback to run after forfeit completes
  */
-function Forfeit(card) {
-  //Trigger automaticOnForfeit BEFORE moving the card (so it's still in scoreArea and active)
+function Forfeit(card, afterForfeit) {
+  //Trigger responseOnForfeit BEFORE moving the card (so it's still in scoreArea and active)
   //This allows cards like Greenmail to gain credits when forfeited
-  AutomaticTriggers("automaticOnForfeit", [card]);
-  
-  card.host = null;
-  MoveCard(card, removedFromGame);
-  Log(GetTitle(card, true) + " forfeited");
+  //Uses TriggeredResponsePhase because the trigger may cause phase changes (e.g. Greenmail + Zwicky)
+  var forfeitedCard = card; //store reference for callback
+  TriggeredResponsePhase(corp, "responseOnForfeit", [card], function() {
+    forfeitedCard.host = null;
+    MoveCard(forfeitedCard, removedFromGame);
+    Log(GetTitle(forfeitedCard, true) + " forfeited");
+    if (typeof afterForfeit === "function") {
+      afterForfeit();
+    }
+  }, "Forfeited");
 }
 
 /**
@@ -1092,8 +1101,9 @@ function SpendCredits(
  * @param {Player} player either corp or runner
  * @param {int} num number of credits to gain
  * @param {String} [temporary] set to a reason if any unused will be lost after run (e.g. "bad publicity")
+ * @param {Card} [sourceCard] the operation or agenda that caused the credit gain (for The Zwicky Group)
  */
-function GainCredits(player, num, temporary = "") {
+function GainCredits(player, num, temporary = "", sourceCard = null) {
   if (num < 1) return;
   var bpcStr = "";
   if (temporary != "") {
@@ -1103,6 +1113,14 @@ function GainCredits(player, num, temporary = "") {
   if (num == 1) Log(PlayerName(player) + " gained one credit" + bpcStr);
   else Log(PlayerName(player) + " gained " + num + " credits" + bpcStr);
   UpdateCounters();
+  
+  //If Corp gained credits from an operation or agenda, trigger responseOnGainCreditsFromCard
+  //This is used by The Zwicky Group identity
+  if (player === corp && sourceCard !== null) {
+    if (CheckCardType(sourceCard, ["operation", "agenda"])) {
+      TriggeredResponsePhase(corp, "responseOnGainCreditsFromCard", [num, sourceCard], null, "Gained Credits");
+    }
+  }
 }
 
 /**

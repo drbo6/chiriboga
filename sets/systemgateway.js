@@ -3712,7 +3712,7 @@ cardSet[30048] = {
     else return [{}];
   },
   Resolve: function (params) {
-    GainCredits(corp, 10);
+    GainCredits(corp, 10, "", this);
     if (params.card) Trash(params.card);
   },
   command: "discard",
@@ -4300,7 +4300,7 @@ cardSet[30056] = {
     return choices;
   },
   Resolve: function (params) {
-    if (params.id != 1) GainCredits(corp, 3);
+    if (params.id != 1) GainCredits(corp, 3, "", this);
     if (params.id != 0) Draw(corp, 3);
   },
 };
@@ -4753,7 +4753,7 @@ cardSet[30064] = {
   playCost: 10,
   //Gain 15[c]
   Resolve: function (params) {
-    GainCredits(corp, 15);
+    GainCredits(corp, 15, "", this);
   },
 };
 cardSet[30065] = {
@@ -4907,10 +4907,13 @@ cardSet[30067] = {
   agendaPoints: 2,
   advancementRequirement: 4,
   responseOnScored: {
-    Resolve: function () {
-      if (intended.score == this) GainCredits(corp, 7);
+    Enumerate: function () {
+      if (intended.score == this) return [{}];
+      return [];
     },
-    automatic: true,
+    Resolve: function () {
+      GainCredits(corp, 7, "", this);
+    },
   },
 };
 cardSet[30068] = {
@@ -5280,7 +5283,7 @@ cardSet[30075] = {
   subTypes: ["Transaction"],
   playCost: 5,
   Resolve: function (params) {
-    GainCredits(corp, 9);
+    GainCredits(corp, 9, "", this);
   },
 };
 cardSet[30076] = {
