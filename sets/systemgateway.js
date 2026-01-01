@@ -213,6 +213,8 @@ cardSet[30004] = {
         if (!CheckCounters(this, "virus", 1)) return [];
         if (!CheckEncounter()) return [];
         if (attackedServer.ice[approachIce] != this.host) return [];
+        //Cannot break ice that can only be broken by fracters (e.g. Semak-samun)
+        if (attackedServer.ice[approachIce].canOnlyBreakUsingFracter) return [];
         return ChoicesEncounteredSubroutines();
       },
       Resolve: function (params) {
@@ -3712,7 +3714,7 @@ cardSet[30048] = {
     else return [{}];
   },
   Resolve: function (params) {
-    GainCredits(corp, 10, "", this);
+    GainCredits(corp, 10);
     if (params.card) Trash(params.card);
   },
   command: "discard",
@@ -4300,7 +4302,7 @@ cardSet[30056] = {
     return choices;
   },
   Resolve: function (params) {
-    if (params.id != 1) GainCredits(corp, 3, "", this);
+    if (params.id != 1) GainCredits(corp, 3);
     if (params.id != 0) Draw(corp, 3);
   },
 };
@@ -4753,7 +4755,7 @@ cardSet[30064] = {
   playCost: 10,
   //Gain 15[c]
   Resolve: function (params) {
-    GainCredits(corp, 15, "", this);
+    GainCredits(corp, 15);
   },
 };
 cardSet[30065] = {
@@ -4907,13 +4909,10 @@ cardSet[30067] = {
   agendaPoints: 2,
   advancementRequirement: 4,
   responseOnScored: {
-    Enumerate: function () {
-      if (intended.score == this) return [{}];
-      return [];
-    },
     Resolve: function () {
-      GainCredits(corp, 7, "", this);
+      if (intended.score == this) GainCredits(corp, 7);
     },
+    automatic: true,
   },
 };
 cardSet[30068] = {
@@ -5283,7 +5282,7 @@ cardSet[30075] = {
   subTypes: ["Transaction"],
   playCost: 5,
   Resolve: function (params) {
-    GainCredits(corp, 9, "", this);
+    GainCredits(corp, 9);
   },
 };
 cardSet[30076] = {

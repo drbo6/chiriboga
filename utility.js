@@ -3068,6 +3068,10 @@ function BreakerMatchesIce(breakerCard, iceCard) {
   if (typeof breakerCard.BreakerMatchesIce == 'function') {
 	return breakerCard.BreakerMatchesIce.call(breakerCard, iceCard);
   }
+  //Check if ice can only be broken by fracters (e.g. Semak-samun)
+  if (iceCard.canOnlyBreakUsingFracter) {
+	return CheckSubType(breakerCard, "Fracter");
+  }
   else if (CheckSubType(breakerCard, "AI")) {
 	if (iceCard.cannotBreakUsingAIPrograms) return false;
 	return true;

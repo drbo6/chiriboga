@@ -6787,3 +6787,77 @@ cardSet[35080] = {
     return result;
   },
 };
+
+//Semak-samun
+//Jinteki Ice: Barrier - AP
+//Rez: 3, Strength: 3, Influence: 1
+//The Runner cannot break the printed subroutine on this ice except using a fracter.
+//Sub: End the run unless the Runner suffers 3 net damage.
+cardSet[35054] = {
+  title: "Semak-samun",
+  imageFile: "35054.png",
+  player: corp,
+  faction: "Jinteki",
+  influence: 1,
+  cardType: "ice",
+  rezCost: 3,
+  strength: 3,
+  subTypes: ["Barrier", "AP"],
+  
+  //The Runner cannot break the printed subroutine on this ice except using a fracter
+  //This blocks AI breakers and non-fracter breakers
+  canOnlyBreakUsingFracter: true,
+  cannotBreakUsingAIPrograms: true, //AI breakers check this directly in their Enumerate
+  
+  subroutines: [
+    {
+      text: "End the run unless the Runner suffers 3 net damage.",
+      Resolve: function () {
+        var choices = [
+          { id: 0, label: "Suffer 3 net damage", button: "Take 3 damage" },
+          { id: 1, label: "End the run", button: "End the run" }
+        ];
+        
+        //**AI code
+        if (runner.AI != null) {
+          var handSize = PlayerHand(runner).length;
+          //Take damage if we have enough cards to survive, otherwise ETR
+          if (handSize > 3) {
+            runner.AI.preferred = { title: "Semak-samun", option: choices[0] };
+          } else {
+            runner.AI.preferred = { title: "Semak-samun", option: choices[1] };
+          }
+        }
+        
+        function decisionCallback(params) {
+          if (params.id == 0) {
+            Damage("net", 3, true); //true = can be prevented
+          } else {
+            EndTheRun();
+          }
+        }
+        DecisionPhase(
+          runner,
+          choices,
+          decisionCallback,
+          "Semak-samun",
+          "Semak-samun",
+          this
+        );
+      },
+      visual: { y: 79, h: 31 },
+    },
+  ],
+  
+  AIImplementIce: function(rc, result, maxCorpCred, incomplete) {
+    //Runner chooses: 3 net damage or ETR
+    //If hand size > 3, they'll likely take damage
+    var handSize = PlayerHand(runner).length;
+    if (handSize > 3) {
+      result.sr = [[["netDamage", "netDamage", "netDamage"]]];
+    } else {
+      result.sr = [[["endTheRun"]]];
+    }
+    return result;
+  },
+};
