@@ -801,7 +801,7 @@ function LoadDecks() {
     // // ----------------
 
     // corp.remoteServers[0].root[0].advancement=5;
-    // corp.remoteServers[1].root[0].advancement=3;
+    corp.remoteServers[3].ice[1].advancement=3;
     
     // // GIVE EVERYONE SOME CREDITS TO START WITH
     // // ----------------------------------------
@@ -809,6 +809,12 @@ function LoadDecks() {
     // GainCredits(runner,25);
     GainCredits(corp,25);
     
+    // // SET THE PHASE
+    // // -------------
+
+    ChangePhase(phases.runnerStartResponse); // Runner starts turn
+    // ChangePhase(phases.corpStartDraw);    
+
     // // OTHER STUFF
     // // -----------
 
@@ -819,9 +825,10 @@ function LoadDecks() {
     // corp.clickTracker = 6;
     // ChangePhase(phases.corpActionMain);
     // ChangePhase(phases.corpDiscardStart);
-    MakeRun(corp.remoteServers[2]); // Run remote
     // MakeRun(corp.RnD);
     // attackedServer = corp.RnD;
+    attackedServer = corp.remoteServers[3];    
+    MakeRun(corp.remoteServers[3]); // Run remote
     // ChangePhase(phases.runApproachServer); //i.e. skip all the ice
 
     // // INSTALL TROJAN (requires setting it on the ice and then hosting it)
@@ -829,12 +836,6 @@ function LoadDecks() {
 
     // corp.remoteServers[0].ice[2].hostedCards = [];
     // InstanceCardsPush(30004, corp.remoteServers[0].ice[2].hostedCards, 1, cardBackTexturesCorp, glowTextures, strengthTextures)[0].host = corp.remoteServers[0].ice[2];
-
-    // // SET THE PHASE TO START OF RUNNER TURN
-    // // -------------------------------------
-
-    ChangePhase(phases.runnerStartResponse); // Runner starts turn
-    // ChangePhase(phases.corpStartDraw);    
   
     // // TO FORCE THE AI TO PLAY CARDS / MAKE DECISIONS, set preferred property on runner.AI or corp.AI
     // // ----------------------------------------------------------------------------------------------
