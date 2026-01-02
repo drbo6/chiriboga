@@ -1919,7 +1919,7 @@ GetFactionIcon(cardSet[playerIdentities[i]].faction) + shortTitle +
 							for (var j=0;j<cardCount;j++) {
 								json.cards.push(id);
 								totalCards++;
-								if (cardSet[id].faction !== cardSet[json.identity].faction) totalInfluence += cardSet[id].influence;
+								if (cardSet[id].faction !== cardSet[json.identity].faction && typeof cardSet[id].influence !== 'undefined') totalInfluence += cardSet[id].influence;
 								if (deckPlayer == corp && typeof cardSet[id].agendaPoints !== 'undefined') totalAgendaPoints += cardSet[id].agendaPoints;
 							}
 						} else {
