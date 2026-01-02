@@ -1759,6 +1759,12 @@ function Setup() {
   );
 
   LoadDecks();
+  
+  // Apply gauntlet perks if in gauntlet mode
+  if (typeof applyGauntletPerks === 'function') {
+    applyGauntletPerks();
+  }
+  
   corp.identityCard.faceUp = true;
   runner.identityCard.faceUp = true;
   if (typeof corp.identityCard.Tutorial !== "undefined")

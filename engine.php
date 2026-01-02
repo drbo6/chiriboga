@@ -51,6 +51,19 @@
 		var hostileTakeoverCallback = null;
 		var hostileTakeoverShown = false;
 		
+		// Convert perk number to display name
+		function getPerkName(perkNum) {
+			var perkNames = {
+				1: 'Perk 1', // Placeholder
+				2: 'Pre-Installed Neutral Ice',
+				3: 'Perk 3', // Placeholder
+				4: 'Boss Perk 4', // Placeholder
+				5: 'Boss Perk 5', // Placeholder
+				6: 'Boss Perk 6'  // Placeholder
+			};
+			return perkNames[perkNum] || ('Unknown Perk ' + perkNum);
+		}
+		
 		function showHostileTakeoverModal(perks, callback) {
 			// perks is an array of perk numbers to display
 			if (!perks || perks.length === 0) {
@@ -61,10 +74,10 @@
 			hostileTakeoverCallback = callback;
 			hostileTakeoverShown = true;
 			
-			// Build the perks display - each perk on its own line
+			// Build the perks display - each perk on its own line with name
 			var perksHtml = '';
 			for (var i = 0; i < perks.length; i++) {
-				perksHtml += '<div class="hostile-takeover-perk">' + perks[i] + '</div>';
+				perksHtml += '<div class="hostile-takeover-perk">' + getPerkName(perks[i]) + '</div>';
 			}
 			
 			$('#hostile-takeover-perks').html(perksHtml);
@@ -132,6 +145,139 @@
 			} catch(e) {
 				console.log('Could not parse gauntlet state for hostile takeover check:', e);
 				if (callback) callback();
+			}
+		}
+		
+		// Get gauntlet state from URL parameter
+		function getGauntletState() {
+			var gParam = '';
+			try {
+				var results = new RegExp('[?&]g=([^&#]*)').exec(window.location.href);
+				gParam = results ? decodeURIComponent(results[1]) : '';
+			} catch(e) {}
+			
+			if (!gParam) return null;
+			
+			try {
+				return JSON.parse(LZString.decompressFromEncodedURIComponent(gParam));
+			} catch(e) {
+				console.log('Could not parse gauntlet state:', e);
+				return null;
+			}
+		}
+		
+		// Get all active perks for the current opponent
+		function getActivePerks() {
+			var gauntletState = getGauntletState();
+			if (!gauntletState) return [];
+			
+			var currentOpponentIndex = gauntletState.defeated || 0;
+			var activePerks = [];
+			
+			for (var i = 0; i <= currentOpponentIndex; i++) {
+				var opponent = gauntletState.opponents[i];
+				if (opponent && typeof opponent.startingPerk === 'number' && opponent.startingPerk > 0) {
+					activePerks.push(opponent.startingPerk);
+				}
+			}
+			
+			return activePerks;
+		}
+		
+		// Find all neutral ice from allowed sets
+		function findNeutralIce(allowedSets) {
+			var neutralIce = [];
+			
+			for (var cardId in cardSet) {
+				var card = cardSet[cardId];
+				if (!card) continue;
+				if (card.cardType !== 'ice') continue;
+				if (card.player !== corp) continue;
+				if (card.faction !== 'Neutral') continue;
+				
+				// Check if card is from an allowed set
+				if (allowedSets && allowedSets.length > 0) {
+					var cardIdNum = parseInt(cardId);
+					var isAllowed = false;
+					for (var i = 0; i < allowedSets.length; i++) {
+						var setCode = allowedSets[i];
+						// Determine card ID range for each set
+						// sg (System Gateway): 30000-30999
+						// su21 (System Update 2021): 31000-31999
+						// ms (Midnight Sun): 33000-33999
+						// el (Elevation): 34000-34999
+						if (setCode === 'sg' && cardIdNum >= 30000 && cardIdNum < 31000) isAllowed = true;
+						else if (setCode === 'su21' && cardIdNum >= 31000 && cardIdNum < 32000) isAllowed = true;
+						else if (setCode === 'ms' && cardIdNum >= 33000 && cardIdNum < 34000) isAllowed = true;
+						else if (setCode === 'el' && cardIdNum >= 34000 && cardIdNum < 35000) isAllowed = true;
+					}
+					if (!isAllowed) continue;
+				}
+				
+				neutralIce.push(parseInt(cardId));
+			}
+			
+			return neutralIce;
+		}
+		
+		// Apply perk 2: Pre-Installed Neutral Ice
+		function applyPerk2_PreInstalledNeutralIce() {
+			var gauntletState = getGauntletState();
+			var allowedSets = gauntletState ? gauntletState.allowedSets : [];
+			
+			// Find all neutral ice from allowed sets
+			var neutralIceIds = findNeutralIce(allowedSets);
+			if (neutralIceIds.length === 0) {
+				console.log('Perk 2: No neutral ice found in allowed sets');
+				return;
+			}
+			
+			// Pick a random neutral ice
+			var randomIceId = neutralIceIds[Math.floor(Math.random() * neutralIceIds.length)];
+			
+			// Use InstanceCard to properly create the card (this sets isCard, setNumber, cardDefinition, etc.)
+			var iceCard = InstanceCard(
+				randomIceId,
+				cardBackTexturesCorp,
+				glowTextures,
+				strengthTextures
+			);
+			
+			if (!iceCard) {
+				console.log('Perk 2: Failed to create ice card');
+				return;
+			}
+			
+			// Pick a random central server (HQ, R&D, Archives)
+			var centralServers = [corp.HQ, corp.RnD, corp.archives];
+			var targetServer = centralServers[Math.floor(Math.random() * centralServers.length)];
+			
+			// Install the ice on the server (facedown, not rezzed)
+			iceCard.cardLocation = targetServer.ice;
+			iceCard.faceUp = false;
+			iceCard.rezzed = false;
+			targetServer.ice.push(iceCard);
+			
+			Log('Perk: ' + iceCard.title + ' pre-installed protecting ' + ServerName(targetServer));
+		}
+		
+		// Apply all active perks
+		function applyGauntletPerks() {
+			var activePerks = getActivePerks();
+			if (activePerks.length === 0) return;
+			
+			console.log('Applying gauntlet perks:', activePerks);
+			
+			for (var i = 0; i < activePerks.length; i++) {
+				var perk = activePerks[i];
+				switch (perk) {
+					case 2:
+						applyPerk2_PreInstalledNeutralIce();
+						break;
+					// Future perks will be added here
+					default:
+						console.log('Unknown perk:', perk);
+				}
 			}
 		}
 		</script>
