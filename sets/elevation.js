@@ -5740,14 +5740,16 @@ cardSet[35071] = {
             //Reveal the card
             Reveal(foundCard, function() {
               //Now offer to install it or add to HQ
-              var installChoices = [
-                { action: "install", label: "Install (ignoring all costs)", button: "Install" },
-                { action: "hq", label: "Add to HQ", button: "Add to HQ" }
-              ];
+              //Operations cannot be installed, only added to HQ
+              var installChoices = [];
+              if (CheckCardType(foundCard, ["agenda", "asset", "upgrade", "ice"])) {
+                installChoices.push({ action: "install", label: "Install (ignoring all costs)", button: "Install" });
+              }
+              installChoices.push({ action: "hq", label: "Add to HQ", button: "Add to HQ" });
               
               //**AI code
               if (corp.AI != null) {
-                //Prefer to install if valuable
+                //Prefer to install if valuable (and installable)
                 var shouldInstall = false;
                 if (CheckCardType(foundCard, ["agenda"])) {
                   shouldInstall = true; //always install agendas
@@ -5770,15 +5772,23 @@ cardSet[35071] = {
                   RemoveCounters(cardRef, "agenda", 1);
                   
                   if (installParams.action === "install") {
-                    //Build install choices with server selection using ChoicesCardInstall
-                    var serverChoices = ChoicesCardInstall(foundCard);
+                    //Build server choices manually (card is still in R&D so ChoicesCardInstall won't work properly)
+                    var serverChoices = [];
                     
-                    if (serverChoices.length === 0) {
-                      //Card can't be installed for some reason
-                      MoveCard(foundCard, corp.HQ.cards);
-                      Log(GetTitle(foundCard, true) + " could not be installed, added to HQ via Off the Books");
-                      ShuffleArray(corp.RnD.cards);
-                      return;
+                    //All Corp cards can go to new remote or existing remotes
+                    serverChoices.push({ server: null, label: GetTitle(foundCard, true) + " -> new server" });
+                    for (var j = 0; j < corp.remoteServers.length; j++) {
+                      serverChoices.push({
+                        server: corp.remoteServers[j],
+                        label: GetTitle(foundCard, true) + " -> " + corp.remoteServers[j].serverName
+                      });
+                    }
+                    
+                    //Ice and upgrades can also go to centrals
+                    if (foundCard.cardType === "ice" || foundCard.cardType === "upgrade") {
+                      serverChoices.push({ server: corp.HQ, label: GetTitle(foundCard, true) + " -> HQ" });
+                      serverChoices.push({ server: corp.RnD, label: GetTitle(foundCard, true) + " -> R&D" });
+                      serverChoices.push({ server: corp.archives, label: GetTitle(foundCard, true) + " -> Archives" });
                     }
                     
                     //**AI code
@@ -5800,7 +5810,7 @@ cardSet[35071] = {
                       "Off the Books",
                       "Choose install destination",
                       cardRef,
-                      "install"
+                      "server"
                     );
                   } else {
                     //Add to HQ
