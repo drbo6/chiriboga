@@ -1829,7 +1829,15 @@ function StartGame() {
 	else stackedLog = []; //skip setup narration
 	}, "Before Starting Hand");
   }
-  Main();
+  
+  // Check for hostile takeover modal before starting main loop
+  if (typeof tryShowHostileTakeover === 'function') {
+    tryShowHostileTakeover(function() {
+      Main();
+    });
+  } else {
+    Main();
+  }
 }
 
 var TutorialReplacer = null;

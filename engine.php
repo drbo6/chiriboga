@@ -46,6 +46,95 @@
 		}
 		echo '<script>var versionReference=' . $maxfilemtime . ';</script>';
 		?> 
+		<script>
+		// Hostile Takeover modal functions for gauntlet perk display
+		var hostileTakeoverCallback = null;
+		var hostileTakeoverShown = false;
+		
+		function showHostileTakeoverModal(perks, callback) {
+			// perks is an array of perk numbers to display
+			if (!perks || perks.length === 0) {
+				if (callback) callback();
+				return;
+			}
+			
+			hostileTakeoverCallback = callback;
+			hostileTakeoverShown = true;
+			
+			// Build the perks display - each perk on its own line
+			var perksHtml = '';
+			for (var i = 0; i < perks.length; i++) {
+				perksHtml += '<div class="hostile-takeover-perk">' + perks[i] + '</div>';
+			}
+			
+			$('#hostile-takeover-perks').html(perksHtml);
+			$('#hostile-takeover-modal').css('display', 'flex');
+		}
+		
+		function dismissHostileTakeoverModal() {
+			$('#hostile-takeover-modal').css('display', 'none');
+			if (hostileTakeoverCallback) {
+				var cb = hostileTakeoverCallback;
+				hostileTakeoverCallback = null;
+				cb();
+			}
+		}
+		
+		// Function to check and show hostile takeover modal on game start
+		// Returns the array of perks to show, or null if none
+		function checkHostileTakeoverOnStart(gauntletState, currentOpponentIndex) {
+			// currentOpponentIndex is 0-based (opponent 1 = index 0)
+			// Only show modal for opponent 2+ (index 1+)
+			if (currentOpponentIndex < 1) return null;
+			
+			// Collect all perks from previous opponents plus current opponent's own perk
+			var allPerks = [];
+			for (var i = 0; i <= currentOpponentIndex; i++) {
+				var opponent = gauntletState.opponents[i];
+				if (opponent && typeof opponent.startingPerk === 'number' && opponent.startingPerk > 0) {
+					allPerks.push(opponent.startingPerk);
+				}
+			}
+			
+			return allPerks.length > 0 ? allPerks : null;
+		}
+		
+		// Auto-check for hostile takeover when game initializes
+		// This hooks into the existing flow by checking the g parameter
+		function tryShowHostileTakeover(callback) {
+			if (hostileTakeoverShown) {
+				if (callback) callback();
+				return;
+			}
+			
+			// Get the gauntlet state from URL parameter 'g'
+			var gParam = '';
+			try {
+				var results = new RegExp('[?&]g=([^&#]*)').exec(window.location.href);
+				gParam = results ? decodeURIComponent(results[1]) : '';
+			} catch(e) {}
+			
+			if (!gParam) {
+				if (callback) callback();
+				return;
+			}
+			
+			try {
+				var gauntletState = JSON.parse(LZString.decompressFromEncodedURIComponent(gParam));
+				var currentOpponentIndex = gauntletState.defeated || 0;
+				var perks = checkHostileTakeoverOnStart(gauntletState, currentOpponentIndex);
+				
+				if (perks && perks.length > 0) {
+					showHostileTakeoverModal(perks, callback);
+				} else {
+					if (callback) callback();
+				}
+			} catch(e) {
+				console.log('Could not parse gauntlet state for hostile takeover check:', e);
+				if (callback) callback();
+			}
+		}
+		</script>
 	</head>
 
 	<body id="body" onload="Init();">
@@ -169,6 +258,20 @@
 					</div>
 					<button class="button" onclick="debugWinGame()">Win the Game</button>
 					<button class="button" onclick="debugLoseGame()">Lose the Game</button>
+				</div>
+			</div>
+		</div>
+		<div id="hostile-takeover-modal" class="modal">
+			<div class="solo-menu">
+				<div class="solo-logo">
+					<h1 class="logo-text">HOSTILE TAKEOVER</h1>
+				</div>
+				<div id="hostile-takeover-content">
+					<p>You weakened your last opponent enough for this Corp to buy up its assets and become stronger. It starts with the following perks:</p>
+					<div id="hostile-takeover-perks"></div>
+				</div>
+				<div class="hostile-takeover-buttons">
+					<button class="button" onclick="dismissHostileTakeoverModal();">CONTINUE</button>
 				</div>
 			</div>
 		</div>

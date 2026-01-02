@@ -788,6 +788,56 @@
       var gauntletLength = settingsOverrides.gauntletLength || 4;
       var alternateFactions = settingsOverrides.alternateFactions;
       
+      // Initialize perk pools for opponent starting perks
+      var regularPerks = [1,1,1,2,2,2,3,3,3];
+      var bossPerks = [4,5,6];
+      
+      // Shuffle the perk pools
+      for (var i = regularPerks.length - 1; i > 0; i--) {
+        var j = Math.floor(Math.random() * (i + 1));
+        var temp = regularPerks[i];
+        regularPerks[i] = regularPerks[j];
+        regularPerks[j] = temp;
+      }
+      for (var i = bossPerks.length - 1; i > 0; i--) {
+        var j = Math.floor(Math.random() * (i + 1));
+        var temp = bossPerks[i];
+        bossPerks[i] = bossPerks[j];
+        bossPerks[j] = temp;
+      }
+      
+      // Helper function to get starting perk for opponent number (1-indexed)
+      function getStartingPerk(opponentNum) {
+        // Opponent 1 => Always 0
+        if (opponentNum === 1) return 0;
+        // Opponents 2-3 => Draw from regularPerks
+        if (opponentNum >= 2 && opponentNum <= 3) {
+          return regularPerks.length > 0 ? regularPerks.shift() : 0;
+        }
+        // Opponent 4 => Draw from bossPerks
+        if (opponentNum === 4) {
+          return bossPerks.length > 0 ? bossPerks.shift() : 0;
+        }
+        // Opponents 5-7 => Draw from regularPerks
+        if (opponentNum >= 5 && opponentNum <= 7) {
+          return regularPerks.length > 0 ? regularPerks.shift() : 0;
+        }
+        // Opponent 8 => Draw from bossPerks
+        if (opponentNum === 8) {
+          return bossPerks.length > 0 ? bossPerks.shift() : 0;
+        }
+        // Opponents 9-11 => Draw from regularPerks
+        if (opponentNum >= 9 && opponentNum <= 11) {
+          return regularPerks.length > 0 ? regularPerks.shift() : 0;
+        }
+        // Opponent 12 => Draw from bossPerks
+        if (opponentNum === 12) {
+          return bossPerks.length > 0 ? bossPerks.shift() : 0;
+        }
+        // Opponent 13 and up => Always 0
+        return 0;
+      }
+      
       var selectedOpponents = [];
       
       if (alternateFactions) {
@@ -877,6 +927,11 @@
             }
           }
         }
+      }
+      
+      // Assign starting perks to all selected opponents
+      for (var opIdx = 0; opIdx < selectedOpponents.length; opIdx++) {
+        selectedOpponents[opIdx].startingPerk = getStartingPerk(opIdx + 1); // opIdx+1 for 1-indexed opponent number
       }
       
       // Create gauntlet state object

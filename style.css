@@ -3211,3 +3211,45 @@ body.deck-builder-page {
 	height: 1em;
 	vertical-align: middle;
 }
+
+/* Hostile Takeover Modal Styles */
+#hostile-takeover-modal .solo-menu {
+	max-width: 500px;
+}
+
+#hostile-takeover-modal .logo-text {
+	color: var(--crt-red, #ff3333);
+	text-shadow: 0 0 5px var(--crt-red, #ff3333), 0 0 15px var(--glow-red, #ff0000), 0 0 35px var(--glow-red-dark, #990000);
+}
+
+#hostile-takeover-content {
+	color: var(--crt-green, #33ff33);
+	font-family: monospace;
+	font-size: 14px;
+	text-align: center;
+	padding: 20px;
+	line-height: 1.6;
+}
+
+#hostile-takeover-content p {
+	margin-bottom: 16px;
+}
+
+#hostile-takeover-perks {
+	margin: 20px 0;
+	font-size: 18px;
+	font-weight: bold;
+}
+
+.hostile-takeover-perk {
+	margin: 8px 0;
+	padding: 8px;
+	border: 1px solid var(--crt-green, #33ff33);
+	background: rgba(51, 255, 51, 0.1);
+}
+
+.hostile-takeover-buttons {
+	display: flex;
+	justify-content: center;
+	padding-bottom: 20px;
+}
