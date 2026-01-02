@@ -3273,6 +3273,16 @@ body.deck-builder-page {
 	color: var(--crt-red, #ff3333);
 }
 
+.hostile-takeover-perk.disabled-perk {
+	opacity: 0.4;
+	text-decoration: line-through;
+}
+
+.hostile-takeover-perk.disabled-perk.boss-perk {
+	opacity: 0.4;
+	text-decoration: line-through;
+}
+
 .hostile-takeover-buttons {
 	display: flex;
 	justify-content: center;

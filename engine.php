@@ -53,6 +53,8 @@
 		
 		// Convert perk number to display name
 		function getPerkName(perkNum) {
+			// Perks 7+ are disabled versions of perks 1-6
+			var basePerk = perkNum > 6 ? perkNum - 6 : perkNum;
 			var perkNames = {
 				1: 'Additional Funds',
 				2: 'Pre-Installed Neutral Ice',
@@ -61,12 +63,18 @@
 				5: 'Pre-Installed Faction Ice',
 				6: 'Subsidiary Gains'
 			};
-			return perkNames[perkNum] || ('Unknown Perk ' + perkNum);
+			return perkNames[basePerk] || ('Unknown Perk ' + perkNum);
 		}
 		
 		// Check if a perk is a boss perk (should be displayed in red)
 		function isBossPerk(perkNum) {
-			return perkNum >= 4 && perkNum <= 6;
+			var basePerk = perkNum > 6 ? perkNum - 6 : perkNum;
+			return basePerk >= 4 && basePerk <= 6;
+		}
+		
+		// Check if a perk is disabled (7+)
+		function isDisabledPerk(perkNum) {
+			return perkNum > 6;
 		}
 		
 		function showHostileTakeoverModal(perks, callback) {
@@ -82,8 +90,10 @@
 			// Build the perks display - each perk on its own line with name
 			var perksHtml = '';
 			for (var i = 0; i < perks.length; i++) {
-				var perkClass = isBossPerk(perks[i]) ? 'hostile-takeover-perk boss-perk' : 'hostile-takeover-perk';
-				perksHtml += '<div class="' + perkClass + '">' + getPerkName(perks[i]) + '</div>';
+				var perkClasses = ['hostile-takeover-perk'];
+				if (isBossPerk(perks[i])) perkClasses.push('boss-perk');
+				if (isDisabledPerk(perks[i])) perkClasses.push('disabled-perk');
+				perksHtml += '<div class="' + perkClasses.join(' ') + '">' + getPerkName(perks[i]) + '</div>';
 			}
 			
 			$('#hostile-takeover-perks').html(perksHtml);
@@ -175,7 +185,7 @@
 			}
 		}
 		
-		// Get all active perks for the current opponent
+		// Get all active perks for the current opponent (includes disabled perks for display)
 		function getActivePerks() {
 			var gauntletState = getGauntletState();
 			if (!gauntletState) return [];
@@ -411,7 +421,7 @@
 			Log('Perk: ' + iceCard.title + ' pre-installed protecting ' + ServerName(targetServer));
 		}
 		
-		// Apply all active perks
+		// Apply all active perks (skips disabled perks 7+)
 		function applyGauntletPerks() {
 			var activePerks = getActivePerks();
 			if (activePerks.length === 0) return;
@@ -420,6 +430,13 @@
 			
 			for (var i = 0; i < activePerks.length; i++) {
 				var perk = activePerks[i];
+				
+				// Skip disabled perks (7+)
+				if (perk > 6) {
+					console.log('Skipping disabled perk:', perk);
+					continue;
+				}
+				
 				switch (perk) {
 					case 1:
 						applyPerk1_AdditionalFunds();

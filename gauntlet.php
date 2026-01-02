@@ -142,7 +142,12 @@
 				CycleSortReverse();
 				return false;
 			});
-			$(document).on('contextmenu','#sortdeck', function(e){
+			$(document).on('contextmenu','#filterfaction', function(e){
+				e.preventDefault();
+				CycleFactionFilterReverse();
+				return false;
+			});
+			$(document).on('contextmenu','#filtertype', function(e){
 				e.preventDefault();
 				CycleTypeFilterReverse();
 				return false;
@@ -432,6 +437,140 @@
 				window.location.href = launchAddress;
 			}
 
+			// Function to show the hack opponents modal
+			function ShowHackOpponentsModal() {
+				if (!gauntletOpponents || gauntletOpponents.length === 0) {
+					alert('No opponents available to hack.');
+					return;
+				}
+				
+				var modalHtml = '<div class="solo-menu" style="display: flex; flex-direction: column; align-items: center;">';
+				modalHtml += '<div class="solo-logo" style="width: 100%;">';
+				modalHtml += '<h1 class="logo-text" style="color: var(--crt-red); text-shadow: 0 0 5px var(--crt-red), 0 0 15px var(--glow-red), 0 0 35px var(--glow-red-dark); font-size: 24px;">HACK OPPONENTS</h1>';
+				modalHtml += '</div>';
+				modalHtml += '<div style="color: var(--crt-green); font-family: monospace; padding: 10px; text-align: center; width: 100%; max-width: 500px;">';
+				modalHtml += '<p style="margin-bottom: 15px;">Select an opponent to view their decklist:</p>';
+				modalHtml += '</div>';
+				modalHtml += '<div class="hack-opponent-gallery" style="display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; padding: 20px; max-width: 500px;">';
+				
+				for (var i = 0; i < gauntletOpponents.length; i++) {
+					var opp = gauntletOpponents[i];
+					var oppIdentityId = opp.identity;
+					var oppImgSrc = 'images/glow_outline.png';
+					var oppName = 'Unknown';
+					if (cardSet[oppIdentityId]) {
+						if (cardSet[oppIdentityId].imageFile) {
+							oppImgSrc = GetImagePath(cardSet[oppIdentityId].imageFile);
+						}
+						oppName = cardSet[oppIdentityId].title || 'Unknown';
+					}
+					
+					var isDefeated = opp.hasbeendefeated === true;
+					var defeatedClass = isDefeated ? ' defeated' : '';
+					
+					modalHtml += '<div class="hack-opponent-item' + defeatedClass + '" style="display: flex; flex-direction: column; align-items: center; cursor: pointer;" onclick="ViewOpponentDecklist(' + i + ');">';
+					modalHtml += '<img class="hack-opponent-img' + defeatedClass + '" src="' + oppImgSrc + '" style="width: 90px; height: auto; border-radius: 6px; transition: transform 0.2s ease, box-shadow 0.2s ease;"/>';
+					modalHtml += '<span class="hack-opponent-name" style="margin-top: 6px; font-size: 11px; color: var(--crt-green); text-align: center; max-width: 90px; word-wrap: break-word; line-height: 1.2;">' + oppName + '</span>';
+					modalHtml += '</div>';
+				}
+				
+				modalHtml += '</div>';
+				modalHtml += '<div style="display: flex; justify-content: center; margin-top: 10px; width: 100%;">';
+				modalHtml += '<button class="button" onclick="CloseHackOpponentsModal();">CLOSE</button>';
+				modalHtml += '</div>';
+				modalHtml += '</div>';
+				
+				var modal = document.getElementById('hack-opponents-modal');
+				if (!modal) {
+					modal = document.createElement('div');
+					modal.id = 'hack-opponents-modal';
+					modal.className = 'modal';
+					modal.style.display = 'flex';
+					modal.style.zIndex = '10000';
+					document.body.appendChild(modal);
+				}
+				
+				modal.innerHTML = modalHtml;
+				modal.style.display = 'flex';
+			}
+			
+			// Function to close the hack opponents modal
+			function CloseHackOpponentsModal() {
+				var modal = document.getElementById('hack-opponents-modal');
+				if (modal) {
+					modal.style.display = 'none';
+				}
+			}
+			
+			// Function to view an opponent's decklist
+			function ViewOpponentDecklist(opponentIndex) {
+				if (!gauntletOpponents || opponentIndex < 0 || opponentIndex >= gauntletOpponents.length) return;
+				
+				var opp = gauntletOpponents[opponentIndex];
+				var oppIdentityId = opp.identity;
+				var oppName = cardSet[oppIdentityId] ? cardSet[oppIdentityId].title : 'Unknown';
+				var oppCards = opp.cards || [];
+				
+				// Count cards in deck
+				var cardCounts = {};
+				for (var i = 0; i < oppCards.length; i++) {
+					var cardId = oppCards[i];
+					cardCounts[cardId] = (cardCounts[cardId] || 0) + 1;
+				}
+				
+				// Sort cards by type, then by name
+				var sortedCardIds = Object.keys(cardCounts).sort(function(a, b) {
+					var cardA = cardSet[parseInt(a)];
+					var cardB = cardSet[parseInt(b)];
+					if (!cardA || !cardB) return 0;
+					
+					// Get type order
+					var typeOrder = { 'agenda': 0, 'asset': 1, 'ice': 2, 'operation': 3, 'upgrade': 4 };
+					var typeA = typeOrder[cardA.cardType] !== undefined ? typeOrder[cardA.cardType] : 99;
+					var typeB = typeOrder[cardB.cardType] !== undefined ? typeOrder[cardB.cardType] : 99;
+					
+					if (typeA !== typeB) return typeA - typeB;
+					return (cardA.title || '').localeCompare(cardB.title || '');
+				});
+				
+				// Build the decklist HTML
+				var decklistHtml = '<div class="solo-menu" style="display: flex; flex-direction: column; align-items: center; max-width: 500px;">';
+				decklistHtml += '<div class="solo-logo" style="width: 100%;">';
+				decklistHtml += '<h1 class="logo-text" style="color: var(--crt-green); text-shadow: 0 0 5px var(--crt-green), 0 0 15px var(--glow-green), 0 0 35px var(--glow-green-dark); font-size: 20px;">' + oppName + '</h1>';
+				decklistHtml += '</div>';
+				decklistHtml += '<div class="decklist-container" style="color: var(--crt-green); font-family: monospace; padding: 15px; width: 100%; max-height: 400px; overflow-y: auto; text-align: left;">';
+				
+				var currentType = '';
+				for (var j = 0; j < sortedCardIds.length; j++) {
+					var cardId = parseInt(sortedCardIds[j]);
+					var card = cardSet[cardId];
+					if (!card) continue;
+					
+					// Add type header if changed
+					var cardType = (card.cardType || 'Unknown').toUpperCase();
+					if (cardType !== currentType) {
+						currentType = cardType;
+						decklistHtml += '<div style="color: var(--crt-green-muted); border-bottom: 1px solid var(--border-green); margin-top: 10px; margin-bottom: 5px; padding-bottom: 3px; font-size: 11px; letter-spacing: 1px;">' + cardType + '</div>';
+					}
+					
+					var count = cardCounts[cardId];
+					decklistHtml += '<div style="padding: 2px 0; font-size: 12px;">' + count + 'x ' + card.title + '</div>';
+				}
+				
+				decklistHtml += '</div>';
+				decklistHtml += '<div style="color: var(--crt-green-muted); font-size: 11px; margin-top: 10px;">Total: ' + oppCards.length + ' cards</div>';
+				decklistHtml += '<div style="display: flex; gap: 10px; justify-content: center; margin-top: 15px; width: 100%;">';
+				decklistHtml += '<button class="button" onclick="ShowHackOpponentsModal();">BACK</button>';
+				decklistHtml += '<button class="button" onclick="CloseHackOpponentsModal();">CLOSE</button>';
+				decklistHtml += '</div>';
+				decklistHtml += '</div>';
+				
+				var modal = document.getElementById('hack-opponents-modal');
+				if (modal) {
+					modal.innerHTML = decklistHtml;
+				}
+			}
+
 			// Function to check if there are cards to sell
 			function HasCardsToSell() {
 				for (var cardId in gauntletCardCounts) {
@@ -596,8 +735,7 @@
 				
 				// Reapply current sort and filters
 				SortCardsBySort();
-				ApplyTypeFilter();
-				if (showingOnlySelected) ApplyFilter();
+				ApplyFilters();
 			}
 
 			// Global variables for shop
@@ -831,8 +969,7 @@
 				
 				// Reapply current sort and filters
 				SortCardsBySort();
-				ApplyTypeFilter();
-				if (showingOnlySelected) ApplyFilter();
+				ApplyFilters();
 				
 				// Run pool verification after buying a pack
 				VerifyCardPool();
@@ -1553,8 +1690,8 @@
 				UpdateDeckTextareaFromCounts();
 				UpdateCardCountsUI();
 				Parse();
-			if (showingOnlySelected) ApplyFilter();
-			UpdatePlayDeckButtonState();
+				// No need to call ApplyFilters here as it doesn't change visibility
+				UpdatePlayDeckButtonState();
 			}
 			function RemoveCardFromDeck(id) {
 				if (typeof json.cards === 'undefined') json.cards = [];
@@ -1570,7 +1707,7 @@
 			
 				// Reapply current sort and filters
 				SortCardsBySort();
-				ApplyTypeFilter();
+				ApplyFilters();
 				UpdatePlayDeckButtonState();
 			}
 
@@ -1688,8 +1825,7 @@
 			
 			// Reapply current sort and filters
 			SortCardsBySort();
-			ApplyTypeFilter();
-			if (showingOnlySelected) ApplyFilter();
+			ApplyFilters();
 			UpdatePlayDeckButtonState();
 			
 			// Run pool verification after selling a card
@@ -2011,8 +2147,10 @@
 			SortCardsBySort();
 		}
 
-		// Type filter state and functions
-		var currentTypeFilter = 'none'; // 'none', 'influence', 'anarch', 'criminal', 'shaper', 'neutral', 'event', 'hardware', 'program', 'resource'
+		// Faction filter state: 'all', 'anarch', 'criminal', 'shaper', 'neutral'
+		var currentFactionFilter = 'all';
+		// Type filter state: 'all', 'event', 'icebreaker', 'program', 'hardware', 'resource'
+		var currentTypeFilter = 'all';
 
 		function SortCardContainer() {
 				var $container = $('#cardcontainer');
@@ -2026,33 +2164,15 @@
 					
 					if (!cardA || !cardB) return 0;
 					
-				// Sort by influence (ascending) then alphabetically when influence filter is active
-				if (currentTypeFilter === 'influence') {
-					var influenceA = cardA.influence || 0;
-					var influenceB = cardB.influence || 0;
-					if (influenceA !== influenceB) {
-						return influenceA - influenceB;
-					}
-				}
-				
-				// Always sort alphabetically by card title as secondary sort
+				// Always sort alphabetically by card title
 				return (cardA.title || '').localeCompare(cardB.title || '');
 			});
 			
 			$container.append($cards);
 		}
 		
-		function ApplyTypeFilter() {
+		function ApplyFilters() {
 			var $cards = $('#cardcontainer').children('.card-item');
-			
-			// Get the player identity's faction for influence filtering
-			var identityFaction = '';
-			if (currentTypeFilter === 'influence') {
-				var identity = cardSet[json.identity];
-				if (identity) {
-					identityFaction = (identity.faction || '').toLowerCase();
-				}
-			}
 			
 			$cards.each(function() {
 				var id = parseInt($(this).attr('data-id'));
@@ -2063,107 +2183,145 @@
 					return;
 				}
 				
-				var isVisible = false;
+				var factionVisible = true;
+				var typeVisible = true;
 				
-				if (currentTypeFilter === 'none') {
-					isVisible = true;
-				} else if (currentTypeFilter === 'influence') {
-					// Show cards that are NOT in the identity's faction and NOT neutral
+				// Apply faction filter
+				if (currentFactionFilter !== 'all') {
 					var cardFaction = (card.faction || '').toLowerCase();
-					var isNeutral = cardFaction === 'neutral' || cardFaction === 'neutral-runner' || cardFaction === 'neutral-corp';
-					var matchesFaction = cardFaction === identityFaction;
-					isVisible = !isNeutral && !matchesFaction;
-				} else if (currentTypeFilter === 'anarch') {
-					var cardFaction = (card.faction || '').toLowerCase();
-					isVisible = (cardFaction === 'anarch' || cardFaction === 'anarch-runner');
-				} else if (currentTypeFilter === 'criminal') {
-					var cardFaction = (card.faction || '').toLowerCase();
-					isVisible = (cardFaction === 'criminal' || cardFaction === 'criminal-runner');
-				} else if (currentTypeFilter === 'shaper') {
-					var cardFaction = (card.faction || '').toLowerCase();
-					isVisible = (cardFaction === 'shaper' || cardFaction === 'shaper-runner');
-				} else if (currentTypeFilter === 'neutral') {
-					var cardFaction = (card.faction || '').toLowerCase();
-					isVisible = (cardFaction === 'neutral' || cardFaction === 'neutral-runner' || cardFaction === 'neutral-corp');
-				} else {
-					var cardType = (card.cardType || '').toLowerCase();
-					isVisible = (currentTypeFilter === cardType);
+					if (currentFactionFilter === 'anarch') {
+						factionVisible = (cardFaction === 'anarch' || cardFaction === 'anarch-runner');
+					} else if (currentFactionFilter === 'criminal') {
+						factionVisible = (cardFaction === 'criminal' || cardFaction === 'criminal-runner');
+					} else if (currentFactionFilter === 'shaper') {
+						factionVisible = (cardFaction === 'shaper' || cardFaction === 'shaper-runner');
+					} else if (currentFactionFilter === 'neutral') {
+						factionVisible = (cardFaction === 'neutral' || cardFaction === 'neutral-runner' || cardFaction === 'neutral-corp');
+					}
 				}
 				
-				$(this).toggle(isVisible);
+				// Apply type filter
+				if (currentTypeFilter !== 'all') {
+					var cardType = (card.cardType || '').toLowerCase();
+					if (currentTypeFilter === 'icebreaker') {
+						// Icebreaker is a subtype of program
+						var subtypes = card.subTypes || [];
+						var isIcebreaker = false;
+						for (var i = 0; i < subtypes.length; i++) {
+							if (subtypes[i].toLowerCase() === 'icebreaker') {
+								isIcebreaker = true;
+								break;
+							}
+						}
+						typeVisible = isIcebreaker;
+					} else {
+						typeVisible = (currentTypeFilter === cardType);
+					}
+				}
+				
+				$(this).toggle(factionVisible && typeVisible);
 			});
+			
+			// If showingOnlySelected is active, also hide cards with count 0
+			if (showingOnlySelected) {
+				$('#cardcontainer .card-item').each(function(){
+					if ($(this).is(':visible')) {
+						var id = parseInt($(this).find('.count-badge').attr('data-id'));
+						var ct = deckCounts[id] || 0;
+						if (ct === 0) $(this).hide();
+					}
+				});
+			}
+		}
+
+		function CycleFactionFilter() {
+			if (currentFactionFilter === 'all') {
+				currentFactionFilter = 'anarch';
+				$('#filterfaction').html('FACTION:<br>ANARCH');
+			} else if (currentFactionFilter === 'anarch') {
+				currentFactionFilter = 'criminal';
+				$('#filterfaction').html('FACTION:<br>CRIMINAL');
+			} else if (currentFactionFilter === 'criminal') {
+				currentFactionFilter = 'shaper';
+				$('#filterfaction').html('FACTION:<br>SHAPER');
+			} else if (currentFactionFilter === 'shaper') {
+				currentFactionFilter = 'neutral';
+				$('#filterfaction').html('FACTION:<br>NEUTRAL');
+			} else {
+				currentFactionFilter = 'all';
+				$('#filterfaction').html('FACTION:<br>ALL');
+			}
+			SortCardsBySort();
+			ApplyFilters();
+		}
+
+		function CycleFactionFilterReverse() {
+			if (currentFactionFilter === 'all') {
+				currentFactionFilter = 'neutral';
+				$('#filterfaction').html('FACTION:<br>NEUTRAL');
+			} else if (currentFactionFilter === 'neutral') {
+				currentFactionFilter = 'shaper';
+				$('#filterfaction').html('FACTION:<br>SHAPER');
+			} else if (currentFactionFilter === 'shaper') {
+				currentFactionFilter = 'criminal';
+				$('#filterfaction').html('FACTION:<br>CRIMINAL');
+			} else if (currentFactionFilter === 'criminal') {
+				currentFactionFilter = 'anarch';
+				$('#filterfaction').html('FACTION:<br>ANARCH');
+			} else {
+				currentFactionFilter = 'all';
+				$('#filterfaction').html('FACTION:<br>ALL');
+			}
+			SortCardsBySort();
+			ApplyFilters();
 		}
 
 		function CycleTypeFilter() {
-			if (currentTypeFilter === 'none') {
-				currentTypeFilter = 'influence';
-				$('#sortdeck').html('FILTER:<br>INFLUENCE');
-			} else if (currentTypeFilter === 'influence') {
-				currentTypeFilter = 'anarch';
-				$('#sortdeck').html('FILTER:<br>ANARCH');
-			} else if (currentTypeFilter === 'anarch') {
-				currentTypeFilter = 'criminal';
-				$('#sortdeck').html('FILTER:<br>CRIMINAL');
-			} else if (currentTypeFilter === 'criminal') {
-				currentTypeFilter = 'shaper';
-				$('#sortdeck').html('FILTER:<br>SHAPER');
-			} else if (currentTypeFilter === 'shaper') {
-				currentTypeFilter = 'neutral';
-				$('#sortdeck').html('FILTER:<br>NEUTRAL');
-			} else if (currentTypeFilter === 'neutral') {
+			if (currentTypeFilter === 'all') {
 				currentTypeFilter = 'event';
-				$('#sortdeck').html('FILTER:<br>EVENT');
+				$('#filtertype').html('TYPE:<br>EVENT');
 			} else if (currentTypeFilter === 'event') {
-				currentTypeFilter = 'hardware';
-				$('#sortdeck').html('FILTER:<br>HARDWARE');
-			} else if (currentTypeFilter === 'hardware') {
+				currentTypeFilter = 'icebreaker';
+				$('#filtertype').html('TYPE:<br>ICEBREAKER');
+			} else if (currentTypeFilter === 'icebreaker') {
 				currentTypeFilter = 'program';
-				$('#sortdeck').html('FILTER:<br>PROGRAM');
+				$('#filtertype').html('TYPE:<br>PROGRAM');
 			} else if (currentTypeFilter === 'program') {
+				currentTypeFilter = 'hardware';
+				$('#filtertype').html('TYPE:<br>HARDWARE');
+			} else if (currentTypeFilter === 'hardware') {
 				currentTypeFilter = 'resource';
-				$('#sortdeck').html('FILTER:<br>RESOURCE');
+				$('#filtertype').html('TYPE:<br>RESOURCE');
 			} else {
-				currentTypeFilter = 'none';
-				$('#sortdeck').html('FILTER:<br>ALL');
+				currentTypeFilter = 'all';
+				$('#filtertype').html('TYPE:<br>ALL');
 			}
 			SortCardsBySort();
-			ApplyTypeFilter();
+			ApplyFilters();
 		}
 
 		function CycleTypeFilterReverse() {
-			if (currentTypeFilter === 'none') {
+			if (currentTypeFilter === 'all') {
 				currentTypeFilter = 'resource';
-				$('#sortdeck').html('FILTER:<br>RESOURCE');
+				$('#filtertype').html('TYPE:<br>RESOURCE');
 			} else if (currentTypeFilter === 'resource') {
-				currentTypeFilter = 'program';
-				$('#sortdeck').html('FILTER:<br>PROGRAM');
-			} else if (currentTypeFilter === 'program') {
 				currentTypeFilter = 'hardware';
-				$('#sortdeck').html('FILTER:<br>HARDWARE');
+				$('#filtertype').html('TYPE:<br>HARDWARE');
 			} else if (currentTypeFilter === 'hardware') {
+				currentTypeFilter = 'program';
+				$('#filtertype').html('TYPE:<br>PROGRAM');
+			} else if (currentTypeFilter === 'program') {
+				currentTypeFilter = 'icebreaker';
+				$('#filtertype').html('TYPE:<br>ICEBREAKER');
+			} else if (currentTypeFilter === 'icebreaker') {
 				currentTypeFilter = 'event';
-				$('#sortdeck').html('FILTER:<br>EVENT');
-			} else if (currentTypeFilter === 'event') {
-				currentTypeFilter = 'neutral';
-				$('#sortdeck').html('FILTER:<br>NEUTRAL');
-			} else if (currentTypeFilter === 'neutral') {
-				currentTypeFilter = 'shaper';
-				$('#sortdeck').html('FILTER:<br>SHAPER');
-			} else if (currentTypeFilter === 'shaper') {
-				currentTypeFilter = 'criminal';
-				$('#sortdeck').html('FILTER:<br>CRIMINAL');
-			} else if (currentTypeFilter === 'criminal') {
-				currentTypeFilter = 'anarch';
-				$('#sortdeck').html('FILTER:<br>ANARCH');
-			} else if (currentTypeFilter === 'anarch') {
-				currentTypeFilter = 'influence';
-				$('#sortdeck').html('FILTER:<br>INFLUENCE');
+				$('#filtertype').html('TYPE:<br>EVENT');
 			} else {
-				currentTypeFilter = 'none';
-				$('#sortdeck').html('FILTER:<br>ALL');
+				currentTypeFilter = 'all';
+				$('#filtertype').html('TYPE:<br>ALL');
 			}
 			SortCardsBySort();
-			ApplyTypeFilter();
+			ApplyFilters();
 		}
 
 		// Random Deck function
@@ -2333,11 +2491,9 @@
 					// Apply darkening to cards not in deck
 					$(this).closest('.card-item').toggleClass('not-in-deck', deckCt === 0);
 				});
-				// Keep filters in sync after counts change
+				// Keep showingOnlySelected filter in sync after counts change
 				if (showingOnlySelected) {
-					// Re-apply current pack filter first
-					ApplyFilter();
-					// Then hide any visible cards that have count 0 in deck
+					// Hide any visible cards that have count 0 in deck
 					$('#cardcontainer .card-item').each(function(){
 						if ($(this).is(':visible')) {
 							var id = parseInt($(this).find('.count-badge').attr('data-id'));
@@ -2548,34 +2704,24 @@
 						$(this).hide();
 					}
 				}
-			});				// If also showing only selected cards, re-apply that filter
-				if (showingOnlySelected) {
-					$('#cardcontainer .card-item').each(function(){
-						if ($(this).is(':visible')) {
-							var id = parseInt($(this).find('.count-badge').attr('data-id'));
-							var ct = deckCounts[id] || 0;
-							if (ct === 0) $(this).hide();
-						}
-					});
-				}
-			}
+			});
+			// After applying pack filter, also apply faction/type filters
+			ApplyFilters();
+		}
 
 			function ToggleOtherCards() {
 				if (!showingOnlySelected) {
-					// Hide cards with count 0 (respect current pack filter)
-					ApplyFilter();
-					$('#cardcontainer .card-item').each(function(){
-						var id = parseInt($(this).find('.count-badge').attr('data-id'));
-						var ct = deckCounts[id] || 0;
-						if (ct === 0) $(this).hide();
-					});
-					$('#togglecards').text('SHOW UNSELECTED');
+					// Set the flag first, then apply filters which will respect it
 					showingOnlySelected = true;
+					$('#togglecards').text('SHOW UNSELECTED');
+					// Reapply all filters - ApplyFilters will respect showingOnlySelected
+					ApplyFilters();
 				} else {
-					// Show all cards allowed by current pack filter
-					showingOnlySelected = false; // update flag BEFORE applying filter so UpdateCardCountsUI won't re-hide
-					ApplyFilter(); // Re-apply the current filter
+					// Show all cards allowed by current filters
+					showingOnlySelected = false;
 					$('#togglecards').text('HIDE UNSELECTED');
+					// Reapply all filters
+					ApplyFilters();
 				}
 			}
 
@@ -3049,10 +3195,8 @@
 					// Parse and update deck stats without changing the deck
 					Parse();
 					UpdatePlayDeckButtonState();
-					// Update influence filter if it's currently active
-					if (currentTypeFilter === 'influence') {
-						ApplyTypeFilter();
-					}
+					// Reapply current filters
+					ApplyFilters();
 					// Run pool verification when identity changes
 					VerifyCardPool();
 			  });
@@ -3606,13 +3750,15 @@
 				</div>
 			<div class="leftrow buttons">
 				<button id="launch" class="button button-red" onclick="if(!$(this).prop('disabled')) ShowSelectOpponentModal();">PLAY<br>DECK</button>
+				<button id="exittomenu" onclick="window.location.href='index.php';" class="button">BACK TO<br>MENU</button>
 				<button id="buycards" onclick="ShowBuyCardsModal();" class="button">BUY/SELL<br>CARDS</button>
+				<button id="hackopponents" onclick="ShowHackOpponentsModal();" class="button">HACK<br>OPPONENTS</button>
 				<button id="addnoninfluence" onclick="AddNonInfluence();" class="button">ADD IN-<br>FACTION</button>
 				<button id="cleardeck" onclick="ClearDeck();" class="button">CLEAR<br>DECK</button>
 				<button id="sortbydeck" onclick="CycleSort();" class="button">SORT BY:<br>NAME</button>
-				<button id="sortdeck" onclick="CycleTypeFilter();" class="button">FILTER:<br>ALL</button>
 				<button id="togglecards" onclick="ToggleOtherCards();" class="button">HIDE UNSELECTED</button>
-				<button id="exittomenu" onclick="window.location.href='index.php';" class="button">BACK TO MENU</button>
+				<button id="filterfaction" onclick="CycleFactionFilter();" class="button">FACTION:<br>ALL</button>
+				<button id="filtertype" onclick="CycleTypeFilter();" class="button">TYPE:<br>ALL</button>
 				<!-- DRBO6: Gauntlet Mode - hide Set as Opponent, Random Deck, Import NRDB, Load Precon -->
 				<button id="opponent" class="button" onclick="window.location.href=$(this).prop('href');" style="display:none;">SET AS OPPONENT</button>
 				<button id="randomdeck" onclick="GenerateRandomDeck();" class="button" style="display:none;">RANDOM<br>DECK</button>
