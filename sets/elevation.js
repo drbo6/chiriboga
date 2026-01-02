@@ -5482,7 +5482,7 @@ cardSet[35052] = {
           );
         });
       },
-      visual: { y: 59, h: 32 },
+      visual: { y: 67, h: 32 },
     },
     {
       text: "Do 1 net damage. Give the Runner 1 tag.",
@@ -5491,14 +5491,14 @@ cardSet[35052] = {
           AddTags(1);
         });
       },
-      visual: { y: 94, h: 32 },
+      visual: { y: 102, h: 32 },
     },
     {
       text: "Do 2 net damage.",
       Resolve: function() {
         Damage("net", 2, true);
       },
-      visual: { y: 121, h: 16 },
+      visual: { y: 129, h: 16 },
     },
   ],
   AIImplementIce: function(rc, result, maxCorpCred, incomplete) {
@@ -5539,14 +5539,14 @@ cardSet[35063] = {
       Resolve: function() {
         AddTags(1);
       },
-      visual: { y: 51, h: 16 },
+      visual: { y: 59, h: 16 },
     },
     {
       text: "Do 1 net damage.",
       Resolve: function() {
         Damage("net", 1, true);
       },
-      visual: { y: 71, h: 16 },
+      visual: { y: 79, h: 16 },
     },
     {
       text: "Do 2 net damage if the Runner has at least 2 tags.",
@@ -5557,7 +5557,7 @@ cardSet[35063] = {
           Log("Runner does not have 2 tags");
         }
       },
-      visual: { y: 99, h: 32 },
+      visual: { y: 107, h: 32 },
     },
   ],
   AIImplementIce: function(rc, result, maxCorpCred, incomplete) {
@@ -5964,21 +5964,21 @@ cardSet[35076] = {
           cardRef
         );
       },
-      visual: { y: 137, h: 32 },
+      visual: { y: 145, h: 32 },
     },
     {
       text: "The Runner loses 2[credit].",
       Resolve: function() {
         LoseCredits(runner, 2);
       },
-      visual: { y: 161, h: 16 },
+      visual: { y: 169, h: 16 },
     },
     {
       text: "Do 1 net damage.",
       Resolve: function() {
         Damage("net", 1, true);
       },
-      visual: { y: 180, h: 16 },
+      visual: { y: 188, h: 16 },
     },
   ],
   
@@ -6008,73 +6008,6 @@ cardSet[35076] = {
   
   AIRezReasons: function() {
     return { facecheck: true, etr: false, taxing: true };
-  },
-};
-
-//Flyswatter
-//Neutral Corp Ice: Barrier
-//Rez: 2, Strength: 0
-//When you rez this ice during a run against this server, purge virus counters.
-//[sub] End the run.
-cardSet[35079] = {
-  title: "Flyswatter",
-  imageFile: "35079.png",
-  player: corp,
-  faction: "Neutral",
-  influence: 0,
-  cardType: "ice",
-  subTypes: ["Barrier"],
-  rezCost: 2,
-  strength: 0,
-  
-  //When you rez this ice during a run against this server, purge virus counters.
-  responseOnRez: {
-    Enumerate: function(card) {
-      if (card !== this) return [];
-      //Must be during a run against this server
-      if (attackedServer === null) return [];
-      if (attackedServer !== GetServer(this)) return [];
-      return [{}];
-    },
-    Resolve: function(params) {
-      Purge();
-    },
-    automatic: true,
-  },
-  
-  subroutines: [
-    {
-      text: "End the run.",
-      Resolve: function() {
-        EndTheRun();
-      },
-      visual: { y: 88, h: 16 },
-    },
-  ],
-  
-  AIImplementIce: function(rc, result, maxCorpCred, incomplete) {
-    result.sr = [[["endTheRun"]]];
-    return result;
-  },
-  
-  AIRezReasons: function() {
-    return { facecheck: true, etr: true };
-  },
-  
-  //AI: Prefer rezzing this when viruses are a problem
-  AIRezForFree: function() {
-    //Only rez for free if in attacked server
-    if (attackedServer !== GetServer(this)) return false;
-    //Extra incentive to rez if there are virus counters to purge
-    var virusCounters = 0;
-    var installedRunnerCards = InstalledCards(runner);
-    for (var i = 0; i < installedRunnerCards.length; i++) {
-      if (typeof installedRunnerCards[i].virus !== 'undefined') {
-        virusCounters += installedRunnerCards[i].virus;
-      }
-    }
-    if (virusCounters >= 3) return true;
-    return true; //still rez for ETR even without viruses
   },
 };
 
@@ -6652,7 +6585,7 @@ cardSet[35074] = {
           corp.AI.preferred = { title: "Biawak", option: choice };
         }
       },
-      visual: { y: 86, h: 16 },
+      visual: { y: 94, h: 16 },
     },
     {
       text: "Trash 1 installed resource or end the run.",
@@ -6701,14 +6634,14 @@ cardSet[35074] = {
           corp.AI.preferred = { title: "Biawak", option: choice };
         }
       },
-      visual: { y: 106, h: 16 },
+      visual: { y: 114, h: 16 },
     },
     {
       text: "End the run.",
       Resolve: function () {
         EndTheRun();
       },
-      visual: { y: 125, h: 16 },
+      visual: { y: 133, h: 16 },
     },
   ],
   
@@ -6947,7 +6880,7 @@ cardSet[35080] = {
           this
         );
       },
-      visual: { y: 94, h: 36 },
+      visual: { y: 102, h: 36 },
     },
     {
       text: "End the run if the Runner is tagged.",
@@ -6956,7 +6889,7 @@ cardSet[35080] = {
           EndTheRun();
         }
       },
-      visual: { y: 120, h: 16 },
+      visual: { y: 128, h: 16 },
     },
   ],
   
@@ -7028,7 +6961,7 @@ cardSet[35054] = {
           this
         );
       },
-      visual: { y: 109, h: 32 },
+      visual: { y: 117, h: 32 },
     },
   ],
   
@@ -7090,7 +7023,7 @@ cardSet[35064] = {
       Resolve: function () {
         EndTheRun();
       },
-      visual: { y: 86, h: 16 },
+      visual: { y: 94, h: 16 },
     },
     {
       text: "If the threat level is 2 or greater, end the run.",
@@ -7100,7 +7033,7 @@ cardSet[35064] = {
           EndTheRun();
         }
       },
-      visual: { y: 114, h: 29 },
+      visual: { y: 122, h: 29 },
     },
     {
       text: "If the threat level is 4 or greater, end the run.",
@@ -7110,7 +7043,7 @@ cardSet[35064] = {
           EndTheRun();
         }
       },
-      visual: { y: 148, h: 29 },
+      visual: { y: 156, h: 29 },
     },
   ],
   

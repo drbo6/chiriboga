@@ -751,7 +751,7 @@ function LoadDecks() {
   // // ----------------------------------------------------------------------------
   // // You can enable the debug menu at the top of init.js
 
-  if (true) { // Use this to easily disable everything below
+  if (false) { // Use this to easily disable everything below
 
      debugging = true; //set true to log extra details and pause execution on error
      viewAllFronts = true; //set true to see all card fronts (for testing)
@@ -776,7 +776,7 @@ function LoadDecks() {
       [], //archivesInstalled
       [35041], //rndInstalled
       [35042], //hqInstalled
-      [[35073,35079,35064, 35063,35052,35074,35080,35076],[30067,35064],[31071, 35053],[31072, 35053, 35076],[35062, 35079]], //remotes (array of arrays)
+      [[30067,35042,35052,35079],[30067,35064],[31071, 35053],[31072, 35053, 35076],[35062, 35079]], //remotes (array of arrays)
       [35070, 35070, 30068], //scored 35042,35052, 31075
       cardBackTexturesCorp,glowTextures,strengthTextures
     );
@@ -788,6 +788,9 @@ function LoadDecks() {
     // corp.RnD.ice[0].rezzed=true;
     // corp.HQ.ice[0].rezzed=true;
     corp.remoteServers[0].root[0].rezzed=true;
+    for (var i = 0; i < 3; i++) {
+      corp.remoteServers[0].ice[i].rezzed = true;
+    }
     corp.remoteServers[3].root[0].rezzed=true;
     // corp.remoteServers[0].ice[0].rezzed=true;
     // corp.remoteServers[0].ice[1].rezzed=true;
@@ -808,8 +811,8 @@ function LoadDecks() {
     // // GIVE EVERYONE SOME CREDITS TO START WITH
     // // ----------------------------------------
 
-    // GainCredits(runner,75);
-    GainCredits(corp,10);
+    GainCredits(runner,50);
+    GainCredits(corp,50);
     
     // // SET THE PHASE
     // // -------------
