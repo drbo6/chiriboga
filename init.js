@@ -1760,11 +1760,6 @@ function Setup() {
 
   LoadDecks();
   
-  // Apply gauntlet perks if in gauntlet mode
-  if (typeof applyGauntletPerks === 'function') {
-    applyGauntletPerks();
-  }
-  
   corp.identityCard.faceUp = true;
   runner.identityCard.faceUp = true;
   if (typeof corp.identityCard.Tutorial !== "undefined")
@@ -1780,6 +1775,11 @@ function Setup() {
     Log("Decks shuffled");
     corp.creditPool = 5;
     runner.creditPool = 5;
+  }
+  
+  // Apply gauntlet perks if in gauntlet mode (after credits are set)
+  if (typeof applyGauntletPerks === 'function') {
+    applyGauntletPerks();
   }
 
   if (viewingPlayer == corp) {

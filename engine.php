@@ -54,7 +54,7 @@
 		// Convert perk number to display name
 		function getPerkName(perkNum) {
 			var perkNames = {
-				1: 'Perk 1', // Placeholder
+				1: 'Additional Funds',
 				2: 'Pre-Installed Neutral Ice',
 				3: 'Perk 3', // Placeholder
 				4: 'Boss Perk 4', // Placeholder
@@ -261,6 +261,12 @@
 			Log('Perk: ' + iceCard.title + ' pre-installed protecting ' + ServerName(targetServer));
 		}
 		
+		// Apply perk 1: Additional Funds (Corp gets 5 extra credits)
+		function applyPerk1_AdditionalFunds() {
+			GainCredits(corp, 5);
+			Log('Perk: Corp gains 5 additional credits');
+		}
+		
 		// Apply all active perks
 		function applyGauntletPerks() {
 			var activePerks = getActivePerks();
@@ -271,6 +277,9 @@
 			for (var i = 0; i < activePerks.length; i++) {
 				var perk = activePerks[i];
 				switch (perk) {
+					case 1:
+						applyPerk1_AdditionalFunds();
+						break;
 					case 2:
 						applyPerk2_PreInstalledNeutralIce();
 						break;
