@@ -123,7 +123,9 @@
 			for (var i = 0; i <= currentOpponentIndex; i++) {
 				var opponent = gauntletState.opponents[i];
 				if (opponent && typeof opponent.startingPerk === 'number' && opponent.startingPerk > 0) {
-					allPerks.push(opponent.startingPerk);
+					// If perkDisabled is true, mark as disabled by adding 6 to the perk number
+					var perkValue = opponent.perkDisabled ? opponent.startingPerk + 6 : opponent.startingPerk;
+					allPerks.push(perkValue);
 				}
 			}
 			
@@ -185,7 +187,7 @@
 			}
 		}
 		
-		// Get all active perks for the current opponent (includes disabled perks for display)
+		// Get all active perks for the current opponent (includes all perks for display, marks disabled ones)
 		function getActivePerks() {
 			var gauntletState = getGauntletState();
 			if (!gauntletState) return [];
@@ -196,7 +198,9 @@
 			for (var i = 0; i <= currentOpponentIndex; i++) {
 				var opponent = gauntletState.opponents[i];
 				if (opponent && typeof opponent.startingPerk === 'number' && opponent.startingPerk > 0) {
-					activePerks.push(opponent.startingPerk);
+					// If perkDisabled is true, mark as disabled by adding 6 to the perk number
+					var perkValue = opponent.perkDisabled ? opponent.startingPerk + 6 : opponent.startingPerk;
+					activePerks.push(perkValue);
 				}
 			}
 			
