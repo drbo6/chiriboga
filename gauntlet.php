@@ -208,7 +208,7 @@
 			function ShowGauntletWelcomeModal(gauntletLength) {
 				var welcomeHtml = '<div class="solo-menu" style="display: flex; flex-direction: column; align-items: center;">';
 				welcomeHtml += '<div class="solo-logo" style="width: 100%;">';
-				welcomeHtml += '<h1 class="logo-text" style="color: var(--crt-red); text-shadow: 0 0 5px var(--crt-red), 0 0 15px var(--glow-red), 0 0 35px var(--glow-red-dark);">WELCOME TO<br>THE GAUNTLET</h1>';
+				welcomeHtml += '<h1 class="logo-text" style="text-align: center; color: var(--crt-red); text-shadow: 0 0 5px var(--crt-red), 0 0 15px var(--glow-red), 0 0 35px var(--glow-red-dark);">WELCOME TO<br>THE GAUNTLET</h1>';
 				welcomeHtml += '</div>';
 				welcomeHtml += '<div style="color: var(--crt-red); font-family: monospace; padding: 20px; text-align: center; width: 100%; max-width: 500px;">';
 				welcomeHtml += '<p>In this mode, you will face ' + gauntletLength + ' randomly selected decks.</p>';
@@ -238,7 +238,7 @@
 			function ShowCongratulationsModal(creditsWon, creditsWonText) {
 				var congratsHtml = '<div class="solo-menu" style="display: flex; flex-direction: column; align-items: center;">';
 				congratsHtml += '<div class="solo-logo" style="width: 100%;">';
-				congratsHtml += '<h1 class="logo-text" style="color: var(--crt-red); text-shadow: 0 0 5px var(--crt-red), 0 0 15px var(--glow-red), 0 0 35px var(--glow-red-dark);">NICE JOB!</h1>';
+				congratsHtml += '<h1 class="logo-text" style="text-align: center; color: var(--crt-red); text-shadow: 0 0 5px var(--crt-red), 0 0 15px var(--glow-red), 0 0 35px var(--glow-red-dark);">NICE JOB!</h1>';
 				congratsHtml += '</div>';
 				congratsHtml += '<div style="color: var(--crt-green); font-family: monospace; padding: 20px; text-align: left; width: 100%; max-width: 400px;">';
 				
@@ -325,9 +325,67 @@
 					return;
 				}
 				
+				// Determine which opponents are unlocked based on progression
+				// Boss positions: 4, 8, 12 (indices 3, 7, 11)
+				// Unlock rules:
+				// 1-3 must be defeated to unlock 4
+				// 4 must be defeated to unlock 5-7
+				// 5-7 must be defeated to unlock 8
+				// 8 must be defeated to unlock 9-11
+				// 9-11 must be defeated to unlock 12
+				function isOpponentUnlocked(index, opponents) {
+					var oppNum = index + 1; // 1-based opponent number
+					
+					// Opponents 1-3 are always unlocked
+					if (oppNum <= 3) return true;
+					
+					// Opponent 4 (first boss): requires 1-3 defeated
+					if (oppNum === 4) {
+						for (var i = 0; i < 3 && i < opponents.length; i++) {
+							if (!opponents[i].hasbeendefeated) return false;
+						}
+						return true;
+					}
+					
+					// Opponents 5-7: requires opponent 4 defeated
+					if (oppNum >= 5 && oppNum <= 7) {
+						return opponents.length >= 4 && opponents[3].hasbeendefeated;
+					}
+					
+					// Opponent 8 (second boss): requires 5-7 defeated
+					if (oppNum === 8) {
+						for (var i = 4; i < 7 && i < opponents.length; i++) {
+							if (!opponents[i].hasbeendefeated) return false;
+						}
+						return true;
+					}
+					
+					// Opponents 9-11: requires opponent 8 defeated
+					if (oppNum >= 9 && oppNum <= 11) {
+						return opponents.length >= 8 && opponents[7].hasbeendefeated;
+					}
+					
+					// Opponent 12 (third boss): requires 9-11 defeated
+					if (oppNum === 12) {
+						for (var i = 8; i < 11 && i < opponents.length; i++) {
+							if (!opponents[i].hasbeendefeated) return false;
+						}
+						return true;
+					}
+					
+					// For any opponents beyond 12, they're unlocked by default
+					return true;
+				}
+				
+				// Check if opponent is a boss (positions 4, 8, 12)
+				function isBossOpponent(index) {
+					var oppNum = index + 1;
+					return oppNum === 4 || oppNum === 8 || oppNum === 12;
+				}
+				
 				var modalHtml = '<div class="solo-menu" style="display: flex; flex-direction: column; align-items: center;">';
 				modalHtml += '<div class="solo-logo" style="width: 100%;">';
-				modalHtml += '<h1 class="logo-text" style="color: var(--crt-red); text-shadow: 0 0 5px var(--crt-red), 0 0 15px var(--glow-red), 0 0 35px var(--glow-red-dark); font-size: 28px;">SELECT NEXT OPPONENT</h1>';
+				modalHtml += '<h1 class="logo-text" style="text-align: center; color: var(--crt-red); text-shadow: 0 0 5px var(--crt-red), 0 0 15px var(--glow-red), 0 0 35px var(--glow-red-dark); font-size: 28px;">SELECT NEXT OPPONENT</h1>';
 				modalHtml += '</div>';
 				modalHtml += '<div class="select-opponent-gallery" style="display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; padding: 20px; max-width: 500px;">';
 				
@@ -335,22 +393,49 @@
 					var opp = gauntletOpponents[i];
 					var oppIdentityId = opp.identity;
 					var oppImgSrc = 'images/glow_outline.png';
-					var oppName = 'Unknown';
+					var oppName = opp.gauntletCorpName || 'Unknown';
 					if (cardSet[oppIdentityId]) {
 						if (cardSet[oppIdentityId].imageFile) {
 							oppImgSrc = GetImagePath(cardSet[oppIdentityId].imageFile);
 						}
-						oppName = cardSet[oppIdentityId].title || 'Unknown';
+						if (!opp.gauntletCorpName) {
+							oppName = cardSet[oppIdentityId].title || 'Unknown';
+						}
 					}
 					
 					var isDefeated = opp.hasbeendefeated === true;
-					var defeatedClass = isDefeated ? ' defeated' : '';
-					var clickHandler = isDefeated ? '' : ' onclick="SelectOpponent(' + i + ');"';
-					var cursorStyle = isDefeated ? 'cursor: default;' : 'cursor: pointer;';
+					var isUnlocked = isOpponentUnlocked(i, gauntletOpponents);
+					var isBoss = isBossOpponent(i);
+					var isLocked = !isUnlocked && !isDefeated;
 					
-					modalHtml += '<div class="select-opponent-item' + defeatedClass + '" style="display: flex; flex-direction: column; align-items: center; ' + cursorStyle + '"' + clickHandler + '>';
-					modalHtml += '<img class="select-opponent-img' + defeatedClass + '" src="' + oppImgSrc + '" style="width: 90px; height: auto; border-radius: 6px; transition: transform 0.2s ease, box-shadow 0.2s ease;"/>';
-					modalHtml += '<span class="select-opponent-name" style="margin-top: 6px; font-size: 11px; color: var(--crt-green); text-align: center; max-width: 90px; word-wrap: break-word; line-height: 1.2;">' + oppName + '</span>';
+					// Determine classes and styles
+					var itemClasses = 'select-opponent-item';
+					var imgClasses = 'select-opponent-img';
+					if (isDefeated) {
+						itemClasses += ' defeated';
+						imgClasses += ' defeated';
+					}
+					if (isLocked) {
+						itemClasses += ' locked';
+						imgClasses += ' locked';
+					}
+					if (isBoss) {
+						itemClasses += ' boss';
+						imgClasses += ' boss';
+					}
+					
+					var clickHandler = (isDefeated || isLocked) ? '' : ' onclick="SelectOpponent(' + i + ');"';
+					var cursorStyle = (isDefeated || isLocked) ? 'cursor: default;' : 'cursor: pointer;';
+					
+					// Boss styling for image border
+					var imgBorderStyle = isBoss ? 'border: 2px solid var(--crt-red); box-shadow: 0 0 8px var(--glow-red);' : '';
+					
+					// Name styling - red and bold for bosses
+					var nameColor = isBoss ? 'color: var(--crt-red); font-weight: bold;' : 'color: var(--crt-green);';
+					
+					modalHtml += '<div class="' + itemClasses + '" style="display: flex; flex-direction: column; align-items: center; ' + cursorStyle + '"' + clickHandler + '>';
+					modalHtml += '<img class="' + imgClasses + '" src="' + oppImgSrc + '" style="width: 90px; height: auto; border-radius: 6px; transition: transform 0.2s ease, box-shadow 0.2s ease; ' + imgBorderStyle + '"/>';
+					modalHtml += '<span class="select-opponent-name" style="margin-top: 6px; font-size: 11px; ' + nameColor + ' text-align: center; max-width: 90px; word-wrap: break-word; line-height: 1.2;">' + oppName + '</span>';
 					modalHtml += '</div>';
 				}
 				
@@ -444,12 +529,45 @@
 					return;
 				}
 				
+				// Helper functions for unlock logic (same as Play Deck)
+				function isOpponentUnlocked(index, opponents) {
+					var oppNum = index + 1;
+					if (oppNum <= 3) return true;
+					if (oppNum === 4) {
+						for (var i = 0; i < 3 && i < opponents.length; i++) {
+							if (!opponents[i].hasbeendefeated) return false;
+						}
+						return true;
+					}
+					if (oppNum >= 5 && oppNum <= 7) {
+						return opponents.length >= 4 && opponents[3].hasbeendefeated;
+					}
+					if (oppNum === 8) {
+						for (var i = 4; i < 7 && i < opponents.length; i++) {
+							if (!opponents[i].hasbeendefeated) return false;
+						}
+						return true;
+					}
+					if (oppNum >= 9 && oppNum <= 11) {
+						return opponents.length >= 8 && opponents[7].hasbeendefeated;
+					}
+					if (oppNum === 12) {
+						for (var i = 8; i < 11 && i < opponents.length; i++) {
+							if (!opponents[i].hasbeendefeated) return false;
+						}
+						return true;
+					}
+					return true;
+				}
+				
+				function isBossOpponent(index) {
+					var oppNum = index + 1;
+					return oppNum === 4 || oppNum === 8 || oppNum === 12;
+				}
+				
 				var modalHtml = '<div class="solo-menu" style="display: flex; flex-direction: column; align-items: center;">';
 				modalHtml += '<div class="solo-logo" style="width: 100%;">';
-				modalHtml += '<h1 class="logo-text" style="color: var(--crt-red); text-shadow: 0 0 5px var(--crt-red), 0 0 15px var(--glow-red), 0 0 35px var(--glow-red-dark); font-size: 24px;">HACK OPPONENTS</h1>';
-				modalHtml += '</div>';
-				modalHtml += '<div style="color: var(--crt-green); font-family: monospace; padding: 10px; text-align: center; width: 100%; max-width: 500px;">';
-				modalHtml += '<p style="margin-bottom: 15px;">Select an opponent to view their decklist:</p>';
+				modalHtml += '<h1 class="logo-text" style="text-align: center; color: var(--crt-red); text-shadow: 0 0 5px var(--crt-red), 0 0 15px var(--glow-red), 0 0 35px var(--glow-red-dark); font-size: 28px;">HACK<br>OPPONENT</h1>';
 				modalHtml += '</div>';
 				modalHtml += '<div class="hack-opponent-gallery" style="display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; padding: 20px; max-width: 500px;">';
 				
@@ -457,20 +575,49 @@
 					var opp = gauntletOpponents[i];
 					var oppIdentityId = opp.identity;
 					var oppImgSrc = 'images/glow_outline.png';
-					var oppName = 'Unknown';
+					var oppName = opp.gauntletCorpName || 'Unknown';
 					if (cardSet[oppIdentityId]) {
 						if (cardSet[oppIdentityId].imageFile) {
 							oppImgSrc = GetImagePath(cardSet[oppIdentityId].imageFile);
 						}
-						oppName = cardSet[oppIdentityId].title || 'Unknown';
+						if (!opp.gauntletCorpName) {
+							oppName = cardSet[oppIdentityId].title || 'Unknown';
+						}
 					}
 					
 					var isDefeated = opp.hasbeendefeated === true;
-					var defeatedClass = isDefeated ? ' defeated' : '';
+					var isUnlocked = isOpponentUnlocked(i, gauntletOpponents);
+					var isBoss = isBossOpponent(i);
+					var isLocked = !isUnlocked && !isDefeated;
 					
-					modalHtml += '<div class="hack-opponent-item' + defeatedClass + '" style="display: flex; flex-direction: column; align-items: center; cursor: pointer;" onclick="ViewOpponentDecklist(' + i + ');">';
-					modalHtml += '<img class="hack-opponent-img' + defeatedClass + '" src="' + oppImgSrc + '" style="width: 90px; height: auto; border-radius: 6px; transition: transform 0.2s ease, box-shadow 0.2s ease;"/>';
-					modalHtml += '<span class="hack-opponent-name" style="margin-top: 6px; font-size: 11px; color: var(--crt-green); text-align: center; max-width: 90px; word-wrap: break-word; line-height: 1.2;">' + oppName + '</span>';
+					// Determine classes
+					var itemClasses = 'hack-opponent-item';
+					var imgClasses = 'hack-opponent-img';
+					if (isDefeated) {
+						itemClasses += ' defeated';
+						imgClasses += ' defeated';
+					}
+					if (isLocked) {
+						itemClasses += ' locked';
+						imgClasses += ' locked';
+					}
+					if (isBoss) {
+						itemClasses += ' boss';
+						imgClasses += ' boss';
+					}
+					
+					var clickHandler = (isDefeated || isLocked) ? '' : ' onclick="ShowHackOptionsForOpponent(' + i + ');"';
+					var cursorStyle = (isDefeated || isLocked) ? 'cursor: default;' : 'cursor: pointer;';
+					
+					// Boss styling for image border
+					var imgBorderStyle = isBoss ? 'border: 2px solid var(--crt-red); box-shadow: 0 0 8px var(--glow-red);' : '';
+					
+					// Name styling - red and bold for bosses
+					var nameColor = isBoss ? 'color: var(--crt-red); font-weight: bold;' : 'color: var(--crt-green);';
+					
+					modalHtml += '<div class="' + itemClasses + '" style="display: flex; flex-direction: column; align-items: center; ' + cursorStyle + '"' + clickHandler + '>';
+					modalHtml += '<img class="' + imgClasses + '" src="' + oppImgSrc + '" style="width: 90px; height: auto; border-radius: 6px; transition: transform 0.2s ease, box-shadow 0.2s ease; ' + imgBorderStyle + '"/>';
+					modalHtml += '<span class="hack-opponent-name" style="margin-top: 6px; font-size: 11px; ' + nameColor + ' text-align: center; max-width: 90px; word-wrap: break-word; line-height: 1.2;">' + oppName + '</span>';
 					modalHtml += '</div>';
 				}
 				
@@ -502,13 +649,447 @@
 				}
 			}
 			
-			// Function to view an opponent's decklist
+			// Track hack attempts per opponent for seeded randomness
+			var hackAttemptCounters = {};
+			
+			// Get a seeded random number for hack chances
+			function GetHackChance(opponentIndex, actionType, attemptNumber) {
+				// Use the gauntlet seed combined with opponent index and action type
+				var seedStr = gauntletSeed + '_hack_' + opponentIndex + '_' + actionType + '_' + attemptNumber;
+				var seededRng = new Math.seedrandom(seedStr);
+				
+				var config = gauntletConfig.hackOpponent || {};
+				var min, max;
+				
+				switch(actionType) {
+					case 'decklist':
+						min = config.viewDecklistChanceMin || 10;
+						max = config.viewDecklistChanceMax || 90;
+						break;
+					case 'perk':
+						min = config.viewPerkChanceMin || 10;
+						max = config.viewPerkChanceMax || 90;
+						break;
+					case 'disablePerk':
+						min = config.disablePerkChanceMin || 20;
+						max = config.disablePerkChanceMax || 70;
+						break;
+					case 'disableBossPerk':
+						min = config.disableBossPerkChanceMin || 5;
+						max = config.disableBossPerkChanceMax || 40;
+						break;
+					default:
+						min = 10;
+						max = 90;
+				}
+				
+				return Math.floor(seededRng() * (max - min + 1)) + min;
+			}
+			
+			// Get the current attempt number for an opponent/action combo
+			function GetHackAttemptNumber(opponentIndex, actionType) {
+				var key = opponentIndex + '_' + actionType;
+				if (!hackAttemptCounters[key]) {
+					hackAttemptCounters[key] = 0;
+				}
+				return hackAttemptCounters[key];
+			}
+			
+			// Increment the attempt counter
+			function IncrementHackAttempt(opponentIndex, actionType) {
+				var key = opponentIndex + '_' + actionType;
+				if (!hackAttemptCounters[key]) {
+					hackAttemptCounters[key] = 0;
+				}
+				hackAttemptCounters[key]++;
+				
+				// Save to gauntlet state
+				SaveHackAttemptsToState();
+			}
+			
+			// Save hack attempts to gauntlet state
+			function SaveHackAttemptsToState() {
+				var gauntletParam = URIParameter("g");
+				if (gauntletParam !== "") {
+					try {
+						var gauntletState = JSON.parse(LZString.decompressFromEncodedURIComponent(gauntletParam));
+						gauntletState.hackAttempts = hackAttemptCounters;
+						var updatedParam = LZString.compressToEncodedURIComponent(JSON.stringify(gauntletState));
+						
+						// Update URL without reloading
+						var newUrl = window.location.pathname + '?' + 
+							(opponentdeckstr ? opponentdeckstr : '') + 
+							'r=' + URIParameter('r') + 
+							'&g=' + updatedParam;
+						history.replaceState(null, "Chiriboga", newUrl);
+					} catch (e) {
+						console.error("Failed to save hack attempts:", e);
+					}
+				}
+			}
+			
+			// Load hack attempts from gauntlet state
+			function LoadHackAttemptsFromState() {
+				var gauntletParam = URIParameter("g");
+				if (gauntletParam !== "") {
+					try {
+						var gauntletState = JSON.parse(LZString.decompressFromEncodedURIComponent(gauntletParam));
+						if (gauntletState.hackAttempts) {
+							hackAttemptCounters = gauntletState.hackAttempts;
+						}
+					} catch (e) {
+						console.error("Failed to load hack attempts:", e);
+					}
+				}
+			}
+			
+			// Show hack options for a specific opponent
+			function ShowHackOptionsForOpponent(opponentIndex) {
+				if (!gauntletOpponents || opponentIndex < 0 || opponentIndex >= gauntletOpponents.length) return;
+				
+				var opp = gauntletOpponents[opponentIndex];
+				var oppIdentityId = opp.identity;
+				var oppName = opp.gauntletCorpName || (cardSet[oppIdentityId] ? cardSet[oppIdentityId].title : 'Unknown');
+				
+				var config = gauntletConfig.hackOpponent || {};
+				var decklistCost = config.viewDecklistCost || 5;
+				var perkCost = config.viewPerkCost || 5;
+				var disablePerkCost = config.disablePerkCost || 10;
+				var disableBossPerkCost = config.disableBossPerkCost || 15;
+				
+				// Get current chances based on attempt numbers
+				var decklistAttempt = GetHackAttemptNumber(opponentIndex, 'decklist');
+				var perkAttempt = GetHackAttemptNumber(opponentIndex, 'perk');
+				var disableAttempt = GetHackAttemptNumber(opponentIndex, 'disablePerk');
+				var disableBossAttempt = GetHackAttemptNumber(opponentIndex, 'disableBossPerk');
+				
+				var decklistChance = GetHackChance(opponentIndex, 'decklist', decklistAttempt);
+				var perkChance = GetHackChance(opponentIndex, 'perk', perkAttempt);
+				var disableChance = GetHackChance(opponentIndex, 'disablePerk', disableAttempt);
+				var disableBossChance = GetHackChance(opponentIndex, 'disableBossPerk', disableBossAttempt);
+				
+				// Check if opponent has a perk and if it's a boss perk
+				var hasPerk = opp.startingPerk && opp.startingPerk > 0;
+				var isBossPerk = hasPerk && opp.startingPerk >= 4;
+				var perkDisabled = opp.perkDisabled === true;
+				var actualDisableCost = isBossPerk ? disableBossPerkCost : disablePerkCost;
+				var actualDisableChance = isBossPerk ? disableBossChance : disableChance;
+				
+				// Check what has already been revealed
+				var decklistRevealed = opp.decklistRevealed === true;
+				var perkRevealed = opp.perkRevealed === true;
+				
+				// Icon filter for enabled/disabled states (matching shop)
+				var enabledIconFilter = 'invert(1) brightness(0.5) sepia(1) saturate(5) hue-rotate(80deg)';
+				var disabledIconFilter = 'brightness(0) saturate(100%) invert(0.6) sepia(80%) hue-rotate(8deg) saturate(0.7)';
+				
+				var modalHtml = '<div class="solo-menu" style="display: flex; flex-direction: column; align-items: center; width: 600px;">';
+				modalHtml += '<h1 class="logo-text" style="text-align: center; color: var(--crt-red); text-shadow: 0 0 5px var(--crt-red), 0 0 15px var(--glow-red), 0 0 35px var(--glow-red-dark); margin: 20px 0;">' + oppName.toUpperCase() + '</h1>';
+				modalHtml += '<div style="color: var(--crt-red); font-family: monospace; padding: 20px; text-align: center; width: 100%;">';
+				modalHtml += '<p>Current Credits: <span id="hack-credits">' + gauntletCredits + '</span><img src="images/nsg/NSG_CREDIT.svg" class="card-icon" alt="credit" style="margin-left: 0px; margin-bottom: 2px; height: 16px; display: inline-block; vertical-align: sub; filter: ' + enabledIconFilter + ';"></p>';
+				modalHtml += '</div>';
+				modalHtml += '<div id="hack-buttons" style="display: flex; flex-direction: column; justify-content: center; gap: 10px; width: 100%; padding: 20px; min-height: 200px;">';
+				
+				// VIEW DECKLIST button
+				if (decklistRevealed) {
+					modalHtml += '<button class="button" onclick="ViewOpponentDecklist(' + opponentIndex + ');" style="width: 100%;">VIEW DECKLIST [REVEALED]</button>';
+				} else {
+					var canAffordDecklist = gauntletCredits >= decklistCost;
+					var decklistDisabled = canAffordDecklist ? '' : ' disabled';
+					var decklistStyle = canAffordDecklist ? 'width: 100%;' : 'width: 100%; opacity: 0.6; border-color: var(--border-red-dark); color: var(--crt-red-muted); cursor: default; background-color: rgba(12,24,12,0.7) !important; pointer-events: none;';
+					var decklistIconFilter = canAffordDecklist ? enabledIconFilter : disabledIconFilter;
+					modalHtml += '<button class="button"' + decklistDisabled + ' onclick="AttemptHackDecklist(' + opponentIndex + ');" style="' + decklistStyle + '">VIEW DECKLIST: ' + decklistCost + '<img src="images/nsg/NSG_CREDIT.svg" class="card-icon" alt="credit" style="margin-left: 2px; margin-bottom: 2px; height: 16px; display: inline-block; vertical-align: sub; filter: ' + decklistIconFilter + ';"> - ' + decklistChance + '% CHANCE</button>';
+				}
+				
+				// VIEW PERK button
+				if (!hasPerk) {
+					modalHtml += '<button class="button" disabled style="width: 100%; opacity: 0.6; border-color: var(--border-red-dark); color: var(--crt-red-muted); cursor: default; background-color: rgba(12,24,12,0.7) !important; pointer-events: none;">NO PERK</button>';
+				} else if (perkRevealed) {
+					modalHtml += '<button class="button" onclick="ShowPerkInfo(' + opponentIndex + ');" style="width: 100%;">VIEW PERK [REVEALED]</button>';
+				} else {
+					var canAffordPerk = gauntletCredits >= perkCost;
+					var perkDisabledAttr = canAffordPerk ? '' : ' disabled';
+					var perkStyle = canAffordPerk ? 'width: 100%;' : 'width: 100%; opacity: 0.6; border-color: var(--border-red-dark); color: var(--crt-red-muted); cursor: default; background-color: rgba(12,24,12,0.7) !important; pointer-events: none;';
+					var perkIconFilter = canAffordPerk ? enabledIconFilter : disabledIconFilter;
+					modalHtml += '<button class="button"' + perkDisabledAttr + ' onclick="AttemptHackPerk(' + opponentIndex + ');" style="' + perkStyle + '">VIEW PERK: ' + perkCost + '<img src="images/nsg/NSG_CREDIT.svg" class="card-icon" alt="credit" style="margin-left: 2px; margin-bottom: 2px; height: 16px; display: inline-block; vertical-align: sub; filter: ' + perkIconFilter + ';"> - ' + perkChance + '% CHANCE</button>';
+				}
+				
+				// DISABLE PERK button
+				if (!hasPerk) {
+					modalHtml += '<button class="button" disabled style="width: 100%; opacity: 0.6; border-color: var(--border-red-dark); color: var(--crt-red-muted); cursor: default; background-color: rgba(12,24,12,0.7) !important; pointer-events: none;">NO PERK TO DISABLE</button>';
+				} else if (perkDisabled) {
+					modalHtml += '<button class="button" disabled style="width: 100%; opacity: 0.6; border-color: var(--border-red-dark); color: var(--crt-red-muted); cursor: default; background-color: rgba(12,24,12,0.7) !important; pointer-events: none;">PERK DISABLED</button>';
+				} else {
+					var canAffordDisable = gauntletCredits >= actualDisableCost;
+					var disableDisabledAttr = canAffordDisable ? '' : ' disabled';
+					var disableStyle = canAffordDisable ? 'width: 100%;' : 'width: 100%; opacity: 0.6; border-color: var(--border-red-dark); color: var(--crt-red-muted); cursor: default; background-color: rgba(12,24,12,0.7) !important; pointer-events: none;';
+					var disableIconFilter = canAffordDisable ? enabledIconFilter : disabledIconFilter;
+					modalHtml += '<button class="button"' + disableDisabledAttr + ' onclick="AttemptDisablePerk(' + opponentIndex + ');" style="' + disableStyle + '">DISABLE PERK: ' + actualDisableCost + '<img src="images/nsg/NSG_CREDIT.svg" class="card-icon" alt="credit" style="margin-left: 2px; margin-bottom: 2px; height: 16px; display: inline-block; vertical-align: sub; filter: ' + disableIconFilter + ';"> - ' + actualDisableChance + '% CHANCE</button>';
+				}
+				
+				modalHtml += '<button class="button" onclick="ShowHackOpponentsModal();" style="width: 100%;">BACK</button>';
+				modalHtml += '<button class="button" onclick="CloseHackOpponentsModal();" style="width: 100%;">CLOSE</button>';
+				modalHtml += '</div>';
+				modalHtml += '</div>';
+				
+				var modal = document.getElementById('hack-opponents-modal');
+				if (modal) {
+					modal.innerHTML = modalHtml;
+				}
+			}
+			
+			// Attempt to hack decklist
+			function AttemptHackDecklist(opponentIndex) {
+				var config = gauntletConfig.hackOpponent || {};
+				var cost = config.viewDecklistCost || 5;
+				
+				if (gauntletCredits < cost) {
+					alert('Not enough credits!');
+					return;
+				}
+				
+				// Deduct credits
+				gauntletCredits -= cost;
+				
+				// Get current chance
+				var attemptNum = GetHackAttemptNumber(opponentIndex, 'decklist');
+				var chance = GetHackChance(opponentIndex, 'decklist', attemptNum);
+				
+				// Increment attempt counter (changes the chance for next time)
+				IncrementHackAttempt(opponentIndex, 'decklist');
+				
+				// Roll for success using seeded random
+				var rollSeed = gauntletSeed + '_hackroll_decklist_' + opponentIndex + '_' + attemptNum;
+				var rollRng = new Math.seedrandom(rollSeed);
+				var roll = Math.floor(rollRng() * 100) + 1;
+				
+				if (roll <= chance) {
+					// Success!
+					gauntletOpponents[opponentIndex].decklistRevealed = true;
+					SaveOpponentStateToURL();
+					UpdateLaunchStrings();
+					ShowHackResultModal(true, 'DECKLIST REVEALED', 'You successfully hacked into their systems and retrieved the decklist.', opponentIndex);
+				} else {
+					// Failure
+					SaveOpponentStateToURL();
+					UpdateLaunchStrings();
+					ShowHackResultModal(false, 'HACK FAILED', 'Your intrusion was detected and blocked. The chance has changed for your next attempt.', opponentIndex);
+				}
+			}
+			
+			// Helper function to get perk name from perk ID
+			function GetPerkName(perkId) {
+				var basePerk = perkId > 6 ? perkId - 6 : perkId;
+				var perkNames = {
+					1: 'Additional Funds',
+					2: 'Pre-Installed Neutral Ice',
+					3: 'Holdover Directive',
+					4: 'Liquidated Assets',
+					5: 'Pre-Installed Faction Ice',
+					6: 'Subsidiary Gains'
+				};
+				return perkNames[basePerk] || 'Unknown Perk';
+			}
+			
+			// Attempt to hack perk
+			function AttemptHackPerk(opponentIndex) {
+				var opp = gauntletOpponents[opponentIndex];
+				var config = gauntletConfig.hackOpponent || {};
+				var cost = config.viewPerkCost || 5;
+				
+				if (gauntletCredits < cost) {
+					alert('Not enough credits!');
+					return;
+				}
+				
+				// Deduct credits
+				gauntletCredits -= cost;
+				
+				// Get current chance
+				var attemptNum = GetHackAttemptNumber(opponentIndex, 'perk');
+				var chance = GetHackChance(opponentIndex, 'perk', attemptNum);
+				
+				// Increment attempt counter
+				IncrementHackAttempt(opponentIndex, 'perk');
+				
+				// Roll for success
+				var rollSeed = gauntletSeed + '_hackroll_perk_' + opponentIndex + '_' + attemptNum;
+				var rollRng = new Math.seedrandom(rollSeed);
+				var roll = Math.floor(rollRng() * 100) + 1;
+				
+				if (roll <= chance) {
+					// Success!
+					gauntletOpponents[opponentIndex].perkRevealed = true;
+					SaveOpponentStateToURL();
+					UpdateLaunchStrings();
+					var perkName = GetPerkName(opp.startingPerk);
+					ShowHackResultModal(true, 'PERK REVEALED', 'You successfully breached their servers and revealed: "' + perkName + '".', opponentIndex);
+				} else {
+					// Failure
+					SaveOpponentStateToURL();
+					UpdateLaunchStrings();
+					ShowHackResultModal(false, 'HACK FAILED', 'Security protocols blocked your access. The chance has changed for your next attempt.', opponentIndex);
+				}
+			}
+			
+			// Attempt to disable perk
+			function AttemptDisablePerk(opponentIndex) {
+				var opp = gauntletOpponents[opponentIndex];
+				var isBossPerk = opp.startingPerk && opp.startingPerk >= 4;
+				
+				var config = gauntletConfig.hackOpponent || {};
+				var cost = isBossPerk ? (config.disableBossPerkCost || 15) : (config.disablePerkCost || 10);
+				var actionType = isBossPerk ? 'disableBossPerk' : 'disablePerk';
+				
+				if (gauntletCredits < cost) {
+					alert('Not enough credits!');
+					return;
+				}
+				
+				// Deduct credits
+				gauntletCredits -= cost;
+				
+				// Get current chance
+				var attemptNum = GetHackAttemptNumber(opponentIndex, actionType);
+				var chance = GetHackChance(opponentIndex, actionType, attemptNum);
+				
+				// Increment attempt counter
+				IncrementHackAttempt(opponentIndex, actionType);
+				
+				// Roll for success
+				var rollSeed = gauntletSeed + '_hackroll_disable_' + opponentIndex + '_' + attemptNum;
+				var rollRng = new Math.seedrandom(rollSeed);
+				var roll = Math.floor(rollRng() * 100) + 1;
+				
+				if (roll <= chance) {
+					// Success!
+					gauntletOpponents[opponentIndex].perkDisabled = true;
+					SaveOpponentStateToURL();
+					UpdateLaunchStrings();
+					var perkName = GetPerkName(opp.startingPerk);
+					ShowHackResultModal(true, 'PERK DISABLED', 'You successfully breached their servers and disabled a "' + perkName + '" perk.', opponentIndex);
+				} else {
+					// Failure
+					SaveOpponentStateToURL();
+					UpdateLaunchStrings();
+					ShowHackResultModal(false, 'HACK FAILED', 'Their security systems detected and removed the trojan you installed. The chance has changed for your next attempt.', opponentIndex);
+				}
+			}
+			
+			// Save opponent state changes to URL
+			function SaveOpponentStateToURL() {
+				var gauntletParam = URIParameter("g");
+				if (gauntletParam !== "") {
+					try {
+						var gauntletState = JSON.parse(LZString.decompressFromEncodedURIComponent(gauntletParam));
+						gauntletState.opponents = gauntletOpponents;
+						gauntletState.credits = gauntletCredits;
+						gauntletState.hackAttempts = hackAttemptCounters;
+						var updatedParam = LZString.compressToEncodedURIComponent(JSON.stringify(gauntletState));
+						
+						// Update URL
+						var newUrl = window.location.pathname + '?' + 
+							(opponentdeckstr ? opponentdeckstr : '') + 
+							'r=' + URIParameter('r') + 
+							'&g=' + updatedParam;
+						history.replaceState(null, "Chiriboga", newUrl);
+					} catch (e) {
+						console.error("Failed to save opponent state:", e);
+					}
+				}
+			}
+			
+			// Show hack result modal
+			function ShowHackResultModal(success, title, message, opponentIndex) {
+				var color = success ? 'var(--crt-green)' : 'var(--crt-red)';
+				var glowColor = success ? 'var(--glow-green)' : 'var(--glow-red)';
+				var glowDark = success ? 'var(--glow-green-dark)' : 'var(--glow-red-dark)';
+				
+				var modalHtml = '<div class="solo-menu" style="display: flex; flex-direction: column; align-items: center; width: 600px;">';
+				modalHtml += '<h1 class="logo-text" style="text-align: center; color: ' + color + '; text-shadow: 0 0 5px ' + color + ', 0 0 15px ' + glowColor + ', 0 0 35px ' + glowDark + '; margin: 20px 0;">' + title + '</h1>';
+				modalHtml += '<div style="color: ' + color + '; font-family: monospace; padding: 20px; text-align: center; width: 100%;">';
+				modalHtml += '<p>' + message + '</p>';
+				modalHtml += '</div>';
+				modalHtml += '<div id="hack-buttons" style="display: flex; flex-direction: column; justify-content: center; gap: 10px; width: 100%; padding: 20px; min-height: 50px;">';
+				modalHtml += '<button class="button" onclick="ShowHackOptionsForOpponent(' + opponentIndex + ');" style="width: 100%;">CONTINUE</button>';
+				modalHtml += '</div>';
+				modalHtml += '</div>';
+				
+				var modal = document.getElementById('hack-opponents-modal');
+				if (modal) {
+					modal.innerHTML = modalHtml;
+				}
+			}
+			
+			// Show perk info for an opponent
+			function ShowPerkInfo(opponentIndex) {
+				var opp = gauntletOpponents[opponentIndex];
+				var perkId = opp.startingPerk || 0;
+				var perkDisabled = opp.perkDisabled === true;
+				
+				// Perk names and descriptions (must match engine.php)
+				// Perks 7+ are disabled versions of perks 1-6
+				var basePerk = perkId > 6 ? perkId - 6 : perkId;
+				
+				var perkNames = {
+					1: 'Additional Funds',
+					2: 'Pre-Installed Neutral Ice',
+					3: 'Holdover Directive',
+					4: 'Liquidated Assets',
+					5: 'Pre-Installed Faction Ice',
+					6: 'Subsidiary Gains'
+				};
+				
+				var perkDescriptions = {
+					1: 'The Corp starts with 5 extra credits.',
+					2: 'The Corp starts with a random neutral ICE installed protecting a central server.',
+					3: 'The Corp starts with a scored 1-point agenda.',
+					4: 'The Corp starts with 10 extra credits.',
+					5: 'The Corp starts with a random faction ICE installed protecting a central server.',
+					6: 'The Corp starts with a scored 3-point agenda.'
+				};
+				
+				var perkName = perkNames[basePerk] || 'Unknown Perk';
+				var perkDesc = perkDescriptions[basePerk] || 'Unknown effect.';
+				var isBoss = basePerk >= 4 && basePerk <= 6;
+				
+				var titleColor = isBoss ? 'var(--crt-red)' : 'var(--crt-green)';
+				var titleGlow = isBoss ? 'var(--glow-red)' : 'var(--glow-green)';
+				var titleGlowDark = isBoss ? 'var(--glow-red-dark)' : 'var(--glow-green-dark)';
+				
+				var modalHtml = '<div class="solo-menu" style="display: flex; flex-direction: column; align-items: center; width: 600px;">';
+				modalHtml += '<h1 class="logo-text" style="text-align: center; color: ' + titleColor + '; text-shadow: 0 0 5px ' + titleColor + ', 0 0 15px ' + titleGlow + ', 0 0 35px ' + titleGlowDark + '; margin: 20px 0;">' + perkName.toUpperCase() + '</h1>';
+				
+				if (isBoss) {
+					modalHtml += '<div style="color: var(--crt-red); font-family: monospace; font-size: 12px; margin-bottom: 10px;">[BOSS PERK]</div>';
+				}
+				
+				modalHtml += '<div style="color: var(--crt-green); font-family: monospace; padding: 20px; text-align: center; width: 100%;">';
+				modalHtml += '<p>' + perkDesc + '</p>';
+				if (perkDisabled) {
+					modalHtml += '<p style="color: var(--crt-green); margin-top: 15px; font-weight: bold;">[ DISABLED ]</p>';
+				}
+				modalHtml += '</div>';
+				
+				modalHtml += '<div id="hack-buttons" style="display: flex; flex-direction: column; justify-content: center; gap: 10px; width: 100%; padding: 20px; min-height: 50px;">';
+				modalHtml += '<button class="button" onclick="ShowHackOptionsForOpponent(' + opponentIndex + ');" style="width: 100%;">BACK</button>';
+				modalHtml += '<button class="button" onclick="CloseHackOpponentsModal();" style="width: 100%;">CLOSE</button>';
+				modalHtml += '</div>';
+				modalHtml += '</div>';
+				
+				var modal = document.getElementById('hack-opponents-modal');
+				if (modal) {
+					modal.innerHTML = modalHtml;
+				}
+			}
+			
+			// Function to view an opponent's decklist (after revealed)
 			function ViewOpponentDecklist(opponentIndex) {
 				if (!gauntletOpponents || opponentIndex < 0 || opponentIndex >= gauntletOpponents.length) return;
 				
 				var opp = gauntletOpponents[opponentIndex];
 				var oppIdentityId = opp.identity;
-				var oppName = cardSet[oppIdentityId] ? cardSet[oppIdentityId].title : 'Unknown';
+				var oppName = opp.gauntletCorpName || (cardSet[oppIdentityId] ? cardSet[oppIdentityId].title : 'Unknown');
 				var oppCards = opp.cards || [];
 				
 				// Count cards in deck
@@ -534,10 +1115,8 @@
 				});
 				
 				// Build the decklist HTML
-				var decklistHtml = '<div class="solo-menu" style="display: flex; flex-direction: column; align-items: center; max-width: 500px;">';
-				decklistHtml += '<div class="solo-logo" style="width: 100%;">';
-				decklistHtml += '<h1 class="logo-text" style="color: var(--crt-green); text-shadow: 0 0 5px var(--crt-green), 0 0 15px var(--glow-green), 0 0 35px var(--glow-green-dark); font-size: 20px;">' + oppName + '</h1>';
-				decklistHtml += '</div>';
+				var decklistHtml = '<div class="solo-menu" style="display: flex; flex-direction: column; align-items: center; width: 600px;">';
+				decklistHtml += '<h1 class="logo-text" style="text-align: center; color: var(--crt-green); text-shadow: 0 0 5px var(--crt-green), 0 0 15px var(--glow-green), 0 0 35px var(--glow-green-dark); margin: 20px 0;">' + oppName.toUpperCase() + '</h1>';
 				decklistHtml += '<div class="decklist-container" style="color: var(--crt-green); font-family: monospace; padding: 15px; width: 100%; max-height: 400px; overflow-y: auto; text-align: left;">';
 				
 				var currentType = '';
@@ -559,9 +1138,9 @@
 				
 				decklistHtml += '</div>';
 				decklistHtml += '<div style="color: var(--crt-green-muted); font-size: 11px; margin-top: 10px;">Total: ' + oppCards.length + ' cards</div>';
-				decklistHtml += '<div style="display: flex; gap: 10px; justify-content: center; margin-top: 15px; width: 100%;">';
-				decklistHtml += '<button class="button" onclick="ShowHackOpponentsModal();">BACK</button>';
-				decklistHtml += '<button class="button" onclick="CloseHackOpponentsModal();">CLOSE</button>';
+				decklistHtml += '<div id="hack-buttons" style="display: flex; flex-direction: column; justify-content: center; gap: 10px; width: 100%; padding: 20px; min-height: 50px;">';
+				decklistHtml += '<button class="button" onclick="ShowHackOptionsForOpponent(' + opponentIndex + ');" style="width: 100%;">BACK</button>';
+				decklistHtml += '<button class="button" onclick="CloseHackOpponentsModal();" style="width: 100%;">CLOSE</button>';
 				decklistHtml += '</div>';
 				decklistHtml += '</div>';
 				
@@ -618,7 +1197,7 @@
 			function ShowBuyCardsModal() {
 				// Packs are already selected on page load
 				var buycardsHtml = '<div class="solo-menu" style="display: flex; flex-direction: column; align-items: center; width: 600px;">';
-				buycardsHtml += '<h1 class="logo-text" style="color: var(--crt-red); text-shadow: 0 0 5px var(--crt-red), 0 0 15px var(--glow-red), 0 0 35px var(--glow-red-dark); margin: 20px 0;">AESOP\'S PAWN SHOP</h1>';
+				buycardsHtml += '<h1 class="logo-text" style="text-align: center; color: var(--crt-red); text-shadow: 0 0 5px var(--crt-red), 0 0 15px var(--glow-red), 0 0 35px var(--glow-red-dark); margin: 20px 0;">AESOP\'S PAWN SHOP</h1>';
 				buycardsHtml += '<div style="color: var(--crt-red); font-family: monospace; padding: 20px; text-align: center; width: 100%;">';
 				buycardsHtml += '<p>Current Credits: <span id="shop-credits">' + gauntletCredits + '</span><img src="images/nsg/NSG_CREDIT.svg" class="card-icon" alt="credit" style="margin-left: 0px; margin-bottom: 2px; height: 16px; display: inline-block; vertical-align: sub; filter: invert(1) brightness(0.5) sepia(1) saturate(5) hue-rotate(80deg);"></p>';
 				buycardsHtml += '</div>';
@@ -1421,6 +2000,11 @@
 				// Store opponents globally for opponent display
 				gauntletOpponents = gauntletState.opponents || [];
 				
+				// Load hack attempt counters from state
+				if (gauntletState.hackAttempts) {
+					hackAttemptCounters = gauntletState.hackAttempts;
+				}
+				
 				// Log opponent names and URLs
 				if (gauntletState.opponents && gauntletState.opponents.length > 0) {
 					console.log("Gauntlet Opponents:");
@@ -1721,7 +2305,7 @@
 				
 				var modalHtml = '<div class="solo-menu" style="display: flex; flex-direction: column; align-items: center; max-width: 400px;">';
 				modalHtml += '<div class="solo-logo" style="width: 100%;">';
-				modalHtml += '<h1 class="logo-text" style="color: var(--crt-red); text-shadow: 0 0 5px var(--crt-red), 0 0 15px var(--glow-red), 0 0 35px var(--glow-red-dark); font-size: 1.5em;">SELL CARD</h1>';
+				modalHtml += '<h1 class="logo-text" style="text-align: center; color: var(--crt-red); text-shadow: 0 0 5px var(--crt-red), 0 0 15px var(--glow-red), 0 0 35px var(--glow-red-dark); font-size: 1.5em;">SELL CARD</h1>';
 				modalHtml += '</div>';
 				modalHtml += '<div style="text-align: center; margin: 10px 0;">';
 				modalHtml += '<img src="' + imgSrc + '" style="max-height: 200px; border-radius: 8px;" />';

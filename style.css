@@ -3288,3 +3288,102 @@ body.deck-builder-page {
 	justify-content: center;
 	padding-bottom: 20px;
 }
+
+/* Hack Opponents Modal Styles */
+.hack-opponent-item {
+	transition: transform 0.2s ease;
+}
+
+.hack-opponent-item:hover {
+	transform: scale(1.05);
+}
+
+.hack-opponent-item:hover .hack-opponent-img {
+	box-shadow: 0 0 15px var(--crt-green, #33ff33);
+}
+
+.hack-opponent-item.defeated {
+	opacity: 0.5;
+}
+
+.hack-opponent-item.defeated .hack-opponent-img {
+	filter: grayscale(80%);
+}
+
+.hack-opponent-img {
+	border: 1px solid var(--border-green, #1f6d1f);
+	transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.decklist-container::-webkit-scrollbar {
+	width: 8px;
+}
+
+.decklist-container::-webkit-scrollbar-track {
+	background: rgba(51, 255, 51, 0.1);
+}
+
+.decklist-container::-webkit-scrollbar-thumb {
+	background: var(--crt-green, #33ff33);
+	border-radius: 4px;
+}
+
+.decklist-container::-webkit-scrollbar-thumb:hover {
+	background: var(--crt-green-bright, #66ff66);
+}
+
+/* Select Opponent Modal - Locked Opponents */
+.select-opponent-item.locked {
+	opacity: 0.4;
+	pointer-events: none;
+}
+
+.select-opponent-item.locked .select-opponent-img {
+	filter: grayscale(80%);
+}
+
+/* Select Opponent Modal - Boss Opponents */
+.select-opponent-item.boss:not(.defeated):not(.locked):hover {
+	transform: scale(1.05);
+}
+
+.select-opponent-item.boss:not(.defeated):not(.locked):hover .select-opponent-img {
+	box-shadow: 0 0 15px var(--crt-red, #ff3333);
+}
+
+/* Select Opponent Modal - Regular Opponents Hover */
+.select-opponent-item:not(.defeated):not(.locked):not(.boss):hover {
+	transform: scale(1.05);
+}
+
+.select-opponent-item:not(.defeated):not(.locked):not(.boss):hover .select-opponent-img {
+	box-shadow: 0 0 15px var(--crt-green, #33ff33);
+}
+
+/* Hack Opponent Modal - Locked Opponents */
+.hack-opponent-item.locked {
+	opacity: 0.4;
+	pointer-events: none;
+}
+
+.hack-opponent-item.locked .hack-opponent-img {
+	filter: grayscale(80%);
+}
+
+/* Hack Opponent Modal - Boss Opponents */
+.hack-opponent-item.boss:not(.defeated):not(.locked):hover {
+	transform: scale(1.05);
+}
+
+.hack-opponent-item.boss:not(.defeated):not(.locked):hover .hack-opponent-img {
+	box-shadow: 0 0 15px var(--crt-red, #ff3333);
+}
+
+/* Hack Opponent Modal - Regular Opponents Hover */
+.hack-opponent-item:not(.defeated):not(.locked):not(.boss):hover {
+	transform: scale(1.05);
+}
+
+.hack-opponent-item:not(.defeated):not(.locked):not(.boss):hover .hack-opponent-img {
+	box-shadow: 0 0 15px var(--crt-green, #33ff33);
+}

@@ -13,7 +13,7 @@ var gauntletConfig = {
 
   // ===== STARTING CREDITS =====
   // Number of credits the player starts with in gauntlet mode
-  startingCredits: 25,
+  startingCredits: 25000,
 
   // ===== MATCH REWARDS =====
   // Credits awarded or deducted based on game outcomes
@@ -25,6 +25,27 @@ var gauntletConfig = {
     runSuccessful: 1,          // Credits for successful run - not implemented yet
     runEnded: -1,              // Credits deducted when run ends - not implemented yet
     minimalCredits: 10         // Minimum credits player can have (prevents going negative)
+  },
+
+  // ===== HACK OPPONENT SETTINGS =====
+  // Configuration for the hack opponent feature
+  hackOpponent: {
+    // Cost in credits for each hack action
+    viewDecklistCost: 5,
+    viewPerkCost: 5,
+    disablePerkCost: 10,        // Cost for disabling regular perks (1-3)
+    disableBossPerkCost: 15,    // Cost for disabling boss perks (4-6)
+    
+    // Success chance ranges (min/max percentage)
+    // Actual chance is randomly determined within this range for each attempt
+    viewDecklistChanceMin: 25,
+    viewDecklistChanceMax: 75,
+    viewPerkChanceMin: 10,
+    viewPerkChanceMax: 90,
+    disablePerkChanceMin: 50,
+    disablePerkChanceMax: 75,
+    disableBossPerkChanceMin: 25,
+    disableBossPerkChanceMax: 50
   },
 
   // ===== ALTERNATE FACTIONS =====

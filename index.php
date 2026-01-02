@@ -934,6 +934,32 @@
         selectedOpponents[opIdx].startingPerk = getStartingPerk(opIdx + 1); // opIdx+1 for 1-indexed opponent number
       }
       
+      // Generate unique 1337-speak corp names for each opponent (max 8 chars each)
+      var leetCorpNames = [
+        'xX_C0rP', 'D4t4.VuL', 'n3X7~g3N', 'SyS7_c0r',
+        'm3G4::Cp', 'Zer0_D4w', 'c0D3.r3D', 'H4cK~Pr0',
+        'F1r3|W4L', 'd4Rk_N0d', 'Gh0s7.N3', 'V1rU5~Fr',
+        'cR4sH_73', 'r007|4cC', '5yS.0v3R', 'gL17cH_F',
+        '4p3X~C0r', 'N0v4_53c', 'Ph4n70M.', 'cYb3R|L0',
+        '7r4C3_Nu', 'pR070~M4', 'Qu4n7uM.', '5734L7H_',
+        'bL4cK|1c', 'R3d_Qu33', '5p1D3r.A', 'v3C70R~9',
+        'Null.p7R', 'w4RM_h0L', '1c3~Br34', 'Pr0Xy|99',
+        'd33P_w3B', 'n0D3.x3C', 'Z3r0|d4Y', 'C0r3~DmP'
+      ];
+      
+      // Shuffle the names array
+      for (var i = leetCorpNames.length - 1; i > 0; i--) {
+        var j = Math.floor(Math.random() * (i + 1));
+        var temp = leetCorpNames[i];
+        leetCorpNames[i] = leetCorpNames[j];
+        leetCorpNames[j] = temp;
+      }
+      
+      // Assign unique names to each opponent
+      for (var opIdx = 0; opIdx < selectedOpponents.length; opIdx++) {
+        selectedOpponents[opIdx].gauntletCorpName = leetCorpNames[opIdx % leetCorpNames.length];
+      }
+      
       // Create gauntlet state object
       var seed = Math.random().toString(36).substring(2, 15);
       var gauntletState = {
