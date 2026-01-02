@@ -194,6 +194,168 @@ function Rez(card, ignoreAllCosts=false, onRezResolve=null, context=null, allowC
 		  cancelCallback
 		);
 	}
+	//Forfeit OR reveal and trash 3 from HQ (e.g. Plutus)
+	else if (card.additionalRezCostForfeitOrTrashThree) {
+		var oldPhase = currentPhase;
+		var oldActivePlayer = activePlayer;
+		
+		//Build choices: forfeit agendas OR trash 3 from HQ
+		var choices = [];
+		
+		//Option 1: Forfeit any scored agenda
+		var agendaChoices = ChoicesArrayCards(corp.scoreArea);
+		for (var i = 0; i < agendaChoices.length; i++) {
+			agendaChoices[i].action = "forfeit";
+			agendaChoices[i].label = "Forfeit " + agendaChoices[i].card.title;
+		}
+		choices = choices.concat(agendaChoices);
+		
+		//Option 2: Reveal and trash 3 cards from HQ (only if we have 3+ cards)
+		if (corp.HQ.cards.length >= 3) {
+			choices.push({
+				id: choices.length,
+				action: "trash",
+				label: "Reveal and trash 3 random cards from HQ",
+				button: "Trash 3 from HQ"
+			});
+		}
+		
+		//If no valid choices, can't rez
+		if (choices.length === 0) {
+			Log("Cannot rez " + card.title + " - no agenda to forfeit and less than 3 cards in HQ");
+			if (cancelCallback) cancelCallback();
+			return;
+		}
+		
+		//**AI code
+		if (corp.AI != null) {
+			//Prefer forfeiting a 1-point agenda if available
+			var lowestPointAgenda = null;
+			var lowestPoints = 999;
+			for (var i = 0; i < choices.length; i++) {
+				if (choices[i].action === "forfeit") {
+					var pts = choices[i].card.agendaPoints || 0;
+					if (pts < lowestPoints) {
+						lowestPoints = pts;
+						lowestPointAgenda = choices[i];
+					}
+				}
+			}
+			//If we have a 1-point agenda, forfeit it; otherwise trash from HQ
+			if (lowestPointAgenda && lowestPoints <= 1) {
+				corp.AI.preferred = { title: "Rezzing " + card.title, option: lowestPointAgenda };
+			} else {
+				//Prefer trashing if available and no low-value agenda
+				var trashOption = choices.find(function(c) { return c.action === "trash"; });
+				if (trashOption) {
+					corp.AI.preferred = { title: "Rezzing " + card.title, option: trashOption };
+				} else if (lowestPointAgenda) {
+					corp.AI.preferred = { title: "Rezzing " + card.title, option: lowestPointAgenda };
+				}
+			}
+		}
+		
+		DecisionPhase(
+			corp,
+			choices,
+			function(fparams) {
+				if (fparams.action === "forfeit") {
+					Forfeit(fparams.card, function() {
+						payCreditsAndRez();
+					});
+				} else if (fparams.action === "trash") {
+					//Corp chooses 3 cards from HQ to reveal and trash
+					var hqChoices = ChoicesArrayCards(corp.HQ.cards);
+					
+					//Add multi-select confirm button
+					var requiredCount = 3;
+					hqChoices.push({
+						id: hqChoices.length,
+						label: "Confirm",
+						multiSelectDynamicButtonText: function(numSelected) {
+							return "Reveal & Trash " + numSelected + "/3 cards";
+						},
+						multiSelectDynamicButtonEnabler: function(numSelected) {
+							return numSelected === requiredCount;
+						},
+						button: "Reveal & Trash 0/3 cards",
+						cards: Array(requiredCount).fill(null)
+					});
+					
+					//Set cards array on all choices for multi-select
+					for (var j = 0; j < hqChoices.length - 1; j++) {
+						hqChoices[j].cards = Array(requiredCount).fill(null);
+					}
+					
+					//**AI code - pick least valuable cards
+					if (corp.AI != null) {
+						var scored = corp.HQ.cards.map(function(c) {
+							var keepScore = 0;
+							if (CheckCardType(c, ["agenda"])) {
+								keepScore = 100 + (c.agendaPoints || 0) * 10;
+							} else if (CheckCardType(c, ["ice"])) {
+								keepScore = 30;
+							} else if (CheckCardType(c, ["asset"]) && CheckSubType(c, "Ambush")) {
+								keepScore = 50;
+							} else if (CheckCardType(c, ["asset", "upgrade"])) {
+								keepScore = 20;
+							} else {
+								keepScore = 10; //operations
+							}
+							return { card: c, keepScore: keepScore };
+						});
+						//Sort ascending (lowest value first = trash these)
+						scored.sort(function(a, b) { return a.keepScore - b.keepScore; });
+						var aiCardsToTrash = scored.slice(0, 3).map(function(s) { return s.card; });
+						corp.AI.preferred = { 
+							title: "Rezzing " + card.title, 
+							option: { cards: aiCardsToTrash }
+						};
+					}
+					
+					DecisionPhase(
+						corp,
+						hqChoices,
+						function(trashParams) {
+							//Get selected cards (filter nulls)
+							var cardsToTrash = trashParams.cards.filter(function(c) { return c !== null; });
+							
+							//Reveal and trash each card recursively
+							var revealAndTrashNext = function(index) {
+								if (index >= cardsToTrash.length) {
+									//All done - proceed with rez
+									Log("Corp revealed and trashed 3 cards from HQ");
+									payCreditsAndRez();
+									return;
+								}
+								Reveal(cardsToTrash[index], function() {
+									if (corp.HQ.cards.includes(cardsToTrash[index])) {
+										//Keep card face-up in Archives after reveal
+										cardsToTrash[index].faceUp = true;
+										Trash(cardsToTrash[index], false, function() {
+											revealAndTrashNext(index + 1);
+										}, card);
+									} else {
+										revealAndTrashNext(index + 1);
+									}
+								}, card);
+							};
+							revealAndTrashNext(0);
+						},
+						"Rezzing " + card.title,
+						"Choose 3 cards from HQ to reveal and trash",
+						card,
+						"trash"
+					);
+				}
+			},
+			"Rezzing " + card.title,
+			"Choose additional cost for " + card.title,
+			this,
+			"forfeit",
+			cancelCallback
+		);
+	}
 	else payCreditsAndRez();
 	//it's a recursive function so no need to continue here
 	return;

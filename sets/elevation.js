@@ -6384,6 +6384,189 @@ cardSet[35055] = {
   },
 };
 
+//Plutus
+//Weyland Asset: Deep Net
+//Rez: 0, Trash: 3, Influence: 3, Unique
+//As an additional cost to rez this asset, forfeit 1 agenda or reveal and trash 3 cards from HQ.
+//When your turn begins, you may play 1 transaction operation from Archives. After it resolves, remove it from the game.
+cardSet[35073] = {
+  title: "Plutus",
+  imageFile: "35073.png",
+  player: corp,
+  faction: "Weyland Consortium",
+  influence: 3,
+  cardType: "asset",
+  subTypes: ["Deep Net"],
+  rezCost: 0,
+  trashCost: 3,
+  unique: true,
+  
+  //As an additional cost to rez this asset, forfeit 1 agenda or reveal and trash 3 cards from HQ.
+  //This custom property is handled in mechanics.js Rez function
+  additionalRezCostForfeitOrTrashThree: true,
+  
+  //When your turn begins, you may play 1 transaction operation from Archives.
+  //After it resolves, remove it from the game.
+  responseOnCorpTurnBegins: {
+    Enumerate: function() {
+      if (!this.rezzed) return [];
+      //Check if there are any transaction operations in Archives that we can afford
+      var transactions = corp.archives.cards.filter(function(card) {
+        return card.cardType === "operation" && 
+               CheckSubType(card, "Transaction") &&
+               AvailableCredits(corp, "playing", card) >= PlayCost(card);
+      });
+      if (transactions.length === 0) return [];
+      return [{}];
+    },
+    Resolve: function() {
+      var cardRef = this;
+      
+      //Build list of playable transaction operations in Archives
+      var transactionChoices = [];
+      for (var i = 0; i < corp.archives.cards.length; i++) {
+        var card = corp.archives.cards[i];
+        if (card.cardType === "operation" && CheckSubType(card, "Transaction")) {
+          if (AvailableCredits(corp, "playing", card) >= PlayCost(card)) {
+            //No button property - card shows as clickable in modal
+            transactionChoices.push({ card: card, label: card.title });
+          }
+        }
+      }
+      
+      //Add decline option with button (shows in footer)
+      transactionChoices.push({ 
+        card: null, 
+        id: transactionChoices.length,
+        label: "Decline", 
+        button: "Decline" 
+      });
+      
+      //**AI code
+      if (corp.AI != null) {
+        //Play the best transaction (usually highest credit gain)
+        var bestChoice = null;
+        var bestValue = 0;
+        for (var i = 0; i < transactionChoices.length; i++) {
+          if (transactionChoices[i].card === null) continue;
+          var opCard = transactionChoices[i].card;
+          //Simple heuristic: prefer cards that net more credits
+          var value = 10 - PlayCost(opCard); //lower cost = better
+          if (opCard.title === "Hedge Fund") value += 5;
+          if (opCard.title === "Beanstalk Royalties") value += 3;
+          if (value > bestValue) {
+            bestValue = value;
+            bestChoice = transactionChoices[i];
+          }
+        }
+        if (bestChoice) {
+          transactionChoices = [bestChoice];
+        } else {
+          transactionChoices = [{ card: null, label: "Decline", button: "Decline" }];
+        }
+      }
+      
+      DecisionPhase(
+        corp,
+        transactionChoices,
+        function(params) {
+          if (params.card !== null) {
+            var opCard = params.card;
+            //Mark that this card should be removed from game after playing
+            opCard._removeFromGameAfterResolve = true;
+            
+            //Use the standard Play function with a callback
+            //The card will be removed from game instead of going to Archives
+            //because of the _removeFromGameAfterResolve flag (checked in phase.js)
+            SpendCredits(corp, PlayCost(opCard), "playing", opCard, function() {
+              //Override the log message
+              var customLogMessage = 'Played "' + GetTitle(opCard, true) + '" from Archives via Plutus';
+              
+              //Move from Archives to resolving
+              MoveCard(opCard, corp.resolvingCards);
+              opCard.faceUp = true;
+              
+              Log(customLogMessage);
+              AutomaticTriggers("automaticOnPlay", [opCard]);
+              
+              //Get choices from Enumerate if available
+              var choices = [{}];
+              if (typeof opCard.Enumerate === "function") {
+                choices = opCard.Enumerate.call(opCard);
+              }
+              
+              if (choices.length === 0) {
+                //No valid choices - operation can't resolve
+                Log("No valid targets for " + GetTitle(opCard));
+                RemoveFromGame(opCard);
+                delete opCard._removeFromGameAfterResolve;
+                return;
+              }
+              
+              //If multiple choices, let player choose (for human) or pick first (for AI)
+              if (choices.length === 1 || corp.AI != null) {
+                //Single choice or AI - just resolve
+                opCard.Resolve.call(opCard, choices[0]);
+                //After resolving, remove from game (card is still in resolvingCards)
+                RemoveFromGame(opCard);
+                delete opCard._removeFromGameAfterResolve;
+              } else {
+                //Multiple choices - let player decide via DecisionPhase
+                var instruction = GetTitle(opCard, true);
+                if (typeof opCard.text !== "undefined") instruction = opCard.text;
+                
+                DecisionPhase(
+                  corp,
+                  choices,
+                  function(resolveParams) {
+                    opCard.Resolve.call(opCard, resolveParams);
+                    //After resolving, remove from game
+                    RemoveFromGame(opCard);
+                    delete opCard._removeFromGameAfterResolve;
+                  },
+                  "Playing " + GetTitle(opCard, true),
+                  instruction,
+                  opCard
+                );
+              }
+            }, cardRef);
+          }
+        },
+        "Plutus",
+        "Play a transaction operation from Archives?",
+        this
+      );
+    },
+    text: "Plutus",
+  },
+  
+  //Rez at end of Runner turn
+  RezUsability: function() {
+    if (currentPhase.identifier === "Runner 2.2") return true;
+    return false;
+  },
+  
+  //**AI code
+  AIWorthInstalling: function(emptyProtectedRemotes) {
+    //Check if we can rez it (need scored agenda OR 3+ cards in HQ)
+    if (corp.scoreArea.length === 0 && corp.HQ.cards.length < 3) return -1;
+    
+    //Check if there are transactions in Archives or likely to be
+    var transactionsInArchives = corp.archives.cards.filter(function(card) {
+      return card.cardType === "operation" && CheckSubType(card, "Transaction");
+    }).length;
+    
+    //Worth installing if we have transactions in archives or a reasonable deck
+    if (transactionsInArchives > 0 || corp.RnD.cards.length > 10) {
+      for (var j = 0; j < emptyProtectedRemotes.length; j++) {
+        if (!corp.AI._isAScoringServer(emptyProtectedRemotes[j])) return j;
+      }
+      return emptyProtectedRemotes.length;
+    }
+    return -1;
+  },
+};
+
 //Biawak
 //Weyland Ice: Sentry - Destroyer
 //Rez: 14, Strength: 6, Influence: 3

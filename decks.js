@@ -770,13 +770,13 @@ function LoadDecks() {
     );
 
     CorpTestField(35069, //identity
-      [30037, 30047,30073,35075,30074], //archivesCards
+      [30037, 30047,30073,35075,30074,30075,35073,35077], //archivesCards
       [30073,30072,30047,30073,30073,30039,30039,30039,30039,30039,30039,30039,30039,30039,30039,30039,30039,30039,30039,30039,35044,35044,35044,35045], //rndCards
-      [35055,35079,35040,35076,30075,35077], //hqCards 
+      [35055,35079,35040,35076,30075,35077,35073], //hqCards 
       [], //archivesInstalled
       [35041], //rndInstalled
       [35042], //hqInstalled
-      [[35070,35079,35064, 35063,35052,35074,35080,35076],[30067,35064],[31071, 35053],[31072, 35053, 35076],[35062, 35079]], //remotes (array of arrays)
+      [[35073,35079,35064, 35063,35052,35074,35080,35076],[30067,35064],[31071, 35053],[31072, 35053, 35076],[35062, 35079]], //remotes (array of arrays)
       [35070, 35070, 30068], //scored 35042,35052, 31075
       cardBackTexturesCorp,glowTextures,strengthTextures
     );
@@ -787,7 +787,7 @@ function LoadDecks() {
     // corp.archives.ice[0].rezzed=true;
     // corp.RnD.ice[0].rezzed=true;
     // corp.HQ.ice[0].rezzed=true;
-    corp.remoteServers[4].root[0].rezzed=true;
+    corp.remoteServers[0].root[0].rezzed=true;
     corp.remoteServers[3].root[0].rezzed=true;
     // corp.remoteServers[0].ice[0].rezzed=true;
     // corp.remoteServers[0].ice[1].rezzed=true;
@@ -809,13 +809,13 @@ function LoadDecks() {
     // // ----------------------------------------
 
     // GainCredits(runner,75);
-    // GainCredits(corp,75);
+    GainCredits(corp,10);
     
     // // SET THE PHASE
     // // -------------
 
-    // ChangePhase(phases.runnerStartResponse); // Runner starts turn
-    ChangePhase(phases.corpStartDraw);    
+    ChangePhase(phases.runnerStartResponse); // Runner starts turn
+    // ChangePhase(phases.corpStartDraw);    
 
     // // OTHER STUFF
     // // -----------
