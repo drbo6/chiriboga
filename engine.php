@@ -30,7 +30,7 @@
 		$jsfiles = array('init','phase', 'command', 'checks', 'mechanics', 'utility', 'config');
 
 		// Load card sets
-		$sets = ["coreset","systemgateway","systemupdate2021","midnightsun","elevation"];
+		$sets = ["coreset","systemgateway","systemupdate2021","midnightsun","elevation","gauntlet"];
 		foreach ($sets as $set) {
 			array_push($jsfiles, 'sets/'.$set);
 		}
@@ -59,7 +59,7 @@
 				3: 'Perk 3', // Placeholder
 				4: 'Boss Perk 4', // Placeholder
 				5: 'Boss Perk 5', // Placeholder
-				6: 'Boss Perk 6'  // Placeholder
+				6: 'Subsidiary Gains'
 			};
 			return perkNames[perkNum] || ('Unknown Perk ' + perkNum);
 		}
@@ -263,8 +263,34 @@
 		
 		// Apply perk 1: Additional Funds (Corp gets 5 extra credits)
 		function applyPerk1_AdditionalFunds() {
+			Log('Perk: Additional Funds');
 			GainCredits(corp, 5);
-			Log('Perk: Corp gains 5 additional credits');
+		}
+		
+		// Apply perk 6: Subsidiary Gains (Corp starts with a scored 3-point agenda)
+		function applyPerk6_SubsidiaryGains() {
+			var agendaId = 11; // Subsidiary Gains from gauntlet set
+			
+			// Create the agenda card
+			var agendaCard = InstanceCard(
+				agendaId,
+				cardBackTexturesCorp,
+				glowTextures,
+				strengthTextures
+			);
+			
+			if (!agendaCard) {
+				console.log('Perk 6: Failed to create Subsidiary Gains agenda');
+				return;
+			}
+			
+			// Add directly to corp's score area (no triggers, pre-game)
+			agendaCard.cardLocation = corp.scoreArea;
+			agendaCard.faceUp = true;
+			agendaCard.advancement = 0;
+			corp.scoreArea.push(agendaCard);
+			
+			Log('Perk: Corp starts with ' + agendaCard.title + ' scored');
 		}
 		
 		// Apply all active perks
@@ -282,6 +308,9 @@
 						break;
 					case 2:
 						applyPerk2_PreInstalledNeutralIce();
+						break;
+					case 6:
+						applyPerk6_SubsidiaryGains();
 						break;
 					// Future perks will be added here
 					default:
