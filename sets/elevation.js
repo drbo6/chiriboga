@@ -5669,7 +5669,7 @@ cardSet[35071] = {
   faction: "Weyland Consortium",
   cardType: "agenda",
   subTypes: ["Initiative"],
-  agendaPoints: 1,
+  agendaPoints: 2,
   advancementRequirement: 3,
   advancement: 0,
   

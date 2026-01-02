@@ -5291,7 +5291,10 @@ cardSet[30076] = {
   elo: 1159,
   player: runner,
   link: 0,
+  faction: "Neutral",
   cardType: "identity",
+  deckSize: 30,
+  influenceLimit: 15,
   subTypes: ["Natural"],
   Tutorial: function(str) {
     if ((str=="Corp Mulligan")||(str=="Runner Mulligan")) {
@@ -5306,6 +5309,9 @@ cardSet[30077] = {
   imageFile: "30077.png",
   elo: 1205,
   player: corp,
+  faction: "Neutral",
   cardType: "identity",
+  deckSize: 30,
+  influenceLimit: 15,
   subTypes: ["Megacorp"],
 };
