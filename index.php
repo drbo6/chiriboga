@@ -842,22 +842,28 @@
       
       if (alternateFactions) {
         // Select opponents cycling through factions, with each faction getting equal representation
+        // Re-shuffle faction order every 4 opponents so no repeats within a cluster
         var allCorpFactions = ['Jinteki', 'Haas-Bioroid', 'NBN', 'Weyland Consortium'];
         
-        // Randomize the order of factions
-        for (var i = allCorpFactions.length - 1; i > 0; i--) {
-          var j = Math.floor(Math.random() * (i + 1));
-          var temp = allCorpFactions[i];
-          allCorpFactions[i] = allCorpFactions[j];
-          allCorpFactions[j] = temp;
+        // Build a list of factions with reshuffling every 4
+        var corpFactions = [];
+        for (var cluster = 0; cluster < Math.ceil(gauntletLength / 4); cluster++) {
+          // Shuffle factions for this cluster
+          var clusterFactions = allCorpFactions.slice(); // copy array
+          for (var i = clusterFactions.length - 1; i > 0; i--) {
+            var j = Math.floor(Math.random() * (i + 1));
+            var temp = clusterFactions[i];
+            clusterFactions[i] = clusterFactions[j];
+            clusterFactions[j] = temp;
+          }
+          // Add this cluster's factions to the list
+          for (var i = 0; i < clusterFactions.length; i++) {
+            corpFactions.push(clusterFactions[i]);
+          }
         }
         
-        // Build a list of factions to cycle through to reach gauntletLength
-        // Cycles through randomized faction order without repeating until all used
-        var corpFactions = [];
-        for (var i = 0; i < gauntletLength; i++) {
-          corpFactions.push(allCorpFactions[i % allCorpFactions.length]);
-        }
+        // Trim to gauntletLength
+        corpFactions = corpFactions.slice(0, gauntletLength);
         
         for (var f = 0; f < corpFactions.length; f++) {
           var faction = corpFactions[f];
