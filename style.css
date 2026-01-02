@@ -3239,6 +3239,25 @@ body.deck-builder-page {
 	margin: 20px 0;
 	font-size: 18px;
 	font-weight: bold;
+	max-height: 280px;
+	overflow-y: auto;
+}
+
+#hostile-takeover-perks::-webkit-scrollbar {
+	width: 8px;
+}
+
+#hostile-takeover-perks::-webkit-scrollbar-track {
+	background: rgba(51, 255, 51, 0.1);
+}
+
+#hostile-takeover-perks::-webkit-scrollbar-thumb {
+	background: var(--crt-green, #33ff33);
+	border-radius: 4px;
+}
+
+#hostile-takeover-perks::-webkit-scrollbar-thumb:hover {
+	background: var(--crt-green-bright, #66ff66);
 }
 
 .hostile-takeover-perk {
@@ -3246,6 +3265,12 @@ body.deck-builder-page {
 	padding: 8px;
 	border: 1px solid var(--crt-green, #33ff33);
 	background: rgba(51, 255, 51, 0.1);
+}
+
+.hostile-takeover-perk.boss-perk {
+	border: 1px solid var(--crt-red, #ff3333);
+	background: rgba(255, 51, 51, 0.1);
+	color: var(--crt-red, #ff3333);
 }
 
 .hostile-takeover-buttons {

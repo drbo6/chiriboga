@@ -56,12 +56,17 @@
 			var perkNames = {
 				1: 'Additional Funds',
 				2: 'Pre-Installed Neutral Ice',
-				3: 'Perk 3', // Placeholder
-				4: 'Boss Perk 4', // Placeholder
-				5: 'Boss Perk 5', // Placeholder
+				3: 'Holdover Directive',
+				4: 'Liquidated Assets',
+				5: 'Pre-Installed Faction Ice',
 				6: 'Subsidiary Gains'
 			};
 			return perkNames[perkNum] || ('Unknown Perk ' + perkNum);
+		}
+		
+		// Check if a perk is a boss perk (should be displayed in red)
+		function isBossPerk(perkNum) {
+			return perkNum >= 4 && perkNum <= 6;
 		}
 		
 		function showHostileTakeoverModal(perks, callback) {
@@ -77,11 +82,18 @@
 			// Build the perks display - each perk on its own line with name
 			var perksHtml = '';
 			for (var i = 0; i < perks.length; i++) {
-				perksHtml += '<div class="hostile-takeover-perk">' + getPerkName(perks[i]) + '</div>';
+				var perkClass = isBossPerk(perks[i]) ? 'hostile-takeover-perk boss-perk' : 'hostile-takeover-perk';
+				perksHtml += '<div class="' + perkClass + '">' + getPerkName(perks[i]) + '</div>';
 			}
 			
 			$('#hostile-takeover-perks').html(perksHtml);
 			$('#hostile-takeover-modal').css('display', 'flex');
+			
+			// Scroll perks list to bottom to show most recent perks
+			var perksContainer = document.getElementById('hostile-takeover-perks');
+			if (perksContainer) {
+				perksContainer.scrollTop = perksContainer.scrollHeight;
+			}
 		}
 		
 		function dismissHostileTakeoverModal() {
@@ -96,11 +108,7 @@
 		// Function to check and show hostile takeover modal on game start
 		// Returns the array of perks to show, or null if none
 		function checkHostileTakeoverOnStart(gauntletState, currentOpponentIndex) {
-			// currentOpponentIndex is 0-based (opponent 1 = index 0)
-			// Only show modal for opponent 2+ (index 1+)
-			if (currentOpponentIndex < 1) return null;
-			
-			// Collect all perks from previous opponents plus current opponent's own perk
+			// Collect all non-zero perks from opponent 1 through current opponent
 			var allPerks = [];
 			for (var i = 0; i <= currentOpponentIndex; i++) {
 				var opponent = gauntletState.opponents[i];
@@ -109,6 +117,7 @@
 				}
 			}
 			
+			// Only return perks if there are any non-zero ones
 			return allPerks.length > 0 ? allPerks : null;
 		}
 		
@@ -220,6 +229,42 @@
 			return neutralIce;
 		}
 		
+		// Find all faction (non-neutral) ice from allowed sets
+		function findFactionIce(allowedSets) {
+			var factionIce = [];
+			
+			for (var cardId in cardSet) {
+				var card = cardSet[cardId];
+				if (!card) continue;
+				if (card.cardType !== 'ice') continue;
+				if (card.player !== corp) continue;
+				if (card.faction === 'Neutral') continue; // Exclude neutral ice
+				
+				// Check if card is from an allowed set
+				if (allowedSets && allowedSets.length > 0) {
+					var cardIdNum = parseInt(cardId);
+					var isAllowed = false;
+					for (var i = 0; i < allowedSets.length; i++) {
+						var setCode = allowedSets[i];
+						// Determine card ID range for each set
+						// sg (System Gateway): 30000-30999
+						// su21 (System Update 2021): 31000-31999
+						// ms (Midnight Sun): 33000-33999
+						// el (Elevation): 34000-34999
+						if (setCode === 'sg' && cardIdNum >= 30000 && cardIdNum < 31000) isAllowed = true;
+						else if (setCode === 'su21' && cardIdNum >= 31000 && cardIdNum < 32000) isAllowed = true;
+						else if (setCode === 'ms' && cardIdNum >= 33000 && cardIdNum < 34000) isAllowed = true;
+						else if (setCode === 'el' && cardIdNum >= 34000 && cardIdNum < 35000) isAllowed = true;
+					}
+					if (!isAllowed) continue;
+				}
+				
+				factionIce.push(parseInt(cardId));
+			}
+			
+			return factionIce;
+		}
+		
 		// Apply perk 2: Pre-Installed Neutral Ice
 		function applyPerk2_PreInstalledNeutralIce() {
 			var gauntletState = getGauntletState();
@@ -267,6 +312,38 @@
 			GainCredits(corp, 5);
 		}
 		
+		// Apply perk 4: Liquidated Assets (Corp gets 10 extra credits)
+		function applyPerk4_LiquidatedAssets() {
+			Log('Perk: Liquidated Assets');
+			GainCredits(corp, 10);
+		}
+		
+		// Apply perk 3: Holdover Directive (Corp starts with a scored 1-point agenda)
+		function applyPerk3_HoldoverDirective() {
+			var agendaId = 10; // Holdover Directive from gauntlet set
+			
+			// Create the agenda card
+			var agendaCard = InstanceCard(
+				agendaId,
+				cardBackTexturesCorp,
+				glowTextures,
+				strengthTextures
+			);
+			
+			if (!agendaCard) {
+				console.log('Perk 3: Failed to create Holdover Directive agenda');
+				return;
+			}
+			
+			// Add directly to corp's score area (no triggers, pre-game)
+			agendaCard.cardLocation = corp.scoreArea;
+			agendaCard.faceUp = true;
+			agendaCard.advancement = 0;
+			corp.scoreArea.push(agendaCard);
+			
+			Log('Perk: Corp starts with ' + agendaCard.title + ' scored');
+		}
+		
 		// Apply perk 6: Subsidiary Gains (Corp starts with a scored 3-point agenda)
 		function applyPerk6_SubsidiaryGains() {
 			var agendaId = 11; // Subsidiary Gains from gauntlet set
@@ -293,6 +370,47 @@
 			Log('Perk: Corp starts with ' + agendaCard.title + ' scored');
 		}
 		
+		// Apply perk 5: Pre-Installed Faction Ice
+		function applyPerk5_PreInstalledFactionIce() {
+			var gauntletState = getGauntletState();
+			var allowedSets = gauntletState ? gauntletState.allowedSets : [];
+			
+			// Find all faction ice from allowed sets
+			var factionIceIds = findFactionIce(allowedSets);
+			if (factionIceIds.length === 0) {
+				console.log('Perk 5: No faction ice found in allowed sets');
+				return;
+			}
+			
+			// Pick a random faction ice
+			var randomIceId = factionIceIds[Math.floor(Math.random() * factionIceIds.length)];
+			
+			// Use InstanceCard to properly create the card
+			var iceCard = InstanceCard(
+				randomIceId,
+				cardBackTexturesCorp,
+				glowTextures,
+				strengthTextures
+			);
+			
+			if (!iceCard) {
+				console.log('Perk 5: Failed to create ice card');
+				return;
+			}
+			
+			// Pick a random central server (HQ, R&D, Archives)
+			var centralServers = [corp.HQ, corp.RnD, corp.archives];
+			var targetServer = centralServers[Math.floor(Math.random() * centralServers.length)];
+			
+			// Install the ice on the server in outermost position (facedown, not rezzed)
+			iceCard.cardLocation = targetServer.ice;
+			iceCard.faceUp = false;
+			iceCard.rezzed = false;
+			targetServer.ice.push(iceCard);
+			
+			Log('Perk: ' + iceCard.title + ' pre-installed protecting ' + ServerName(targetServer));
+		}
+		
 		// Apply all active perks
 		function applyGauntletPerks() {
 			var activePerks = getActivePerks();
@@ -309,10 +427,18 @@
 					case 2:
 						applyPerk2_PreInstalledNeutralIce();
 						break;
+					case 3:
+						applyPerk3_HoldoverDirective();
+						break;
+					case 4:
+						applyPerk4_LiquidatedAssets();
+						break;
+					case 5:
+						applyPerk5_PreInstalledFactionIce();
+						break;
 					case 6:
 						applyPerk6_SubsidiaryGains();
 						break;
-					// Future perks will be added here
 					default:
 						console.log('Unknown perk:', perk);
 				}
