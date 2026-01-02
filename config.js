@@ -33,15 +33,15 @@ var gauntletConfig = {
     // Cost in credits for each hack action
     viewDecklistCost: 5,
     viewPerkCost: 5,
-    disablePerkCost: 10,        // Cost for disabling regular perks (1-3)
-    disableBossPerkCost: 15,    // Cost for disabling boss perks (4-6)
+    disablePerkCost: 15,        // Cost for disabling regular perks (1-3)
+    disableBossPerkCost: 30,    // Cost for disabling boss perks (4-6)
     
     // Success chance ranges (min/max percentage)
     // Actual chance is randomly determined within this range for each attempt
     viewDecklistChanceMin: 25,
     viewDecklistChanceMax: 75,
-    viewPerkChanceMin: 10,
-    viewPerkChanceMax: 90,
+    viewPerkChanceMin: 75,
+    viewPerkChanceMax: 95,
     disablePerkChanceMin: 50,
     disablePerkChanceMax: 75,
     disableBossPerkChanceMin: 25,

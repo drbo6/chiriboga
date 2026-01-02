@@ -962,8 +962,9 @@
 				var roll = Math.floor(rollRng() * 100) + 1;
 				
 				if (roll <= chance) {
-					// Success!
+					// Success! Disabling also reveals the perk
 					gauntletOpponents[opponentIndex].perkDisabled = true;
+					gauntletOpponents[opponentIndex].perkRevealed = true;
 					SaveOpponentStateToURL();
 					UpdateLaunchStrings();
 					var perkName = GetPerkName(opp.startingPerk);
