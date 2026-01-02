@@ -118,15 +118,26 @@
 		// Function to check and show hostile takeover modal on game start
 		// Returns the array of perks to show, or null if none
 		function checkHostileTakeoverOnStart(gauntletState, currentOpponentIndex) {
-			// Collect all non-zero perks from opponent 1 through current opponent
+			// Collect all non-zero perks from previously defeated opponents (using defeatOrder)
 			var allPerks = [];
-			for (var i = 0; i <= currentOpponentIndex; i++) {
-				var opponent = gauntletState.opponents[i];
+			var defeatOrder = gauntletState.defeatOrder || [];
+			
+			// Add perks from all previously defeated opponents (in order they were defeated)
+			for (var i = 0; i < defeatOrder.length; i++) {
+				var oppIndex = defeatOrder[i];
+				var opponent = gauntletState.opponents[oppIndex];
 				if (opponent && typeof opponent.startingPerk === 'number' && opponent.startingPerk > 0) {
 					// If perkDisabled is true, mark as disabled by adding 6 to the perk number
 					var perkValue = opponent.perkDisabled ? opponent.startingPerk + 6 : opponent.startingPerk;
 					allPerks.push(perkValue);
 				}
+			}
+			
+			// Also add the current opponent's perk (the one we're about to fight)
+			var currentOpponent = gauntletState.opponents[currentOpponentIndex];
+			if (currentOpponent && typeof currentOpponent.startingPerk === 'number' && currentOpponent.startingPerk > 0) {
+				var perkValue = currentOpponent.perkDisabled ? currentOpponent.startingPerk + 6 : currentOpponent.startingPerk;
+				allPerks.push(perkValue);
 			}
 			
 			// Only return perks if there are any non-zero ones
@@ -155,7 +166,7 @@
 			
 			try {
 				var gauntletState = JSON.parse(LZString.decompressFromEncodedURIComponent(gParam));
-				var currentOpponentIndex = gauntletState.defeated || 0;
+				var currentOpponentIndex = gauntletState.currentOpponentIndex || 0;
 				var perks = checkHostileTakeoverOnStart(gauntletState, currentOpponentIndex);
 				
 				if (perks && perks.length > 0) {
@@ -192,16 +203,26 @@
 			var gauntletState = getGauntletState();
 			if (!gauntletState) return [];
 			
-			var currentOpponentIndex = gauntletState.defeated || 0;
+			var currentOpponentIndex = gauntletState.currentOpponentIndex || 0;
+			var defeatOrder = gauntletState.defeatOrder || [];
 			var activePerks = [];
 			
-			for (var i = 0; i <= currentOpponentIndex; i++) {
-				var opponent = gauntletState.opponents[i];
+			// Add perks from all previously defeated opponents (in order they were defeated)
+			for (var i = 0; i < defeatOrder.length; i++) {
+				var oppIndex = defeatOrder[i];
+				var opponent = gauntletState.opponents[oppIndex];
 				if (opponent && typeof opponent.startingPerk === 'number' && opponent.startingPerk > 0) {
 					// If perkDisabled is true, mark as disabled by adding 6 to the perk number
 					var perkValue = opponent.perkDisabled ? opponent.startingPerk + 6 : opponent.startingPerk;
 					activePerks.push(perkValue);
 				}
+			}
+			
+			// Also add the current opponent's perk (the one we're fighting)
+			var currentOpponent = gauntletState.opponents[currentOpponentIndex];
+			if (currentOpponent && typeof currentOpponent.startingPerk === 'number' && currentOpponent.startingPerk > 0) {
+				var perkValue = currentOpponent.perkDisabled ? currentOpponent.startingPerk + 6 : currentOpponent.startingPerk;
+				activePerks.push(perkValue);
 			}
 			
 			return activePerks;

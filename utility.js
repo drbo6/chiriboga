@@ -1127,6 +1127,13 @@ function PlayerWin(player, msgstr) {
           if (typeof currentOpponentIndex === 'number' && gauntletState.opponents && gauntletState.opponents[currentOpponentIndex]) {
             gauntletState.opponents[currentOpponentIndex].hasbeendefeated = true;
             console.log("Marked opponent " + currentOpponentIndex + " as defeated");
+            
+            // Add to defeatOrder array to track the order opponents were defeated
+            if (!gauntletState.defeatOrder) {
+              gauntletState.defeatOrder = [];
+            }
+            gauntletState.defeatOrder.push(currentOpponentIndex);
+            console.log("Added opponent " + currentOpponentIndex + " to defeatOrder:", gauntletState.defeatOrder);
           }
           
           // Increment defeated count

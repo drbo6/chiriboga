@@ -972,6 +972,7 @@
         subset: gauntletCardCounts,
         opponents: selectedOpponents,
         defeated: 0,
+        defeatOrder: [], // Track the order in which opponents were defeated (array of opponent indices)
         agendaScored: 0,
         credits: gauntletConfig && gauntletConfig.startingCredits ? gauntletConfig.startingCredits : 0,
         creditsWon: 0,

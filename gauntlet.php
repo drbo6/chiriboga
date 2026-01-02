@@ -328,6 +328,8 @@
 				// Determine which opponents are unlocked based on progression
 				// Boss positions: 4, 8, 12 (indices 3, 7, 11)
 				// Unlock rules:
+				// 1 is always unlocked (must be defeated first)
+				// 2-3 unlocked after 1 is defeated
 				// 1-3 must be defeated to unlock 4
 				// 4 must be defeated to unlock 5-7
 				// 5-7 must be defeated to unlock 8
@@ -336,8 +338,13 @@
 				function isOpponentUnlocked(index, opponents) {
 					var oppNum = index + 1; // 1-based opponent number
 					
-					// Opponents 1-3 are always unlocked
-					if (oppNum <= 3) return true;
+					// Opponent 1 is always unlocked (must be defeated first)
+					if (oppNum === 1) return true;
+					
+					// Opponents 2-3: requires opponent 1 defeated
+					if (oppNum >= 2 && oppNum <= 3) {
+						return opponents.length >= 1 && opponents[0].hasbeendefeated;
+					}
 					
 					// Opponent 4 (first boss): requires 1-3 defeated
 					if (oppNum === 4) {
@@ -541,7 +548,12 @@
 				// Helper functions for unlock logic (same as Play Deck)
 				function isOpponentUnlocked(index, opponents) {
 					var oppNum = index + 1;
-					if (oppNum <= 3) return true;
+					// Opponent 1 is always unlocked
+					if (oppNum === 1) return true;
+					// Opponents 2-3: requires opponent 1 defeated
+					if (oppNum >= 2 && oppNum <= 3) {
+						return opponents.length >= 1 && opponents[0].hasbeendefeated;
+					}
 					if (oppNum === 4) {
 						for (var i = 0; i < 3 && i < opponents.length; i++) {
 							if (!opponents[i].hasbeendefeated) return false;
