@@ -5656,6 +5656,184 @@ cardSet[35070] = {
   },
 };
 
+//Off the Books
+//Weyland Agenda: Initiative
+//Advancement: 3, Points: 1
+//Dividends 1 (When you score this agenda, place 1 agenda counter on it for each excess advancement counter.)
+//When your discard phase ends, you may remove 1 hosted agenda counter to search R&D for 1 card 
+//and reveal it. You may install that card, ignoring all costs. If you do not, add it to HQ.
+cardSet[35071] = {
+  title: "Off the Books",
+  imageFile: "35071.png",
+  player: corp,
+  faction: "Weyland Consortium",
+  cardType: "agenda",
+  subTypes: ["Initiative"],
+  agendaPoints: 1,
+  advancementRequirement: 3,
+  advancement: 0,
+  
+  //Dividends 1: When you score, place agenda counters for excess advancement
+  responseOnScored: {
+    Resolve: function(params) {
+      if (intended.score == this) {
+        var advancementOverThree = this.advancement - 3;
+        if (advancementOverThree > 0) AddCounters(this, "agenda", advancementOverThree);
+      }
+    },
+    automatic: true,
+  },
+  
+  //When your discard phase ends, you may remove 1 hosted agenda counter to search R&D
+  responseOnCorpDiscardEnds: {
+    Enumerate: function() {
+      if (CheckCounters(this, "agenda", 1)) {
+        return [{}];
+      }
+      return [];
+    },
+    Resolve: function(params) {
+      var cardRef = this;
+      
+      //Build choices from R&D cards
+      var rndChoices = ChoicesArrayCards(corp.RnD.cards);
+      
+      //Add decline option
+      rndChoices.push({ card: null, label: "Decline", button: "Decline" });
+      
+      //**AI code
+      if (corp.AI != null) {
+        //AI prefers agendas and valuable cards
+        var bestChoice = null;
+        var bestScore = -1;
+        for (var i = 0; i < rndChoices.length - 1; i++) {
+          var card = rndChoices[i].card;
+          var score = 0;
+          if (CheckCardType(card, ["agenda"])) {
+            score = (card.agendaPoints || 0) * 10 + 5; //high value for agendas
+          } else if (CheckCardType(card, ["ice"])) {
+            score = 3;
+          } else if (CheckCardType(card, ["asset", "upgrade"])) {
+            score = 2;
+          } else if (CheckCardType(card, ["operation"])) {
+            score = 1;
+          }
+          if (score > bestScore) {
+            bestScore = score;
+            bestChoice = rndChoices[i];
+          }
+        }
+        if (bestChoice) {
+          rndChoices = [bestChoice];
+        } else {
+          rndChoices = [{ card: null, label: "Decline", button: "Decline" }];
+        }
+      }
+      
+      DecisionPhase(
+        corp,
+        rndChoices,
+        function(searchParams) {
+          if (searchParams.card !== null) {
+            var foundCard = searchParams.card;
+            
+            //Reveal the card
+            Reveal(foundCard, function() {
+              //Now offer to install it or add to HQ
+              var installChoices = [
+                { action: "install", label: "Install (ignoring all costs)", button: "Install" },
+                { action: "hq", label: "Add to HQ", button: "Add to HQ" }
+              ];
+              
+              //**AI code
+              if (corp.AI != null) {
+                //Prefer to install if valuable
+                var shouldInstall = false;
+                if (CheckCardType(foundCard, ["agenda"])) {
+                  shouldInstall = true; //always install agendas
+                } else if (CheckCardType(foundCard, ["ice"])) {
+                  shouldInstall = true; //prefer to install ice
+                } else if (CheckCardType(foundCard, ["asset", "upgrade"])) {
+                  shouldInstall = true; //install assets/upgrades if found
+                }
+                if (shouldInstall) {
+                  installChoices = [{ action: "install", label: "Install", button: "Install" }];
+                } else {
+                  installChoices = [{ action: "hq", label: "Add to HQ", button: "Add to HQ" }];
+                }
+              }
+              
+              DecisionPhase(
+                corp,
+                installChoices,
+                function(installParams) {
+                  RemoveCounters(cardRef, "agenda", 1);
+                  
+                  if (installParams.action === "install") {
+                    //Build install choices with server selection using ChoicesCardInstall
+                    var serverChoices = ChoicesCardInstall(foundCard);
+                    
+                    if (serverChoices.length === 0) {
+                      //Card can't be installed for some reason
+                      MoveCard(foundCard, corp.HQ.cards);
+                      Log(GetTitle(foundCard, true) + " could not be installed, added to HQ via Off the Books");
+                      ShuffleArray(corp.RnD.cards);
+                      return;
+                    }
+                    
+                    //**AI code
+                    if (corp.AI != null && serverChoices.length > 1) {
+                      //AI picks first available server option
+                      serverChoices = [serverChoices[0]];
+                    }
+                    
+                    DecisionPhase(
+                      corp,
+                      serverChoices,
+                      function(serverParams) {
+                        //Install the card ignoring all costs to the chosen server
+                        Install(foundCard, serverParams.server, true, null, true, null, cardRef);
+                        Log(GetTitle(foundCard, true) + " installed from R&D via Off the Books");
+                        //Shuffle R&D
+                        ShuffleArray(corp.RnD.cards);
+                      },
+                      "Off the Books",
+                      "Choose install destination",
+                      cardRef,
+                      "install"
+                    );
+                  } else {
+                    //Add to HQ
+                    MoveCard(foundCard, corp.HQ.cards);
+                    Log(GetTitle(foundCard, true) + " added to HQ from R&D via Off the Books");
+                    //Shuffle R&D
+                    ShuffleArray(corp.RnD.cards);
+                  }
+                },
+                "Off the Books",
+                "Install or add to HQ?",
+                cardRef
+              );
+            }, cardRef);
+          } else {
+            //Declined - still remove the counter since we checked it
+            RemoveCounters(cardRef, "agenda", 1);
+          }
+        },
+        "Off the Books",
+        "Search R&D for 1 card",
+        cardRef
+      );
+    },
+  },
+  
+  AIOverAdvance: true, //good to over-advance for extra counters
+  AIAdvancementLimit: function() {
+    var maxThisTurn = Math.min(corp.AI._clicksLeft(), Credits(corp)) + this.advancement;
+    return Math.max(3, maxThisTurn); //want to over-advance for the counters
+  },
+};
+
 //Idiosyncresis
 //NBN Asset
 //Rez: 1, Trash: 2

@@ -751,7 +751,7 @@ function LoadDecks() {
   // // ----------------------------------------------------------------------------
   // // You can enable the debug menu at the top of init.js
 
-  if (false) { // Use this to easily disable everything below
+  if (true) { // Use this to easily disable everything below
 
      debugging = true; //set true to log extra details and pause execution on error
      viewAllFronts = true; //set true to see all card fronts (for testing)
@@ -776,7 +776,7 @@ function LoadDecks() {
       [], //archivesInstalled
       [35041], //rndInstalled
       [35042], //hqInstalled
-      [[30067,35042,35052,35079],[30067,35064],[31071, 35053],[31072, 35053, 35076],[35062, 35079]], //remotes (array of arrays)
+      [[35071,35042,35052,35079],[30067,35064],[31071, 35053],[31072, 35053, 35076],[35062, 35079]], //remotes (array of arrays)
       [35070, 35070, 30068], //scored 35042,35052, 31075
       cardBackTexturesCorp,glowTextures,strengthTextures
     );
@@ -787,7 +787,7 @@ function LoadDecks() {
     // corp.archives.ice[0].rezzed=true;
     // corp.RnD.ice[0].rezzed=true;
     // corp.HQ.ice[0].rezzed=true;
-    corp.remoteServers[0].root[0].rezzed=true;
+    // corp.remoteServers[0].root[0].rezzed=true;
     for (var i = 0; i < 3; i++) {
       corp.remoteServers[0].ice[i].rezzed = true;
     }
@@ -805,7 +805,7 @@ function LoadDecks() {
     // // SET ADVANCEMENTS
     // // ----------------
 
-    corp.remoteServers[3].root[0].advancement=2; // root/agenda/asset
+    corp.remoteServers[0].root[0].advancement=2; // root/agenda/asset
     corp.remoteServers[3].ice[1].advancement=3; // ice
     
     // // GIVE EVERYONE SOME CREDITS TO START WITH
@@ -817,8 +817,8 @@ function LoadDecks() {
     // // SET THE PHASE
     // // -------------
 
-    ChangePhase(phases.runnerStartResponse); // Runner starts turn
-    // ChangePhase(phases.corpStartDraw);    
+    // ChangePhase(phases.runnerStartResponse); // Runner starts turn
+    ChangePhase(phases.corpStartDraw);    
 
     // // OTHER STUFF
     // // -----------
@@ -827,7 +827,7 @@ function LoadDecks() {
     AddTags(3);
     // runner.clickTracker = 0;  
     // runner.rig.resources[0].power = 4;
-    corp.clickTracker = 20;
+    // corp.clickTracker = 20;
     // ChangePhase(phases.corpActionMain);
     // ChangePhase(phases.corpDiscardStart);
     // MakeRun(corp.RnD);
