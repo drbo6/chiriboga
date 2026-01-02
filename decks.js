@@ -578,8 +578,8 @@ function LoadDecks() {
 			deckJson.cards.push(30000+parseInt(deckJson.systemGateway[i]));
 		}
 	}
-	//also update the identity if it is legacy
-	if (parseInt(deckJson.identity) < 10001) deckJson.identity = parseInt(deckJson.identity) + 30000;
+	//ensure identity is an integer
+	deckJson.identity = parseInt(deckJson.identity);
     runner.identityCard = InstanceCard(
       deckJson.identity,
       cardBackTexturesRunner,
@@ -652,8 +652,8 @@ function LoadDecks() {
 			deckJson.cards.push(30000+parseInt(deckJson.systemGateway[i]));
 		}
 	}
-	//also update the identity if it is legacy
-	if (parseInt(deckJson.identity) < 10001) deckJson.identity = parseInt(deckJson.identity) + 30000;
+	//ensure identity is an integer
+	deckJson.identity = parseInt(deckJson.identity);
     corp.identityCard = InstanceCard(
       deckJson.identity,
       cardBackTexturesCorp,

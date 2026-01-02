@@ -386,7 +386,7 @@
 				
 				// Build the opponent deck object
 				var oppDeckObj = {
-					identity: selectedOpp.identity,
+					identity: parseInt(selectedOpp.identity),
 					cards: selectedOpp.cards || []
 				};
 				
@@ -396,7 +396,7 @@
 				// Build the player deck
 				var deckForUri;
 				if (deckModified) {
-					deckForUri = { identity: json.identity, cards: json.cards.slice() };
+					deckForUri = { identity: parseInt(json.identity), cards: json.cards.slice() };
 				} else {
 					deckForUri = {};
 					for (var k in json) { if (Object.prototype.hasOwnProperty.call(json,k)) deckForUri[k] = json[k]; }
@@ -2696,7 +2696,7 @@
 			  // Build deck object for URI: include metadata only if deck not modified
 			  var deckForUri;
 			  if (deckModified) {
-				deckForUri = { identity: json.identity, cards: json.cards.slice() };
+				deckForUri = { identity: parseInt(json.identity), cards: json.cards.slice() };
 			  } else {
 				deckForUri = {};
 				for (var k in json) { if (Object.prototype.hasOwnProperty.call(json,k)) deckForUri[k] = json[k]; }
@@ -3038,7 +3038,7 @@
 			  
 			  //identity select will update stats but keep current deck
 			  $("#identityselect").change(function () {
-					json.identity = $("select#identityselect option:checked").val();
+					json.identity = parseInt($("select#identityselect option:checked").val());
 					$("#identity").prop(
 						"src",
 						GetImagePath(cardSet[json.identity].imageFile)

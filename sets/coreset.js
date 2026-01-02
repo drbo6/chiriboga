@@ -616,6 +616,7 @@ coreSet[1016] = {
   imageFile: "01016.png",
   player: runner,
   cardType: "resource",
+  influence: 3,
   subTypes: ["Seedy"],
   installCost: 3,
   unique: true,

@@ -832,14 +832,26 @@
 
 			function UpdateLaunchStrings() {
 			  //console.log(json);
+			  // Ensure identity is an integer before building URI
+			  if (json.identity) json.identity = parseInt(json.identity);
 			  // Build deck object for URI: include metadata only if deck not modified
 			  var deckForUri;
 			  if (deckModified) {
-				deckForUri = { identity: json.identity, cards: json.cards.slice() };
+				deckForUri = { identity: parseInt(json.identity), cards: json.cards.slice() };
 			  } else {
 				deckForUri = {};
-				for (var k in json) { if (Object.prototype.hasOwnProperty.call(json,k)) deckForUri[k] = json[k]; }
+				for (var k in json) { 
+				  if (Object.prototype.hasOwnProperty.call(json,k)) {
+					// Ensure identity is stored as integer
+					if (k === 'identity') {
+					  deckForUri[k] = parseInt(json[k]);
+					} else {
+					  deckForUri[k] = json[k];
+					}
+				  }
+				}
 			  }
+			  console.log('deckForUri before stringify:', deckForUri, 'identity type:', typeof deckForUri.identity);
 			  var string = JSON.stringify(deckForUri);
 			  var compressed = LZString.compressToEncodedURIComponent(string);
 			  var launchAddress = "engine.php?p=" + dC + "&" + opponentdeckstr + dC + "=" + compressed;
@@ -964,8 +976,8 @@
 						json.cards.push(30000+parseInt(json.systemGateway[i]));
 					}
 				}
-				//also update the identity if it is legacy
-				if (parseInt(json.identity) < 10001) json.identity = parseInt(json.identity) + 30000;
+				//ensure identity is an integer
+				json.identity = parseInt(json.identity);
 				//update select
 				$("#identityselect option[value=" + json.identity + "]").prop(
 				  "selected",
@@ -1124,7 +1136,7 @@
 			  
 			  //identity select will regenerate a deck if changed
 			  $("#identityselect").change(function () {
-								json.identity = $("select#identityselect option:checked").val();
+								json.identity = parseInt($("select#identityselect option:checked").val());
 								$("#identity").prop(
 									"src",
 									"images/" + ChangeImageFileToJPG(cardSet[json.identity].imageFile)
@@ -1263,7 +1275,7 @@
 								}
 								
 								// Load the deck into the current deck
-								json.identity = deck.identity;
+								json.identity = parseInt(deck.identity);
 								json.cards = deck.cards.slice();
 								
 								// Rebuild deckCounts from json.cards
@@ -2065,6 +2077,9 @@ GetFactionIcon(cardSet[playerIdentities[i]].faction) + shortTitle +
 						identityHTML += '<option value="' + playerIdentities[i].id + '"' + selected + '>' + icon + shortTitle + '</option>';
 								}
 								$('#identityselect').html(identityHTML);
+								
+								// Ensure identity remains an integer after rebuild
+								json.identity = parseInt(json.identity);
 								
 								// Refresh the card list display
 								RenderAllCardsList();
