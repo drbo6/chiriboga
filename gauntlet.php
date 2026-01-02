@@ -505,6 +505,15 @@
 						gauntletState.subset = gauntletCardCounts;
 						gauntletState.creditsWon = 0;
 						gauntletState.currentOpponentIndex = opponentIndex; // Track which opponent was selected
+						gauntletState.hackAttempts = hackAttemptCounters;
+						// Update only hack-related states on opponents, don't replace entire array
+						if (gauntletState.opponents && gauntletOpponents) {
+							for (var i = 0; i < gauntletOpponents.length && i < gauntletState.opponents.length; i++) {
+								if (gauntletOpponents[i].perkRevealed) gauntletState.opponents[i].perkRevealed = true;
+								if (gauntletOpponents[i].perkDisabled) gauntletState.opponents[i].perkDisabled = true;
+								if (gauntletOpponents[i].decklistRevealed) gauntletState.opponents[i].decklistRevealed = true;
+							}
+						}
 						updatedGauntletParam = LZString.compressToEncodedURIComponent(JSON.stringify(gauntletState));
 					} catch (e) {
 						console.error("Failed to update gauntlet state:", e);
@@ -983,9 +992,16 @@
 				if (gauntletParam !== "") {
 					try {
 						var gauntletState = JSON.parse(LZString.decompressFromEncodedURIComponent(gauntletParam));
-						gauntletState.opponents = gauntletOpponents;
 						gauntletState.credits = gauntletCredits;
 						gauntletState.hackAttempts = hackAttemptCounters;
+						// Update only hack-related states on opponents, don't replace entire array
+						if (gauntletState.opponents && gauntletOpponents) {
+							for (var i = 0; i < gauntletOpponents.length && i < gauntletState.opponents.length; i++) {
+								if (gauntletOpponents[i].perkRevealed) gauntletState.opponents[i].perkRevealed = true;
+								if (gauntletOpponents[i].perkDisabled) gauntletState.opponents[i].perkDisabled = true;
+								if (gauntletOpponents[i].decklistRevealed) gauntletState.opponents[i].decklistRevealed = true;
+							}
+						}
 						var updatedParam = LZString.compressToEncodedURIComponent(JSON.stringify(gauntletState));
 						
 						// Update URL
@@ -1173,12 +1189,6 @@
 				// Rebuild pack button HTML
 				var newButtonsHtml = '';
 				
-				// SELL ALL EXTRA CARDS button - disable if no cards to sell
-				var hasCards = HasCardsToSell();
-				var sellDisabled = hasCards ? '' : ' disabled';
-				var sellStyle = hasCards ? 'width: 100%;' : 'width: 100%; opacity: 0.6; border-color: var(--border-red-dark); color: var(--crt-red-muted); cursor: default; background-color: rgba(12,24,12,0.7) !important; pointer-events: none;';
-				newButtonsHtml += '<button class="button" onclick="SellExtraCards();"' + sellDisabled + ' style="' + sellStyle + '">SELL ALL EXTRA CARDS</button>';
-				
 				// Add buttons for selected packs
 				for (var i = 0; i < selectedShopPacks.length; i++) {
 					var pack = selectedShopPacks[i];
@@ -1188,6 +1198,20 @@
 					var iconFilter = canAfford ? 'invert(1) brightness(0.5) sepia(1) saturate(5) hue-rotate(80deg)' : 'brightness(0) saturate(100%) invert(0.6) sepia(80%) hue-rotate(8deg) saturate(0.7)';
 					newButtonsHtml += '<button class="button" onclick="BuyCardPack(' + i + ');"' + packDisabled + ' style="' + packStyle + '">BUY ' + pack.name.toUpperCase() + ': ' + pack.cost + '<img src="images/nsg/NSG_CREDIT.svg" class="card-icon" alt="credit" style="margin-left: 2px; margin-bottom: 2px; height: 16px; display: inline-block; vertical-align: sub; filter: ' + iconFilter + ';"></button>';
 				}
+				
+				// RE-ROLL PACKS button
+				var rerollCost = (gauntletConfig.shop && gauntletConfig.shop.rerollPacksCost) || 5;
+				var canAffordReroll = gauntletCredits >= rerollCost;
+				var rerollDisabled = canAffordReroll ? '' : ' disabled';
+				var rerollStyle = canAffordReroll ? 'width: 100%;' : 'width: 100%; opacity: 0.6; border-color: var(--border-red-dark); color: var(--crt-red-muted); cursor: default; background-color: rgba(12,24,12,0.7) !important; pointer-events: none;';
+				var rerollIconFilter = canAffordReroll ? 'invert(1) brightness(0.5) sepia(1) saturate(5) hue-rotate(80deg)' : 'brightness(0) saturate(100%) invert(0.6) sepia(80%) hue-rotate(8deg) saturate(0.7)';
+				newButtonsHtml += '<button class="button" onclick="RerollShopPacks();"' + rerollDisabled + ' style="' + rerollStyle + '">RE-ROLL PACKS: ' + rerollCost + '<img src="images/nsg/NSG_CREDIT.svg" class="card-icon" alt="credit" style="margin-left: 2px; margin-bottom: 2px; height: 16px; display: inline-block; vertical-align: sub; filter: ' + rerollIconFilter + ';"></button>';
+				
+				// SELL ALL EXTRA CARDS button - disable if no cards to sell
+				var hasCards = HasCardsToSell();
+				var sellDisabled = hasCards ? '' : ' disabled';
+				var sellStyle = hasCards ? 'width: 100%;' : 'width: 100%; opacity: 0.6; border-color: var(--border-red-dark); color: var(--crt-red-muted); cursor: default; background-color: rgba(12,24,12,0.7) !important; pointer-events: none;';
+				newButtonsHtml += '<button class="button" onclick="SellExtraCards();"' + sellDisabled + ' style="' + sellStyle + '">SELL ALL EXTRA CARDS</button>';
 				
 				newButtonsHtml += '<button class="button" onclick="CloseBuyCardsModal();" style="width: 100%;">CLOSE</button>';
 				
@@ -1201,14 +1225,9 @@
 				buycardsHtml += '<h1 class="logo-text" style="text-align: center; color: var(--crt-red); text-shadow: 0 0 5px var(--crt-red), 0 0 15px var(--glow-red), 0 0 35px var(--glow-red-dark); margin: 20px 0;">AESOP\'S PAWN SHOP</h1>';
 				buycardsHtml += '<div style="color: var(--crt-red); font-family: monospace; padding: 20px; text-align: center; width: 100%;">';
 				buycardsHtml += '<p>Current Credits: <span id="shop-credits">' + gauntletCredits + '</span><img src="images/nsg/NSG_CREDIT.svg" class="card-icon" alt="credit" style="margin-left: 0px; margin-bottom: 2px; height: 16px; display: inline-block; vertical-align: sub; filter: invert(1) brightness(0.5) sepia(1) saturate(5) hue-rotate(80deg);"></p>';
+				buycardsHtml += '<p style="color: var(--crt-green); font-size: 11px; margin-top: 10px;">Pack names indicate what factions or card types you are more likely to find inside.</p>';
 				buycardsHtml += '</div>';
 				buycardsHtml += '<div id="shop-buttons" style="display: flex; flex-direction: column; justify-content: center; gap: 10px; width: 100%; padding: 20px; min-height: 200px;">';
-				
-				// SELL ALL EXTRA CARDS button - disable if no cards to sell
-				var hasCards = HasCardsToSell();
-				var sellDisabled = hasCards ? '' : ' disabled';
-				var sellStyle = hasCards ? 'width: 100%;' : 'width: 100%; opacity: 0.6; border-color: var(--border-red-dark); color: var(--crt-red-muted); cursor: default; background-color: rgba(12,24,12,0.7) !important; pointer-events: none;';
-				buycardsHtml += '<button class="button" onclick="SellExtraCards();"' + sellDisabled + ' style="' + sellStyle + '">SELL ALL EXTRA CARDS</button>';
 				
 				// Add buttons for selected packs
 				for (var i = 0; i < selectedShopPacks.length; i++) {
@@ -1219,6 +1238,20 @@
 					var iconFilter = canAfford ? 'invert(1) brightness(0.5) sepia(1) saturate(5) hue-rotate(80deg)' : 'brightness(0) saturate(100%) invert(0.6) sepia(80%) hue-rotate(8deg) saturate(0.7)';
 					buycardsHtml += '<button class="button" onclick="BuyCardPack(' + i + ');"' + packDisabled + ' style="' + packStyle + '">BUY ' + pack.name.toUpperCase() + ': ' + pack.cost + '<img src="images/nsg/NSG_CREDIT.svg" class="card-icon" alt="credit" style="margin-left: 2px; margin-bottom: 2px; height: 16px; display: inline-block; vertical-align: sub; filter: ' + iconFilter + ';"></button>';
 				}
+				
+				// RE-ROLL PACKS button
+				var rerollCost = (gauntletConfig.shop && gauntletConfig.shop.rerollPacksCost) || 5;
+				var canAffordReroll = gauntletCredits >= rerollCost;
+				var rerollDisabled = canAffordReroll ? '' : ' disabled';
+				var rerollStyle = canAffordReroll ? 'width: 100%;' : 'width: 100%; opacity: 0.6; border-color: var(--border-red-dark); color: var(--crt-red-muted); cursor: default; background-color: rgba(12,24,12,0.7) !important; pointer-events: none;';
+				var rerollIconFilter = canAffordReroll ? 'invert(1) brightness(0.5) sepia(1) saturate(5) hue-rotate(80deg)' : 'brightness(0) saturate(100%) invert(0.6) sepia(80%) hue-rotate(8deg) saturate(0.7)';
+				buycardsHtml += '<button class="button" onclick="RerollShopPacks();"' + rerollDisabled + ' style="' + rerollStyle + '">RE-ROLL PACKS: ' + rerollCost + '<img src="images/nsg/NSG_CREDIT.svg" class="card-icon" alt="credit" style="margin-left: 2px; margin-bottom: 2px; height: 16px; display: inline-block; vertical-align: sub; filter: ' + rerollIconFilter + ';"></button>';
+				
+				// SELL ALL EXTRA CARDS button - disable if no cards to sell
+				var hasCards = HasCardsToSell();
+				var sellDisabled = hasCards ? '' : ' disabled';
+				var sellStyle = hasCards ? 'width: 100%;' : 'width: 100%; opacity: 0.6; border-color: var(--border-red-dark); color: var(--crt-red-muted); cursor: default; background-color: rgba(12,24,12,0.7) !important; pointer-events: none;';
+				buycardsHtml += '<button class="button" onclick="SellExtraCards();"' + sellDisabled + ' style="' + sellStyle + '">SELL ALL EXTRA CARDS</button>';
 				
 				buycardsHtml += '<button class="button" onclick="CloseBuyCardsModal();" style="width: 100%;">CLOSE</button>';
 				buycardsHtml += '</div>';
@@ -1248,7 +1281,34 @@
 
 			// Function to go back to shop from purchase view
 			function BackToShop() {
-				RefreshShopPackButtons();
+				// Rebuild the entire modal to ensure credits and all buttons are updated
+				ShowBuyCardsModal();
+			}
+
+			// Function to re-roll shop packs
+			function RerollShopPacks() {
+				var rerollCost = (gauntletConfig.shop && gauntletConfig.shop.rerollPacksCost) || 5;
+				
+				if (gauntletCredits < rerollCost) {
+					alert('Not enough credits!');
+					return;
+				}
+				
+				// Deduct credits
+				gauntletCredits -= rerollCost;
+				
+				// Increment shop purchase count to get new random packs
+				shopPurchaseCount++;
+				
+				// Re-select packs using the new purchase count (deterministic based on seed)
+				selectedShopPacks = SelectRandomShopPacks();
+				console.log("Shop packs re-rolled (count #" + shopPurchaseCount + "):", selectedShopPacks.map(function(p) { return p.name; }));
+				
+				// Save state and refresh
+				Parse(); // This saves shopPurchaseCount and credits to URL
+				
+				// Refresh the shop modal
+				ShowBuyCardsModal();
 			}
 
 			// Function to sell all extra cards (cards with more than 3 copies)
@@ -2080,32 +2140,8 @@
 			validityOutput += '</div>';
 			$("#output").html(validityOutput);
 			
-			// Update opponent display to show all opponent identity images
-			if (gauntletOpponents && gauntletOpponents.length > 0) {
-				var oppHTML = '' +
-					'<div class="opponent-header"><span class="opponent-title">Opponents</span><span class="opponent-arrow" aria-hidden="true">&#9660;</span></div>' +
-					'<div class="opponent-body opponent-gallery">';
-				for (var i = 0; i < gauntletOpponents.length; i++) {
-					var opp = gauntletOpponents[i];
-					var oppIdentityId = opp.identity;
-					var oppImgSrc = 'images/glow_outline.png';
-					if (cardSet[oppIdentityId] && cardSet[oppIdentityId].imageFile) {
-						oppImgSrc = GetImagePath(cardSet[oppIdentityId].imageFile);
-					}
-					var defeatedClass = opp.hasbeendefeated ? ' defeated' : '';
-					oppHTML += '<img class="opponent-identity-img' + defeatedClass + '" src="' + oppImgSrc + '" data-identity-id="' + oppIdentityId + '"/>';
-				}
-				oppHTML += '</div>';
-				$("#opponentid").html(oppHTML).addClass('collapsed').show();
-			} else if (opponentdeckimg != "") {
-				// Fallback for non-gauntlet mode with single opponent
-				var oppHTML = '' +
-					'<div class="opponent-header"><span class="opponent-title">Opponent Deck</span><span class="opponent-arrow" aria-hidden="true">&#9660;</span></div>' +
-					'<div class="opponent-body"><img src="'+opponentdeckimg+'"/></div>';
-				$("#opponentid").html(oppHTML).addClass('collapsed').show();
-			} else {
-				$("#opponentid").hide();
-			}
+			// Hide opponent display - opponents are now accessed via Play Deck and Hack Opponents buttons
+			$("#opponentid").hide();
 			
 			// Render cards from gauntlet subset
 			RenderAllCardsList();
@@ -3445,6 +3481,15 @@
 				  gauntletState.credits = gauntletCredits;
 				  gauntletState.subset = gauntletCardCounts;
 				  gauntletState.creditsWon = 0; // Reset creditsWon after applying to credits
+				  gauntletState.hackAttempts = hackAttemptCounters;
+				  // Update only hack-related states on opponents, don't replace entire array
+				  if (gauntletState.opponents && gauntletOpponents) {
+					for (var i = 0; i < gauntletOpponents.length && i < gauntletState.opponents.length; i++) {
+					  if (gauntletOpponents[i].perkRevealed) gauntletState.opponents[i].perkRevealed = true;
+					  if (gauntletOpponents[i].perkDisabled) gauntletState.opponents[i].perkDisabled = true;
+					  if (gauntletOpponents[i].decklistRevealed) gauntletState.opponents[i].decklistRevealed = true;
+					}
+				  }
 				  updatedGauntletParam = LZString.compressToEncodedURIComponent(JSON.stringify(gauntletState));
 				} catch (e) {
 				  console.error("Failed to update gauntlet state with shop data:", e);
@@ -4261,40 +4306,14 @@
 			  validityOutput += '</div>';
 			  if (validDeck) {
 				$("#output").html(validityOutput);
-				$("#launch").prop("disabled", false);
 			  } else {
 				$("#output").html(validityOutput + $("#output").html());
 			  }
 		  $("#launch").html("PLAY<br>DECK");
 		  UpdateLaunchStrings();
-		  //update opponent display to show all opponent identity images
-		  if (gauntletOpponents && gauntletOpponents.length > 0) {
-			  var oppHTML = '' +
-				'<div class="opponent-header"><span class="opponent-title">Opponents</span><span class="opponent-arrow" aria-hidden="true">&#9660;</span></div>' +
-				'<div class="opponent-body opponent-gallery">';
-			  for (var i = 0; i < gauntletOpponents.length; i++) {
-				  var opp = gauntletOpponents[i];
-				  var oppIdentityId = opp.identity;
-				  var oppImgSrc = 'images/glow_outline.png';
-				  if (cardSet[oppIdentityId] && cardSet[oppIdentityId].imageFile) {
-					  oppImgSrc = GetImagePath(cardSet[oppIdentityId].imageFile);
-				  }
-				  var defeatedClass = opp.hasbeendefeated ? ' defeated' : '';
-				  oppHTML += '<img class="opponent-identity-img' + defeatedClass + '" src="' + oppImgSrc + '" data-identity-id="' + oppIdentityId + '"/>';
-			  }
-			  oppHTML += '</div>';
-			  $("#opponentid").html(oppHTML).addClass('collapsed');
-		  } else if (opponentdeckimg != "") {
-			  var oppHTML = '' +
-				'<div class="opponent-header"><span class="opponent-title">Opponent Deck</span><span class="opponent-arrow" aria-hidden="true">&#9660;</span></div>' +
-				'<div class="opponent-body"><img src="'+opponentdeckimg+'"/></div>';
-			  $("#opponentid").html(oppHTML).addClass('collapsed');
-		  } else {
-			  var emptyOppHTML = '' +
-				'<div class="opponent-header"><span class="opponent-title">Opponent Deck</span><span class="opponent-arrow" aria-hidden="true">&#9660;</span></div>' +
-				'<div class="opponent-body"><img src="images/glow_outline.png"/></div>';
-			  $("#opponentid").html(emptyOppHTML).addClass('collapsed');
-		  }
+		  UpdatePlayDeckButtonState(); // Properly check identity and deck validity
+		  // Hide opponent display - opponents are now accessed via Play Deck and Hack Opponents buttons
+		  $("#opponentid").hide();
 		}			//function for testing and debugging
 			function TestGeneration(seed=0) {
 				Math.seedrandom(seed);

@@ -48,6 +48,12 @@ var gauntletConfig = {
     disableBossPerkChanceMax: 50
   },
 
+  // ===== SHOP SETTINGS =====
+  // Configuration for the card shop
+  shop: {
+    rerollPacksCost: 5          // Cost to re-roll the available packs
+  },
+
   // ===== ALTERNATE FACTIONS =====
   // If true, each selected precon represents a different faction (one opponent per faction)
   // If false, randomly selects precons across all factions without faction requirement
