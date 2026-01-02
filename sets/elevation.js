@@ -6945,3 +6945,269 @@ cardSet[35064] = {
     return result;
   },
 };
+
+//Key Performance Indicators
+//Weyland Operation: Transaction
+//Cost: 1, Influence: 2
+//Resolve 2 of the following in any order:
+// - Draw 1 card. Shuffle 1 card from HQ into R&D.
+// - Install 1 piece of ice from HQ, ignoring all costs.
+// - Place 1 advancement counter on an installed card you can advance.
+// - Gain 2 credits.
+cardSet[35077] = {
+  title: "Key Performance Indicators",
+  imageFile: "35077.png",
+  player: corp,
+  faction: "Weyland Consortium",
+  influence: 2,
+  cardType: "operation",
+  subTypes: ["Transaction"],
+  playCost: 1,
+  
+  Resolve: function(params) {
+    var cardRef = this;
+    cardRef._usedEffects = [];
+    cardRef._chooseEffect(1);
+  },
+  
+  _getAvailableChoices: function() {
+    var choices = [];
+    
+    //Effect 1: Draw 1 card, shuffle 1 card from HQ into R&D
+    if (!this._usedEffects.includes(1)) {
+      choices.push({
+        id: 1,
+        label: "Draw 1 card, shuffle 1 card from HQ into R&D"
+      });
+    }
+    
+    //Effect 2: Install 1 piece of ice from HQ, ignoring all costs
+    if (!this._usedEffects.includes(2)) {
+      var hasIceInHQ = false;
+      for (var i = 0; i < corp.HQ.cards.length; i++) {
+        if (CheckCardType(corp.HQ.cards[i], ["ice"])) {
+          hasIceInHQ = true;
+          break;
+        }
+      }
+      if (hasIceInHQ) {
+        choices.push({
+          id: 2,
+          label: "Install 1 piece of ice from HQ (ignoring all costs)"
+        });
+      }
+    }
+    
+    //Effect 3: Place 1 advancement counter on an installed card you can advance
+    if (!this._usedEffects.includes(3)) {
+      var hasAdvanceableCards = false;
+      var installedCards = InstalledCards(corp);
+      for (var i = 0; i < installedCards.length; i++) {
+        if (CheckAdvance(installedCards[i])) {
+          hasAdvanceableCards = true;
+          break;
+        }
+      }
+      if (hasAdvanceableCards) {
+        choices.push({
+          id: 3,
+          label: "Place 1 advancement counter on an installed card"
+        });
+      }
+    }
+    
+    //Effect 4: Gain 2 credits (always available)
+    if (!this._usedEffects.includes(4)) {
+      choices.push({
+        id: 4,
+        label: "Gain 2[c]"
+      });
+    }
+    
+    return choices;
+  },
+  
+  _chooseEffect: function(effectNumber) {
+    var cardRef = this;
+    var choices = cardRef._getAvailableChoices();
+    
+    //If no choices available, we're done
+    if (choices.length === 0) return;
+    
+    //**AI code
+    if (corp.AI != null && choices.length > 0) {
+      var preferredId = cardRef._AIChooseEffect(choices);
+      for (var i = 0; i < choices.length; i++) {
+        if (choices[i].id === preferredId) {
+          corp.AI.preferred = { title: "Key Performance Indicators", option: choices[i] };
+          break;
+        }
+      }
+    }
+    
+    DecisionPhase(
+      corp,
+      choices,
+      function(choiceParams) {
+        cardRef._usedEffects.push(choiceParams.id);
+        cardRef._executeEffect(choiceParams.id, effectNumber);
+      },
+      "Key Performance Indicators",
+      "Choose effect " + effectNumber + " of 2",
+      cardRef
+    );
+  },
+  
+  _executeEffect: function(effectId, effectNumber) {
+    var cardRef = this;
+    
+    if (effectId === 1) {
+      //Draw 1 card, shuffle 1 card from HQ into R&D
+      Draw(corp, 1);
+      
+      //Now choose a card to shuffle into R&D
+      var hqChoices = ChoicesArrayCards(corp.HQ.cards);
+      
+      //Set server for drag target
+      for (var i = 0; i < hqChoices.length; i++) {
+        hqChoices[i].server = corp.RnD;
+      }
+      
+      //Add cancel option
+      hqChoices.push({ cancel: true, label: "Cancel", button: "Cancel" });
+      
+      //**AI code
+      if (corp.AI != null && hqChoices.length > 1) {
+        //Shuffle the least useful card (prefer non-agendas, non-ice)
+        var worstCard = hqChoices[0];
+        for (var i = 0; i < hqChoices.length - 1; i++) {
+          if (!CheckCardType(hqChoices[i].card, ["agenda", "ice"])) {
+            worstCard = hqChoices[i];
+            break;
+          }
+        }
+        corp.AI.preferred = { title: "Key Performance Indicators", option: worstCard };
+      }
+      
+      var shufflePhase = DecisionPhase(
+        corp,
+        hqChoices,
+        function(shuffleParams) {
+          if (shuffleParams.cancel) {
+            //Undo the draw by putting the top card of HQ back on top of R&D
+            var drawnCard = corp.HQ.cards[corp.HQ.cards.length - 1];
+            MoveCard(drawnCard, corp.RnD.cards);
+            //Remove this effect from used effects so player can choose again
+            var idx = cardRef._usedEffects.indexOf(1);
+            if (idx > -1) cardRef._usedEffects.splice(idx, 1);
+            //Return to effect selection
+            cardRef._chooseEffect(effectNumber);
+            return;
+          }
+          MoveCard(shuffleParams.card, corp.RnD.cards);
+          Shuffle(corp.RnD.cards);
+          Log(GetTitle(shuffleParams.card) + " shuffled into R&D");
+          if (effectNumber === 1) {
+            cardRef._chooseEffect(2);
+          }
+        },
+        "Key Performance Indicators",
+        "Drag card to R&D",
+        cardRef
+      );
+      shufflePhase.targetServerCardsOnly = true;
+    }
+    else if (effectId === 2) {
+      //Install 1 piece of ice from HQ, ignoring all costs
+      var iceChoices = ChoicesArrayInstall(corp.HQ.cards, true, function(card) {
+        return CheckCardType(card, ["ice"]);
+      });
+      
+      //Add cancel option
+      iceChoices.push({ cancel: true, label: "Cancel", button: "Cancel" });
+      
+      //**AI code
+      if (corp.AI != null && iceChoices.length > 1) {
+        corp.AI.preferred = { title: "Key Performance Indicators", option: iceChoices[0] };
+      }
+      
+      DecisionPhase(
+        corp,
+        iceChoices,
+        function(installParams) {
+          if (installParams.cancel) {
+            //Remove this effect from used effects so player can choose again
+            var idx = cardRef._usedEffects.indexOf(2);
+            if (idx > -1) cardRef._usedEffects.splice(idx, 1);
+            //Return to effect selection
+            cardRef._chooseEffect(effectNumber);
+            return;
+          }
+          //Install in the chosen server
+          var targetServer = installParams.server;
+          if (targetServer === null) {
+            targetServer = NewRemoteServer();
+          }
+          Install(installParams.card, targetServer, true); //true = ignore cost
+          if (effectNumber === 1) {
+            cardRef._chooseEffect(2);
+          }
+        },
+        "Key Performance Indicators",
+        "Choose ice to install",
+        cardRef
+      );
+    }
+    else if (effectId === 3) {
+      //Place 1 advancement counter on an installed card you can advance
+      var advanceableCards = ChoicesInstalledCards(corp, function(card) {
+        return CheckAdvance(card);
+      });
+      
+      //**AI code
+      if (corp.AI != null && advanceableCards.length > 0) {
+        corp.AI.preferred = { title: "Key Performance Indicators", option: advanceableCards[0] };
+      }
+      
+      DecisionPhase(
+        corp,
+        advanceableCards,
+        function(advanceParams) {
+          Advance(advanceParams.card);
+          if (effectNumber === 1) {
+            cardRef._chooseEffect(2);
+          }
+        },
+        "Key Performance Indicators",
+        "Choose card to advance",
+        cardRef
+      );
+    }
+    else if (effectId === 4) {
+      //Gain 2 credits
+      GainCredits(corp, 2);
+      if (effectNumber === 1) {
+        cardRef._chooseEffect(2);
+      }
+    }
+  },
+  
+  //AI priority
+  _AIChooseEffect: function(choices) {
+    //Priority: Install ice > Advance > Draw/Shuffle > Gain credits
+    var priorities = [2, 3, 1, 4];
+    for (var i = 0; i < priorities.length; i++) {
+      for (var j = 0; j < choices.length; j++) {
+        if (choices[j].id === priorities[i]) {
+          return priorities[i];
+        }
+      }
+    }
+    return choices[0].id;
+  },
+  
+  AIWouldPlay: function() {
+    //Always worth playing - flexible and cheap
+    return true;
+  },
+};
