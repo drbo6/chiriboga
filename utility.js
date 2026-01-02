@@ -989,6 +989,21 @@ function ShowGauntletRecap(gauntletState) {
   var maxScore = 7 * (gauntletState.gauntletLength || 4);
   var score = Math.max(0, maxScore - (gauntletState.agendaScored || 0));
   
+  // Helper function to get perk name
+  function getPerkName(perkNum) {
+    // Perks 7-12 are disabled versions of perks 1-6
+    var basePerk = perkNum > 6 ? perkNum - 6 : perkNum;
+    var perkNames = {
+      1: 'Additional Funds',
+      2: 'Pre-Installed Neutral Ice',
+      3: 'Holdover Directive',
+      4: 'Liquidated Assets',
+      5: 'Pre-Installed Faction Ice',
+      6: 'Subsidiary Gains'
+    };
+    return perkNames[basePerk] || null;
+  }
+  
   // Build opponent list HTML with thumbnails
   var opponentListHtml = '<div class="gauntlet-recap-opponents" style="overflow-y: auto; max-height: 400px; padding: 10px 0;">';
   
@@ -999,6 +1014,13 @@ function ShowGauntletRecap(gauntletState) {
       var identityCard = cardSet[identityId];
       var identityTitle = identityCard ? GetTitle(identityCard) : 'Unknown Identity';
       var identityFaction = opponent.faction || 'Unknown';
+      
+      // Get perk info
+      var perkName = null;
+      var perkDisabled = opponent.perkDisabled || false;
+      if (typeof opponent.startingPerk === 'number' && opponent.startingPerk > 0) {
+        perkName = getPerkName(opponent.startingPerk);
+      }
       
       // Get card image if available
       var imageFile = identityCard && identityCard.imageFile ? identityCard.imageFile : '';
@@ -1024,6 +1046,11 @@ function ShowGauntletRecap(gauntletState) {
       opponentListHtml += '<div style="flex: 1;">';
       opponentListHtml += '<div style="color: #33ff33; font-weight: bold;">' + opponent.name + '</div>';
       opponentListHtml += '<div style="color: #66ff66; font-size: 12px;">' + identityTitle + '</div>';
+      opponentListHtml += '<div style="color: #99ff99; font-size: 11px;">' + identityFaction + '</div>';
+      if (perkName) {
+        var perkStyle = perkDisabled ? 'color: #ff6666; text-decoration: line-through;' : 'color: #ffcc00;';
+        opponentListHtml += '<div style="font-size: 10px; ' + perkStyle + '">' + perkName + (perkDisabled ? ' (Disabled)' : '') + '</div>';
+      }
       opponentListHtml += '</div>';
       opponentListHtml += '</div>';
     }
