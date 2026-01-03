@@ -2,7 +2,6 @@
 
 A single-player implementation of Android: Netrunner with AI opponents and a refined cyberpunk interface. Built on the [Chiriboga engine](https://github.com/bobtheuberfish/chiriboga) by bobtheuberfish.
 
-![Version](https://img.shields.io/badge/version-0.1.0--alpha-red)
 ![PHP](https://img.shields.io/badge/php-7.4%2B-blue)
 ![License](https://img.shields.io/badge/license-GPL--3.0-green)
 
