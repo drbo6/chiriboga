@@ -4,7 +4,7 @@
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1">
 		<meta name="robots" content="noindex">
-		<title>Chiriboga</title>
+		<title>Netrunner: Solo Mode</title>
 		<link href="images/favicon.ico" rel="icon">
 		<?php
 		echo '<link rel="stylesheet" type="text/css" href="style.css?' . filemtime('style.css') . '" />';
