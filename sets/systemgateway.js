@@ -5294,7 +5294,7 @@ cardSet[30076] = {
   faction: "Neutral",
   cardType: "identity",
   deckSize: 30,
-  influenceLimit: 15,
+  influenceLimit: 9001,
   subTypes: ["Natural"],
   Tutorial: function(str) {
     if ((str=="Corp Mulligan")||(str=="Runner Mulligan")) {
@@ -5312,6 +5312,6 @@ cardSet[30077] = {
   faction: "Neutral",
   cardType: "identity",
   deckSize: 30,
-  influenceLimit: 15,
+  influenceLimit: 9001,
   subTypes: ["Megacorp"],
 };
