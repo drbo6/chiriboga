@@ -176,7 +176,7 @@
 					dropdown.append('<option value="-1">Load Precon Deck</option>');
 					for (var i = 0; i < preconDecks.length; i++) {
 						var deck = preconDecks[i];
-						if (String(identityId) === String(deck.identity)) {
+						if (String(identityId) === String(deck.identity) && deck.useForCustomGame) {
 							dropdown.append('<option value="' + i + '">' + deck.name + '</option>');
 						}
 					}

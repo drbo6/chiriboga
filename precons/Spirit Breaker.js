@@ -10,6 +10,8 @@ registerPrecon({
     useForQuickGame: false,
     // useForGauntlet: Whether to include this deck in Gauntlet mode selection
     useForGauntlet: true,
+    // useForCustomGame: Whether to include this deck in Custom Game mode
+    useForCustomGame: true,
     // deck_set: The set or category this deck belongs to
     deck_set: "none",
     URL: "https://netrunnerdb.com/en/decklist/046dca3d-9ba7-4cb1-a029-5e5cb5ec382a/-sg-su21-spirit-breaker",

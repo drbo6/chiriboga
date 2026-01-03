@@ -10,6 +10,8 @@ registerPrecon({
     useForQuickGame: false,
     // useForGauntlet: Whether to include this deck in Gauntlet mode selection
     useForGauntlet: true,
+    // useForCustomGame: Whether to include this deck in Custom Game mode
+    useForCustomGame: true,
     // deck_set: The set or category this deck belongs to
     deck_set: "none",
     URL: "https://netrunnerdb.com/en/decklist/494fec55-e58f-4187-9769-aa44eb03a63c/bio-builder",

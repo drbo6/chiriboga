@@ -10,6 +10,8 @@ registerPrecon({
 	useForQuickGame: false,
 	// useForGauntlet: Whether to include this deck in Gauntlet mode selection
 	useForGauntlet: false,
+	// useForCustomGame: Whether to include this deck in Custom Game mode
+	useForCustomGame: false,
 	// deck_set: The set or category this deck belongs to
 	deck_set: "Gauntlet Boss",
 	URL: "https://netrunnerdb.com/en/decklist/41657905-1cd4-433f-9a75-645eabed5585/system-gateway-update-draft-cube",

@@ -10,6 +10,8 @@ registerPrecon({
     useForQuickGame: false,
     // useForGauntlet: Whether to include this deck in Gauntlet mode selection
     useForGauntlet: true,
+    // useForCustomGame: Whether to include this deck in Custom Game mode
+    useForCustomGame: true,
     // deck_set: The set or category this deck belongs to
     deck_set: "none",
     URL: "https://netrunnerdb.com/en/decklist/bd8454f0-5d57-4c06-bb6a-4bfe4d8613ca/sg-su21-stealing-from-hq",

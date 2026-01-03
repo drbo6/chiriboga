@@ -10,6 +10,8 @@ registerPrecon({
     useForQuickGame: false,
     // useForGauntlet: Whether to include this deck in Gauntlet mode selection
     useForGauntlet: true,
+    // useForCustomGame: Whether to include this deck in Custom Game mode
+    useForCustomGame: true,
     // deck_set: The set or category this deck belongs to
     deck_set: "none",
     URL: "https://netrunnerdb.com/en/decklist/935c51f3-267d-4835-80df-2459272a2320/-sg-su21-king-of-recursion",

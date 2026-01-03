@@ -10,6 +10,8 @@ registerPrecon({
     useForQuickGame: true,
     // useForGauntlet: Whether to include this deck in Gauntlet mode selection
     useForGauntlet: true,
+    // useForCustomGame: Whether to include this deck in Custom Game mode
+    useForCustomGame: true,
     // deck_set: The set or category this deck belongs to
     deck_set: "Girometics SG+SU21",
     URL: "https://netrunnerdb.com/en/decklist/8fc12751-627a-4053-97f4-a9373734c963/-sg-su21-built-to-last-advancement-factory",

@@ -10,6 +10,8 @@ registerPrecon({
     useForQuickGame: false,
     // useForGauntlet: Whether to include this deck in Gauntlet mode selection
     useForGauntlet: true,
+    // useForCustomGame: Whether to include this deck in Custom Game mode
+    useForCustomGame: true,
     // deck_set: The set or category this deck belongs to
     deck_set: "none",
     URL: "https://netrunnerdb.com/en/decklist/f59ec206-691a-4a07-b3e5-69c4d3b06460/-gateway-update-headlock-reina",

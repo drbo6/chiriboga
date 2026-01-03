@@ -10,6 +10,8 @@ registerPrecon({
     useForQuickGame: true,
     // useForGauntlet: Whether to include this deck in Gauntlet mode selection
     useForGauntlet: true,
+    // useForCustomGame: Whether to include this deck in Custom Game mode
+    useForCustomGame: true,
     // deck_set: The set or category this deck belongs to
     deck_set: "Girometics SG+SU21",
     URL: "https://netrunnerdb.com/en/decklist/70985518-9780-4cae-9582-e75f02b89342/-sg-su21-steve-cambridge-the-long-con",

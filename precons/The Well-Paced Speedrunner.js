@@ -10,6 +10,8 @@ registerPrecon({
 	useForQuickGame: true,
 	// useForGauntlet: Whether to include this deck in Gauntlet mode selection
 	useForGauntlet: true,
+	// useForCustomGame: Whether to include this deck in Custom Game mode
+	useForCustomGame: true,
 	// deck_set: The set or category this deck belongs to
 	deck_set: "Girometics SG+SU21",
 	URL: "https://claude.ai/chat/61b290bd-a0ff-403a-8a84-c534c9624b3d",

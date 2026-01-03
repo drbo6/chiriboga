@@ -10,6 +10,8 @@ registerPrecon({
     useForQuickGame: true,
     // useForGauntlet: Whether to include this deck in Gauntlet mode selection
     useForGauntlet: true,
+    // useForCustomGame: Whether to include this deck in Custom Game mode
+    useForCustomGame: true,
     // deck_set: The set or category this deck belongs to
     deck_set: "Girometics SG+SU21",
     URL: "https://netrunnerdb.com/en/decklist/5b1841e7-c557-4114-8ff0-647af9a893c7/-sg-su21-zahya-sadeghi-customs-duties",

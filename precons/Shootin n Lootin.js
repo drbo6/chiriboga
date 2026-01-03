@@ -10,6 +10,8 @@ registerPrecon({
 	useForQuickGame: false,
 	// useForGauntlet: Whether to include this deck in Gauntlet mode selection
 	useForGauntlet: false,
+	// useForCustomGame: Whether to include this deck in Custom Game mode
+	useForCustomGame: true,
 	// deck_set: The set or category this deck belongs to
 	deck_set: "Girometics NSG Core",
 	URL: "https://netrunnerdb.com/en/decklist/a9c9e074-d20a-40ca-8030-f5d0d1ce677f/-nsg-core-shootin-n-lootin-",

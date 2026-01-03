@@ -10,6 +10,8 @@ registerPrecon({
     useForQuickGame: true,
     // useForGauntlet: Whether to include this deck in Gauntlet mode selection
     useForGauntlet: true,
+    // useForCustomGame: Whether to include this deck in Custom Game mode
+    useForCustomGame: true,
     // deck_set: The set or category this deck belongs to
     deck_set: "Girometics SG+SU21",
     URL: "https://netrunnerdb.com/en/decklist/28811205-6f7c-48e5-a407-6e6b020d4ed3/-sg-su21-restoring-humanity-high-stakes-updated-",

@@ -10,6 +10,8 @@ registerPrecon({
 	useForQuickGame: false,
 	// useForGauntlet: Whether to include this deck in Gauntlet mode selection
 	useForGauntlet: false,
+	// useForCustomGame: Whether to include this deck in Custom Game mode
+	useForCustomGame: true,
 	// deck_set: The set or category this deck belongs to
 	deck_set: "NSG Tutorial",
 	URL: "https://netrunnerdb.com/en/decklist/f7d0f21e-8ee5-488e-86cc-fc10a7a81849/system-gateway-upgraded-starter-corp-starter-booster-",

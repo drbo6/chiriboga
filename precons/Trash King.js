@@ -10,6 +10,8 @@ registerPrecon({
     useForQuickGame: true,
     // useForGauntlet: Whether to include this deck in Gauntlet mode selection
     useForGauntlet: true,
+    // useForCustomGame: Whether to include this deck in Custom Game mode
+    useForCustomGame: true,
     // deck_set: The set or category this deck belongs to
     deck_set: "Girometics SG+SU21",
     URL: "https://netrunnerdb.com/en/decklist/c61cbd7f-4c52-4406-8fad-d263009f27eb/-sg-su21-ren-loup-arcemont-trash-king",

@@ -10,6 +10,8 @@ registerPrecon({
 	useForQuickGame: false,
 	// useForGauntlet: Whether to include this deck in Gauntlet mode selection
 	useForGauntlet: false,
+	// useForCustomGame: Whether to include this deck in Custom Game mode
+	useForCustomGame: true,
 	// deck_set: The set or category this deck belongs to
 	deck_set: "NSG Tutorial",
 	URL: "https://netrunnerdb.com/en/decklist/0665c5c7-f7f1-4674-86b5-ca4e371888f2/system-gateway-starter-corp-34-cards-",

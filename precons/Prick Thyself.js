@@ -5,6 +5,8 @@ registerPrecon({
     useAsCustomDefault: true,
     useForQuickGame: false,
     useForGauntlet: false,
+    // useForCustomGame: Whether to include this deck in Custom Game mode
+    useForCustomGame: true,
     deck_set: "Girometics NSG Core",
     URL: "https://netrunnerdb.com/en/decklist/bbcf997a-3ec6-4728-9813-82df335db2f3/-nsg-core-prick-thyself",
     notes: "This deck focuses on trading damage and cards for powerful tempo gains, a core Anarch idea. Some cards are meant to be installed cheaply from hand, while extra copies are used as fuel rather than played. Managing your hand carefully lets you install expensive tools at a discount and keep pressure on the Corp. Because this style burns through cards quickly, early draw and smart refills are key to staying in control.",

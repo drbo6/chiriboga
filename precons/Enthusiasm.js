@@ -10,6 +10,8 @@ registerPrecon({
 	useForQuickGame: false,
 	// useForGauntlet: Whether to include this deck in Gauntlet mode selection
 	useForGauntlet: false,
+	// useForCustomGame: Whether to include this deck in Custom Game mode
+	useForCustomGame: true,
 	// deck_set: The set or category this deck belongs to
 	deck_set: "Girometics NSG Core",
 	URL: "https://netrunnerdb.com/en/decklist/14966eb5-a65c-4578-83bb-345e566df203/-nsg-core-enthusiasm",

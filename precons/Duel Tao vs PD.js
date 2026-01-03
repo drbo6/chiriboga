@@ -10,6 +10,8 @@ registerPrecon({
     useForQuickGame: false,
     // useForGauntlet: Whether to include this deck in Gauntlet mode selection
     useForGauntlet: false,
+    // useForCustomGame: Whether to include this deck in Custom Game mode
+    useForCustomGame: true,
     // deck_set: The set or category this deck belongs to
     deck_set: "Duel",
     URL: "https://netrunnerdb.com/en/decklist/0c5fcba2-bacd-4e0b-9118-8ae8ec10473c/sg-su21-duel-episode-1-t-o-salonga-vs-pd-",

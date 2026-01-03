@@ -10,6 +10,8 @@ registerPrecon({
     useForQuickGame: false,
     // useForGauntlet: Whether to include this deck in Gauntlet mode selection
     useForGauntlet: false,
+    // useForCustomGame: Whether to include this deck in Custom Game mode
+    useForCustomGame: true,
     // deck_set: The set or category this deck belongs to
     deck_set: "Duel",
     URL: "https://netrunnerdb.com/en/decklist/688a22ee-f9c3-4a30-b3f8-6a3ae97a8c0b/sg-su21-duel-episode-3-steve-cambridge-vs-pe-",

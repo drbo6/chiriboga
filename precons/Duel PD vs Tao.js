@@ -10,6 +10,8 @@ registerPrecon({
     useForQuickGame: false,
     // useForGauntlet: Whether to include this deck in Gauntlet mode selection
     useForGauntlet: false,
+    // useForCustomGame: Whether to include this deck in Custom Game mode
+    useForCustomGame: true,
     // deck_set: The set or category this deck belongs to
     deck_set: "Duel",
     URL: "https://netrunnerdb.com/en/decklist/7034d6ea-5995-465b-9c63-5647b87aabbd/sg-su21-duel-episode-1-precision-design-vs-t-o-",

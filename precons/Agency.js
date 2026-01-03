@@ -10,6 +10,8 @@ registerPrecon({
 	useForQuickGame: false,
 	// useForGauntlet: Whether to include this deck in Gauntlet mode selection
 	useForGauntlet: false,
+	// useForCustomGame: Whether to include this deck in Custom Game mode
+	useForCustomGame: true,
 	// deck_set: The set or category this deck belongs to
 	deck_set: "Girometics NSG Core",
 	URL: "https://netrunnerdb.com/en/decklist/8b2c2754-48c2-4375-a124-e1eebba9a95e/-nsg-core-agency",

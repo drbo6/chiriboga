@@ -10,6 +10,8 @@ registerPrecon({
     useForQuickGame: false,
     // useForGauntlet: Whether to include this deck in Gauntlet mode selection
     useForGauntlet: false,
+    // useForCustomGame: Whether to include this deck in Custom Game mode
+    useForCustomGame: true,
     // deck_set: The set or category this deck belongs to
     deck_set: "Duel",
     URL: "https://netrunnerdb.com/en/decklist/a29809f2-57e9-4ba8-9bac-a5d05b1ccf26/sg-su21-duel-episode-4-built-to-last-vs-kit-",

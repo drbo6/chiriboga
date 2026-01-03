@@ -10,6 +10,8 @@ registerPrecon({
 	useForQuickGame: false,
 	// useForGauntlet: Whether to include this deck in Gauntlet mode selection
 	useForGauntlet: false,
+	// useForCustomGame: Whether to include this deck in Custom Game mode
+	useForCustomGame: true,
 	// deck_set: The set or category this deck belongs to
 	deck_set: "NSG Tutorial",
 	URL: "https://netrunnerdb.com/en/decklist/d71397b7-af7b-475c-8984-18360a64f6ee/system-gateway-starter-runner-30-cards-",

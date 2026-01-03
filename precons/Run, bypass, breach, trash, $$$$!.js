@@ -10,6 +10,8 @@ registerPrecon({
 	useForQuickGame: false,
 	// useForGauntlet: Whether to include this deck in Gauntlet mode selection
 	useForGauntlet: true,
+	// useForCustomGame: Whether to include this deck in Custom Game mode
+	useForCustomGame: true,
 	// deck_set: The set or category this deck belongs to
 	deck_set: "none",
 	URL: "https://netrunnerdb.com/en/decklist/215fedad-e199-4cd3-b3e2-014d9fcfd578/run-bypass-breach-trash-sg-su21-",

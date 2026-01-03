@@ -10,6 +10,8 @@ registerPrecon({
 	useForQuickGame: false,
 	// useForGauntlet: Whether to include this deck in Gauntlet mode selection
 	useForGauntlet: false,
+	// useForCustomGame: Whether to include this deck in Custom Game mode
+	useForCustomGame: true,
 	// deck_set: The set or category this deck belongs to
 	deck_set: "Girometics NSG Core",
 	URL: "https://netrunnerdb.com/en/decklist/51804cff-8a01-4b85-b1cc-a140935cf81c/-nsg-core-brick-stack",

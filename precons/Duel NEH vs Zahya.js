@@ -10,6 +10,8 @@ registerPrecon({
     useForQuickGame: false,
     // useForGauntlet: Whether to include this deck in Gauntlet mode selection
     useForGauntlet: false,
+    // useForCustomGame: Whether to include this deck in Custom Game mode
+    useForCustomGame: true,
     // deck_set: The set or category this deck belongs to
     deck_set: "Duel",
     URL: "https://netrunnerdb.com/en/decklist/e66e83ae-d946-4f6c-a0ac-e78848637da3/sg-su21-duel-episode-2-near-earth-hub-vs-zahya-",

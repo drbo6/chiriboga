@@ -10,6 +10,8 @@ registerPrecon({
     useForQuickGame: false,
     // useForGauntlet: Whether to include this deck in Gauntlet mode selection
     useForGauntlet: false,
+    // useForCustomGame: Whether to include this deck in Custom Game mode
+    useForCustomGame: true,
     // deck_set: The set or category this deck belongs to
     deck_set: "Girometics NSG Core",
     URL: "https://netrunnerdb.com/en/decklist/81c60189-b0b9-429b-83a8-0cd6611fcff1/-nsg-core-bowel-movements",
