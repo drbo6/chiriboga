@@ -751,7 +751,7 @@ function LoadDecks() {
   // // ----------------------------------------------------------------------------
   // // You can enable the debug menu at the top of init.js
 
-  if (true) { // Use this to easily disable everything below
+  if (false) { // Use this to easily disable everything below
 
      debugging = true; //set true to log extra details and pause execution on error
      viewAllFronts = true; //set true to see all card fronts (for testing)
@@ -769,14 +769,14 @@ function LoadDecks() {
       cardBackTexturesRunner,glowTextures,strengthTextures
     );
 
-    CorpTestField(35035, //identity
+    CorpTestField(30059, //identity - 35035
       [30037, 30047,30073,35075,30074,30075,35081,35081], //archivesCards
       [30073,30072,30047,30073,30073,30039,30039,30039,30039,30039,35044,35044,35044,35045], //rndCards
       [35055,35079,35040,35081], //hqCards 
       [], //archivesInstalled
       [35041], //rndInstalled
       [35042], //hqInstalled
-      [[35071,35042,35052,35079],[30067,35064],[31071, 35053],[31072, 35053, 35076],[35062, 35079]], //remotes (array of arrays)
+      [[35071, 35045, 30042, 35041, 35052,35079],[30067,35064],[31071, 35053],[31072, 35053, 35076],[35062, 35079]], //remotes (array of arrays)
       [35070, 35070, 30068], //scored 35042,35052, 31075
       cardBackTexturesCorp,glowTextures,strengthTextures
     );
@@ -837,8 +837,8 @@ function LoadDecks() {
     // // RUN REMOTE
     // // ----------
 
-    attackedServer = corp.remoteServers[0];    
-    MakeRun(corp.remoteServers[0]); // Run remote
+    attackedServer = corp.remoteServers[1];    
+    MakeRun(corp.remoteServers[1]); // Run remote
 
     // // INSTALL TROJAN (requires setting it on the ice and then hosting it)
     // // -------------------------------------------------------------------

@@ -564,9 +564,6 @@ cardSet[35079] = {
     result.sr = [[["endTheRun"]]];
     return result;
   },
-  AIRezReasons: function() {
-    return { facecheck: true, etr: true };
-  },
 };
 
 cardSet[35014] = {
@@ -3219,13 +3216,6 @@ cardSet[35042] = {
   ],
   
   //**AI code
-  AIImplementIce: function(rc, result, maxCorpCred, incomplete) {
-    result.sr = [
-      [["misc_moderate"]], //install from HQ
-      [["endTheRun"]]
-    ];
-    return result;
-  },
   AIRezReasons: function() {
     return { facecheck: true, etr: true };
   },
@@ -3422,10 +3412,6 @@ cardSet[35075] = {
   ],
   
   //**AI code
-  AIImplementIce: function(rc, result, maxCorpCred, incomplete) {
-    result.sr = [["endTheRun"], ["endTheRun"]];
-    return result;
-  },
   AIRezReasons: function() {
     return { facecheck: true, etr: true };
   },
@@ -3580,13 +3566,6 @@ cardSet[35041] = {
   ],
   
   //**AI code
-  AIImplementIce: function(rc, result, maxCorpCred, incomplete) {
-    result.sr = [
-      [["misc_serious"]], //trash program
-      [["coreDamage"]]
-    ];
-    return result;
-  },
   AIRezReasons: function() {
     return { facecheck: true, program_trash: true, damage: true };
   },
@@ -4272,17 +4251,6 @@ cardSet[35053] = {
   ],
   
   //AI code
-  AIImplementIce: function(rc, result, maxCorpCred, incomplete) {
-    //This is complex ice that can install ice, rez ice, and resolve subroutines from other ice
-    //Simplify for AI: treat as moderately threatening
-    result.sr = [
-      [["misc_moderate"]], //install ice from Archives
-      [["misc_moderate"]], //rez ice paying 2 less
-      [["misc_moderate"]], //resolve sentry subroutine
-      [["misc_moderate"]]  //resolve code gate subroutine
-    ];
-    return result;
-  },
   AIRezReasons: function() {
     return { facecheck: true };
   },
@@ -4671,34 +4639,9 @@ cardSet[35020] = {
   },
   
   //AI code
-  AIImplementBreaker: function(rc, result, point, server, cardStrength, iceAI, iceStrength, clicksLeft, creditsLeft) {
-    //note: args for ImplementIcebreaker are: point, card, cardStrength, iceAI, iceStrength, iceSubTypes, costToUpStr, amtToUpStr, costToBreak, amtToBreak, creditsLeft
-    
-    //Check if a run event is active (simplified for AI - assume no run event for cost calculation)
-    //In reality this would need to check runner.resolvingCards for run events
-    var boostCost = 3; //Default cost, would be 1 if run event active
-    
-    result = result.concat(
-      rc.ImplementIcebreaker(
-        point,
-        this,
-        cardStrength,
-        iceAI,
-        iceStrength,
-        ["Code Gate"],
-        boostCost,
-        2,
-        1,
-        1,
-        creditsLeft
-      )
-    ); //cost to str, amt to str, cost to brk, amt to brk
-    return result;
-  },
-  AIPreferredInstallChoice: function(choices) {
-    //don't install if this is last click
-    if (runner.clickTracker < 2) return -1;
-    return 0;
+  AIImplementIcebreaker: function() {
+    //Cost to break one subroutine
+    return { breakCost: 1, boostCost: 3, boostAmount: 2 };
   },
 };
 
@@ -4984,29 +4927,8 @@ cardSet[35032] = {
   },
   
   //AI code
-  AIImplementBreaker: function(rc, result, point, server, cardStrength, iceAI, iceStrength, clicksLeft, creditsLeft) {
-    //note: args for ImplementIcebreaker are: point, card, cardStrength, iceAI, iceStrength, iceSubTypes, costToUpStr, amtToUpStr, costToBreak, amtToBreak, creditsLeft
-    result = result.concat(
-      rc.ImplementIcebreaker(
-        point,
-        this,
-        cardStrength,
-        iceAI,
-        iceStrength,
-        ["Barrier"],
-        2, //costToUpStr
-        2, //amtToUpStr
-        1, //costToBreak
-        1, //amtToBreak
-        creditsLeft
-      )
-    );
-    return result;
-  },
-  AIPreferredInstallChoice: function(choices) {
-    //don't install if this is last click
-    if (runner.clickTracker < 2) return -1;
-    return 0;
+  AIImplementIcebreaker: function() {
+    return { breakCost: 1, boostCost: 2, boostAmount: 2 };
   },
 };
 
