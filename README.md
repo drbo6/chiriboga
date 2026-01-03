@@ -38,6 +38,37 @@ Card art and symbols are property of Null Signal Games and used under [CC BY-ND 
 
 # Developer Documentation
 
+# Missing Cards
+
+The following Elevation cards are not yet implemented (17 cards):
+
+## Haas-Bioroid (1 card)
+- **35035** - LEO Construction: Labor Solutions (Identity)
+
+## Jinteki (8 cards)
+- **35046** - AU Co.: The Gold Standard in Clones (Identity)
+- **35047** - PT Untaian: Life's Building Blocks (Identity)
+- **35048** - Proprionegation (Agenda)
+- **35049** - Sericulture Expansion (Agenda)
+- **35050** - Byte! (Asset - Ambush)
+- **35051** - Phật Gioan Baotixita (Asset - Executive)
+- **35056** - Mitra Aman (Upgrade - Clone)
+
+## NBN (9 cards)
+- **35057** - Nebula Talent Management: Making Stars (Identity - Flip)
+- **35058** - Synapse Global: Faster than Thought (Identity)
+- **35059** - Embedded Reporting (Agenda - Initiative)
+- **35060** - Next Big Thing (Agenda - Initiative)
+- **35065** - Bigger Picture (Operation - Gray Ops)
+- **35066** - IP Enforcement (Operation - Gray Ops)
+- **35067** - Touch-ups (Operation - Double)
+
+## Weyland Consortium (1 card)
+- **35068** - BANGUN: When Disaster Strikes (Identity)
+
+## Neutral Corp (1 card)
+- **35081** - Petty Cash (Operation - Transaction)
+
 # Debugging and Testing Guide for Chiriboga
 
 This guide explains how to create specific board states, enable debugging features, and test scenarios in the Netrunner implementation.
