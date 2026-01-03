@@ -59,8 +59,12 @@
   if (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
     $parts = explode(',', $_SERVER['HTTP_X_FORWARDED_FOR']);
     $ip = trim($parts[0]);
+    // Validate IP format to prevent header injection
+    if (!filter_var($ip, FILTER_VALIDATE_IP)) {
+      $ip = $_SERVER['REMOTE_ADDR'] ?? 'Unknown';
+    }
   } else {
-    $ip = $_SERVER['REMOTE_ADDR'] ?? '';
+    $ip = $_SERVER['REMOTE_ADDR'] ?? 'Unknown';
   }
   ?>
 </head>

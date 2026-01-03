@@ -1,9 +1,0 @@
-version: '3'
-services:
-  web:
-    image: netrunner
-    build: .
-    container_name: netrunner
-    restart: always
-    ports:
-      - "3000:80"
