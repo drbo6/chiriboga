@@ -1046,7 +1046,6 @@ function ShowGauntletRecap(gauntletState) {
       opponentListHtml += '<div style="flex: 1;">';
       opponentListHtml += '<div style="color: #33ff33; font-weight: bold;">' + opponent.name + '</div>';
       opponentListHtml += '<div style="color: #66ff66; font-size: 12px;">' + identityTitle + '</div>';
-      opponentListHtml += '<div style="color: #99ff99; font-size: 11px;">' + identityFaction + '</div>';
       if (perkName) {
         var perkStyle = perkDisabled ? 'color: #ff6666; text-decoration: line-through;' : 'color: #ffcc00;';
         opponentListHtml += '<div style="font-size: 10px; ' + perkStyle + '">' + perkName + (perkDisabled ? ' (Disabled)' : '') + '</div>';
