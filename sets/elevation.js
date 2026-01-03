@@ -564,6 +564,9 @@ cardSet[35079] = {
     result.sr = [[["endTheRun"]]];
     return result;
   },
+  AIRezReasons: function() {
+    return { facecheck: true, etr: true };
+  },
 };
 
 cardSet[35014] = {
@@ -3216,6 +3219,13 @@ cardSet[35042] = {
   ],
   
   //**AI code
+  AIImplementIce: function(rc, result, maxCorpCred, incomplete) {
+    result.sr = [
+      [["misc_moderate"]], //install from HQ
+      [["endTheRun"]]
+    ];
+    return result;
+  },
   AIRezReasons: function() {
     return { facecheck: true, etr: true };
   },
@@ -3412,6 +3422,10 @@ cardSet[35075] = {
   ],
   
   //**AI code
+  AIImplementIce: function(rc, result, maxCorpCred, incomplete) {
+    result.sr = [["endTheRun"], ["endTheRun"]];
+    return result;
+  },
   AIRezReasons: function() {
     return { facecheck: true, etr: true };
   },
@@ -3566,6 +3580,13 @@ cardSet[35041] = {
   ],
   
   //**AI code
+  AIImplementIce: function(rc, result, maxCorpCred, incomplete) {
+    result.sr = [
+      [["misc_serious"]], //trash program
+      [["coreDamage"]]
+    ];
+    return result;
+  },
   AIRezReasons: function() {
     return { facecheck: true, program_trash: true, damage: true };
   },
@@ -4251,6 +4272,17 @@ cardSet[35053] = {
   ],
   
   //AI code
+  AIImplementIce: function(rc, result, maxCorpCred, incomplete) {
+    //This is complex ice that can install ice, rez ice, and resolve subroutines from other ice
+    //Simplify for AI: treat as moderately threatening
+    result.sr = [
+      [["misc_moderate"]], //install ice from Archives
+      [["misc_moderate"]], //rez ice paying 2 less
+      [["misc_moderate"]], //resolve sentry subroutine
+      [["misc_moderate"]]  //resolve code gate subroutine
+    ];
+    return result;
+  },
   AIRezReasons: function() {
     return { facecheck: true };
   },
@@ -4639,9 +4671,34 @@ cardSet[35020] = {
   },
   
   //AI code
-  AIImplementIcebreaker: function() {
-    //Cost to break one subroutine
-    return { breakCost: 1, boostCost: 3, boostAmount: 2 };
+  AIImplementBreaker: function(rc, result, point, server, cardStrength, iceAI, iceStrength, clicksLeft, creditsLeft) {
+    //note: args for ImplementIcebreaker are: point, card, cardStrength, iceAI, iceStrength, iceSubTypes, costToUpStr, amtToUpStr, costToBreak, amtToBreak, creditsLeft
+    
+    //Check if a run event is active (simplified for AI - assume no run event for cost calculation)
+    //In reality this would need to check runner.resolvingCards for run events
+    var boostCost = 3; //Default cost, would be 1 if run event active
+    
+    result = result.concat(
+      rc.ImplementIcebreaker(
+        point,
+        this,
+        cardStrength,
+        iceAI,
+        iceStrength,
+        ["Code Gate"],
+        boostCost,
+        2,
+        1,
+        1,
+        creditsLeft
+      )
+    ); //cost to str, amt to str, cost to brk, amt to brk
+    return result;
+  },
+  AIPreferredInstallChoice: function(choices) {
+    //don't install if this is last click
+    if (runner.clickTracker < 2) return -1;
+    return 0;
   },
 };
 
@@ -4927,8 +4984,29 @@ cardSet[35032] = {
   },
   
   //AI code
-  AIImplementIcebreaker: function() {
-    return { breakCost: 1, boostCost: 2, boostAmount: 2 };
+  AIImplementBreaker: function(rc, result, point, server, cardStrength, iceAI, iceStrength, clicksLeft, creditsLeft) {
+    //note: args for ImplementIcebreaker are: point, card, cardStrength, iceAI, iceStrength, iceSubTypes, costToUpStr, amtToUpStr, costToBreak, amtToBreak, creditsLeft
+    result = result.concat(
+      rc.ImplementIcebreaker(
+        point,
+        this,
+        cardStrength,
+        iceAI,
+        iceStrength,
+        ["Barrier"],
+        2, //costToUpStr
+        2, //amtToUpStr
+        1, //costToBreak
+        1, //amtToBreak
+        creditsLeft
+      )
+    );
+    return result;
+  },
+  AIPreferredInstallChoice: function(choices) {
+    //don't install if this is last click
+    if (runner.clickTracker < 2) return -1;
+    return 0;
   },
 };
 
@@ -7622,5 +7700,149 @@ cardSet[35081] = {
     if (!CheckCredits(corp, PlayCost(this), "playing", this)) return false;
     //Worth playing - nets +2 credits and we get the click back
     return true;
+  },
+};
+
+//LEO Construction: Labor Solutions
+//Haas-Bioroid Identity: Division
+//Deck: 45, Influence: 15
+//Once per turn → Trash 1 rezzed bioroid card in the root of or protecting the attacked server: End the run.
+cardSet[35035] = {
+  title: "LEO Construction: Labor Solutions",
+  imageFile: "35035.png",
+  player: corp,
+  faction: "Haas-Bioroid",
+  cardType: "identity",
+  subTypes: ["Division"],
+  deckSize: 45,
+  influenceLimit: 15,
+  
+  //Track "once per turn" usage
+  usedThisTurn: false,
+  
+  //Reset at start of each turn
+  responseOnCorpTurnBegins: {
+    Resolve: function() {
+      this.usedThisTurn = false;
+    },
+    automatic: true,
+  },
+  
+  responseOnRunnerTurnBegins: {
+    Resolve: function() {
+      this.usedThisTurn = false;
+    },
+    automatic: true,
+  },
+  
+  //Paid ability: Trash 1 rezzed bioroid card in the root of or protecting the attacked server: End the run
+  abilities: [
+    {
+      text: "Trash a rezzed bioroid to end the run",
+      Enumerate: function() {
+        //Must be during a run
+        if (!CheckRunning()) return [];
+        //Once per turn
+        if (this.usedThisTurn) return [];
+        
+        //Find rezzed bioroid cards in root of or protecting the attacked server
+        var bioroidChoices = [];
+        
+        //Check ice protecting the server
+        for (var i = 0; i < attackedServer.ice.length; i++) {
+          var ice = attackedServer.ice[i];
+          if (ice.rezzed && CheckSubType(ice, "Bioroid")) {
+            bioroidChoices.push({
+              card: ice,
+              label: "Trash " + GetTitle(ice, true) + " (ice)"
+            });
+          }
+        }
+        
+        //Check cards in root of server
+        for (var i = 0; i < attackedServer.root.length; i++) {
+          var rootCard = attackedServer.root[i];
+          if (rootCard.rezzed && CheckSubType(rootCard, "Bioroid")) {
+            bioroidChoices.push({
+              card: rootCard,
+              label: "Trash " + GetTitle(rootCard, true) + " (root)"
+            });
+          }
+        }
+        
+        return bioroidChoices;
+      },
+      Resolve: function(params) {
+        var cardRef = this;
+        cardRef.usedThisTurn = true;
+        
+        //Trash the chosen bioroid card (as a cost, so cannot be prevented)
+        Trash(params.card, false, function(cardsTrashed) {
+          Log("LEO Construction trashes " + GetTitle(params.card, true) + " to end the run");
+          EndTheRun();
+        }, cardRef);
+      },
+    },
+  ],
+  
+  //**AI code
+  AIWouldTrigger: function() {
+    //Only consider if we haven't used it this turn
+    if (this.usedThisTurn) return false;
+    //Only during a run
+    if (!CheckRunning()) return false;
+    
+    //Check if there's something valuable to protect in this server
+    var serverHasAgenda = false;
+    for (var i = 0; i < attackedServer.root.length; i++) {
+      if (CheckCardType(attackedServer.root[i], ["agenda"])) {
+        serverHasAgenda = true;
+        break;
+      }
+    }
+    
+    //For centrals, always consider it valuable
+    var isCentral = (attackedServer === corp.HQ || attackedServer === corp.RnD || attackedServer === corp.archives);
+    
+    //Find cheapest bioroid to trash
+    var cheapestBioroid = null;
+    var cheapestValue = Infinity;
+    
+    //Check ice
+    for (var i = 0; i < attackedServer.ice.length; i++) {
+      var ice = attackedServer.ice[i];
+      if (ice.rezzed && CheckSubType(ice, "Bioroid")) {
+        var value = RezCost(ice);
+        if (value < cheapestValue) {
+          cheapestValue = value;
+          cheapestBioroid = ice;
+        }
+      }
+    }
+    
+    //Check root
+    for (var i = 0; i < attackedServer.root.length; i++) {
+      var rootCard = attackedServer.root[i];
+      if (rootCard.rezzed && CheckSubType(rootCard, "Bioroid")) {
+        var value = RezCost(rootCard);
+        if (value < cheapestValue) {
+          cheapestValue = value;
+          cheapestBioroid = rootCard;
+        }
+      }
+    }
+    
+    if (cheapestBioroid === null) return false;
+    
+    //Decision: is it worth trashing a bioroid to end the run?
+    //Generally yes if:
+    //- There's an agenda at risk
+    //- The bioroid is cheap (< 4 credits)
+    //- It's a central server with important cards
+    if (serverHasAgenda) return true;
+    if (isCentral && cheapestValue <= 3) return true;
+    if (cheapestValue <= 2) return true; //Very cheap bioroid, might as well use it
+    
+    return false;
   },
 };

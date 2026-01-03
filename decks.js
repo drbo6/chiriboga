@@ -769,7 +769,7 @@ function LoadDecks() {
       cardBackTexturesRunner,glowTextures,strengthTextures
     );
 
-    CorpTestField(35069, //identity
+    CorpTestField(35035, //identity
       [30037, 30047,30073,35075,30074,30075,35081,35081], //archivesCards
       [30073,30072,30047,30073,30073,30039,30039,30039,30039,30039,35044,35044,35044,35045], //rndCards
       [35055,35079,35040,35081], //hqCards 
@@ -817,8 +817,8 @@ function LoadDecks() {
     // // SET THE PHASE
     // // -------------
 
-    // ChangePhase(phases.runnerStartResponse); // Runner starts turn
-    ChangePhase(phases.corpStartDraw);    
+    ChangePhase(phases.runnerStartResponse); // Runner starts turn
+    // ChangePhase(phases.corpStartDraw);    
 
     // // OTHER STUFF
     // // -----------
@@ -837,8 +837,8 @@ function LoadDecks() {
     // // RUN REMOTE
     // // ----------
 
-    //attackedServer = corp.remoteServers[1];    
-    //MakeRun(corp.remoteServers[1]); // Run remote
+    attackedServer = corp.remoteServers[0];    
+    MakeRun(corp.remoteServers[0]); // Run remote
 
     // // INSTALL TROJAN (requires setting it on the ice and then hosting it)
     // // -------------------------------------------------------------------
