@@ -502,16 +502,36 @@
         return cardSet[d.identity].player === corp;
       });
       
-      // Sort by faction then name
-      corpPrecons.sort(function(a, b) {
+      // Separate neutral decks from factioned decks
+      var neutralPrecons = [];
+      var factionedPrecons = [];
+      
+      for (var i = 0; i < corpPrecons.length; i++) {
+        var precon = corpPrecons[i];
+        var identity = cardSet[precon.identity];
+        var faction = identity.faction || 'Unknown';
+        
+        if (faction === 'Neutral') {
+          neutralPrecons.push(precon);
+        } else {
+          factionedPrecons.push(precon);
+        }
+      }
+      
+      // Sort each group by faction then name
+      factionedPrecons.sort(function(a, b) {
         var factionA = cardSet[a.identity].faction || '';
         var factionB = cardSet[b.identity].faction || '';
         if (factionA !== factionB) return factionA.localeCompare(factionB);
         return (a.name || '').localeCompare(b.name || '');
       });
       
-      for (var i = 0; i < corpPrecons.length; i++) {
-        var precon = corpPrecons[i];
+      neutralPrecons.sort(function(a, b) {
+        return (a.name || '').localeCompare(b.name || '');
+      });
+      
+      // Helper function to create a precon item
+      function createPreconItem(precon) {
         var identity = cardSet[precon.identity];
         var faction = identity.faction || 'Unknown';
         
@@ -548,14 +568,39 @@
           'Jinteki': 'JIN',
           'Haas-Bioroid': 'HB',
           'NBN': 'NBN',
-          'Weyland Consortium': 'WEY'
+          'Weyland Consortium': 'WEY',
+          'Neutral': 'NEU'
         };
         factionLabel.textContent = factionAbbrev[faction] || faction.substring(0, 3).toUpperCase();
         
         item.appendChild(checkbox);
         item.appendChild(nameLink);
         item.appendChild(factionLabel);
-        listContainer.appendChild(item);
+        return item;
+      }
+      
+      // Add factioned precons first
+      for (var i = 0; i < factionedPrecons.length; i++) {
+        listContainer.appendChild(createPreconItem(factionedPrecons[i]));
+      }
+      
+      // Add neutral section if there are neutral decks
+      if (neutralPrecons.length > 0) {
+        var neutralHeader = document.createElement('div');
+        neutralHeader.className = 'settings-section-header';
+        neutralHeader.title = 'Neutral corp decks that can replace the final gauntlet opponent when Alternate Factions is ON';
+        neutralHeader.textContent = 'NEUTRAL GAUNTLET OPPONENTS';
+        listContainer.appendChild(neutralHeader);
+        
+        var neutralDesc = document.createElement('div');
+        neutralDesc.className = 'precon-section-desc';
+        neutralDesc.style.cssText = 'padding: 4px 8px 8px 8px; font-size: 10px; color: #00ff00aa; line-height: 1.4;';
+        neutralDesc.textContent = 'When Alternate Factions is ON, enabled neutral decks can replace the final gauntlet opponent.';
+        listContainer.appendChild(neutralDesc);
+        
+        for (var i = 0; i < neutralPrecons.length; i++) {
+          listContainer.appendChild(createPreconItem(neutralPrecons[i]));
+        }
       }
     }
     
@@ -890,6 +935,42 @@
               for (var q = 0; q < qty; q++) {
                 opponent.cards.push(parseInt(cc));
               }
+            }
+          }
+        }
+        
+        // Check if we should replace the final opponent with a neutral deck
+        if (gauntletLength > 0 && selectedOpponents.length === gauntletLength) {
+          var neutralBossChance = (typeof gauntletConfig.neutralBossChance === 'number') 
+            ? gauntletConfig.neutralBossChance 
+            : 0.25;
+          
+          if (Math.random() < neutralBossChance) {
+            // Find available neutral corp decks
+            var neutralDecks = preconDecks.filter(function(d) {
+              if (!isPreconEnabledForGauntlet(d)) return false;
+              if (!cardSet[d.identity]) return false;
+              var identity = cardSet[d.identity];
+              return identity.player === corp && identity.faction === 'Neutral';
+            });
+            
+            if (neutralDecks.length > 0) {
+              // Replace the last opponent with a random neutral deck
+              var chosen = neutralDecks[Math.floor(Math.random() * neutralDecks.length)];
+              var chosenIdentity = cardSet[chosen.identity];
+              var opponent = {identity: parseInt(chosen.identity), cards: [], name: chosen.name || 'Unknown Deck', faction: chosenIdentity.faction || 'Unknown', URL: chosen.URL || '', hasbeendefeated: false};
+              
+              // Populate cards from precon
+              for (var cc in chosen.cards) {
+                if (!chosen.cards.hasOwnProperty(cc)) continue;
+                var qty = chosen.cards[cc];
+                for (var q = 0; q < qty; q++) {
+                  opponent.cards.push(parseInt(cc));
+                }
+              }
+              
+              // Replace the last opponent
+              selectedOpponents[selectedOpponents.length - 1] = opponent;
             }
           }
         }

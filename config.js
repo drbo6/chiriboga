@@ -59,6 +59,12 @@ var gauntletConfig = {
   // If false, randomly selects precons across all factions without faction requirement
   alternateFactions: true,
 
+  // ===== NEUTRAL BOSS CHANCE =====
+  // Chance (0.0 to 1.0) that a neutral deck will replace the final gauntlet opponent
+  // Only applies when alternateFactions is true and neutral corp precons are available
+  // Set to 0 to disable neutral bosses, 1.0 to always have a neutral final boss
+  neutralBossChance: 1.0,
+
   // ===== BALANCED FACTIONS =====
   // If true, random card selection will balance across runner factions (Anarch, Criminal, Shaper, Neutral)
   // This prevents factions with more cards of a given type from dominating the card pool
