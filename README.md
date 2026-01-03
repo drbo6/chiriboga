@@ -1,13 +1,105 @@
-# Netrunner Solo Mode
-https://github.com/bobtheuberfish/chiriboga
+# Netrunner: Solo Mode
 
-Adding a nicer interface for the Chiriboga engine ^
+A single-player implementation of Android: Netrunner with AI opponents and a refined cyberpunk interface. Built on the [Chiriboga engine](https://github.com/bobtheuberfish/chiriboga) by bobtheuberfish.
 
-# Install
-Extract PHP for Windows in c:\php
-Add c:\php to your Path (Environment Variables)
-Move the images into the game folder
-Run php -S localhost:8000 in the repo folder
+![Version](https://img.shields.io/badge/version-0.1.0--alpha-red)
+![PHP](https://img.shields.io/badge/php-7.4%2B-blue)
+![License](https://img.shields.io/badge/license-GPL--3.0-green)
+
+## Features
+
+- 🤖 **AI Opponent** - Sophisticated Corp AI that builds servers, advances agendas, and makes strategic decisions
+- 🎮 **Multiple Game Modes** - Quick Game, Custom Game, Gauntlet Mode, and Tutorial
+- 🎨 **Cyberpunk Interface** - Retro terminal aesthetic with CRT effects and animations
+- 📦 **Card Support** - System Gateway, System Update 2021, Midnight Sun, and Elevation sets
+- 🏆 **Achievements System** - Track your progress and unlock rewards
+- 🔧 **Deck Builder** - Visual deck construction with card filters and sorting
+
+## Quick Start
+
+### Requirements
+- PHP 7.4 or higher (PHP 8.1+ recommended)
+- A web server (Apache/Nginx) or PHP's built-in server
+
+### Installation
+
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/yourusername/chiriboga.git
+   cd chiriboga
+   ```
+
+2. **Start the development server**
+   ```bash
+   php -S localhost:8000
+   ```
+
+3. **Open in browser**
+   ```
+   http://localhost:8000
+   ```
+
+### For Production (Apache/Nginx)
+
+1. Upload all files to your web server
+2. Ensure the `.htaccess` file is present (Apache users)
+3. Point your domain to the directory containing `index.php`
+4. Access via your domain URL
+
+**Note:** The included `.htaccess` provides security headers and optimizations. For Nginx, refer to the equivalent configuration in the comments.
+
+## Game Modes
+
+### Quick Game
+Jump straight into a match with pre-selected runner and corp decks.
+
+### Custom Game
+Choose your identity, build or import custom decks, and configure game settings.
+
+### Gauntlet Mode
+Face a series of increasingly difficult AI opponents with a limited card pool. Earn credits by winning to buy more card packs and improve your deck.
+
+### Tutorial
+Learn the basics of Netrunner through guided scenarios.
+
+## How to Play
+
+1. Select a game mode from the main menu
+2. Choose your Runner identity
+3. Build a deck or select a preconstructed deck
+4. Click "Launch Game" to start playing
+5. Use clicks to perform actions during your turn
+6. Make runs on Corp servers to steal agendas
+7. First to 7 agenda points wins!
+
+For complete rules, see the [Netrunner Comprehensive Rules](https://nullsignal.games/wp-content/uploads/2024/08/Null-Signal-Games-Netrunner-Comprehensive-Rules-v25.08.pdf).
+
+## Credits
+
+### Original Engine
+**Chiriboga** - Developed by [bobtheuberfish](https://github.com/bobtheuberfish)  
+Source: https://github.com/bobtheuberfish/chiriboga
+
+### Solo Mode Extension
+Developed by [DrBo6](https://github.com/drbo6)  
+Enhanced interface, game modes, and Gauntlet system
+
+### Preconstructed Decks
+- Girometics SG+SU21 and NSG Core precons
+- Additional precons curated by DrBo6
+
+### Special Thanks
+Testers: BadEpsilon, bowlsley, D-Smith, eniteris, Kwaice, Mentlegen, olompumpa, R41B, saff, Saintis, Ysengrin
+
+## Legal
+
+*Netrunner* and *Android* are trademarks of Fantasy Flight Publishing, Inc. and/or Wizards of the Coast LLC. This is a fan-made project and is not affiliated with or endorsed by FFG, WotC, or Null Signal Games.
+
+Card art and symbols are property of Null Signal Games and used under [CC BY-ND 4.0](https://creativecommons.org/licenses/by-nd/4.0/).
+
+---
+
+# Developer Documentation
 
 # Debugging and Testing Guide for Chiriboga
 
