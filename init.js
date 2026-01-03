@@ -1922,6 +1922,7 @@ function NicelyFormatCommand(cmdstr) {
     else cmdstr = "Continue";
   } else if (cmdstr == "m") cmdstr = "Mulligan";
   else if (cmdstr == "jack") cmdstr = "Jack out";
+  else if (cmdstr == "archivesTrigger") cmdstr = "Play from Archives";
 
   return cmdstr.charAt(0).toUpperCase() + cmdstr.slice(1);
 }

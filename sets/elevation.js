@@ -7515,3 +7515,112 @@ cardSet[35077] = {
     return true;
   },
 };
+
+//Petty Cash
+//Neutral Corp Operation: Transaction
+//Cost: 3
+//Play only if you have not finished an action yet this turn.
+//Gain 5[c]. If you played this operation from anywhere except HQ, gain [click].
+//[click]: Play this operation from Archives. After it resolves, remove it from the game.
+cardSet[35081] = {
+  title: "Petty Cash",
+  imageFile: "35081.png",
+  player: corp,
+  faction: "Neutral",
+  influence: 0,
+  cardType: "operation",
+  subTypes: ["Transaction"],
+  playCost: 3,
+  
+  //Track where this card was played from
+  _playedFromArchives: false,
+  
+  //Play only if you have not finished an action yet this turn
+  //This means no actions have been completed yet (actionsCompletedThisTurn === 0)
+  Enumerate: function() {
+    //Check play restriction: no actions finished this turn
+    if (corp.actionsCompletedThisTurn > 0) return [];
+    return [{}];
+  },
+  
+  //Gain 5[c]. If you played this operation from anywhere except HQ, gain [click].
+  Resolve: function(params) {
+    GainCredits(corp, 5);
+    //Check if played from not-HQ (i.e., from Archives)
+    if (this._playedFromArchives) {
+      GainClicks(corp, 1);
+      Log("Petty Cash grants 1 additional click (played from Archives)");
+    }
+    //Reset flag after use
+    this._playedFromArchives = false;
+  },
+  
+  //[click]: Play this operation from Archives. After it resolves, remove it from the game.
+  //This is implemented as a special ability that works from Archives
+  archivesClickAbility: {
+    text: "Play Petty Cash from Archives",
+    availableWhenInactive: true,
+    
+    Enumerate: function() {
+      //Only available when card is in Archives
+      if (this.cardLocation !== corp.archives.cards) return [];
+      //Check if we have clicks
+      if (!CheckActionClicks(corp, 1)) return [];
+      //Check the play restriction: no actions finished this turn
+      if (corp.actionsCompletedThisTurn > 0) return [];
+      //Check if we can afford the play cost
+      if (!CheckCredits(corp, PlayCost(this), "playing", this)) return [];
+      return [{}];
+    },
+    
+    Resolve: function(params) {
+      var cardRef = this;
+      
+      //Mark that we're playing from Archives
+      cardRef._playedFromArchives = true;
+      cardRef._removeFromGameAfterResolve = true;
+      
+      //Spend click for the ability
+      SpendClicks(corp, 1);
+      
+      //Pay the play cost
+      SpendCredits(corp, PlayCost(cardRef), "playing", cardRef, function() {
+        //Move from Archives to resolving
+        MoveCard(cardRef, corp.resolvingCards);
+        cardRef.faceUp = true;
+        
+        Log('Played "Petty Cash" from Archives');
+        AutomaticTriggers("automaticOnPlay", [cardRef]);
+        
+        //Resolve the operation
+        cardRef.Resolve.call(cardRef, {});
+        
+        //Remove from game after resolving
+        RemoveFromGame(cardRef);
+        delete cardRef._removeFromGameAfterResolve;
+        cardRef._playedFromArchives = false;
+        
+      }, cardRef);
+    },
+  },
+  
+  //**AI code
+  AIWouldPlay: function() {
+    //Play restriction: must be first action of turn
+    if (corp.actionsCompletedThisTurn > 0) return false;
+    //Good economy card - nets +2 credits
+    return true;
+  },
+  
+  //AI: Consider playing from Archives
+  AIWouldTriggerArchivesAbility: function() {
+    //Check if in Archives
+    if (this.cardLocation !== corp.archives.cards) return false;
+    //Check play restriction
+    if (corp.actionsCompletedThisTurn > 0) return false;
+    //Check if we can afford it
+    if (!CheckCredits(corp, PlayCost(this), "playing", this)) return false;
+    //Worth playing - nets +2 credits and we get the click back
+    return true;
+  },
+};

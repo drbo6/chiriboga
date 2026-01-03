@@ -809,6 +809,15 @@ phases.corpActionStart = CreatePhaseFromTemplate(
   null
 );
 
+//Reset actions completed counter at start of action phase
+var corpActionStartOriginalInit = phases.corpActionStart.Init;
+phases.corpActionStart.Init = function() {
+  corp.actionsCompletedThisTurn = 0;
+  if (typeof corpActionStartOriginalInit === 'function') {
+    corpActionStartOriginalInit.call(this);
+  }
+};
+
 //Take action
 phases.corpActionMain = {
   player: corp,
@@ -883,6 +892,24 @@ phases.corpActionMain = {
     },
     trigger: function () {
       return ChoicesTriggerableAbilities(corp, "click"); //click abilities only
+    },
+    archivesTrigger: function () {
+      //Check for cards in Archives with archivesClickAbility
+      var ret = [];
+      for (var i = 0; i < corp.archives.cards.length; i++) {
+        var card = corp.archives.cards[i];
+        if (typeof card.archivesClickAbility !== "undefined") {
+          var choices = card.archivesClickAbility.Enumerate.call(card);
+          if (choices.length > 0) {
+            ret.push({
+              card: card,
+              ability: card.archivesClickAbility,
+              label: "(" + GetTitle(card, true) + ") " + card.archivesClickAbility.text
+            });
+          }
+        }
+      }
+      return ret;
     },
     purge: function () {
       //the agenda point check is so purge isn't available for the tutorial decks
@@ -993,6 +1020,12 @@ phases.corpActionMain = {
         this
       );
     },
+    archivesTrigger: function (params) {
+      //Resolve the archives ability (e.g., Petty Cash from Archives)
+      SetHistoryThumbnail(params.card.imageFile, "Use");
+      params.ability.Resolve.call(params.card, params);
+      IncrementPhase();
+    },
     purge: function () {
       SetHistoryThumbnail("generic_red.png", "Purge");
       SpendClicks(corp, 3);
@@ -1011,6 +1044,7 @@ phases.corpActionMain = {
     advance: "[click], 1[c]: Advance a card",
     trash: "[click], 2[c]: Trash a resource",
     trigger: "Trigger a [click] ability",
+    archivesTrigger: "Play from Archives",
     purge: "[click],[click],[click]: Purge virus counters",
   },
 };
@@ -1027,6 +1061,15 @@ phases.corpPostAction = CreatePhaseFromTemplate(
   "Corp 2.2*",
   null
 );
+
+//Increment actions completed counter when entering post-action phase
+var corpPostActionOriginalInit = phases.corpPostAction.Init;
+phases.corpPostAction.Init = function() {
+  corp.actionsCompletedThisTurn = (corp.actionsCompletedThisTurn || 0) + 1;
+  if (typeof corpPostActionOriginalInit === 'function') {
+    corpPostActionOriginalInit.call(this);
+  }
+};
 
 // DRBO6 START - Add action phase ends trigger for corp (cards like Mercia B4LL4RD)
 // When corp runs out of clicks, trigger action phase ends callbacks before moving to discard

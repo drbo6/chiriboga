@@ -9,7 +9,8 @@ A single-player implementation of Android: Netrunner with AI opponents, a rogue-
 
 - 🤖 **AI Opponent** - Simple Corp AI that builds servers, advances agendas, and makes strategic decisions
 - 🎮 **Multiple Game Modes** - Quick Game, Custom Game, Gauntlet Mode, and Tutorial
-- 🎲 **Rogue-lite (Gauntlet)** - Face sequential opponents with a limited card pool, earn credits, and build your deck
+- 📚 **Precon support** - Preconstructed decks for beginners to try out
+- 🎲 **Rogue-lite** - Face sequential opponents with a limited card pool, earn credits, and build your deck
 
 ## Credits
 
@@ -65,9 +66,6 @@ The following Elevation cards are not yet implemented (17 cards):
 
 ## Weyland Consortium (1 card)
 - **35068** - BANGUN: When Disaster Strikes (Identity)
-
-## Neutral Corp (1 card)
-- **35081** - Petty Cash (Operation - Transaction)
 
 # Debugging and Testing Guide for Chiriboga
 
