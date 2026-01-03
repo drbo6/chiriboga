@@ -2105,6 +2105,9 @@ GetFactionIcon(cardSet[playerIdentities[i]].faction) + shortTitle +
 			<div id="dataentry">
 				<div class="leftrow toprow">
 					<select id="identityselect"></select>
+					<select id="preconselect">
+						<option value="-1">Load Precon Deck</option>
+					</select>
 					<img id="identity" src="images/glow_outline.png">
 					<div class="rightpart">
 						<div id="output">
@@ -2133,11 +2136,6 @@ GetFactionIcon(cardSet[playerIdentities[i]].faction) + shortTitle +
 					</div>
 					<div style="margin-top:8px;">
 						<button id="importdeckfromNRDB" class="button" type="button">Import Deck from NRDB</button>
-					</div>
-					<div style="margin-top:8px;">
-						<select id="preconselect" class="button" style="width:85%; display:block; margin:0 auto;">
-							<option value="-1">Load Precon Deck</option>
-						</select>
 					</div>
 					<div style="margin-top:8px;">
 						<button id="exportjs" class="button" type="button" style="width:85%; display:block; margin:0 auto;">Export JS Deck</button>
