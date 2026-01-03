@@ -1,77 +1,15 @@
 # Netrunner: Solo Mode
 
-A single-player implementation of Android: Netrunner with AI opponents and a refined cyberpunk interface. Built on the [Chiriboga engine](https://github.com/bobtheuberfish/chiriboga) by bobtheuberfish.
+A single-player implementation of Android: Netrunner with AI opponents, a rogue-lite gauntlet mode and a refined cyberpunk interface. Built on the [Chiriboga engine](https://github.com/bobtheuberfish/chiriboga) by bobtheuberfish.
 
 ![PHP](https://img.shields.io/badge/php-7.4%2B-blue)
 ![License](https://img.shields.io/badge/license-GPL--3.0-green)
 
 ## Features
 
-- 🤖 **AI Opponent** - Sophisticated Corp AI that builds servers, advances agendas, and makes strategic decisions
+- 🤖 **AI Opponent** - Simple Corp AI that builds servers, advances agendas, and makes strategic decisions
 - 🎮 **Multiple Game Modes** - Quick Game, Custom Game, Gauntlet Mode, and Tutorial
-- 🎨 **Cyberpunk Interface** - Retro terminal aesthetic with CRT effects and animations
-- 📦 **Card Support** - System Gateway, System Update 2021, Midnight Sun, and Elevation sets
-- 🏆 **Achievements System** - Track your progress and unlock rewards
-- 🔧 **Deck Builder** - Visual deck construction with card filters and sorting
-
-## Quick Start
-
-### Requirements
-- PHP 7.4 or higher (PHP 8.1+ recommended)
-- A web server (Apache/Nginx) or PHP's built-in server
-
-### Installation
-
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/yourusername/chiriboga.git
-   cd chiriboga
-   ```
-
-2. **Start the development server**
-   ```bash
-   php -S localhost:8000
-   ```
-
-3. **Open in browser**
-   ```
-   http://localhost:8000
-   ```
-
-### For Production (Apache/Nginx)
-
-1. Upload all files to your web server
-2. Ensure the `.htaccess` file is present (Apache users)
-3. Point your domain to the directory containing `index.php`
-4. Access via your domain URL
-
-**Note:** The included `.htaccess` provides security headers and optimizations. For Nginx, refer to the equivalent configuration in the comments.
-
-## Game Modes
-
-### Quick Game
-Jump straight into a match with pre-selected runner and corp decks.
-
-### Custom Game
-Choose your identity, build or import custom decks, and configure game settings.
-
-### Gauntlet Mode
-Face a series of increasingly difficult AI opponents with a limited card pool. Earn credits by winning to buy more card packs and improve your deck.
-
-### Tutorial
-Learn the basics of Netrunner through guided scenarios.
-
-## How to Play
-
-1. Select a game mode from the main menu
-2. Choose your Runner identity
-3. Build a deck or select a preconstructed deck
-4. Click "Launch Game" to start playing
-5. Use clicks to perform actions during your turn
-6. Make runs on Corp servers to steal agendas
-7. First to 7 agenda points wins!
-
-For complete rules, see the [Netrunner Comprehensive Rules](https://nullsignal.games/wp-content/uploads/2024/08/Null-Signal-Games-Netrunner-Comprehensive-Rules-v25.08.pdf).
+- 🎲 **Rogue-lite (Gauntlet)** - Face sequential opponents with a limited card pool, earn credits, and build your deck
 
 ## Credits
 
@@ -139,52 +77,9 @@ Once `enableDebugMenu = true`, a debug button appears in the UI. It provides the
 
 ## Creating a Test Board State
 
-The codebase provides two functions for setting up specific board states: `RunnerTestField()` and `CorpTestField()`. These are called in `decks.js` after the normal deck loading.
+The codebase provides two functions for setting up specific board states: `RunnerTestField()` and `CorpTestField()`. 
 
-### Card Numbers
-
-Cards are identified by their **set number** (a 5-digit integer). You'll need to look these up in your card set definition file. Examples from the codebase:
-
-- `31002` - A runner identity
-- `30032` - A runner card (in heap)
-- `31004` - A runner card (in stack)
-- `30035` - A corp identity
-- `30073`, `30072`, `30047` - Corp cards
-
-### RunnerTestField Parameters
-
-```javascript
-RunnerTestField(
-  identity,           // Set number for runner identity (e.g., 31002)
-  heapCards,          // Array of set numbers for cards in heap
-  stackCards,         // Array of set numbers for cards in stack
-  gripCards,          // Array of set numbers for cards in grip (hand)
-  installed,          // Array of set numbers for installed cards (auto-sorts by type)
-  stolen,             // Array of set numbers for stolen agendas
-  cardBackTexturesRunner,
-  glowTextures,
-  strengthTextures
-);
-```
-
-### CorpTestField Parameters
-
-```javascript
-CorpTestField(
-  identity,           // Set number for corp identity (e.g., 30035)
-  archivesCards,      // Array of set numbers for cards in Archives
-  rndCards,           // Array of set numbers for R&D (top card is last in array)
-  hqCards,            // Array of set numbers for HQ (hand)
-  archivesInstalled,  // Array of set numbers for ice/upgrades on Archives
-  rndInstalled,       // Array of set numbers for ice/upgrades on R&D
-  hqInstalled,        // Array of set numbers for ice/upgrades on HQ
-  remotes,            // Array of arrays - each inner array is a remote server
-  scored,             // Array of set numbers for scored agendas
-  cardBackTexturesCorp,
-  glowTextures,
-  strengthTextures
-);
-```
+**These are called in `decks.js` after the normal deck loading**. There is a condition set to false that you can set to true to enable it and see it in action. (Just start a game to see the board state that is present there.)
 
 ### Example: Setting Up a Test Scenario
 
@@ -541,23 +436,6 @@ runner.AI.preferred = {
 | `trace` | `strengthToIncrease` | Corp | Set trace strength |
 | (any) | `chooseServer` | Runner | Select a server (works in any phase) |
 | (any) | `nextPrefs` | Both | Chain another preference for sub-decisions |
-
-## Debugging Tips
-
-1. **Start simple**: Begin with `enableDebugMenu = true` and use the UI buttons before writing test field code.
-
-2. **Use ReproductionCode**: When you encounter a bug, immediately run `ReproductionCode(true)` in the console to capture the state before it changes.
-
-3. **Check the console**: Open browser dev tools (F12) to see AI reasoning and error messages.
-
-4. **Slow down AI**: Uncomment this line in `decks.js` to slow AI actions for observation:
-   ```javascript
-   mainLoopDelay = 50; // Default is faster; increase for debugging
-   ```
-
-5. **Test specific interactions**: Use `ChangePhase()` and `MakeRun()` to jump directly to the game state you want to test.
-
-6. **Watch for LogError**: The `LogError()` function outputs to `console.error()`. When `debugging = true`, these will pause execution.
 
 ## Quick Reference: Browser Console Commands
 
