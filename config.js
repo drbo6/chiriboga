@@ -24,7 +24,8 @@ var gauntletConfig = {
     agendaPointScored: -2,     // Credits per agenda point scored by corp (negative = loss)
     runSuccessful: 1,          // Credits for successful run - not implemented yet
     runEnded: -1,              // Credits deducted when run ends - not implemented yet
-    minimalCredits: 10         // Minimum credits player can have (prevents going negative)
+    minimalCredits: 10,         // Minimum credits player can have (prevents going negative)
+    bossBeaten: 10             // Additional credits for defeating a boss opponent
   },
 
   // ===== HACK OPPONENT SETTINGS =====
