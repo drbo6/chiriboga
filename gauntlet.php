@@ -2161,6 +2161,7 @@
 			UpdateCardCountsUI();
 			UpdateLaunchStrings();
 			UpdatePlayDeckButtonState();
+			UpdateHackOpponentsButtonState();
 			
 				try {
 					var currentIdSel = $('#identityselect').val();
@@ -3581,6 +3582,25 @@
 				$('#launch').prop('disabled', !isValid).attr('title', tooltipText);
 			}
 
+			function UpdateHackOpponentsButtonState() {
+				// Disable Hack Opponents button until at least one opponent has been defeated
+				var hasDefeatedOpponent = false;
+				if (gauntletOpponents && gauntletOpponents.length > 0) {
+					for (var i = 0; i < gauntletOpponents.length; i++) {
+						if (gauntletOpponents[i].hasbeendefeated === true) {
+							hasDefeatedOpponent = true;
+							break;
+						}
+					}
+				}
+				
+				if (hasDefeatedOpponent) {
+					$('#hackopponents').prop('disabled', false).attr('title', '');
+				} else {
+					$('#hackopponents').prop('disabled', true).attr('title', 'Defeat at least one opponent first');
+				}
+			}
+
 			var mouseDownCallback = function (ev) {
 			  if (ev.which == 3) {
 				//right
@@ -4368,7 +4388,7 @@
 				<button id="launch" class="button button-red" onclick="if(!$(this).prop('disabled')) ShowSelectOpponentModal();">PLAY<br>DECK</button>
 				<button id="exittomenu" onclick="window.location.href='index.php';" class="button">BACK TO<br>MENU</button>
 				<button id="buycards" onclick="ShowBuyCardsModal();" class="button">BUY/SELL<br>CARDS</button>
-				<button id="hackopponents" onclick="ShowHackOpponentsModal();" class="button">HACK<br>OPPONENTS</button>
+				<button id="hackopponents" onclick="ShowHackOpponentsModal();" class="button button-green">HACK<br>OPPONENTS</button>
 				<button id="addnoninfluence" onclick="AddNonInfluence();" class="button">ADD IN-<br>FACTION</button>
 				<button id="cleardeck" onclick="ClearDeck();" class="button">CLEAR<br>DECK</button>
 				<button id="sortbydeck" onclick="CycleSort();" class="button">SORT BY:<br>NAME</button>
