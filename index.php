@@ -7,6 +7,94 @@
   <link href="images/favicon.ico" rel="icon">
   <link rel="manifest" href="manifest.json">
   <link rel="stylesheet" href="style.css?<?php echo filemtime('style.css'); ?>" />
+  <style>
+    /* Achievements Panel Styles */
+    .achievements-panel {
+      display: none;
+      flex-direction: column;
+      gap: 8px;
+      overflow: hidden;
+    }
+    .achievements-header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--crt-green-dim);
+    }
+    .achievements-title {
+      font-size: 1.2rem;
+      color: var(--crt-green);
+      text-shadow: 0 0 10px var(--crt-green);
+    }
+    .achievements-back {
+      background: transparent;
+      border: 1px solid var(--crt-green-dim);
+      color: var(--crt-green-muted);
+      padding: 4px 12px;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 0.85rem;
+      transition: all 0.2s;
+    }
+    .achievements-back:hover {
+      color: var(--crt-green);
+      border-color: var(--crt-green);
+      text-shadow: 0 0 5px var(--crt-green);
+    }
+    .achievements-content {
+      overflow-y: auto;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .achievements-section-header {
+      font-size: 0.85rem;
+      color: var(--crt-green-muted);
+      padding: 8px 0 4px;
+      border-bottom: 1px dashed var(--crt-green-dim);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    
+    /* Achievements List */
+    .achievements-list {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .achievement-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px;
+      background: rgba(51, 255, 51, 0.05);
+      border: 1px solid var(--crt-green-dim);
+      cursor: help;
+      transition: all 0.2s;
+    }
+    .achievement-row:hover {
+      background: rgba(51, 255, 51, 0.1);
+      border-color: var(--crt-green);
+    }
+    .achievement-incomplete {
+      opacity: 0.4;
+      filter: grayscale(0.5);
+    }
+    .achievement-incomplete:hover {
+      opacity: 0.6;
+    }
+    .achievement-name {
+      font-size: 0.9rem;
+      color: var(--crt-green);
+    }
+    .achievement-date {
+      font-size: 0.85rem;
+      color: var(--crt-green-muted);
+      font-family: monospace;
+    }
+  </style>
   <?php include 'cardrenderer/webfont.php'; ?>
   <script src="deck/lz-string.min.js?<?php echo filemtime('deck/lz-string.min.js'); ?>"></script>
   <script src="deck/seedrandom.min.js?<?php echo filemtime('deck/seedrandom.min.js'); ?>"></script>
@@ -253,6 +341,23 @@
               </div>
             </div>
 
+            <div class="achievements-panel" id="achievements-panel" style="display:none;">
+              <div class="achievements-header-row">
+                <div class="achievements-title">ACHIEVEMENTS</div>
+                <button class="achievements-back" onclick="closeAchievements()">BACK</button>
+              </div>
+              <div class="achievements-content">
+                <div class="achievements-section-header">HIGH SCORES</div>
+                <div class="high-scores-list" id="high-scores-list">
+                  <!-- Populated by JavaScript -->
+                </div>
+                <div class="achievements-section-header">ACHIEVEMENTS</div>
+                <div class="achievements-list" id="achievements-list">
+                  <!-- Populated by JavaScript -->
+                </div>
+              </div>
+            </div>
+
             <!-- Data management modal -->
             <div class="data-modal" id="data-modal" style="display:none;">
               <div class="data-modal-content">
@@ -333,6 +438,190 @@
       allowedSets: null,
       preconOverrides: {}  // Maps precon name to boolean override for useForGauntlet
     };
+    
+    // ========================================
+    // ACHIEVEMENTS SYSTEM
+    // ========================================
+    var ACHIEVEMENTS_STORAGE_KEY = 'chiriboga-achievements';
+    
+    // Default achievements definition
+    var defaultAchievements = [
+      {
+        id: 'getHighScore',
+        name: 'High Scorer',
+        description: 'Record a High Score.',
+        achieved: false,
+        achievedAt: null,
+        hidden: false
+      },
+      {
+        id: 'beat4gauntlet',
+        name: 'Complete a short Gauntlet',
+        description: 'Survive a Gauntlet of 4 opponents.',
+        achieved: false,
+        achievedAt: null,
+        hidden: false
+      },
+      {
+        id: 'beat8gauntlet',
+        name: 'Complete a regular Gauntlet',
+        description: 'Survive a Gauntlet of 8 opponents.',
+        achieved: false,
+        achievedAt: null,
+        hidden: false
+      },
+      {
+        id: 'beat12gauntlet',
+        name: 'Complete a long Gauntlet',
+        description: 'Survive a Gauntlet of 12 opponents.',
+        achieved: false,
+        achievedAt: null,
+        hidden: false
+      }
+    ];
+    
+    // Default high scores structure (top 3)
+    var defaultHighScores = [
+      { score: 0, timestamp: null, identity: null },
+      { score: 0, timestamp: null, identity: null },
+      { score: 0, timestamp: null, identity: null }
+    ];
+    
+    // Initialize achievements in localStorage if not present
+    function initializeAchievements() {
+      try {
+        var existing = localStorage.getItem(ACHIEVEMENTS_STORAGE_KEY);
+        if (!existing) {
+          // Create default achievements structure
+          var achievementsData = {
+            highScores: JSON.parse(JSON.stringify(defaultHighScores)),
+            achievements: JSON.parse(JSON.stringify(defaultAchievements))
+          };
+          localStorage.setItem(ACHIEVEMENTS_STORAGE_KEY, JSON.stringify(achievementsData));
+          return achievementsData;
+        } else {
+          // Parse existing data and merge any new achievements
+          var data = JSON.parse(existing);
+          
+          if (!Array.isArray(data.highScores)) {
+            data.highScores = JSON.parse(JSON.stringify(defaultHighScores));
+          } else if (data.highScores.length > 3) {
+            // Trim to top 3 if somehow more were added
+            data.highScores.sort(function(a, b) {
+              if (b.score !== a.score) return b.score - a.score;
+              return new Date(b.timestamp) - new Date(a.timestamp);
+            });
+            data.highScores = data.highScores.slice(0, 3);
+          }
+          
+          if (!Array.isArray(data.achievements)) {
+            data.achievements = [];
+          }
+          
+          // Merge in any new achievements that don't exist yet
+          var existingIds = {};
+          for (var i = 0; i < data.achievements.length; i++) {
+            existingIds[data.achievements[i].id] = true;
+          }
+          for (var j = 0; j < defaultAchievements.length; j++) {
+            if (!existingIds[defaultAchievements[j].id]) {
+              data.achievements.push(JSON.parse(JSON.stringify(defaultAchievements[j])));
+            }
+          }
+          
+          // Save back with any new achievements added
+          localStorage.setItem(ACHIEVEMENTS_STORAGE_KEY, JSON.stringify(data));
+          return data;
+        }
+      } catch (e) {
+        console.error('Error initializing achievements:', e);
+        return { highScores: JSON.parse(JSON.stringify(defaultHighScores)), achievements: JSON.parse(JSON.stringify(defaultAchievements)) };
+      }
+    }
+    
+    // Get achievements data
+    function getAchievements() {
+      try {
+        var data = localStorage.getItem(ACHIEVEMENTS_STORAGE_KEY);
+        if (data) {
+          return JSON.parse(data);
+        }
+      } catch (e) {
+        console.error('Error reading achievements:', e);
+      }
+      return initializeAchievements();
+    }
+    
+    // Update high scores if new score qualifies for top 3
+    function updateHighScore(score, identity) {
+      try {
+        var data = getAchievements();
+        var dominated = data.highScores[2].score;
+        
+        if (score > dominated) {
+          // Add new score and sort
+          data.highScores.push({
+            score: score,
+            timestamp: new Date().toISOString(),
+            identity: identity
+          });
+          data.highScores.sort(function(a, b) { return b.score - a.score; });
+          data.highScores = data.highScores.slice(0, 3);
+          localStorage.setItem(ACHIEVEMENTS_STORAGE_KEY, JSON.stringify(data));
+          return true;
+        }
+        return false;
+      } catch (e) {
+        console.error('Error updating high score:', e);
+        return false;
+      }
+    }
+    
+    // Unlock an achievement by id
+    function unlockAchievement(achievementId) {
+      try {
+        var data = getAchievements();
+        for (var i = 0; i < data.achievements.length; i++) {
+          if (data.achievements[i].id === achievementId && !data.achievements[i].achieved) {
+            data.achievements[i].achieved = true;
+            data.achievements[i].achievedAt = new Date().toISOString();
+            localStorage.setItem(ACHIEVEMENTS_STORAGE_KEY, JSON.stringify(data));
+            return data.achievements[i];
+          }
+        }
+        return null;
+      } catch (e) {
+        console.error('Error unlocking achievement:', e);
+        return null;
+      }
+    }
+    
+    // Calculate achievement completion percentage
+    function getAchievementPercentage() {
+      var data = getAchievements();
+      if (!data.achievements || data.achievements.length === 0) return 0;
+      
+      var achieved = 0;
+      for (var i = 0; i < data.achievements.length; i++) {
+        if (data.achievements[i].achieved) {
+          achieved++;
+        }
+      }
+      return Math.round((achieved / data.achievements.length) * 100);
+    }
+    
+    // Update the achievement percentage display in the menu
+    function updateAchievementDisplay() {
+      var percent = getAchievementPercentage();
+      var displays = document.querySelectorAll('.achievement-percent');
+      for (var i = 0; i < displays.length; i++) {
+        displays[i].textContent = '[' + percent + '%]';
+      }
+    }
+    
+    // ========================================
+    // END ACHIEVEMENTS SYSTEM
+    // ========================================
     
     // Hidden sets reveal tracking
     var hiddenSetsRevealed = false;
@@ -1164,6 +1453,10 @@
 
       // Initialize settings from config
       initializeSettings();
+      
+      // Initialize achievements and update display
+      initializeAchievements();
+      updateAchievementDisplay();
 
       // Lock menu layout dimensions so panel swaps do not shift the UI
       lockMenuLayoutDimensions();
@@ -1173,6 +1466,9 @@
     });
     
     function handleMenu(option, evt) {
+      // Initialize achievements if not already present
+      initializeAchievements();
+      
       // Register implementation so early queued clicks can be flushed
       try { window.handleMenuImpl = handleMenu; } catch(e) {}
       try { if (window._flushQueuedMenuClicks) window._flushQueuedMenuClicks(); } catch(e) {}
@@ -1209,6 +1505,12 @@
       // Handle settings
       if (option === 'settings') {
         openSettings();
+        return;
+      }
+      
+      // Handle achievements
+      if (option === 'achievements') {
+        openAchievements();
         return;
       }
       
@@ -1441,6 +1743,148 @@
       var p = document.getElementById('settings-panel');
       p.style.width='';
       p.style.maxHeight='';
+    }
+
+    // Achievements panel toggle
+    function openAchievements(){
+      var menu = document.getElementById('menu-buttons');
+      var panel = document.getElementById('achievements-panel');
+      // If already open, act like back button
+      if (menu.style.display === 'none' && panel.style.display === 'flex') {
+        closeAchievements();
+        return;
+      }
+      // Capture current width of menu buttons before hiding
+      var rect = menu.getBoundingClientRect();
+      var w = rect.width;
+      var h = rect.height;
+      menu.style.display='none';
+      panel.style.width = w + 'px';
+      panel.style.maxHeight = h + 'px';
+      panel.style.display='flex';
+      // Populate the achievements panel
+      populateAchievementsPanel();
+    }
+    
+    function closeAchievements(){
+      document.getElementById('achievements-panel').style.display='none';
+      document.getElementById('menu-buttons').style.display='flex';
+      // Clear explicit width so menu layout can adapt on resize
+      var p = document.getElementById('achievements-panel');
+      p.style.width='';
+      p.style.maxHeight='';
+    }
+    
+    // Format timestamp to yy|mm|dd format
+    function formatAchievementDate(timestamp) {
+      if (!timestamp) return '';
+      var date = new Date(timestamp);
+      var yy = String(date.getFullYear()).slice(-2);
+      var mm = String(date.getMonth() + 1).padStart(2, '0');
+      var dd = String(date.getDate()).padStart(2, '0');
+      return yy + '|' + mm + '|' + dd;
+    }
+    
+    // Get card image path from identity ID
+    function getIdentityImagePath(identityId) {
+      if (!identityId || !cardSet[identityId]) return '';
+      var identity = cardSet[identityId];
+      if (identity && identity.imageFile) {
+        return 'images/' + identity.imageFile.replace('.png', '.jpg');
+      }
+      return '';
+    }
+    
+    // Populate the achievements panel with high scores and achievements
+    function populateAchievementsPanel() {
+      var data = getAchievements();
+      
+      // Populate high scores (sorted descending by score)
+      var highScoresList = document.getElementById('high-scores-list');
+      highScoresList.innerHTML = '';
+      
+      // Sort high scores by score descending, then by timestamp descending for ties (latest first)
+      var sortedScores = data.highScores.slice().sort(function(a, b) {
+        if (b.score !== a.score) return b.score - a.score;
+        // For ties, latest timestamp first (descending)
+        return new Date(b.timestamp) - new Date(a.timestamp);
+      });
+      
+      // Check if there are any valid scores
+      var hasValidScores = sortedScores.some(function(hs) { return hs.score > 0; });
+      
+      if (!hasValidScores) {
+        var emptyRow = document.createElement('div');
+        emptyRow.className = 'high-score-row high-score-empty';
+        emptyRow.textContent = 'No high scores yet. Complete a Gauntlet!';
+        highScoresList.appendChild(emptyRow);
+      } else {
+        var displayCount = 0;
+        for (var i = 0; i < sortedScores.length && displayCount < 3; i++) {
+          var hs = sortedScores[i];
+          if (hs.score <= 0) continue; // Skip empty scores
+          displayCount++;
+          
+          var row = document.createElement('div');
+          row.className = 'high-score-row';
+          
+          // Identity thumbnail
+          var thumb = document.createElement('div');
+          thumb.className = 'high-score-thumb';
+          if (hs.identity) {
+            var imgPath = getIdentityImagePath(hs.identity);
+            if (imgPath) {
+              var img = document.createElement('img');
+              img.src = imgPath;
+              img.alt = '';
+              thumb.appendChild(img);
+            }
+          }
+          row.appendChild(thumb);
+          
+          // Score
+          var scoreEl = document.createElement('div');
+          scoreEl.className = 'high-score-score';
+          scoreEl.textContent = hs.score;
+          row.appendChild(scoreEl);
+          
+          // Date
+          var dateEl = document.createElement('div');
+          dateEl.className = 'high-score-date';
+          dateEl.textContent = formatAchievementDate(hs.timestamp);
+          row.appendChild(dateEl);
+          
+          highScoresList.appendChild(row);
+        }
+      }
+      
+      // Populate achievements
+      var achievementsList = document.getElementById('achievements-list');
+      achievementsList.innerHTML = '';
+      
+      for (var i = 0; i < data.achievements.length; i++) {
+        var achievement = data.achievements[i];
+        
+        var row = document.createElement('div');
+        row.className = 'achievement-row' + (achievement.achieved ? '' : ' achievement-incomplete');
+        row.title = achievement.description;
+        
+        // Achievement name
+        var nameEl = document.createElement('div');
+        nameEl.className = 'achievement-name';
+        nameEl.textContent = achievement.name;
+        row.appendChild(nameEl);
+        
+        // Achievement date (only if achieved)
+        var dateEl = document.createElement('div');
+        dateEl.className = 'achievement-date';
+        if (achievement.achieved && achievement.achievedAt) {
+          dateEl.textContent = formatAchievementDate(achievement.achievedAt);
+        }
+        row.appendChild(dateEl);
+        
+        achievementsList.appendChild(row);
+      }
     }
 
     // Data modal helper functions
@@ -1707,6 +2151,9 @@
     
     // Handle Continue button click
     function handleGauntletContinue(evt) {
+      // Initialize achievements if not already present
+      initializeAchievements();
+      
       var continueBtn = document.getElementById('gauntlet-continue-btn');
       if (!hasGauntletSave() || continueBtn.classList.contains('disabled')) {
         return false;
@@ -1730,6 +2177,9 @@
     }
     
     function handleGauntletNew(evt) {
+      // Initialize achievements if not already present
+      initializeAchievements();
+      
       // Check if there are enough gauntlet precons before launching
       var gauntletCorpDecks = preconDecks.filter(function(d) {
         if (!isPreconEnabledForGauntlet(d)) return false;
@@ -1784,6 +2234,9 @@
     });
     
     function startTutorial(mentorIndex) {
+      // Initialize achievements if not already present
+      initializeAchievements();
+      
       var tutorials = [
         { side: 'r', mentor: 0 },
         { side: 'r', mentor: 1 },

@@ -67,6 +67,110 @@ function ChangeImageFileToJPG(name) {
   return name;
 }
 
+// ========================================
+// ACHIEVEMENTS HELPER FUNCTIONS
+// ========================================
+var ACHIEVEMENTS_STORAGE_KEY = 'chiriboga-achievements';
+
+// Get achievements data from localStorage
+function getAchievementsData() {
+  try {
+    var data = localStorage.getItem(ACHIEVEMENTS_STORAGE_KEY);
+    if (data) {
+      return JSON.parse(data);
+    }
+  } catch (e) {
+    console.error('Error reading achievements:', e);
+  }
+  return null;
+}
+
+// Update high score if new score qualifies for top 3
+function updateHighScore(score, identity) {
+  try {
+    var data = getAchievementsData();
+    if (!data || !Array.isArray(data.highScores)) {
+      console.warn('Achievements data not initialized');
+      return false;
+    }
+    
+    var dominated = data.highScores[2].score;
+    
+    if (score > dominated) {
+      data.highScores.push({
+        score: score,
+        timestamp: new Date().toISOString(),
+        identity: identity
+      });
+      data.highScores.sort(function(a, b) {
+        if (b.score !== a.score) return b.score - a.score;
+        // For ties, latest timestamp first (descending)
+        return new Date(b.timestamp) - new Date(a.timestamp);
+      });
+      data.highScores = data.highScores.slice(0, 3);
+      localStorage.setItem(ACHIEVEMENTS_STORAGE_KEY, JSON.stringify(data));
+      console.log('New high score recorded: ' + score);
+      
+      // Unlock the high score achievement
+      unlockAchievement('getHighScore');
+      
+      return true;
+    }
+    return false;
+  } catch (e) {
+    console.error('Error updating high score:', e);
+    return false;
+  }
+}
+
+// Unlock an achievement by id
+function unlockAchievement(achievementId) {
+  try {
+    var data = getAchievementsData();
+    if (!data || !Array.isArray(data.achievements)) {
+      console.warn('Achievements data not initialized');
+      return null;
+    }
+    
+    for (var i = 0; i < data.achievements.length; i++) {
+      if (data.achievements[i].id === achievementId && !data.achievements[i].achieved) {
+        data.achievements[i].achieved = true;
+        data.achievements[i].achievedAt = new Date().toISOString();
+        localStorage.setItem(ACHIEVEMENTS_STORAGE_KEY, JSON.stringify(data));
+        console.log('Achievement unlocked: ' + achievementId);
+        return data.achievements[i];
+      }
+    }
+    return null;
+  } catch (e) {
+    console.error('Error unlocking achievement:', e);
+    return null;
+  }
+}
+
+// Update achievements based on gauntlet completion
+function updateGauntletAchievements(score, identity, gauntletLength, isComplete) {
+  // Update high score
+  updateHighScore(score, identity);
+  
+  // Unlock gauntlet completion achievements only if completed
+  if (isComplete) {
+    if (gauntletLength >= 4) {
+      unlockAchievement('beat4gauntlet');
+    }
+    if (gauntletLength >= 8) {
+      unlockAchievement('beat8gauntlet');
+    }
+    if (gauntletLength >= 12) {
+      unlockAchievement('beat12gauntlet');
+    }
+  }
+}
+
+// ========================================
+// END ACHIEVEMENTS HELPER FUNCTIONS
+// ========================================
+
 // Functions used to save card locations
 // currently only handles a few specific locations
 function ServerAddress(server) {
@@ -1013,6 +1117,11 @@ function ShowGauntletRecap(gauntletState) {
   console.log("rawScore: " + agendaStolen + " - " + agendaScored + " + " + creditBonus + " = " + rawScore);
   console.log("FINAL SCORE: " + score);
   
+  // Update achievements and high scores
+  var gauntletLength = gauntletState.opponents ? gauntletState.opponents.length : 0;
+  var runnerIdentity = gauntletState.runnerIdentity || null;
+  updateGauntletAchievements(score, runnerIdentity, gauntletLength, true);
+  
   // Helper function to get perk name
   function getPerkName(perkNum) {
     // Perks 7-12 are disabled versions of perks 1-6
@@ -1179,6 +1288,11 @@ function ShowGauntletLostModal(gauntletState) {
   console.log("creditBonus: round(" + totalCredits + " / " + creditScoreDivisor + ") = " + creditBonus);
   console.log("rawScore: " + totalAgendaStolen + " - " + totalAgendaScored + " + " + creditBonus + " = " + rawScore);
   console.log("FINAL SCORE: " + score);
+  
+  // Update high scores (but not achievements since gauntlet was not completed)
+  var runnerIdentity = gauntletState.runnerIdentity || null;
+  var gauntletLength = gauntletState.opponents ? gauntletState.opponents.length : 0;
+  updateGauntletAchievements(score, runnerIdentity, gauntletLength, false);
   
   // Helper function to get perk name
   function getPerkName(perkNum) {
@@ -1357,6 +1471,11 @@ function PlayerWin(player, msgstr) {
           // Parse the gauntlet state
           var gauntletState = JSON.parse(LZString.decompressFromEncodedURIComponent(gauntletParam));
           
+          // Store the runner identity in the gauntlet state for high score tracking
+          if (runner && runner.identityCard && runner.identityCard.setNumber) {
+            gauntletState.runnerIdentity = runner.identityCard.setNumber;
+          }
+          
           // Mark the current opponent as defeated
           var currentOpponentIndex = gauntletState.currentOpponentIndex;
           if (typeof currentOpponentIndex === 'number' && gauntletState.opponents && gauntletState.opponents[currentOpponentIndex]) {
@@ -1512,6 +1631,11 @@ function PlayerWin(player, msgstr) {
         try {
           // Parse the gauntlet state
           var gauntletState = JSON.parse(LZString.decompressFromEncodedURIComponent(gauntletParam));
+          
+          // Store the runner identity in the gauntlet state for high score tracking
+          if (runner && runner.identityCard && runner.identityCard.setNumber) {
+            gauntletState.runnerIdentity = runner.identityCard.setNumber;
+          }
           
           // Show the GAUNTLET LOST modal (similar to GAUNTLET COMPLETE)
           ShowGauntletLostModal(gauntletState);
