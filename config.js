@@ -23,7 +23,7 @@ var gauntletConfig = {
     agendaPointStolen: 3,      // Credits per agenda point stolen from corp
     agendaPointScored: -2,     // Credits per agenda point scored by corp (negative = loss)
     minimalCredits: 10,         // Minimum credits player can have (prevents going negative)
-    bossBeaten: 10             // Additional credits for defeating a boss opponent
+    bossBeaten: 15             // Additional credits for defeating a boss opponent
   },
 
   // ===== HACK OPPONENT SETTINGS =====

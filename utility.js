@@ -1169,7 +1169,7 @@ function PlayerWin(player, msgstr) {
           gauntletState.agendaScored = (gauntletState.agendaScored || 0) + AgendaPoints(corp);
           
           // Calculate creditsWon for this match
-          // Formula: victory + (agendaPointStolen * runnerAgendaPoints) + (agendaPointScored * corpAgendaPoints)
+          // Formula: victory + (agendaPointStolen * runnerAgendaPoints) + (agendaPointScored * corpAgendaPoints) + bossBeaten (if applicable)
           // Note: agendaPointScored is typically negative, so we add it (not subtract)
           if (typeof gauntletConfig !== 'undefined' && gauntletConfig && gauntletConfig.matchRewards) {
             try {
@@ -1177,16 +1177,26 @@ function PlayerWin(player, msgstr) {
               var victory = (typeof rewards.victory !== 'undefined') ? rewards.victory : 5;
               var agendaPointStolen = (typeof rewards.agendaPointStolen !== 'undefined') ? rewards.agendaPointStolen : 0;
               var agendaPointScored = (typeof rewards.agendaPointScored !== 'undefined') ? rewards.agendaPointScored : 0;
+              var bossBeatenReward = (typeof rewards.bossBeaten !== 'undefined') ? rewards.bossBeaten : 0;
               var minimalCredits = (typeof rewards.minimalCredits !== 'undefined') ? rewards.minimalCredits : 0;
               
               var runnerPoints = AgendaPoints(runner);
               var corpPoints = AgendaPoints(corp);
+              
+              // Check if this was a boss opponent (4th, 8th, 12th - i.e. index 3, 7, 11)
+              var opponentNumber = (typeof currentOpponentIndex === 'number') ? currentOpponentIndex + 1 : 0;
+              var isBossOpponent = (opponentNumber > 0 && opponentNumber % 4 === 0);
               
               // Build the creditsWonText breakdown
               var breakdownLines = [];
               
               // Victory bonus
               breakdownLines.push({ label: "Victory", value: victory });
+              
+              // Boss beaten bonus
+              if (isBossOpponent && bossBeatenReward > 0) {
+                breakdownLines.push({ label: "Boss Defeated", value: bossBeatenReward });
+              }
               
               // Stolen agendas (runner's score area)
               if (runner.scoreArea && runner.scoreArea.length > 0) {
@@ -1209,7 +1219,8 @@ function PlayerWin(player, msgstr) {
               // Calculate total credits for this match
               var creditsThisMatch = victory 
                 + (agendaPointStolen * runnerPoints) 
-                + (agendaPointScored * corpPoints);
+                + (agendaPointScored * corpPoints)
+                + (isBossOpponent ? bossBeatenReward : 0);
               
               // Check if minimalCredits floor applies
               var floorApplied = false;
@@ -1232,7 +1243,7 @@ function PlayerWin(player, msgstr) {
               
               gauntletState.creditsWonText = textLines.join("\n");
               gauntletState.creditsWon = (gauntletState.creditsWon || 0) + creditsThisMatch;
-              console.log("Credits won this match: " + creditsThisMatch + " (victory:" + victory + " agenda:" + (agendaPointStolen * runnerPoints) + "/" + (agendaPointScored * corpPoints) + " total: " + gauntletState.creditsWon + ")");
+              console.log("Credits won this match: " + creditsThisMatch + " (victory:" + victory + " boss:" + (isBossOpponent ? bossBeatenReward : 0) + " agenda:" + (agendaPointStolen * runnerPoints) + "/" + (agendaPointScored * corpPoints) + " total: " + gauntletState.creditsWon + ")");
             } catch (rewardError) {
               console.error("Error calculating credits won:", rewardError);
               // Just use victory as default if calculation fails
