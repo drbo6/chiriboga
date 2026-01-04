@@ -1221,6 +1221,16 @@
 				var sellStyle = hasCards ? 'width: 100%;' : 'width: 100%; opacity: 0.6; border-color: var(--border-red-dark); color: var(--crt-red-muted); cursor: default; background-color: rgba(12,24,12,0.7) !important; pointer-events: none;';
 				newButtonsHtml += '<button class="button" onclick="SellExtraCards();"' + sellDisabled + ' style="' + sellStyle + '">SELL ALL EXTRA CARDS</button>';
 				
+				// UNLOCK IDENTITY button - disable if identity is already unlocked or can't afford
+				var unlockCost = (gauntletConfig.shop && gauntletConfig.shop.unlockIdentityCost) || 15;
+				var isIdentityLocked = $('#identityselect').prop('disabled');
+				var canAffordUnlock = gauntletCredits >= unlockCost;
+				var unlockAvailable = isIdentityLocked && canAffordUnlock;
+				var unlockDisabled = unlockAvailable ? '' : ' disabled';
+				var unlockStyle = unlockAvailable ? 'width: 100%;' : 'width: 100%; opacity: 0.6; border-color: var(--border-red-dark); color: var(--crt-red-muted); cursor: default; background-color: rgba(12,24,12,0.7) !important; pointer-events: none;';
+				var unlockIconFilter = unlockAvailable ? 'invert(1) brightness(0.5) sepia(1) saturate(5) hue-rotate(80deg)' : 'brightness(0) saturate(100%) invert(0.6) sepia(80%) hue-rotate(8deg) saturate(0.7)';
+				newButtonsHtml += '<button class="button" onclick="UnlockIdentity();"' + unlockDisabled + ' style="' + unlockStyle + '">UNLOCK IDENTITY: ' + unlockCost + '<img src="images/nsg/NSG_CREDIT.svg" class="card-icon" alt="credit" style="margin-left: 2px; margin-bottom: 2px; height: 16px; display: inline-block; vertical-align: sub; filter: ' + unlockIconFilter + ';"></button>';
+				
 				newButtonsHtml += '<button class="button" onclick="CloseBuyCardsModal();" style="width: 100%;">CLOSE</button>';
 				
 				buttonsDiv.innerHTML = newButtonsHtml;
@@ -1260,6 +1270,16 @@
 				var sellDisabled = hasCards ? '' : ' disabled';
 				var sellStyle = hasCards ? 'width: 100%;' : 'width: 100%; opacity: 0.6; border-color: var(--border-red-dark); color: var(--crt-red-muted); cursor: default; background-color: rgba(12,24,12,0.7) !important; pointer-events: none;';
 				buycardsHtml += '<button class="button" onclick="SellExtraCards();"' + sellDisabled + ' style="' + sellStyle + '">SELL ALL EXTRA CARDS</button>';
+				
+				// UNLOCK IDENTITY button - disable if identity is already unlocked or can't afford
+				var unlockCost = (gauntletConfig.shop && gauntletConfig.shop.unlockIdentityCost) || 15;
+				var isIdentityLocked = $('#identityselect').prop('disabled');
+				var canAffordUnlock = gauntletCredits >= unlockCost;
+				var unlockAvailable = isIdentityLocked && canAffordUnlock;
+				var unlockDisabled = unlockAvailable ? '' : ' disabled';
+				var unlockStyle = unlockAvailable ? 'width: 100%;' : 'width: 100%; opacity: 0.6; border-color: var(--border-red-dark); color: var(--crt-red-muted); cursor: default; background-color: rgba(12,24,12,0.7) !important; pointer-events: none;';
+				var unlockIconFilter = unlockAvailable ? 'invert(1) brightness(0.5) sepia(1) saturate(5) hue-rotate(80deg)' : 'brightness(0) saturate(100%) invert(0.6) sepia(80%) hue-rotate(8deg) saturate(0.7)';
+				buycardsHtml += '<button class="button" onclick="UnlockIdentity();"' + unlockDisabled + ' style="' + unlockStyle + '">UNLOCK IDENTITY: ' + unlockCost + '<img src="images/nsg/NSG_CREDIT.svg" class="card-icon" alt="credit" style="margin-left: 2px; margin-bottom: 2px; height: 16px; display: inline-block; vertical-align: sub; filter: ' + unlockIconFilter + ';"></button>';
 				
 				buycardsHtml += '<button class="button" onclick="CloseBuyCardsModal();" style="width: 100%;">CLOSE</button>';
 				buycardsHtml += '</div>';
@@ -1384,6 +1404,39 @@
 				// Reapply current sort and filters
 				SortCardsBySort();
 				ApplyFilters();
+			}
+
+			// Function to unlock identity selection
+			function UnlockIdentity() {
+				var unlockCost = (gauntletConfig.shop && gauntletConfig.shop.unlockIdentityCost) || 15;
+				
+				// Check if identity is already unlocked
+				if (!$('#identityselect').prop('disabled')) {
+					return; // Already unlocked
+				}
+				
+				// Check if player can afford it
+				if (gauntletCredits < unlockCost) {
+					return; // Can't afford
+				}
+				
+				// Deduct credits
+				gauntletCredits -= unlockCost;
+				
+				// Unlock the identity dropdown
+				$('#identityselect').prop('disabled', false).prop('title', '');
+				
+				// Update the credits display in the modal
+				var shopCreditsEl = document.getElementById('shop-credits');
+				if (shopCreditsEl) {
+					shopCreditsEl.innerHTML = gauntletCredits;
+				}
+				
+				// Update the UI
+				Parse(); // Update deck stats including credits display
+				
+				// Refresh shop buttons to update button states
+				RefreshShopPackButtons();
 			}
 
 			// Global variables for shop

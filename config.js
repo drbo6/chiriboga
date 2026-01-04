@@ -13,7 +13,7 @@ var gauntletConfig = {
 
   // ===== STARTING CREDITS =====
   // Number of credits the player starts with in gauntlet mode
-  startingCredits: 30,
+  startingCredits: 30000,
 
   // ===== MATCH REWARDS =====
   // Credits awarded or deducted based on game outcomes
@@ -52,7 +52,8 @@ var gauntletConfig = {
   // ===== SHOP SETTINGS =====
   // Configuration for the card shop
   shop: {
-    rerollPacksCost: 5          // Cost to re-roll the available packs
+    rerollPacksCost: 5,         // Cost to re-roll the available packs
+    unlockIdentityCost: 50      // Cost to unlock identity selection after first win
   },
 
   // ===== ALTERNATE FACTIONS =====
