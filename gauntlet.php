@@ -178,6 +178,26 @@
 			var gauntletOpponents = []; // Array of opponent data from gauntlet state
 			var shopDisplayCardIds = []; // Cards currently displayed in shop modal for lightbox cycling
 			
+			// Function to save gauntlet state to localStorage for Continue feature
+			function SaveGauntletToLocalStorage() {
+				try {
+					var rParam = URIParameter("r");
+					var gParam = URIParameter("g");
+					
+					if (gParam && gParam !== "") {
+						var gauntletSaveData = {
+							r: rParam,
+							g: gParam,
+							timestamp: Date.now()
+						};
+						localStorage.setItem('chiriboga-gauntlet-save', JSON.stringify(gauntletSaveData));
+						console.log("Gauntlet state saved to localStorage");
+					}
+				} catch (e) {
+					console.error("Failed to save gauntlet to localStorage:", e);
+				}
+			}
+			
 			// Function to register a precon deck
 			function registerPrecon(deck) {
 				preconDecks.push(deck);
@@ -531,6 +551,19 @@
 				var launchAddress = "engine.php?p=r&c=" + oppCompressed + "&r=" + playerCompressed;
 				if (updatedGauntletParam !== "") {
 					launchAddress += "&g=" + updatedGauntletParam;
+				}
+				
+				// Save gauntlet state to localStorage before launching
+				try {
+					var gauntletSaveData = {
+						r: playerCompressed,
+						g: updatedGauntletParam,
+						timestamp: Date.now()
+					};
+					localStorage.setItem('chiriboga-gauntlet-save', JSON.stringify(gauntletSaveData));
+					console.log("Gauntlet state saved to localStorage before launch");
+				} catch (e) {
+					console.error("Failed to save gauntlet to localStorage:", e);
 				}
 				
 				// Close modal and navigate
@@ -2211,6 +2244,9 @@
 			UpdateLaunchStrings();
 			UpdatePlayDeckButtonState();
 			UpdateHackOpponentsButtonState();
+			
+			// Save gauntlet state to localStorage for Continue feature
+			SaveGauntletToLocalStorage();
 			
 				try {
 					var currentIdSel = $('#identityselect').val();

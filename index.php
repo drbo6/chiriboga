@@ -115,7 +115,7 @@
                 <div class="menu-item" id="gauntlet-main" onclick="handleMenu('tournament', event)">GAUNTLET</div>
                 <div class="gauntlet-submenu" id="gauntlet-submenu" style="display:none;">
                   <div class="menu-item-sub" onclick="handleGauntletNew(event)">NEW</div>
-                  <div class="menu-item-sub disabled" onclick="return false;">CONTINUE</div>
+                  <div class="menu-item-sub disabled" id="gauntlet-continue-btn" onclick="handleGauntletContinue(event)">CONTINUE</div>
                 </div>
               </div>
               <div class="menu-item" onclick="handleMenu('tutorial', event)">TUTORIAL</div>
@@ -1478,6 +1478,8 @@
       if (mainBtn && submenu) {
         mainBtn.style.display = 'none';
         submenu.style.display = 'flex';
+        // Update continue button state based on localStorage
+        updateGauntletContinueButton();
       }
     }
     
@@ -1487,6 +1489,57 @@
       if (mainBtn && submenu) {
         mainBtn.style.display = 'block';
         submenu.style.display = 'none';
+      }
+    }
+    
+    // Check if a saved gauntlet exists in localStorage
+    function hasGauntletSave() {
+      try {
+        var savedJson = localStorage.getItem('chiriboga-gauntlet-save');
+        if (savedJson) {
+          var saveData = JSON.parse(savedJson);
+          // Check if save has required data
+          return saveData && saveData.r && saveData.g;
+        }
+      } catch (e) {
+        console.error("Error checking gauntlet save:", e);
+      }
+      return false;
+    }
+    
+    // Update the continue button state
+    function updateGauntletContinueButton() {
+      var continueBtn = document.getElementById('gauntlet-continue-btn');
+      if (continueBtn) {
+        if (hasGauntletSave()) {
+          continueBtn.classList.remove('disabled');
+        } else {
+          continueBtn.classList.add('disabled');
+        }
+      }
+    }
+    
+    // Handle Continue button click
+    function handleGauntletContinue(evt) {
+      var continueBtn = document.getElementById('gauntlet-continue-btn');
+      if (!hasGauntletSave() || continueBtn.classList.contains('disabled')) {
+        return false;
+      }
+      
+      try {
+        var savedJson = localStorage.getItem('chiriboga-gauntlet-save');
+        var saveData = JSON.parse(savedJson);
+        
+        // Navigate to gauntlet.php with saved parameters
+        var gauntletUrl = 'gauntlet.php?r=' + saveData.r + '&g=' + saveData.g;
+        window.location.href = gauntletUrl;
+      } catch (e) {
+        console.error("Error loading gauntlet save:", e);
+        var btn = evt.target;
+        btn.innerHTML = 'ERROR';
+        setTimeout(function() {
+          btn.innerHTML = 'CONTINUE';
+        }, 1500);
       }
     }
     

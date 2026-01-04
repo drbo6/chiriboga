@@ -992,7 +992,17 @@ function ShowGauntletRecap(gauntletState) {
     ? gauntletConfig.matchRewards.creditScoreDivisor 
     : 10;
   var creditBonus = Math.floor(totalCredits / creditScoreDivisor);
-  var score = Math.max(0, (7 * defeatedCount) - (gauntletState.agendaScored || 0) + creditBonus);
+  var agendaScored = gauntletState.agendaScored || 0;
+  var rawScore = (7 * defeatedCount) - agendaScored + creditBonus;
+  var score = Math.max(0, rawScore);
+  
+  console.log("=== GAUNTLET COMPLETE SCORE CALCULATION ===");
+  console.log("defeated: " + defeatedCount + " × 7 = " + (7 * defeatedCount));
+  console.log("agendaScored: -" + agendaScored);
+  console.log("credits: " + gauntletState.credits + " + creditsWon: " + gauntletState.creditsWon + " = " + totalCredits);
+  console.log("creditBonus: floor(" + totalCredits + " / " + creditScoreDivisor + ") = " + creditBonus);
+  console.log("rawScore: " + (7 * defeatedCount) + " - " + agendaScored + " + " + creditBonus + " = " + rawScore);
+  console.log("FINAL SCORE: " + score);
   
   // Helper function to get perk name
   function getPerkName(perkNum) {
@@ -1106,7 +1116,17 @@ function ShowGauntletLostModal(gauntletState) {
     ? gauntletConfig.matchRewards.creditScoreDivisor 
     : 10;
   var creditBonus = Math.floor(totalCredits / creditScoreDivisor);
-  var score = Math.max(0, (7 * defeatedCount) - (gauntletState.agendaScored || 0) + creditBonus);
+  var agendaScored = gauntletState.agendaScored || 0;
+  var rawScore = (7 * defeatedCount) - agendaScored + creditBonus;
+  var score = Math.max(0, rawScore);
+  
+  console.log("=== GAUNTLET LOST SCORE CALCULATION ===");
+  console.log("defeated: " + defeatedCount + " × 7 = " + (7 * defeatedCount));
+  console.log("agendaScored: -" + agendaScored);
+  console.log("credits: " + gauntletState.credits + " + creditsWon: " + gauntletState.creditsWon + " = " + totalCredits);
+  console.log("creditBonus: floor(" + totalCredits + " / " + creditScoreDivisor + ") = " + creditBonus);
+  console.log("rawScore: " + (7 * defeatedCount) + " - " + agendaScored + " + " + creditBonus + " = " + rawScore);
+  console.log("FINAL SCORE: " + score);
   
   // Helper function to get perk name
   function getPerkName(perkNum) {
