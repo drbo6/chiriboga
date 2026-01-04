@@ -3589,6 +3589,10 @@
 			// Card text - replace bracketed words with images (NSG SVG format)
 			if (cardInfo.text) {
 				var cardText = cardInfo.text.replace(/\[([^\]]+)\]/g, function(match, word) {
+					// Only convert to icon if the word contains at least one letter (not just numbers)
+					if (!/[a-zA-Z]/.test(word)) {
+						return match; // Return original text like [5] unchanged
+					}
 					var iconName = word.toUpperCase();
 					// Special case: [trash] maps to TRASH_ABILITY
 					if (iconName === 'TRASH') iconName = 'TRASH_ABILITY';

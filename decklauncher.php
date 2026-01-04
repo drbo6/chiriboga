@@ -494,6 +494,10 @@
 			// Card text - replace bracketed words with images (NSG SVG format)
 			if (cardInfo.text) {
 				var cardText = cardInfo.text.replace(/\[([^\]]+)\]/g, function(match, word) {
+					// Only convert to icon if the word contains at least one letter (not just numbers)
+					if (!/[a-zA-Z]/.test(word)) {
+						return match; // Return original text like [5] unchanged
+					}
 					var iconName = word.toUpperCase();
 					// Special case: Reformat the text for NSG icons
 					if (iconName === 'TRASH') iconName = 'TRASH_ABILITY';
@@ -1197,6 +1201,9 @@
 								$('#save-deck-modal-message').html('<span style="color: #33ff33;">Deck "' + deckName + '" saved successfully!</span>');
 								$('#save-deck-modal-input').val('');
 								$('#save-deck-confirm-btn').attr('disabled', 'disabled');
+								
+								// Update Load Deck button visibility
+								UpdateLoadDeckButtonVisibility();
 								
 								// Close modal after 2 seconds
 								setTimeout(function() {
@@ -2160,7 +2167,7 @@ GetFactionIcon(cardSet[playerIdentities[i]].faction) + shortTitle +
 			</div>
 		</div>
 		<!-- Save Deck Modal -->
-		<div id="save-deck-modal" class="modal">
+		<div id="save-deck-modal" class="modal" style="z-index: 10;">
 			<div class="solo-menu">
 				<span id="save-deck-close-btn" class="menu-close">✕</span>
 				<div class="solo-logo">
@@ -2177,7 +2184,7 @@ GetFactionIcon(cardSet[playerIdentities[i]].faction) + shortTitle +
 			</div>
 		</div>
 		<!-- Load Deck Modal -->
-		<div id="load-deck-modal" class="modal">
+		<div id="load-deck-modal" class="modal" style="z-index: 10;">
 			<div class="solo-menu">
 				<span id="load-deck-close-btn" class="menu-close">✕</span>
 				<div class="solo-logo">
