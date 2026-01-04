@@ -1525,7 +1525,7 @@
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
         
-        showDataAlert('EXPORT COMPLETE', 'Successfully exported ' + keyCount + ' data entries.');
+        showDataAlert('EXPORT COMPLETE', 'Your data has been saved to a backup file.');
         console.log('Data exported successfully');
       } catch (e) {
         console.error('Failed to export data:', e);
@@ -1575,11 +1575,8 @@
           
           // Build confirmation message
           var exportDate = importWrapper.exportDate ? new Date(importWrapper.exportDate).toLocaleDateString() : 'Unknown';
-          var message = 'Restore <strong>' + keyCount + '</strong> data entries from backup?';
+          var message = 'Restore data from this backup?';
           message += '<br><br>Backup date: <strong>' + exportDate + '</strong>';
-          if (skippedKeys > 0) {
-            message += '<br><span style="color:var(--crt-green-muted);font-size:11px;">(' + skippedKeys + ' invalid entries will be skipped)</span>';
-          }
           message += '<br><br><span style="color:var(--crt-green-muted);font-size:11px;">This will overwrite your current settings and saves.</span>';
           
           showDataConfirm('RESTORE DATA', message, function() {
@@ -1590,7 +1587,7 @@
               }
             }
             
-            showDataAlert('IMPORT COMPLETE', 'Successfully restored ' + keyCount + ' data entries.<br><br>The page will now reload.', function() {
+            showDataAlert('IMPORT COMPLETE', 'Your data has been restored.<br><br>The page will now reload.', function() {
               location.reload();
             });
           });
