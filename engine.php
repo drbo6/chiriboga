@@ -608,6 +608,7 @@
 					</style>
 						<button class="button" onclick="debugSetAISpeed()">Apply Speed</button>
 					</div>
+					<button class="button" onclick="debugStealScoreAgenda()">Steal/Score Agenda</button>
 					<button class="button" onclick="debugWinGame()">Win the Game</button>
 					<button class="button" onclick="debugLoseGame()">Lose the Game</button>
 				</div>

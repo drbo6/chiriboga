@@ -2112,6 +2112,103 @@ function debugLoseGame() {
     PlayerWin(runner, 'Debug menu: Corp loses');
   }
 }
+
+// Steal or Score a random agenda (depending on whether player is Runner or Corp)
+function debugStealScoreAgenda() {
+  $('#debug-modal').css('display','none');
+  
+  if (viewingPlayer === runner) {
+    // Runner steals an agenda - find agendas in corp's servers
+    var agendas = [];
+    
+    // Check HQ (corp's hand)
+    for (var i = 0; i < corp.HQ.cards.length; i++) {
+      if (corp.HQ.cards[i].cardType === 'agenda') {
+        agendas.push(corp.HQ.cards[i]);
+      }
+    }
+    
+    // Check R&D
+    for (var i = 0; i < corp.RnD.cards.length; i++) {
+      if (corp.RnD.cards[i].cardType === 'agenda') {
+        agendas.push(corp.RnD.cards[i]);
+      }
+    }
+    
+    // Check Archives
+    for (var i = 0; i < corp.archives.cards.length; i++) {
+      if (corp.archives.cards[i].cardType === 'agenda') {
+        agendas.push(corp.archives.cards[i]);
+      }
+    }
+    
+    // Check remote servers
+    for (var s = 0; s < corp.remoteServers.length; s++) {
+      var remote = corp.remoteServers[s];
+      for (var i = 0; i < remote.root.length; i++) {
+        if (remote.root[i].cardType === 'agenda') {
+          agendas.push(remote.root[i]);
+        }
+      }
+    }
+    
+    if (agendas.length === 0) {
+      Log('DEBUG: No agendas available to steal');
+      return;
+    }
+    
+    // Pick a random agenda
+    var randomAgenda = agendas[Math.floor(Math.random() * agendas.length)];
+    
+    // Move to runner's score area
+    MoveCard(randomAgenda, runner.scoreArea);
+    randomAgenda.faceUp = true;
+    randomAgenda.advancement = 0;
+    
+    Log('DEBUG: ' + GetTitle(randomAgenda, true) + ' stolen');
+    Render();
+    EnumeratePhase();
+    
+  } else if (viewingPlayer === corp) {
+    // Corp scores an agenda - find agendas in HQ or installed in remotes
+    var agendas = [];
+    
+    // Check HQ (corp's hand)
+    for (var i = 0; i < corp.HQ.cards.length; i++) {
+      if (corp.HQ.cards[i].cardType === 'agenda') {
+        agendas.push(corp.HQ.cards[i]);
+      }
+    }
+    
+    // Check remote servers for installed agendas
+    for (var s = 0; s < corp.remoteServers.length; s++) {
+      var remote = corp.remoteServers[s];
+      for (var i = 0; i < remote.root.length; i++) {
+        if (remote.root[i].cardType === 'agenda') {
+          agendas.push(remote.root[i]);
+        }
+      }
+    }
+    
+    if (agendas.length === 0) {
+      Log('DEBUG: No agendas available to score');
+      return;
+    }
+    
+    // Pick a random agenda
+    var randomAgenda = agendas[Math.floor(Math.random() * agendas.length)];
+    
+    // Move to corp's score area
+    MoveCard(randomAgenda, corp.scoreArea);
+    randomAgenda.faceUp = true;
+    randomAgenda.advancement = 0;
+    
+    Log('DEBUG: ' + GetTitle(randomAgenda, true) + ' scored');
+    Render();
+    EnumeratePhase();
+  }
+}
+
 // Show debug menu button if enabled
 function ShowDebugMenuButtonIfEnabled() {
   if (typeof enableDebugMenu !== 'undefined' && enableDebugMenu) {
