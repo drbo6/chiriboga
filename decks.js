@@ -757,29 +757,45 @@ function LoadDecks() {
      viewAllFronts = true; //set true to see all card fronts (for testing)
      mainLoopDelay = 50; //for speedy AI vs AI testing (any faster than this and funny things happen at end-of-game)
 
+    // RunnerTestField(30001, [], [30030,30005,30032,31007,30003,30031,31003,30004,31038,30028,31008,30031,30033,30029,30034,31006,31038,31039,31037,30029,30032,30031,30003,31039,30030,30032,31004,30008,31037,30008,30033,30033,30029,30030,31012,31038], [30028,30034,30028,31010,30034], [], [], cardBackTexturesRunner,glowTextures,strengthTextures);
+    // CorpTestField(31040, [], [30038,31043,31045,31045,30042,30075,30040,30039,30067,31046,31041,30036,30075,30069,31043,30041,31045,30053,30042,30064,30037,31042,31047,31042,30050,30067,30064,31046,31044,31041,30050,31047,30038,30042,31043,30053,30075,30067,30037,31046,30039,30040,31042], [31044,30069,31041,30039], [], [], [30038], [[30037]], [], cardBackTexturesCorp,glowTextures,strengthTextures);
+    // runner.stack[6].madeSuccessfulRunThisTurn=true;
+    // runner.stack[6].icePassedLastRun=[corp.HQ.ice[0],];
+    // corp.RnD.cards[6].cardsInstalledThisTurn=[corp.HQ.ice[0],corp.remoteServers[0].root[0],];
+    // corp.RnD.cards[28].hostedCards = [];
+    // corp.RnD.cards[41].cardsInstalledThisTurn=[corp.HQ.ice[0],corp.remoteServers[0].root[0],];
+    // corp.RnD.cards[42].knownToRunner=true;
+    // corp.HQ.ice[0].rezzed=true;
+    // corp.HQ.cards[0].hostedCards = [];
+    // corp.remoteServers[0].root[0].knownToRunner=true;
+    // corp.remoteServers[0].root[0].AITurnsInstalled=1;
+    // corp.remoteServers[0].AISuccessfulRuns=1;
+    // corp.RnD.AISuccessfulRuns=1;
+
+
     // SET UP THE MAIN STATES FOR THE RUNNER AND CORP
     // ----------------------------------------------
 
-    RunnerTestField(1017, //identity
-      [30032, 30032, 35009, 35008], //heapCards
-      [35015, 35022, 35022, 30033, 35014, 1039, 35030, 35005, 35016, 35034, 35004, 35010, 35007, 35009, 35008, 35029, 35025], //stackCards
-      [1030, 1030, 1030, 1030], //gripCards
-      [35028, 30015, 35009, 35020, 35022, 30032], //installed 
-      [], //stolen
-      cardBackTexturesRunner,glowTextures,strengthTextures
-    );
+    // RunnerTestField(1017, //identity
+    //   [30032, 30032, 35009, 35008], //heapCards
+    //   [35015, 35022, 35022, 30033, 35014, 1039, 35030, 35005, 35016, 35034, 35004, 35010, 35007, 35009, 35008, 35029, 35025], //stackCards
+    //   [1030, 1030, 1030, 1030], //gripCards
+    //   [35028, 30015, 35009, 35020, 35022, 30032], //installed 
+    //   [], //stolen
+    //   cardBackTexturesRunner,glowTextures,strengthTextures
+    // );
 
-    CorpTestField(30059, //identity - 35035
-      [30037, 30047,30073,35075,30074,30075,35081,35081], //archivesCards
-      [30073,30072,30047,30073,30073,30039,30039,30039,30039,30039,35044,35044,35044,35045], //rndCards
-      [35055,35079,35040,35081], //hqCards 
-      [], //archivesInstalled
-      [35041], //rndInstalled
-      [35042], //hqInstalled
-      [[35071, 35045, 30042, 35041, 35052,35079],[30067,35064],[31071, 35053],[31072, 35053, 35076],[35062, 35079]], //remotes (array of arrays)
-      [35070, 35070, 30068], //scored 35042,35052, 31075
-      cardBackTexturesCorp,glowTextures,strengthTextures
-    );
+    // CorpTestField(30059, //identity - 35035
+    //   [30037, 30047,30073,35075,30074,30075,35081,35081], //archivesCards
+    //   [30073,30072,30047,30073,30073,30039,30039,30039,30039,30039,35044,35044,35044,35045], //rndCards
+    //   [35055,35079,35040,35081], //hqCards 
+    //   [], //archivesInstalled
+    //   [35041], //rndInstalled
+    //   [35042], //hqInstalled
+    //   [[35071, 35045, 30042, 35041, 35052,35079],[30067,35064],[31071, 35053],[31072, 35053, 35076],[35062, 35079]], //remotes (array of arrays)
+    //   [35070, 35070, 30068], //scored 35042,35052, 31075
+    //   cardBackTexturesCorp,glowTextures,strengthTextures
+    // );
 
     // // REZ ICE
     // // -------
@@ -788,16 +804,16 @@ function LoadDecks() {
     // corp.RnD.ice[0].rezzed=true;
     // corp.HQ.ice[0].rezzed=true;
     // corp.remoteServers[0].root[0].rezzed=true;
-    for (var i = 0; i < 3; i++) {
-      corp.remoteServers[0].ice[i].rezzed = true;
-    }
-    corp.remoteServers[3].root[0].rezzed=true;
+    // for (var i = 0; i < 3; i++) {
+    //   corp.remoteServers[0].ice[i].rezzed = true;
+    // }
+    // corp.remoteServers[3].root[0].rezzed=true;
     // corp.remoteServers[0].ice[0].rezzed=true;
     // corp.remoteServers[0].ice[1].rezzed=true;
     // corp.remoteServers[0].ice[2].rezzed=true;
     // corp.remoteServers[1].ice[0].rezzed=true;
-    corp.remoteServers[1].ice[0].rezzed=true;
-    corp.remoteServers[2].ice[0].rezzed=true;
+    // corp.remoteServers[1].ice[0].rezzed=true;
+    // corp.remoteServers[2].ice[0].rezzed=true;
     // corp.remoteServers[2].ice[1].rezzed=true;
     // corp.remoteServers[0].root[0].knownToRunner=true;
     // corp.archives.ice[0].rezzed=true;
@@ -805,26 +821,26 @@ function LoadDecks() {
     // // SET ADVANCEMENTS
     // // ----------------
 
-    corp.remoteServers[0].root[0].advancement=2; // root/agenda/asset
-    corp.remoteServers[3].ice[1].advancement=3; // ice
+    // corp.remoteServers[0].root[0].advancement=2; // root/agenda/asset
+    // corp.remoteServers[3].ice[1].advancement=3; // ice
     
     // // GIVE EVERYONE SOME CREDITS TO START WITH
     // // ----------------------------------------
 
-    GainCredits(runner,50);
-    GainCredits(corp,50);
+    // GainCredits(runner,50);
+    // GainCredits(corp,50);
     
     // // SET THE PHASE
     // // -------------
 
-    ChangePhase(phases.runnerStartResponse); // Runner starts turn
+    // ChangePhase(phases.runnerStartResponse); // Runner starts turn
     // ChangePhase(phases.corpStartDraw);    
 
     // // OTHER STUFF
     // // -----------
 
     // ChangePhase(phases.runnerEndOfTurn);
-    AddTags(3);
+    // AddTags(3);
     // runner.clickTracker = 0;  
     // runner.rig.resources[0].power = 4;
     // corp.clickTracker = 20;
@@ -837,17 +853,17 @@ function LoadDecks() {
     // // RUN REMOTE
     // // ----------
 
-    attackedServer = corp.remoteServers[1];    
-    MakeRun(corp.remoteServers[1]); // Run remote
+    // attackedServer = corp.remoteServers[1];    
+    // MakeRun(corp.remoteServers[1]); // Run remote
 
     // // INSTALL TROJAN (requires setting it on the ice and then hosting it)
     // // -------------------------------------------------------------------
 
-    var servindex = 2; //remote server index for trojan
-    var iceindex = 0 // ice index on that server
-    corp.remoteServers[servindex].ice[iceindex].hostedCards = [];
-    InstanceCardsPush(30004, corp.remoteServers[servindex].ice[iceindex].hostedCards, 1, cardBackTexturesCorp, glowTextures, strengthTextures)[0].host = corp.remoteServers[servindex].ice[iceindex];
-    corp.remoteServers[servindex].ice[iceindex].hostedCards[0].virus = 2;
+    // var servindex = 2; //remote server index for trojan
+    // var iceindex = 0 // ice index on that server
+    // corp.remoteServers[servindex].ice[iceindex].hostedCards = [];
+    // InstanceCardsPush(30004, corp.remoteServers[servindex].ice[iceindex].hostedCards, 1, cardBackTexturesCorp, glowTextures, strengthTextures)[0].host = corp.remoteServers[servindex].ice[iceindex];
+    // corp.remoteServers[servindex].ice[iceindex].hostedCards[0].virus = 2;
   
     // // TO FORCE THE AI TO PLAY CARDS / MAKE DECISIONS, set preferred property on runner.AI or corp.AI
     // // ----------------------------------------------------------------------------------------------
