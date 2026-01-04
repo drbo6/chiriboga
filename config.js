@@ -4,7 +4,7 @@
 var gauntletConfig = {
   // ===== GAUNTLET LENGTH =====
   // Number of opponents in a gauntlet run (one from each faction)
-  gauntletLength: 4,
+  gauntletLength: 8,
 
   // ===== HI-RES IMAGES =====
   // If true, the renderer will use high-resolution images from "images/hires" when available.
@@ -22,8 +22,6 @@ var gauntletConfig = {
     victory: 5,                // Credits for winning a match
     agendaPointStolen: 3,      // Credits per agenda point stolen from corp
     agendaPointScored: -2,     // Credits per agenda point scored by corp (negative = loss)
-    runSuccessful: 1,          // Credits for successful run - not implemented yet
-    runEnded: -1,              // Credits deducted when run ends - not implemented yet
     minimalCredits: 10,         // Minimum credits player can have (prevents going negative)
     bossBeaten: 10             // Additional credits for defeating a boss opponent
   },
