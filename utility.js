@@ -1109,6 +1109,14 @@ function ShowGauntletRecap(gauntletState) {
   
   recapModal.innerHTML = recapHtml;
   recapModal.style.display = 'flex';
+  
+  // Clear gauntlet save data from localStorage on completion
+  try {
+    localStorage.removeItem('chiriboga-gauntlet-save');
+    console.log("Gauntlet save data cleared from localStorage");
+  } catch (e) {
+    console.error("Failed to clear gauntlet save data:", e);
+  }
 }
 
 /**
@@ -1278,6 +1286,14 @@ function ShowGauntletLostModal(gauntletState) {
   
   lostModal.innerHTML = lostHtml;
   lostModal.style.display = 'flex';
+  
+  // Clear gauntlet save data from localStorage on loss
+  try {
+    localStorage.removeItem('chiriboga-gauntlet-save');
+    console.log("Gauntlet save data cleared from localStorage");
+  } catch (e) {
+    console.error("Failed to clear gauntlet save data:", e);
+  }
 }
 
 /**
