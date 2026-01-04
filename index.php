@@ -68,7 +68,7 @@
   }
   ?>
 </head>
-<body>
+<body class="no-scroll">
   <div class="terminal-frame">
     <div class="screen">
       <div class="glow-overlay"></div>

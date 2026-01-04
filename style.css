@@ -1434,6 +1434,8 @@ div.options {
 /* Page-level scrolling: body is the only scroll container */
 html { overflow-y: auto; height: 100%; scrollbar-width: thin; scrollbar-color: var(--scrollbar-green) var(--bg-dark); }
 body { overflow-y: auto; overflow-x: hidden; min-height: 100%; }
+/* Disable scrolling on index page */
+html:has(body.no-scroll), body.no-scroll { overflow: hidden; height: 100vh; }
 /* Prevent nested scrollbar in card list area */
 /* Restore default for #cardcontainer */
 #cardcontainer {
