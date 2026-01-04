@@ -111,7 +111,13 @@
             <div class="menu-buttons" id="menu-buttons">
               <div class="menu-item" onclick="handleMenu('quick', event)">QUICK GAME</div>
               <div class="menu-item" onclick="handleMenu('custom', event)">CUSTOM GAME</div>
-              <div class="menu-item" onclick="handleMenu('tournament', event)">GAUNTLET</div>
+              <div class="menu-item-container" id="gauntlet-container">
+                <div class="menu-item" id="gauntlet-main" onclick="handleMenu('tournament', event)">GAUNTLET</div>
+                <div class="gauntlet-submenu" id="gauntlet-submenu" style="display:none;">
+                  <div class="menu-item-sub" onclick="handleGauntletNew(event)">NEW</div>
+                  <div class="menu-item-sub disabled" onclick="return false;">CONTINUE</div>
+                </div>
+              </div>
               <div class="menu-item" onclick="handleMenu('tutorial', event)">TUTORIAL</div>
               <div class="menu-item" onclick="handleMenu('achievements', event)">ACHIEVEMENTS <span class="achievement-percent">[0%]</span></div>
               <div class="menu-item" onclick="handleMenu('settings', event)">SETTINGS</div>
@@ -1170,49 +1176,9 @@
         return;
       }
       
-      // Handle gauntlet/tournament mode
+      // Handle gauntlet/tournament mode - show submenu
       if (option === 'tournament') {
-        // Check if there are enough gauntlet precons before launching
-        var gauntletCorpDecks = preconDecks.filter(function(d) {
-          if (!isPreconEnabledForGauntlet(d)) return false;
-          if (!cardSet[d.identity]) return false;
-          var identity = cardSet[d.identity];
-          return identity.player === corp;
-        });
-        
-        // Need at least gauntletLength precons total
-        var gauntletLength = settingsOverrides.gauntletLength || 4;
-        if (gauntletCorpDecks.length < gauntletLength) {
-          item.innerHTML = 'MISSING PRECONS';
-          setTimeout(() => {
-            item.innerHTML = 'GAUNTLET';
-          }, 1500);
-          return;
-        }
-        
-        // Need at least 1 precon for each corp faction
-        var requiredFactions = ['Jinteki', 'Haas-Bioroid', 'NBN', 'Weyland Consortium'];
-        var missingFaction = false;
-        for (var i = 0; i < requiredFactions.length; i++) {
-          var faction = requiredFactions[i];
-          var hasFaction = gauntletCorpDecks.some(function(d) {
-            return cardSet[d.identity].faction === faction;
-          });
-          if (!hasFaction) {
-            missingFaction = true;
-            break;
-          }
-        }
-        
-        if (missingFaction) {
-          item.innerHTML = 'MISSING PRECONS';
-          setTimeout(() => {
-            item.innerHTML = 'GAUNTLET';
-          }, 1500);
-          return;
-        }
-        
-        LaunchGauntlet();
+        showGauntletSubmenu();
         return;
       }
       
@@ -1504,6 +1470,79 @@
       screenContentWidth = null;
       screenContentHeight = null;
     }
+    
+    // Gauntlet submenu toggle
+    function showGauntletSubmenu() {
+      var mainBtn = document.getElementById('gauntlet-main');
+      var submenu = document.getElementById('gauntlet-submenu');
+      if (mainBtn && submenu) {
+        mainBtn.style.display = 'none';
+        submenu.style.display = 'flex';
+      }
+    }
+    
+    function hideGauntletSubmenu() {
+      var mainBtn = document.getElementById('gauntlet-main');
+      var submenu = document.getElementById('gauntlet-submenu');
+      if (mainBtn && submenu) {
+        mainBtn.style.display = 'block';
+        submenu.style.display = 'none';
+      }
+    }
+    
+    function handleGauntletNew(evt) {
+      // Check if there are enough gauntlet precons before launching
+      var gauntletCorpDecks = preconDecks.filter(function(d) {
+        if (!isPreconEnabledForGauntlet(d)) return false;
+        if (!cardSet[d.identity]) return false;
+        var identity = cardSet[d.identity];
+        return identity.player === corp;
+      });
+      
+      // Need at least gauntletLength precons total
+      var gauntletLength = settingsOverrides.gauntletLength || 4;
+      var newBtn = evt.target;
+      
+      if (gauntletCorpDecks.length < gauntletLength) {
+        newBtn.innerHTML = 'MISSING';
+        setTimeout(function() {
+          newBtn.innerHTML = 'NEW';
+        }, 1500);
+        return;
+      }
+      
+      // Need at least 1 precon for each corp faction
+      var requiredFactions = ['Jinteki', 'Haas-Bioroid', 'NBN', 'Weyland Consortium'];
+      var missingFaction = false;
+      for (var i = 0; i < requiredFactions.length; i++) {
+        var faction = requiredFactions[i];
+        var hasFaction = gauntletCorpDecks.some(function(d) {
+          return cardSet[d.identity].faction === faction;
+        });
+        if (!hasFaction) {
+          missingFaction = true;
+          break;
+        }
+      }
+      
+      if (missingFaction) {
+        newBtn.innerHTML = 'MISSING';
+        setTimeout(function() {
+          newBtn.innerHTML = 'NEW';
+        }, 1500);
+        return;
+      }
+      
+      LaunchGauntlet();
+    }
+    
+    // Hide gauntlet submenu when clicking elsewhere
+    document.addEventListener('click', function(e) {
+      var container = document.getElementById('gauntlet-container');
+      if (container && !container.contains(e.target)) {
+        hideGauntletSubmenu();
+      }
+    });
     
     function startTutorial(mentorIndex) {
       var tutorials = [

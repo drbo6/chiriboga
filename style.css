@@ -2553,6 +2553,44 @@ body { background: #0a0a0a; min-height: 100vh; display: flex; align-items: cente
 .achievement-percent { color: #ff6633; text-shadow: 0 0 5px #ff6633; }
 .menu-item:hover .achievement-percent, .menu-item:active .achievement-percent { color: var(--bg-dark); text-shadow: none; }
 
+/* Gauntlet submenu container and buttons */
+.menu-item-container { position: relative; }
+.gauntlet-submenu { 
+  display: flex; 
+  gap: 8px; 
+  width: 100%;
+}
+.menu-item-sub { 
+  flex: 1;
+  color: var(--crt-green); 
+  padding: 12px 10px; 
+  font-size: 14px; 
+  letter-spacing: 2px; 
+  cursor: pointer; 
+  transition: all 0.1s ease; 
+  -webkit-user-select: none; 
+  user-select: none; 
+  position: relative; 
+  text-align: center;
+  border: 1px solid var(--border-green);
+  border-radius: 4px;
+  background: rgba(12, 24, 12, 0.7);
+  box-shadow: inset 0 0 8px var(--button-glow-inset), 0 0 6px var(--button-glow-outer);
+}
+.menu-item-sub:hover:not(.disabled) { 
+  background-color: var(--crt-green); 
+  color: var(--bg-dark); 
+  text-shadow: none; 
+}
+.menu-item-sub:active:not(.disabled) { 
+  background-color: #66ff66; 
+}
+.menu-item-sub.disabled { 
+  opacity: 0.4; 
+  cursor: not-allowed; 
+  color: var(--crt-green-muted);
+}
+
 /* Tutorial buttons */
 #tutorial-buttons {
   flex: 1;
