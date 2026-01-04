@@ -875,6 +875,12 @@
 					var disableStyle = canAffordDisable ? 'width: 100%;' : 'width: 100%; opacity: 0.6; border-color: var(--border-red-dark); color: var(--crt-red-muted); cursor: default; background-color: rgba(12,24,12,0.7) !important; pointer-events: none;';
 					var disableIconFilter = canAffordDisable ? enabledIconFilter : disabledIconFilter;
 					modalHtml += '<button class="button"' + disableDisabledAttr + ' onclick="AttemptDisablePerk(' + opponentIndex + ');" style="' + disableStyle + '">DISABLE PERK: ' + actualDisableCost + '<img src="images/nsg/NSG_CREDIT.svg" class="card-icon" alt="credit" style="margin-left: 2px; margin-bottom: 2px; height: 16px; display: inline-block; vertical-align: sub; filter: ' + disableIconFilter + ';"> - ' + actualDisableChance + '% CHANCE</button>';
+					
+					// Warning about card loss risk
+					var cardLossChance = isBossPerk ? (config.bossHackCardLossPercentage || 40) : (config.regularHackCardLossPercentage || 25);
+					modalHtml += '<div style="color: var(--crt-red); font-family: monospace; font-size: 11px; text-align: center; margin-top: 5px; margin-bottom: 5px; padding: 5px; border: 1px solid var(--border-red-dark); background-color: rgba(80, 0, 0, 0.3);">';
+					modalHtml += '⚠ WARNING: Disabling perks risks card loss (' + cardLossChance + '% chance)';
+					modalHtml += '</div>';
 				}
 				
 				modalHtml += '<button class="button" onclick="ShowHackOpponentsModal();" style="width: 100%;">BACK</button>';
@@ -1011,6 +1017,9 @@
 				var rollRng = new Math.seedrandom(rollSeed);
 				var roll = Math.floor(rollRng() * 100) + 1;
 				
+				// Check for card loss (happens regardless of success/failure)
+				var lostCards = CheckAndApplyCardLoss(opponentIndex, attemptNum, isBossPerk);
+				
 				if (roll <= chance) {
 					// Success! Disabling also reveals the perk
 					gauntletOpponents[opponentIndex].perkDisabled = true;
@@ -1018,12 +1027,194 @@
 					SaveOpponentStateToURL();
 					UpdateLaunchStrings();
 					var perkName = GetPerkName(opp.startingPerk);
-					ShowHackResultModal(true, 'PERK DISABLED', 'You successfully breached their servers and disabled a "' + perkName + '" perk.', opponentIndex);
+					ShowHackResultModalWithCardLoss(true, 'PERK DISABLED', 'You successfully breached their servers and disabled a "' + perkName + '" perk.', opponentIndex, lostCards);
 				} else {
 					// Failure
 					SaveOpponentStateToURL();
 					UpdateLaunchStrings();
-					ShowHackResultModal(false, 'HACK FAILED', 'Their security systems detected and removed the trojan you installed. The chance has changed for your next attempt.', opponentIndex);
+					ShowHackResultModalWithCardLoss(false, 'HACK FAILED', 'Their security systems detected and removed the trojan you installed. The chance has changed for your next attempt.', opponentIndex, lostCards);
+				}
+			}
+			
+			// Check if card loss should occur and apply it
+			function CheckAndApplyCardLoss(opponentIndex, attemptNum, isBossPerk) {
+				var config = gauntletConfig.hackOpponent || {};
+				var lostCards = [];
+				
+				// Get card loss parameters based on perk type
+				var cardLossPercentage = isBossPerk ? (config.bossHackCardLossPercentage || 40) : (config.regularHackCardLossPercentage || 25);
+				var individualCardLossPercentage = isBossPerk ? (config.bossHackIndividualCardLossPercentage || 60) : (config.regularHackIndividualCardLossPercentage || 50);
+				var maxCardLoss = isBossPerk ? (config.bossHackCardLossMaxQuantity || 3) : (config.regularHackCardLossMaxQuantity || 2);
+				var prioritizeDeck = config.prioritizeDeckCardLoss !== false; // Default to true
+				
+				// Roll for card loss trigger
+				var cardLossSeed = gauntletSeed + '_cardloss_' + opponentIndex + '_' + attemptNum;
+				var cardLossRng = new Math.seedrandom(cardLossSeed);
+				var cardLossRoll = Math.floor(cardLossRng() * 100) + 1;
+				
+				if (cardLossRoll > cardLossPercentage) {
+					// No card loss triggered
+					return lostCards;
+				}
+				
+				// Card loss triggered - determine how many cards to lose
+				for (var i = 0; i < maxCardLoss; i++) {
+					var individualRoll = Math.floor(cardLossRng() * 100) + 1;
+					if (individualRoll <= individualCardLossPercentage) {
+						// Find a card to remove
+						var cardToRemove = FindCardToRemove(prioritizeDeck, cardLossRng);
+						if (cardToRemove !== null) {
+							// Remove the card
+							RemoveCardFromCollection(cardToRemove);
+							var cardName = cardSet[cardToRemove] ? cardSet[cardToRemove].title : 'Unknown Card';
+							lostCards.push({ id: cardToRemove, name: cardName });
+						}
+					}
+				}
+				
+				return lostCards;
+			}
+			
+			// Find a card to remove based on priority settings
+			function FindCardToRemove(prioritizeDeck, rng) {
+				var config = gauntletConfig.hackOpponent || {};
+				
+				if (prioritizeDeck) {
+					// Priority 1: Cards currently in the deck (deckCounts > 0)
+					var deckCardIds = [];
+					for (var cardId in deckCounts) {
+						if (deckCounts[cardId] > 0 && gauntletCardCounts[cardId] > 0) {
+							deckCardIds.push(parseInt(cardId));
+						}
+					}
+					if (deckCardIds.length > 0) {
+						var idx = Math.floor(rng() * deckCardIds.length);
+						return deckCardIds[idx];
+					}
+					
+					// Priority 2: Cards that were in the original deck (from r parameter) and still in pool
+					var runnerDeckParam = URIParameter("r");
+					if (runnerDeckParam && runnerDeckParam !== "") {
+						try {
+							var runnerDeck = JSON.parse(LZString.decompressFromEncodedURIComponent(runnerDeckParam));
+							if (runnerDeck && runnerDeck.cards) {
+								var originalDeckCardIds = [];
+								for (var i = 0; i < runnerDeck.cards.length; i++) {
+									var cardId = runnerDeck.cards[i];
+									// Card must still be in the collection but not currently in the deck
+									if (gauntletCardCounts[cardId] > 0 && (!deckCounts[cardId] || deckCounts[cardId] === 0)) {
+										originalDeckCardIds.push(cardId);
+									}
+								}
+								// Remove duplicates
+								originalDeckCardIds = originalDeckCardIds.filter(function(item, pos) {
+									return originalDeckCardIds.indexOf(item) === pos;
+								});
+								if (originalDeckCardIds.length > 0) {
+									var idx = Math.floor(rng() * originalDeckCardIds.length);
+									return originalDeckCardIds[idx];
+								}
+							}
+						} catch (e) {
+							console.error("Failed to parse runner deck for card loss:", e);
+						}
+					}
+				}
+				
+				// Priority 3 (or default if prioritizeDeck is false): Any card in the collection
+				var collectionCardIds = [];
+				for (var cardId in gauntletCardCounts) {
+					if (gauntletCardCounts[cardId] > 0) {
+						collectionCardIds.push(parseInt(cardId));
+					}
+				}
+				if (collectionCardIds.length > 0) {
+					var idx = Math.floor(rng() * collectionCardIds.length);
+					return collectionCardIds[idx];
+				}
+				
+				// No cards available to remove
+				return null;
+			}
+			
+			// Remove a card from the collection (and deck if necessary)
+			function RemoveCardFromCollection(cardId) {
+				if (typeof gauntletCardCounts[cardId] === 'undefined' || gauntletCardCounts[cardId] <= 0) return;
+				
+				// If the card is in the deck, remove it from the deck first
+				if (typeof deckCounts[cardId] !== 'undefined' && deckCounts[cardId] > 0) {
+					RemoveCardFromDeck(cardId);
+				}
+				
+				// Remove one copy from the gauntlet collection
+				gauntletCardCounts[cardId]--;
+				
+				// Also remove from gauntletCardIds array (remove one occurrence)
+				var idx = gauntletCardIds.indexOf(cardId);
+				if (idx > -1) gauntletCardIds.splice(idx, 1);
+				
+				// If no copies left, remove from gauntletCardCounts and remove card from display
+				if (gauntletCardCounts[cardId] <= 0) {
+					delete gauntletCardCounts[cardId];
+					// Remove the card element from the display
+					$('#cardcontainer .card-item[data-id="' + cardId + '"]').remove();
+					// Remove from allCardIdsForPlayer array for lightbox navigation
+					var playerIdx = allCardIdsForPlayer.indexOf(cardId);
+					if (playerIdx > -1) allCardIdsForPlayer.splice(playerIdx, 1);
+				}
+				
+				deckModified = true;
+				UpdateCardCountsUI();
+				Parse();
+				
+				// Reapply current sort and filters
+				SortCardsBySort();
+				ApplyFilters();
+				UpdatePlayDeckButtonState();
+			}
+			
+			// Show hack result modal with card loss information
+			function ShowHackResultModalWithCardLoss(success, title, message, opponentIndex, lostCards) {
+				var color = success ? 'var(--crt-green)' : 'var(--crt-red)';
+				var glowColor = success ? 'var(--glow-green)' : 'var(--glow-red)';
+				var glowDark = success ? 'var(--glow-green-dark)' : 'var(--glow-red-dark)';
+				
+				var modalHtml = '<div class="solo-menu" style="display: flex; flex-direction: column; align-items: center; width: 600px;">';
+				modalHtml += '<h1 class="logo-text" style="text-align: center; color: ' + color + '; text-shadow: 0 0 5px ' + color + ', 0 0 15px ' + glowColor + ', 0 0 35px ' + glowDark + '; margin: 20px 0;">' + title + '</h1>';
+				modalHtml += '<div style="color: ' + color + '; font-family: monospace; padding: 20px; text-align: center; width: 100%;">';
+				modalHtml += '<p>' + message + '</p>';
+				
+				// Show lost cards if any
+				if (lostCards && lostCards.length > 0) {
+					modalHtml += '<div style="margin-top: 15px; padding: 10px; border: 1px solid var(--crt-red); background-color: rgba(80, 0, 0, 0.3);">';
+					modalHtml += '<p style="color: var(--crt-red); font-weight: bold; margin-bottom: 10px;">⚠ COUNTERMEASURES DETECTED ⚠</p>';
+					modalHtml += '<p style="color: var(--crt-red);">The following cards were corrupted and lost:</p>';
+					modalHtml += '<div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin: 15px 0;">';
+					for (var i = 0; i < lostCards.length; i++) {
+						var cardId = lostCards[i].id;
+						var cardName = lostCards[i].name;
+						var imgSrc = 'images/glow_outline.png';
+						if (cardSet[cardId] && cardSet[cardId].imageFile) {
+							imgSrc = GetImagePath(cardSet[cardId].imageFile);
+						}
+						modalHtml += '<div style="display: flex; flex-direction: column; align-items: center; max-width: 100px;">';
+						modalHtml += '<img src="' + imgSrc + '" onclick="ShowLightbox(' + cardId + ');" style="width: 80px; height: auto; border: 2px solid var(--crt-red); border-radius: 4px; cursor: pointer; transition: transform 0.2s ease, box-shadow 0.2s ease;" onmouseover="this.style.transform=\'scale(1.05)\'; this.style.boxShadow=\'0 0 10px var(--glow-red)\';" onmouseout="this.style.transform=\'scale(1)\'; this.style.boxShadow=\'none\';" />';
+						modalHtml += '<span style="color: var(--crt-red); font-size: 10px; margin-top: 4px; text-align: center; word-wrap: break-word; max-width: 80px;">' + cardName + '</span>';
+						modalHtml += '</div>';
+					}
+					modalHtml += '</div>';
+					modalHtml += '</div>';
+				}
+				
+				modalHtml += '</div>';
+				modalHtml += '<div id="hack-buttons" style="display: flex; flex-direction: column; justify-content: center; gap: 10px; width: 100%; padding: 20px; min-height: 50px;">';
+				modalHtml += '<button class="button" onclick="ShowHackOptionsForOpponent(' + opponentIndex + ');" style="width: 100%;">CONTINUE</button>';
+				modalHtml += '</div>';
+				modalHtml += '</div>';
+				
+				var modal = document.getElementById('hack-opponents-modal');
+				if (modal) {
+					modal.innerHTML = modalHtml;
 				}
 			}
 			

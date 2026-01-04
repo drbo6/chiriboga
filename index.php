@@ -277,8 +277,8 @@
                   <div class="tutorial-item" onclick="startTutorial(3)"><span class="tutorial-number">4</span><span class="tutorial-label">ASSETS & TRASH COSTS</span></div>
                   <div class="tutorial-item" onclick="startTutorial(4)"><span class="tutorial-number">5</span><span class="tutorial-label">ADVANCING & SCORING</span></div>
                   <div class="tutorial-item" onclick="startTutorial(5)"><span class="tutorial-number">6</span><span class="tutorial-label">UPGRADES & ROOT</span></div>
-                  <div class="tutorial-item" onclick="window.location.href='engine.php?ap=6&p=r&r=N4IglgJgpgdgLmOBPEAuEB2AbCANCAZyQLigFsBxAQ1IHcqVUBtLXVgRgCZcueBmHgBYeAVlE8AHLk4AGaXM7tpSzq1XSMG6VM46dATmmG+ck7jN9ul8wL63BAXQC+QA&c=N4IglgJgpgdgLmOBPEAuEB2DIA0IDOS+cUAtgOICGJA7pSqgNoDMGOr7AnFzgCwAMfQbwBMfAKwS+ANhl82vNtN45lqpRtXdp3DIL04MARkMmMY84YvNDNjCvuHJGZ+IC6AXyA'"><span class="tutorial-number">7</span><span class="tutorial-label">VS CORP STARTER DECK</span></div>
-                  <div class="tutorial-item" onclick="window.location.href='engine.php?ap=6&p=c&c=N4IglgJgpgdgLmOBPEAuEB2DIA0IDOS+cUAtgOICGJA7pSqgNoDMGOr7AnFzgCwAMfQbwBMfAKwS+ANhl82vNtN45lqpRtXdp3DIL04MARkMmMY84YvNDNjCvuHJGZ+IC6AXyA&r=N4IglgJgpgdgLmOBPEAuEB2AbCANCAZyQLigFsBxAQ1IHcqVUBtLXVgRgCZcueBmHgBYeAVlE8AHLk4AGaXM7tpSzq1XSMG6VM46dATmmG+ck7jN9ul8wL63BAXQC+QA'"><span class="tutorial-number">8</span><span class="tutorial-label">VS RUNNER STARTER DECK</span></div>
+                  <div class="tutorial-item" onclick="window.location.href='engine.php?ap=6&p=r&r=N4IglgJgpgdgLmOBPEAuAzABkwdgGwA0IAxgIYBOEAzmgNpbaEOZPYCMATAQ59++n0xsALILYBWMZJ4AOQR0zzFDDm3lqVrTBy0cc8-SrlH5x7BwCc8qwyyC7t5dnRdbr5wNufnwgLoBfIA&c=N4IglgJgpgdgLmOBPEAuAzABkwdhwGhAGMBDAJwgGc0BtLTdA+x-ZgTle3Q-oBZNOmfoN4AmEQFZJIgGyyRTbL0WYZvQWo0qZ27T2wz9uAfRwnsOAIyCrN8afsXHudDden1Hm1NM+LEgF0AXyA'"><span class="tutorial-number">7</span><span class="tutorial-label">VS CORP STARTER DECK</span></div>
+                  <div class="tutorial-item" onclick="window.location.href='engine.php?ap=6&p=c&c=N4IglgJgpgdgLmOBPEAuAzABkwdhwGhAGMBDAJwgGc0BtLTdA+x-ZgTle3Q-oBZNOmfoN4AmEQFZJIgGyyRTbL0WYZvQWo0qZ27T2wz9uAfRwnsOAIyCrN8afsXHudDden1Hm1NM+LEgF0AXyA&r=N4IglgJgpgdgLmOBPEAuAzABkwdgGwA0IAxgIYBOEAzmgNpbaEOZPYCMATAQ59++n0xsALILYBWMZJ4AOQR0zzFDDm3lqVrTBy0cc8-SrlH5x7BwCc8qwyyC7t5dnRdbr5wNufnwgLoBfIA'"><span class="tutorial-number">8</span><span class="tutorial-label">VS RUNNER STARTER DECK</span></div>
                 </div>
               </div>
             </div>
@@ -894,10 +894,8 @@
       
       // Helper function to get starting perk for opponent number (1-indexed)
       function getStartingPerk(opponentNum) {
-        // Opponent 1 => Always 0
-        if (opponentNum === 1) return 0;
-        // Opponents 2-3 => Draw from regularPerks
-        if (opponentNum >= 2 && opponentNum <= 3) {
+        // Opponents 1-3 => Draw from regularPerks
+        if (opponentNum >= 1 && opponentNum <= 3) {
           return regularPerks.length > 0 ? regularPerks.shift() : 0;
         }
         // Opponent 4 => Draw from bossPerks
