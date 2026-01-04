@@ -186,9 +186,9 @@
                 <div class="settings-group" title="Number of opponents you must defeat to complete the Gauntlet">
                   <label class="settings-label">GAUNTLET LENGTH</label>
                   <div class="settings-stepper">
-                    <button class="stepper-btn" id="gauntlet-length-minus" onclick="adjustGauntletLength(-1)">−</button>
+                    <button class="stepper-btn" id="gauntlet-length-minus" onclick="adjustGauntletLength(-4)">−</button>
                     <span class="stepper-value" id="gauntlet-length-value">4</span>
-                    <button class="stepper-btn" id="gauntlet-length-plus" onclick="adjustGauntletLength(1)">+</button>
+                    <button class="stepper-btn" id="gauntlet-length-plus" onclick="adjustGauntletLength(4)">+</button>
                   </div>
                 </div>
                 <div class="settings-group" title="Cycle through all four corp factions before repeating any faction">
@@ -347,9 +347,18 @@
       }
       
       // Use saved values if available, otherwise fall back to config
-      settingsOverrides.gauntletLength = (saved && typeof saved.gauntletLength === 'number') 
-        ? Math.min(12, Math.max(4, saved.gauntletLength))  // Clamp to valid range
+      // Valid gauntlet lengths are 4, 8, or 12 - snap to nearest valid value
+      var rawGauntletLength = (saved && typeof saved.gauntletLength === 'number') 
+        ? saved.gauntletLength
         : (gauntletConfig.gauntletLength || 4);
+      // Snap to nearest valid value (4, 8, or 12)
+      if (rawGauntletLength <= 6) {
+        settingsOverrides.gauntletLength = 4;
+      } else if (rawGauntletLength <= 10) {
+        settingsOverrides.gauntletLength = 8;
+      } else {
+        settingsOverrides.gauntletLength = 12;
+      }
       settingsOverrides.alternateFactions = (saved && typeof saved.alternateFactions === 'boolean') 
         ? saved.alternateFactions 
         : (gauntletConfig.alternateFactions !== false);
@@ -441,7 +450,8 @@
     // Settings control functions
     function adjustGauntletLength(delta) {
       var newVal = settingsOverrides.gauntletLength + delta;
-      if (newVal >= 4 && newVal <= 12) {
+      // Valid values are 4, 8, or 12
+      if (newVal >= 4 && newVal <= 12 && newVal % 4 === 0) {
         settingsOverrides.gauntletLength = newVal;
         document.getElementById('gauntlet-length-value').textContent = newVal;
         updateStepperButtons();
@@ -838,9 +848,7 @@
       var alternateFactions = settingsOverrides.alternateFactions;
       
       // Initialize perk pools for opponent starting perks
-      // Regular perks: 9 perks for non-boss opponents (1-3, 5-7, 9-11)
       var regularPerks = [1,1,1,2,2,2,3,3,3];
-      // Boss perks: 3 perks for boss opponents (4, 8, 12)
       var bossPerks = [4,5,6];
       
       // Shuffle the perk pools
@@ -859,8 +867,10 @@
       
       // Helper function to get starting perk for opponent number (1-indexed)
       function getStartingPerk(opponentNum) {
-        // Opponents 1-3 => Draw from regularPerks
-        if (opponentNum >= 1 && opponentNum <= 3) {
+        // Opponent 1 => Always 0
+        if (opponentNum === 1) return 0;
+        // Opponents 2-3 => Draw from regularPerks
+        if (opponentNum >= 2 && opponentNum <= 3) {
           return regularPerks.length > 0 ? regularPerks.shift() : 0;
         }
         // Opponent 4 => Draw from bossPerks
