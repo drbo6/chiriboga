@@ -985,9 +985,14 @@ function PlayerName(player) {
  * @param {Object} gauntletState the gauntlet state object
  */
 function ShowGauntletRecap(gauntletState) {
-  // Calculate score: (7 * gauntletLength) - agendaScored, minimum 0
-  var maxScore = 7 * (gauntletState.gauntletLength || 4);
-  var score = Math.max(0, maxScore - (gauntletState.agendaScored || 0));
+  // Calculate score: (7 * defeated) - agendaScored + floor(credits / creditScoreDivisor), minimum 0
+  var defeatedCount = gauntletState.defeated || 0;
+  var totalCredits = (gauntletState.credits || 0) + (gauntletState.creditsWon || 0);
+  var creditScoreDivisor = (typeof gauntletConfig !== 'undefined' && gauntletConfig.matchRewards && gauntletConfig.matchRewards.creditScoreDivisor) 
+    ? gauntletConfig.matchRewards.creditScoreDivisor 
+    : 10;
+  var creditBonus = Math.floor(totalCredits / creditScoreDivisor);
+  var score = Math.max(0, (7 * defeatedCount) - (gauntletState.agendaScored || 0) + creditBonus);
   
   // Helper function to get perk name
   function getPerkName(perkNum) {
@@ -1094,6 +1099,15 @@ function ShowGauntletRecap(gauntletState) {
  * @param {Object} gauntletState the gauntlet state object
  */
 function ShowGauntletLostModal(gauntletState) {
+  // Calculate score: (7 * defeated) - agendaScored + floor(credits / creditScoreDivisor), minimum 0
+  var defeatedCount = gauntletState.defeated || 0;
+  var totalCredits = (gauntletState.credits || 0) + (gauntletState.creditsWon || 0);
+  var creditScoreDivisor = (typeof gauntletConfig !== 'undefined' && gauntletConfig.matchRewards && gauntletConfig.matchRewards.creditScoreDivisor) 
+    ? gauntletConfig.matchRewards.creditScoreDivisor 
+    : 10;
+  var creditBonus = Math.floor(totalCredits / creditScoreDivisor);
+  var score = Math.max(0, (7 * defeatedCount) - (gauntletState.agendaScored || 0) + creditBonus);
+  
   // Helper function to get perk name
   function getPerkName(perkNum) {
     // Perks 7-12 are disabled versions of perks 1-6
@@ -1179,10 +1193,11 @@ function ShowGauntletLostModal(gauntletState) {
   lostHtml += '<div style="color: #33ff33; font-family: monospace; padding: 20px; text-align: center; width: 100%;">';
   lostHtml += '<div style="margin-bottom: 20px; font-size: 16px;">Progress: ' + defeatedCount + ' / ' + totalOpponents + ' opponents defeated</div>';
   lostHtml += opponentListHtml;
-  lostHtml += '<div style="margin-top: 20px; padding-top: 20px; border-top: 2px solid #33ff33;">';
-  lostHtml += '<div style="display: flex; justify-content: center; gap: 10px;">';
-  lostHtml += '<button class="button" onclick="window.location.href=\'index.php\';">RETURN TO MENU</button>';
+  lostHtml += '<div style="margin-top: 20px; padding-top: 20px; border-top: 2px solid #33ff33; font-size: 18px;">';
+  lostHtml += '<div style="color: #ffff00; font-weight: bold;">SCORE: ' + score + '</div>';
   lostHtml += '</div>';
+  lostHtml += '<div style="display: flex; justify-content: center; margin-top: 20px;">';
+  lostHtml += '<button class="button" onclick="window.location.href=\'index.php\';">RETURN TO MENU</button>';
   lostHtml += '</div>';
   lostHtml += '</div>';
   lostHtml += '</div>';
