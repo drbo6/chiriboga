@@ -1256,7 +1256,7 @@ function PlayerWin(player, msgstr) {
                 textLines.push(line.label + ": " + valueStr);
               }
               if (floorApplied) {
-                textLines.push("(Minimum credits applied)");
+                textLines.push("(Minimum of " + minimalCredits + " credits applied)");
               }
               textLines.push("Total: " + creditsThisMatch + " credits");
               
