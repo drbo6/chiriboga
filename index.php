@@ -410,7 +410,7 @@
         </div>
 
         <div class="meta-stack portrait-only">
-          <div class="version">BUILD 0.6.6-BETA // 2077.<?php echo date('m.d'); ?></div>
+          <div class="version">BUILD 0.6.7-BETA // 2077.<?php echo date('m.d'); ?></div>
           <div class="status-bar">
             <span class="status-item" style="cursor:pointer;" onclick="openCredits()">CREDITS</span>
             <span class="status-item" id="threat-level-portrait">THREAT LEVEL: <span id="threat-color-portrait">1</span></span>
