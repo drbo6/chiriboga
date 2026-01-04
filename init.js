@@ -147,6 +147,12 @@ function Init() {
 	Render();
 	Main();
 	$('#menu').css('display','none');
+	
+	// Clear watermark on rewind
+	var watermark = document.querySelector('.netrunner-bg-watermark');
+	if (watermark) {
+	  watermark.textContent = '';
+	}
   });
 
   Log("Game begins");
