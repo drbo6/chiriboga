@@ -2997,37 +2997,8 @@ body.run-active .fullscreen-button:hover::before {
     letter-spacing: 2px;
 }
 
-/* Green accent button (for Hack Opponents) */
-.button.button-green {
-    background: linear-gradient(135deg, #081a08 0%, #0a2d0a 50%, #081a08 100%);
-    border: 1px solid var(--border-green, #1f6d1f);
-    color: var(--crt-green, #33ff33);
-    box-shadow: 
-        0 0 10px rgba(51, 255, 51, 0.25) inset, 
-        0 0 6px rgba(51, 255, 51, 0.35),
-        0 0 12px rgba(0, 255, 0, 0.15);
-    text-shadow: 0 0 6px rgba(51, 255, 51, 0.5);
-}
-
-.button.button-green:hover {
-    background: linear-gradient(135deg, #0a2d0a 0%, #104a10 50%, #0a2d0a 100%);
-    border-color: var(--crt-green, #33ff33);
-    color: var(--crt-green-light, #66ff66);
-    box-shadow: 
-        0 0 14px rgba(51, 255, 51, 0.45) inset, 
-        0 0 10px rgba(51, 255, 51, 0.55),
-        0 0 18px rgba(0, 255, 0, 0.25);
-    text-shadow: 0 0 8px rgba(51, 255, 51, 0.7);
-}
-
-.button.button-green:active {
-    background: linear-gradient(135deg, #0c3a0c 0%, #145a14 50%, #0c3a0c 100%);
-    box-shadow: 
-        0 0 10px rgba(51, 255, 51, 0.55) inset, 
-        0 0 8px rgba(51, 255, 51, 0.45);
-}
-
-.button.button-green:disabled {
+/* Hack Opponents button disabled state (green-tinted like Play Deck is red-tinted) */
+#hackopponents:disabled {
     background: linear-gradient(135deg, #051205 0%, #081a08 50%, #051205 100%);
     border-color: var(--border-green-dark, #184e18);
     color: var(--crt-green-muted, #8fdc8f);
@@ -3331,14 +3302,6 @@ body.deck-builder-page {
 /* Hack Opponents Modal Styles */
 .hack-opponent-item {
 	transition: transform 0.2s ease;
-}
-
-.hack-opponent-item:hover {
-	transform: scale(1.05);
-}
-
-.hack-opponent-item:hover .hack-opponent-img {
-	box-shadow: 0 0 15px var(--crt-green, #33ff33);
 }
 
 .hack-opponent-item.defeated {

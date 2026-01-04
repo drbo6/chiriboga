@@ -838,7 +838,9 @@
       var alternateFactions = settingsOverrides.alternateFactions;
       
       // Initialize perk pools for opponent starting perks
+      // Regular perks: 9 perks for non-boss opponents (1-3, 5-7, 9-11)
       var regularPerks = [1,1,1,2,2,2,3,3,3];
+      // Boss perks: 3 perks for boss opponents (4, 8, 12)
       var bossPerks = [4,5,6];
       
       // Shuffle the perk pools
@@ -857,10 +859,8 @@
       
       // Helper function to get starting perk for opponent number (1-indexed)
       function getStartingPerk(opponentNum) {
-        // Opponent 1 => Always 0
-        if (opponentNum === 1) return 0;
-        // Opponents 2-3 => Draw from regularPerks
-        if (opponentNum >= 2 && opponentNum <= 3) {
+        // Opponents 1-3 => Draw from regularPerks
+        if (opponentNum >= 1 && opponentNum <= 3) {
           return regularPerks.length > 0 ? regularPerks.shift() : 0;
         }
         // Opponent 4 => Draw from bossPerks

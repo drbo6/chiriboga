@@ -328,8 +328,7 @@
 				// Determine which opponents are unlocked based on progression
 				// Boss positions: 4, 8, 12 (indices 3, 7, 11)
 				// Unlock rules:
-				// 1 is always unlocked (must be defeated first)
-				// 2-3 unlocked after 1 is defeated
+				// 1-3 are always unlocked
 				// 1-3 must be defeated to unlock 4
 				// 4 must be defeated to unlock 5-7
 				// 5-7 must be defeated to unlock 8
@@ -338,13 +337,8 @@
 				function isOpponentUnlocked(index, opponents) {
 					var oppNum = index + 1; // 1-based opponent number
 					
-					// Opponent 1 is always unlocked (must be defeated first)
-					if (oppNum === 1) return true;
-					
-					// Opponents 2-3: requires opponent 1 defeated
-					if (oppNum >= 2 && oppNum <= 3) {
-						return opponents.length >= 1 && opponents[0].hasbeendefeated;
-					}
+					// Opponents 1-3 are always unlocked
+					if (oppNum >= 1 && oppNum <= 3) return true;
 					
 					// Opponent 4 (first boss): requires 1-3 defeated
 					if (oppNum === 4) {
@@ -513,6 +507,12 @@
 						gauntletState.creditsWon = 0;
 						gauntletState.currentOpponentIndex = opponentIndex; // Track which opponent was selected
 						gauntletState.hackAttempts = hackAttemptCounters;
+						
+						// Before the first match (defeated === 0), set the selected opponent's perk to 0
+						if (gauntletState.defeated === 0 && gauntletState.opponents && gauntletState.opponents[opponentIndex]) {
+							gauntletState.opponents[opponentIndex].startingPerk = 0;
+						}
+						
 						// Update only hack-related states on opponents, don't replace entire array
 						if (gauntletState.opponents && gauntletOpponents) {
 							for (var i = 0; i < gauntletOpponents.length && i < gauntletState.opponents.length; i++) {
@@ -548,12 +548,8 @@
 				// Helper functions for unlock logic (same as Play Deck)
 				function isOpponentUnlocked(index, opponents) {
 					var oppNum = index + 1;
-					// Opponent 1 is always unlocked
-					if (oppNum === 1) return true;
-					// Opponents 2-3: requires opponent 1 defeated
-					if (oppNum >= 2 && oppNum <= 3) {
-						return opponents.length >= 1 && opponents[0].hasbeendefeated;
-					}
+					// Opponents 1-3 are always unlocked
+					if (oppNum >= 1 && oppNum <= 3) return true;
 					if (oppNum === 4) {
 						for (var i = 0; i < 3 && i < opponents.length; i++) {
 							if (!opponents[i].hasbeendefeated) return false;
@@ -4388,7 +4384,7 @@
 				<button id="launch" class="button button-red" onclick="if(!$(this).prop('disabled')) ShowSelectOpponentModal();">PLAY<br>DECK</button>
 				<button id="exittomenu" onclick="window.location.href='index.php';" class="button">BACK TO<br>MENU</button>
 				<button id="buycards" onclick="ShowBuyCardsModal();" class="button">BUY/SELL<br>CARDS</button>
-				<button id="hackopponents" onclick="ShowHackOpponentsModal();" class="button button-green">HACK<br>OPPONENTS</button>
+				<button id="hackopponents" onclick="ShowHackOpponentsModal();" class="button">HACK<br>OPPONENTS</button>
 				<button id="addnoninfluence" onclick="AddNonInfluence();" class="button">ADD IN-<br>FACTION</button>
 				<button id="cleardeck" onclick="ClearDeck();" class="button">CLEAR<br>DECK</button>
 				<button id="sortbydeck" onclick="CycleSort();" class="button">SORT BY:<br>NAME</button>
