@@ -240,6 +240,27 @@
                 <div class="precon-list" id="precon-list">
                   <!-- Populated by JavaScript -->
                 </div>
+                <div class="settings-section-header">DATA MANAGEMENT</div>
+                <div class="settings-group" title="Export all local data including settings and gauntlet saves">
+                  <label class="settings-label">BACKUP DATA</label>
+                  <button class="settings-btn" onclick="exportLocalData()">EXPORT</button>
+                </div>
+                <div class="settings-group" title="Import previously exported data backup">
+                  <label class="settings-label">RESTORE DATA</label>
+                  <button class="settings-btn" onclick="document.getElementById('import-data-input').click()">IMPORT</button>
+                  <input type="file" id="import-data-input" accept=".json" style="display:none;" onchange="importLocalData(event)">
+                </div>
+              </div>
+            </div>
+
+            <!-- Data management modal -->
+            <div class="data-modal" id="data-modal" style="display:none;">
+              <div class="data-modal-content">
+                <div class="data-modal-title" id="data-modal-title">TITLE</div>
+                <div class="data-modal-message" id="data-modal-message">Message goes here</div>
+                <div class="data-modal-buttons" id="data-modal-buttons">
+                  <button class="data-modal-btn" onclick="closeDataModal()">OK</button>
+                </div>
               </div>
             </div>
 
@@ -1418,6 +1439,171 @@
       var p = document.getElementById('settings-panel');
       p.style.width='';
       p.style.maxHeight='';
+    }
+
+    // Data modal helper functions
+    var dataModalCallback = null;
+    
+    function showDataModal(title, message, buttons) {
+      var modal = document.getElementById('data-modal');
+      var titleEl = document.getElementById('data-modal-title');
+      var messageEl = document.getElementById('data-modal-message');
+      var buttonsEl = document.getElementById('data-modal-buttons');
+      
+      titleEl.textContent = title;
+      messageEl.innerHTML = message;
+      
+      // Build buttons
+      buttonsEl.innerHTML = '';
+      buttons.forEach(function(btn) {
+        var button = document.createElement('button');
+        button.className = 'data-modal-btn' + (btn.secondary ? ' secondary' : '');
+        button.textContent = btn.text;
+        button.onclick = function() {
+          closeDataModal();
+          if (btn.callback) btn.callback();
+        };
+        buttonsEl.appendChild(button);
+      });
+      
+      modal.style.display = 'flex';
+    }
+    
+    function closeDataModal() {
+      var modal = document.getElementById('data-modal');
+      modal.style.display = 'none';
+    }
+    
+    function showDataAlert(title, message, callback) {
+      showDataModal(title, message, [
+        { text: 'OK', callback: callback }
+      ]);
+    }
+    
+    function showDataConfirm(title, message, onConfirm, onCancel) {
+      showDataModal(title, message, [
+        { text: 'CANCEL', secondary: true, callback: onCancel },
+        { text: 'CONFIRM', callback: onConfirm }
+      ]);
+    }
+
+    // Export all localStorage data to a JSON file
+    function exportLocalData() {
+      try {
+        var exportData = {};
+        
+        // Iterate through all localStorage keys
+        for (var i = 0; i < localStorage.length; i++) {
+          var key = localStorage.key(i);
+          // Only export chiriboga-related keys
+          if (key && key.indexOf('chiriboga') === 0) {
+            exportData[key] = localStorage.getItem(key);
+          }
+        }
+        
+        var keyCount = Object.keys(exportData).length;
+        if (keyCount === 0) {
+          showDataAlert('NO DATA', 'There is no saved data to export.');
+          return;
+        }
+        
+        // Create the export object with metadata
+        var exportWrapper = {
+          version: 1,
+          exportDate: new Date().toISOString(),
+          data: exportData
+        };
+        
+        // Create and download the file
+        var blob = new Blob([JSON.stringify(exportWrapper, null, 2)], { type: 'application/json' });
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement('a');
+        a.href = url;
+        a.download = 'chiriboga-backup-' + new Date().toISOString().slice(0, 10) + '.json';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        
+        showDataAlert('EXPORT COMPLETE', 'Successfully exported ' + keyCount + ' data entries.');
+        console.log('Data exported successfully');
+      } catch (e) {
+        console.error('Failed to export data:', e);
+        showDataAlert('EXPORT FAILED', 'Could not export data: ' + e.message);
+      }
+    }
+    
+    // Import localStorage data from a JSON file
+    function importLocalData(event) {
+      var file = event.target.files[0];
+      if (!file) return;
+      
+      // Limit file size to 5MB to prevent abuse
+      if (file.size > 5 * 1024 * 1024) {
+        showDataAlert('FILE TOO LARGE', 'Backup file exceeds the 5MB size limit.');
+        event.target.value = '';
+        return;
+      }
+      
+      var reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          var importWrapper = JSON.parse(e.target.result);
+          
+          // Validate the import file
+          if (!importWrapper || !importWrapper.data || typeof importWrapper.data !== 'object') {
+            throw new Error('Invalid backup file format');
+          }
+          
+          // Filter to only allow chiriboga-prefixed keys (security)
+          var validKeys = {};
+          var skippedKeys = 0;
+          for (var key in importWrapper.data) {
+            if (importWrapper.data.hasOwnProperty(key)) {
+              if (typeof key === 'string' && key.indexOf('chiriboga') === 0) {
+                validKeys[key] = importWrapper.data[key];
+              } else {
+                skippedKeys++;
+              }
+            }
+          }
+          
+          var keyCount = Object.keys(validKeys).length;
+          if (keyCount === 0) {
+            throw new Error('No valid data found in backup');
+          }
+          
+          // Build confirmation message
+          var exportDate = importWrapper.exportDate ? new Date(importWrapper.exportDate).toLocaleDateString() : 'Unknown';
+          var message = 'Restore <strong>' + keyCount + '</strong> data entries from backup?';
+          message += '<br><br>Backup date: <strong>' + exportDate + '</strong>';
+          if (skippedKeys > 0) {
+            message += '<br><span style="color:var(--crt-green-muted);font-size:11px;">(' + skippedKeys + ' invalid entries will be skipped)</span>';
+          }
+          message += '<br><br><span style="color:var(--crt-green-muted);font-size:11px;">This will overwrite your current settings and saves.</span>';
+          
+          showDataConfirm('RESTORE DATA', message, function() {
+            // Import each validated key
+            for (var key in validKeys) {
+              if (validKeys.hasOwnProperty(key)) {
+                localStorage.setItem(key, validKeys[key]);
+              }
+            }
+            
+            showDataAlert('IMPORT COMPLETE', 'Successfully restored ' + keyCount + ' data entries.<br><br>The page will now reload.', function() {
+              location.reload();
+            });
+          });
+        } catch (err) {
+          console.error('Failed to import data:', err);
+          showDataAlert('IMPORT FAILED', 'Could not restore data: ' + err.message);
+        }
+      };
+      
+      reader.readAsText(file);
+      
+      // Reset the file input so the same file can be selected again
+      event.target.value = '';
     }
 
     // Tutorial functions

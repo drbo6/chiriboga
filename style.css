@@ -3080,6 +3080,90 @@ body.deck-builder-page {
 .stepper-btn:hover:not(:disabled) { background:var(--crt-green); color:var(--bg-dark); }
 .stepper-btn:disabled { color:var(--border-green-dark); border-color:var(--border-green-dark); cursor:default; opacity:0.4; }
 .stepper-value { color:var(--crt-green); font-size:14px; min-width:24px; text-align:center; }
+.settings-btn { background:var(--bg-dark); color:var(--crt-green); border:1px solid var(--border-green-dark); padding:6px 16px; font-size:11px; letter-spacing:1px; cursor:pointer; transition:all 0.2s; font-family:inherit; }
+.settings-btn:hover { background:var(--crt-green); color:var(--bg-dark); border-color:var(--crt-green); }
+
+/* Data management modal */
+.data-modal {
+  position: fixed;
+  z-index: 10000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.data-modal-content {
+  background: var(--bg-dark);
+  border: 1px solid var(--border-green);
+  border-radius: 8px;
+  padding: 24px 32px;
+  max-width: 400px;
+  width: 90%;
+  box-shadow: 0 0 30px rgba(51, 255, 51, 0.3), inset 0 0 20px rgba(51, 255, 51, 0.1);
+  position: relative;
+}
+.data-modal-content::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: repeating-linear-gradient(to bottom, rgba(0,0,0,0) 0px, rgba(0,0,0,0) 2px, rgba(0,0,0,0.12) 3px, rgba(0,0,0,0.12) 4px);
+  border-radius: 8px;
+}
+.data-modal-title {
+  color: var(--crt-green);
+  font-size: 16px;
+  letter-spacing: 2px;
+  margin-bottom: 16px;
+  text-align: center;
+  text-shadow: 0 0 8px var(--glow-green);
+  position: relative;
+  z-index: 1;
+}
+.data-modal-message {
+  color: var(--crt-green-muted);
+  font-size: 13px;
+  line-height: 1.5;
+  margin-bottom: 20px;
+  text-align: center;
+  position: relative;
+  z-index: 1;
+}
+.data-modal-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  position: relative;
+  z-index: 1;
+}
+.data-modal-btn {
+  background: var(--bg-dark);
+  color: var(--crt-green);
+  border: 1px solid var(--border-green);
+  padding: 8px 24px;
+  font-size: 12px;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: inherit;
+}
+.data-modal-btn:hover {
+  background: var(--crt-green);
+  color: var(--bg-dark);
+}
+.data-modal-btn.secondary {
+  border-color: var(--border-green-dark);
+  color: var(--crt-green-muted);
+}
+.data-modal-btn.secondary:hover {
+  background: var(--crt-green-muted);
+  color: var(--bg-dark);
+  border-color: var(--crt-green-muted);
+}
 
 /* Speed button radio styling */
 .settings-speed-buttons { display:flex; gap:8px; }
