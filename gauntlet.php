@@ -231,11 +231,10 @@
 				welcomeHtml += '<h1 class="logo-text" style="text-align: center; color: var(--crt-red); text-shadow: 0 0 5px var(--crt-red), 0 0 15px var(--glow-red), 0 0 35px var(--glow-red-dark);">WELCOME TO<br>THE GAUNTLET</h1>';
 				welcomeHtml += '</div>';
 				welcomeHtml += '<div style="color: var(--crt-red); font-family: monospace; padding: 20px; text-align: center; width: 100%; max-width: 500px;">';
-				welcomeHtml += '<p>In this mode, you will face ' + gauntletLength + ' randomly selected decks.</p>';
+				welcomeHtml += '<p>In this mode, you will face ' + gauntletLength + ' randomly selected decks. (The Gauntlet length can be changed in the settings before launch.)</p>';
 				welcomeHtml += '<p style="margin-top: 20px;">Build a deck from a randomized limited card pool and defeat them to complete the Gauntlet.</p>';
-				welcomeHtml += '<p style="margin-top: 20px;">Every agenda point that you steal wins you more credits, but every agenda point that the Corp scores costs you some of those credits.</p>';
-				welcomeHtml += '<p style="margin-top: 20px;">After your first game, you can no longer change your identity.</p>';							
-				welcomeHtml += '<p style="margin-top: 20px;">To save your progress, simply create a bookmark in your browser.</p>';	
+				welcomeHtml += '<p style="margin-top: 20px;">Every agenda point that you steal wins you more credits, but every agenda point that the Corp scores costs you some of those credits.</p>';							
+				welcomeHtml += '<p style="margin-top: 20px;">After your first win, each opponent will receive special starting perks. You can hack them to remove these.</p>';					
 				welcomeHtml += '<p style="margin-top: 20px;">Start by buying card packs from the shop to build your deck. Good luck!</p>';
 				welcomeHtml += '</div>';
 				welcomeHtml += '<div style="display: flex; justify-content: center; margin-top: 0px; width: 100%;"><button class="button" onclick="CloseGauntletWelcomeModal();">CONTINUE</button></div>';
