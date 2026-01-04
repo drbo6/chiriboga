@@ -985,23 +985,30 @@ function PlayerName(player) {
  * @param {Object} gauntletState the gauntlet state object
  */
 function ShowGauntletRecap(gauntletState) {
-  // Calculate score: (7 * defeated) - agendaScored + floor(credits / creditScoreDivisor), minimum 0
+  // Calculate score:
+  // +1 for each agenda point runner stole (all games including this one)
+  // -1 for each agenda point corp scored (all games including this one)
+  // + floor(credits / creditScoreDivisor) where credits includes creditsWon
   var defeatedCount = gauntletState.defeated || 0;
   var totalCredits = (gauntletState.credits || 0) + (gauntletState.creditsWon || 0);
   var creditScoreDivisor = (typeof gauntletConfig !== 'undefined' && gauntletConfig.matchRewards && gauntletConfig.matchRewards.creditScoreDivisor) 
     ? gauntletConfig.matchRewards.creditScoreDivisor 
     : 10;
   var creditBonus = Math.floor(totalCredits / creditScoreDivisor);
+  
+  // Agenda points across all games (already includes current game since state was updated)
+  var agendaStolen = gauntletState.agendaStolen || 0;
   var agendaScored = gauntletState.agendaScored || 0;
-  var rawScore = (7 * defeatedCount) - agendaScored + creditBonus;
+  
+  var rawScore = agendaStolen - agendaScored + creditBonus;
   var score = Math.max(0, rawScore);
   
   console.log("=== GAUNTLET COMPLETE SCORE CALCULATION ===");
-  console.log("defeated: " + defeatedCount + " × 7 = " + (7 * defeatedCount));
-  console.log("agendaScored: -" + agendaScored);
-  console.log("credits: " + gauntletState.credits + " + creditsWon: " + gauntletState.creditsWon + " = " + totalCredits);
+  console.log("agendaStolen (all games): +" + agendaStolen);
+  console.log("agendaScored (all games): -" + agendaScored);
+  console.log("credits: " + (gauntletState.credits || 0) + " + creditsWon: " + (gauntletState.creditsWon || 0) + " = " + totalCredits);
   console.log("creditBonus: floor(" + totalCredits + " / " + creditScoreDivisor + ") = " + creditBonus);
-  console.log("rawScore: " + (7 * defeatedCount) + " - " + agendaScored + " + " + creditBonus + " = " + rawScore);
+  console.log("rawScore: " + agendaStolen + " - " + agendaScored + " + " + creditBonus + " = " + rawScore);
   console.log("FINAL SCORE: " + score);
   
   // Helper function to get perk name
@@ -1109,23 +1116,44 @@ function ShowGauntletRecap(gauntletState) {
  * @param {Object} gauntletState the gauntlet state object
  */
 function ShowGauntletLostModal(gauntletState) {
-  // Calculate score: (7 * defeated) - agendaScored + floor(credits / creditScoreDivisor), minimum 0
+  // Calculate score:
+  // +1 for each agenda point runner stole (previous games + this game)
+  // -1 for each agenda point corp scored (previous games + this game)
+  // + floor(credits / creditScoreDivisor) where credits excludes creditsWon (no victory/bossBeaten rewards)
   var defeatedCount = gauntletState.defeated || 0;
-  var totalCredits = (gauntletState.credits || 0) + (gauntletState.creditsWon || 0);
+  var totalCredits = gauntletState.credits || 0; // Don't include creditsWon for losers
   var creditScoreDivisor = (typeof gauntletConfig !== 'undefined' && gauntletConfig.matchRewards && gauntletConfig.matchRewards.creditScoreDivisor) 
     ? gauntletConfig.matchRewards.creditScoreDivisor 
     : 10;
   var creditBonus = Math.floor(totalCredits / creditScoreDivisor);
-  var agendaScored = gauntletState.agendaScored || 0;
-  var rawScore = (7 * defeatedCount) - agendaScored + creditBonus;
+  
+  // Agenda points from previous games
+  var agendaStolenPrev = gauntletState.agendaStolen || 0;
+  var agendaScoredPrev = gauntletState.agendaScored || 0;
+  
+  // Get agenda points from current game
+  var agendaStolenThisGame = 0;
+  var agendaScoredThisGame = 0;
+  if (typeof runner !== 'undefined' && runner) {
+    agendaStolenThisGame = AgendaPoints(runner);
+  }
+  if (typeof corp !== 'undefined' && corp) {
+    agendaScoredThisGame = AgendaPoints(corp);
+  }
+  
+  // Total agenda points
+  var totalAgendaStolen = agendaStolenPrev + agendaStolenThisGame;
+  var totalAgendaScored = agendaScoredPrev + agendaScoredThisGame;
+  
+  var rawScore = totalAgendaStolen - totalAgendaScored + creditBonus;
   var score = Math.max(0, rawScore);
   
   console.log("=== GAUNTLET LOST SCORE CALCULATION ===");
-  console.log("defeated: " + defeatedCount + " × 7 = " + (7 * defeatedCount));
-  console.log("agendaScored: -" + agendaScored);
-  console.log("credits: " + gauntletState.credits + " + creditsWon: " + gauntletState.creditsWon + " = " + totalCredits);
+  console.log("agendaStolen (previous): " + agendaStolenPrev + " + (this game): " + agendaStolenThisGame + " = +" + totalAgendaStolen);
+  console.log("agendaScored (previous): " + agendaScoredPrev + " + (this game): " + agendaScoredThisGame + " = -" + totalAgendaScored);
+  console.log("credits: " + totalCredits + " (excludes creditsWon)");
   console.log("creditBonus: floor(" + totalCredits + " / " + creditScoreDivisor + ") = " + creditBonus);
-  console.log("rawScore: " + (7 * defeatedCount) + " - " + agendaScored + " + " + creditBonus + " = " + rawScore);
+  console.log("rawScore: " + totalAgendaStolen + " - " + totalAgendaScored + " + " + creditBonus + " = " + rawScore);
   console.log("FINAL SCORE: " + score);
   
   // Helper function to get perk name
@@ -1314,8 +1342,11 @@ function PlayerWin(player, msgstr) {
           // Increment defeated count
           gauntletState.defeated = (gauntletState.defeated || 0) + 1;
           
-          // Add corp's agenda points to total
+          // Add corp's agenda points to total (agendas scored by corp)
           gauntletState.agendaScored = (gauntletState.agendaScored || 0) + AgendaPoints(corp);
+          
+          // Add runner's agenda points to total (agendas stolen by runner)
+          gauntletState.agendaStolen = (gauntletState.agendaStolen || 0) + AgendaPoints(runner);
           
           // Calculate creditsWon for this match
           // Formula: victory + (agendaPointStolen * runnerAgendaPoints) + (agendaPointScored * corpAgendaPoints) + bossBeaten (if applicable)
