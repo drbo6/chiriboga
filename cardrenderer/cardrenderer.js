@@ -1569,7 +1569,8 @@ var CardRenderer = {
       });
       this.tutorialText = new PIXI.Text("", this.tutorialStyle);
       this.tutorialText.anchor.set(0, 0.5);
-      this.app.stage.addChild(this.tutorialText); //add to the stage container (so it renders)
+      // Only add tutorialText to stage if t=1 parameter is present
+      // Note: It will also be added in Render() when needed
 
       //store all particle containers created through this
       this.particleContainers = [];

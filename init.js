@@ -1317,7 +1317,10 @@ function Render() {
   
   //put server labels and tutorial text on top (but under hand, resolving cards, viewing grid and gui)
   cardRenderer.app.stage.addChild(cardRenderer.serverText);
-  cardRenderer.app.stage.addChild(cardRenderer.tutorialText);
+  // Only add tutorialText to stage if t=1 parameter is present
+  if (URIParameter("t") === "1") {
+    cardRenderer.app.stage.addChild(cardRenderer.tutorialText);
+  }
   
   //runner resolving cards and hand
   runnerResolvingCascade.Apply(
@@ -1857,6 +1860,9 @@ var TutorialWhitelist = null;
 var TutorialBlacklist = null;
 var TutorialCommandMessage = {};
 function TutorialMessage(message, prompt = false, callback=null) {
+  // Only show tutorial messages if t=1 is in the URL
+  if (URIParameter("t") !== "1") return;
+  
   cardRenderer.tutorialText.text = message;
   if (prompt) {
     var decisionPhase = DecisionPhase(

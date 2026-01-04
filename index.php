@@ -277,8 +277,8 @@
                   <div class="tutorial-item" onclick="startTutorial(3)"><span class="tutorial-number">4</span><span class="tutorial-label">ASSETS & TRASH COSTS</span></div>
                   <div class="tutorial-item" onclick="startTutorial(4)"><span class="tutorial-number">5</span><span class="tutorial-label">ADVANCING & SCORING</span></div>
                   <div class="tutorial-item" onclick="startTutorial(5)"><span class="tutorial-number">6</span><span class="tutorial-label">UPGRADES & ROOT</span></div>
-                  <div class="tutorial-item" onclick="window.location.href='engine.php?ap=6&p=r&r=N4IglgJgpgdgLmOBPEAuAzABkwdgGwA0IAxgIYBOEAzmgNpbaEOZPYCMATAQ59++n0xsALILYBWMZJ4AOQR0zzFDDm3lqVrTBy0cc8-SrlH5x7BwCc8qwyyC7t5dnRdbr5wNufnwgLoBfIA&c=N4IglgJgpgdgLmOBPEAuAzABkwdhwGhAGMBDAJwgGc0BtLTdA+x-ZgTle3Q-oBZNOmfoN4AmEQFZJIgGyyRTbL0WYZvQWo0qZ27T2wz9uAfRwnsOAIyCrN8afsXHudDden1Hm1NM+LEgF0AXyA'"><span class="tutorial-number">7</span><span class="tutorial-label">VS CORP STARTER DECK</span></div>
-                  <div class="tutorial-item" onclick="window.location.href='engine.php?ap=6&p=c&c=N4IglgJgpgdgLmOBPEAuAzABkwdhwGhAGMBDAJwgGc0BtLTdA+x-ZgTle3Q-oBZNOmfoN4AmEQFZJIgGyyRTbL0WYZvQWo0qZ27T2wz9uAfRwnsOAIyCrN8afsXHudDden1Hm1NM+LEgF0AXyA&r=N4IglgJgpgdgLmOBPEAuAzABkwdgGwA0IAxgIYBOEAzmgNpbaEOZPYCMATAQ59++n0xsALILYBWMZJ4AOQR0zzFDDm3lqVrTBy0cc8-SrlH5x7BwCc8qwyyC7t5dnRdbr5wNufnwgLoBfIA'"><span class="tutorial-number">8</span><span class="tutorial-label">VS RUNNER STARTER DECK</span></div>
+                  <div class="tutorial-item" onclick="window.location.href='engine.php?ap=6&p=r&r=N4IglgJgpgdgLmOBPEAuAzABkwdgGwA0IAxgIYBOEAzmgNpbaEOZPYCMATAQ59++n0xsALILYBWMZJ4AOQR0zzFDDm3lqVrTBy0cc8-SrlH5x7BwCc8qwyyC7t5dnRdbr5wNufnwgLoBfIA&c=N4IglgJgpgdgLmOBPEAuAzABkwdhwGhAGMBDAJwgGc0BtLTdA+x-ZgTle3Q-oBZNOmfoN4AmEQFZJIgGyyRTbL0WYZvQWo0qZ27T2wz9uAfRwnsOAIyCrN8afsXHudDden1Hm1NM+LEgF0AXyA&t=1'"><span class="tutorial-number">7</span><span class="tutorial-label">VS CORP STARTER DECK</span></div>
+                  <div class="tutorial-item" onclick="window.location.href='engine.php?ap=6&p=c&c=N4IglgJgpgdgLmOBPEAuAzABkwdhwGhAGMBDAJwgGc0BtLTdA+x-ZgTle3Q-oBZNOmfoN4AmEQFZJIgGyyRTbL0WYZvQWo0qZ27T2wz9uAfRwnsOAIyCrN8afsXHudDden1Hm1NM+LEgF0AXyA&r=N4IglgJgpgdgLmOBPEAuAzABkwdgGwA0IAxgIYBOEAzmgNpbaEOZPYCMATAQ59++n0xsALILYBWMZJ4AOQR0zzFDDm3lqVrTBy0cc8-SrlH5x7BwCc8qwyyC7t5dnRdbr5wNufnwgLoBfIA&t=1'"><span class="tutorial-number">8</span><span class="tutorial-label">VS RUNNER STARTER DECK</span></div>
                 </div>
               </div>
             </div>
@@ -1794,7 +1794,7 @@
       ];
       var t = tutorials[mentorIndex];
       if (!t) return;
-      window.location.href = 'engine.php?p=' + t.side + '&mentor=' + t.mentor;
+      window.location.href = 'engine.php?p=' + t.side + '&mentor=' + t.mentor + '&t=1';
     }
   </script>
 </body>
