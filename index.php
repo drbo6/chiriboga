@@ -818,13 +818,10 @@
             
             if (factionsWithCards.length === 0) continue;  // Skip if no cards match
             
-            // Shuffle factions to randomize who gets remainder slots
-            for (var i = factionsWithCards.length - 1; i > 0; i--) {
-              var j = Math.floor(Math.random() * (i + 1));
-              var temp = factionsWithCards[i];
-              factionsWithCards[i] = factionsWithCards[j];
-              factionsWithCards[j] = temp;
-            }
+            // Sort factions by pool size (smallest first) to prioritize smaller pools
+            factionsWithCards.sort(function(a, b) {
+              return cardsByFaction[a].length - cardsByFaction[b].length;
+            });
             
             // Calculate even distribution with remainder
             var basePerFaction = Math.floor(quantity / factionsWithCards.length);
@@ -833,14 +830,21 @@
             // Select cards from each faction according to quota
             for (var f = 0; f < factionsWithCards.length; f++) {
               var faction = factionsWithCards[f];
-              var pool = cardsByFaction[faction];
+              var pool = cardsByFaction[faction].slice(); // Make a copy to sample without replacement
               var target = basePerFaction + (f < remainder ? 1 : 0);  // First factions get +1 for remainder
               
+              // If target exceeds pool size, we need to cycle through the pool multiple times
               for (var s = 0; s < target; s++) {
+                if (pool.length === 0) {
+                  // Refill the pool if exhausted (rare case where target > pool size)
+                  pool = cardsByFaction[faction].slice();
+                }
                 var randomIdx = Math.floor(Math.random() * pool.length);
                 var selectedCard = pool[randomIdx];
                 gauntletCardIds.push(selectedCard);
                 gauntletCardCounts[selectedCard] = (gauntletCardCounts[selectedCard] || 0) + 1;
+                // Remove selected card from pool to prevent immediate duplicates
+                pool.splice(randomIdx, 1);
               }
             }
           } else {

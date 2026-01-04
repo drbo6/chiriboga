@@ -702,6 +702,13 @@
 			// Track hack attempts per opponent for seeded randomness
 			var hackAttemptCounters = {};
 			
+			// Track prepare hack bonus (temporary, resets after each hack attempt)
+			var prepareHackBonus = 0;
+			
+			// Track failed hack chances to ensure next attempt is always higher
+			// Key: opponentIndex_actionType, Value: the chance that was failed
+			var failedHackChances = {};
+			
 			// Get a seeded random number for hack chances
 			function GetHackChance(opponentIndex, actionType, attemptNumber) {
 				// Use the gauntlet seed combined with opponent index and action type
@@ -733,7 +740,36 @@
 						max = 90;
 				}
 				
-				return Math.floor(seededRng() * (max - min + 1)) + min;
+				var baseChance = Math.floor(seededRng() * (max - min + 1)) + min;
+				
+				// Check if there was a previous failed attempt - if so, ensure this chance is higher
+				var failKey = opponentIndex + '_' + actionType;
+				if (failedHackChances[failKey] !== undefined) {
+					var failedChance = failedHackChances[failKey];
+					var recoveryMin = config.failureRecoveryBonusMin || 5;
+					var recoveryMax = config.failureRecoveryBonusMax || 15;
+					
+					// Calculate recovery bonus using seeded random
+					var recoverySeed = gauntletSeed + '_recovery_' + opponentIndex + '_' + actionType + '_' + attemptNumber;
+					var recoveryRng = new Math.seedrandom(recoverySeed);
+					var recoveryBonus = Math.floor(recoveryRng() * (recoveryMax - recoveryMin + 1)) + recoveryMin;
+					
+					// New chance must be at least failed chance + recovery bonus
+					var minNewChance = failedChance + recoveryBonus;
+					if (baseChance < minNewChance) {
+						baseChance = minNewChance;
+					}
+				}
+				
+				// Cap at 95% maximum
+				return Math.min(baseChance, 95);
+			}
+			
+			// Get the effective hack chance including prepare bonus (for display)
+			function GetEffectiveHackChance(opponentIndex, actionType, attemptNumber) {
+				var baseChance = GetHackChance(opponentIndex, actionType, attemptNumber);
+				var effectiveChance = baseChance + prepareHackBonus;
+				return Math.min(effectiveChance, 95); // Cap at 95%
 			}
 			
 			// Get the current attempt number for an opponent/action combo
@@ -806,17 +842,18 @@
 				var perkCost = config.viewPerkCost || 5;
 				var disablePerkCost = config.disablePerkCost || 10;
 				var disableBossPerkCost = config.disableBossPerkCost || 15;
+				var prepareHackCost = config.prepareHackCost || 3;
 				
-				// Get current chances based on attempt numbers
+				// Get current chances based on attempt numbers (including prepare bonus)
 				var decklistAttempt = GetHackAttemptNumber(opponentIndex, 'decklist');
 				var perkAttempt = GetHackAttemptNumber(opponentIndex, 'perk');
 				var disableAttempt = GetHackAttemptNumber(opponentIndex, 'disablePerk');
 				var disableBossAttempt = GetHackAttemptNumber(opponentIndex, 'disableBossPerk');
 				
-				var decklistChance = GetHackChance(opponentIndex, 'decklist', decklistAttempt);
-				var perkChance = GetHackChance(opponentIndex, 'perk', perkAttempt);
-				var disableChance = GetHackChance(opponentIndex, 'disablePerk', disableAttempt);
-				var disableBossChance = GetHackChance(opponentIndex, 'disableBossPerk', disableBossAttempt);
+				var decklistChance = GetEffectiveHackChance(opponentIndex, 'decklist', decklistAttempt);
+				var perkChance = GetEffectiveHackChance(opponentIndex, 'perk', perkAttempt);
+				var disableChance = GetEffectiveHackChance(opponentIndex, 'disablePerk', disableAttempt);
+				var disableBossChance = GetEffectiveHackChance(opponentIndex, 'disableBossPerk', disableBossAttempt);
 				
 				// Check if opponent has a perk and if it's a boss perk
 				var hasPerk = opp.startingPerk && opp.startingPerk > 0;
@@ -837,8 +874,25 @@
 				modalHtml += '<h1 class="logo-text" style="text-align: center; color: var(--crt-red); text-shadow: 0 0 5px var(--crt-red), 0 0 15px var(--glow-red), 0 0 35px var(--glow-red-dark); margin: 20px 0;">' + oppName.toUpperCase() + '</h1>';
 				modalHtml += '<div style="color: var(--crt-red); font-family: monospace; padding: 20px; text-align: center; width: 100%;">';
 				modalHtml += '<p>Current Credits: <span id="hack-credits">' + gauntletCredits + '</span><img src="images/nsg/NSG_CREDIT.svg" class="card-icon" alt="credit" style="margin-left: 0px; margin-bottom: 2px; height: 16px; display: inline-block; vertical-align: sub; filter: ' + enabledIconFilter + ';"></p>';
+				
+				// Show current prepare hack bonus if active
+				if (prepareHackBonus > 0) {
+					modalHtml += '<p style="color: var(--crt-green); font-size: 12px;">Hack Prepared: +' + prepareHackBonus + '% to all success chances</p>';
+				}
+				
 				modalHtml += '</div>';
 				modalHtml += '<div id="hack-buttons" style="display: flex; flex-direction: column; justify-content: center; gap: 10px; width: 100%; padding: 20px; min-height: 200px;">';
+				
+				// PREPARE HACK button
+				var prepareHackBonusMin = config.prepareHackBonusMin || 5;
+				var prepareHackBonusMax = config.prepareHackBonusMax || 15;
+				var canAffordPrepare = gauntletCredits >= prepareHackCost;
+				var prepareDisabled = canAffordPrepare ? '' : ' disabled';
+				var prepareStyle = canAffordPrepare ? 'width: 100%;' : 'width: 100%; opacity: 0.6; border-color: var(--border-red-dark); color: var(--crt-red-muted); cursor: default; background-color: rgba(12,24,12,0.7) !important; pointer-events: none;';
+				var prepareIconFilter = canAffordPrepare ? enabledIconFilter : disabledIconFilter;
+				modalHtml += '<button class="button"' + prepareDisabled + ' onclick="PrepareHack(' + opponentIndex + ');" style="' + prepareStyle + '">PREPARE HACK: ' + prepareHackCost + '<img src="images/nsg/NSG_CREDIT.svg" class="card-icon" alt="credit" style="margin-left: 2px; margin-bottom: 2px; height: 16px; display: inline-block; vertical-align: sub; filter: ' + prepareIconFilter + ';"></button>';
+				
+				modalHtml += '<hr style="width: 100%; border-color: var(--border-red-dark); margin: 5px 0;">';
 				
 				// VIEW DECKLIST button
 				if (decklistRevealed) {
@@ -894,6 +948,37 @@
 				}
 			}
 			
+			// Prepare Hack - adds temporary bonus to success chances
+			function PrepareHack(opponentIndex) {
+				var config = gauntletConfig.hackOpponent || {};
+				var cost = config.prepareHackCost || 3;
+				var bonusMin = config.prepareHackBonusMin || 5;
+				var bonusMax = config.prepareHackBonusMax || 15;
+				
+				if (gauntletCredits < cost) {
+					alert('Not enough credits!');
+					return;
+				}
+				
+				// Deduct credits
+				gauntletCredits -= cost;
+				
+				// Calculate bonus using seeded random
+				var prepareSeed = gauntletSeed + '_prepare_' + opponentIndex + '_' + Date.now();
+				var prepareRng = new Math.seedrandom(prepareSeed);
+				var bonus = Math.floor(prepareRng() * (bonusMax - bonusMin + 1)) + bonusMin;
+				
+				// Add to existing bonus (stacks)
+				prepareHackBonus += bonus;
+				
+				// Save state and refresh modal
+				SaveOpponentStateToURL();
+				UpdateLaunchStrings();
+				
+				// Refresh the modal to show updated credits and bonus
+				ShowHackOptionsForOpponent(opponentIndex);
+			}
+			
 			// Attempt to hack decklist
 			function AttemptHackDecklist(opponentIndex) {
 				var config = gauntletConfig.hackOpponent || {};
@@ -907,9 +992,14 @@
 				// Deduct credits
 				gauntletCredits -= cost;
 				
-				// Get current chance
+				// Get current chance (includes prepare bonus)
 				var attemptNum = GetHackAttemptNumber(opponentIndex, 'decklist');
-				var chance = GetHackChance(opponentIndex, 'decklist', attemptNum);
+				var baseChance = GetHackChance(opponentIndex, 'decklist', attemptNum);
+				var effectiveChance = Math.min(baseChance + prepareHackBonus, 95);
+				
+				// Reset prepare bonus after use
+				var usedBonus = prepareHackBonus;
+				prepareHackBonus = 0;
 				
 				// Increment attempt counter (changes the chance for next time)
 				IncrementHackAttempt(opponentIndex, 'decklist');
@@ -919,14 +1009,17 @@
 				var rollRng = new Math.seedrandom(rollSeed);
 				var roll = Math.floor(rollRng() * 100) + 1;
 				
-				if (roll <= chance) {
+				if (roll <= effectiveChance) {
 					// Success!
 					gauntletOpponents[opponentIndex].decklistRevealed = true;
+					// Clear failed chance tracking on success
+					delete failedHackChances[opponentIndex + '_decklist'];
 					SaveOpponentStateToURL();
 					UpdateLaunchStrings();
 					ShowHackResultModal(true, 'DECKLIST REVEALED', 'You successfully hacked into their systems and retrieved the decklist.', opponentIndex);
 				} else {
-					// Failure
+					// Failure - record the failed chance for recovery bonus
+					failedHackChances[opponentIndex + '_decklist'] = effectiveChance;
 					SaveOpponentStateToURL();
 					UpdateLaunchStrings();
 					ShowHackResultModal(false, 'HACK FAILED', 'Your intrusion was detected and blocked. The chance has changed for your next attempt.', opponentIndex);
@@ -961,9 +1054,13 @@
 				// Deduct credits
 				gauntletCredits -= cost;
 				
-				// Get current chance
+				// Get current chance (includes prepare bonus)
 				var attemptNum = GetHackAttemptNumber(opponentIndex, 'perk');
-				var chance = GetHackChance(opponentIndex, 'perk', attemptNum);
+				var baseChance = GetHackChance(opponentIndex, 'perk', attemptNum);
+				var effectiveChance = Math.min(baseChance + prepareHackBonus, 95);
+				
+				// Reset prepare bonus after use
+				prepareHackBonus = 0;
 				
 				// Increment attempt counter
 				IncrementHackAttempt(opponentIndex, 'perk');
@@ -973,15 +1070,18 @@
 				var rollRng = new Math.seedrandom(rollSeed);
 				var roll = Math.floor(rollRng() * 100) + 1;
 				
-				if (roll <= chance) {
+				if (roll <= effectiveChance) {
 					// Success!
 					gauntletOpponents[opponentIndex].perkRevealed = true;
+					// Clear failed chance tracking on success
+					delete failedHackChances[opponentIndex + '_perk'];
 					SaveOpponentStateToURL();
 					UpdateLaunchStrings();
 					var perkName = GetPerkName(opp.startingPerk);
 					ShowHackResultModal(true, 'PERK REVEALED', 'You successfully breached their servers and revealed: "' + perkName + '".', opponentIndex);
 				} else {
-					// Failure
+					// Failure - record the failed chance for recovery bonus
+					failedHackChances[opponentIndex + '_perk'] = effectiveChance;
 					SaveOpponentStateToURL();
 					UpdateLaunchStrings();
 					ShowHackResultModal(false, 'HACK FAILED', 'Security protocols blocked your access. The chance has changed for your next attempt.', opponentIndex);
@@ -1005,9 +1105,13 @@
 				// Deduct credits
 				gauntletCredits -= cost;
 				
-				// Get current chance
+				// Get current chance (includes prepare bonus)
 				var attemptNum = GetHackAttemptNumber(opponentIndex, actionType);
-				var chance = GetHackChance(opponentIndex, actionType, attemptNum);
+				var baseChance = GetHackChance(opponentIndex, actionType, attemptNum);
+				var effectiveChance = Math.min(baseChance + prepareHackBonus, 95);
+				
+				// Reset prepare bonus after use
+				prepareHackBonus = 0;
 				
 				// Increment attempt counter
 				IncrementHackAttempt(opponentIndex, actionType);
@@ -1020,16 +1124,19 @@
 				// Check for card loss (happens regardless of success/failure)
 				var lostCards = CheckAndApplyCardLoss(opponentIndex, attemptNum, isBossPerk);
 				
-				if (roll <= chance) {
+				if (roll <= effectiveChance) {
 					// Success! Disabling also reveals the perk
 					gauntletOpponents[opponentIndex].perkDisabled = true;
 					gauntletOpponents[opponentIndex].perkRevealed = true;
+					// Clear failed chance tracking on success
+					delete failedHackChances[opponentIndex + '_' + actionType];
 					SaveOpponentStateToURL();
 					UpdateLaunchStrings();
 					var perkName = GetPerkName(opp.startingPerk);
 					ShowHackResultModalWithCardLoss(true, 'PERK DISABLED', 'You successfully breached their servers and disabled a "' + perkName + '" perk.', opponentIndex, lostCards);
 				} else {
-					// Failure
+					// Failure - record the failed chance for recovery bonus
+					failedHackChances[opponentIndex + '_' + actionType] = effectiveChance;
 					SaveOpponentStateToURL();
 					UpdateLaunchStrings();
 					ShowHackResultModalWithCardLoss(false, 'HACK FAILED', 'Their security systems detected and removed the trojan you installed. The chance has changed for your next attempt.', opponentIndex, lostCards);

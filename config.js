@@ -13,7 +13,7 @@ var gauntletConfig = {
 
   // ===== STARTING CREDITS =====
   // Number of credits the player starts with in gauntlet mode
-  startingCredits: 30000,
+  startingCredits: 3000,
 
   // ===== MATCH REWARDS =====
   // Credits awarded or deducted based on game outcomes
@@ -47,9 +47,19 @@ var gauntletConfig = {
     disableBossPerkChanceMin: 25,
     disableBossPerkChanceMax: 50,
     
+    // Prepare Hack settings - temporary bonus to success chance
+    prepareHackCost: 3,              // Cost in credits to prepare a hack
+    prepareHackBonusMin: 5,          // Minimum percentage bonus added
+    prepareHackBonusMax: 15,         // Maximum percentage bonus added
+    
+    // Failure recovery settings - bonus after a failed hack attempt
+    // The new chance after failure will always be higher than the failed attempt
+    failureRecoveryBonusMin: 5,      // Minimum additional percentage after failure
+    failureRecoveryBonusMax: 15,     // Maximum additional percentage after failure
+    
     // Card loss risk when attempting to disable perks
     // regularHack = disabling regular perks (1-3), bossHack = disabling boss perks (4-6)
-    regularHackCardLossPercentage: 100,        // Chance (%) of triggering card loss on regular hack
+    regularHackCardLossPercentage: 25,        // Chance (%) of triggering card loss on regular hack
     regularHackIndividualCardLossPercentage: 50,  // Chance (%) per card up to max quantity
     regularHackCardLossMaxQuantity: 2,        // Maximum number of cards that can be lost
     bossHackCardLossPercentage: 40,           // Chance (%) of triggering card loss on boss hack
@@ -139,22 +149,23 @@ var gauntletConfig = {
   // Subtypes are case-sensitive and must match exactly as printed on cards
   randomCardRequirements: [
     // Hardware
-    { quantity: 10, cardType: 'hardware', matchSubtypes: ['Console'], excludeSubtypes: [] },
-    { quantity: 30, cardType: 'hardware', matchSubtypes: [], excludeSubtypes: ['Console'] },
+    { quantity: 1, cardType: 'hardware', matchSubtypes: ['Console'], excludeSubtypes: [] },
+    { quantity: 3, cardType: 'hardware', matchSubtypes: [], excludeSubtypes: ['Console'] },
     
     // Resources (any subtype)
-    { quantity: 50, cardType: 'resource', matchSubtypes: [], excludeSubtypes: [] },
+    { quantity: 500, cardType: 'resource', matchSubtypes: [], excludeSubtypes: [] },
     
     // Programs - Icebreakers
-    { quantity: 10, cardType: 'program', matchSubtypes: ['Icebreaker', 'Killer'], excludeSubtypes: [] },
-    { quantity: 10, cardType: 'program', matchSubtypes: ['Icebreaker', 'Fracter'], excludeSubtypes: [] },
-    { quantity: 10, cardType: 'program', matchSubtypes: ['Icebreaker', 'Decoder'], excludeSubtypes: [] },
+    { quantity: 1, cardType: 'program', matchSubtypes: ['Icebreaker', 'Killer'], excludeSubtypes: [] },
+    { quantity: 1, cardType: 'program', matchSubtypes: ['Icebreaker', 'Fracter'], excludeSubtypes: [] },
+    { quantity: 1, cardType: 'program', matchSubtypes: ['Icebreaker', 'Decoder'], excludeSubtypes: [] },
     
     // Programs - Other
-    { quantity: 40, cardType: 'program', matchSubtypes: [], excludeSubtypes: ['Icebreaker'] },
+    { quantity: 1, cardType: 'program', matchSubtypes: ['Trojan'], excludeSubtypes: ['Icebreaker'] },
+    { quantity: 3, cardType: 'program', matchSubtypes: [], excludeSubtypes: ['Icebreaker'] },
     
     // Events
-    { quantity: 80, cardType: 'event', matchSubtypes: [], excludeSubtypes: [] }
+    { quantity: 8, cardType: 'event', matchSubtypes: [], excludeSubtypes: [] }
   ],
 
   // ===== CARD PACK CONFIGURATIONS =====
