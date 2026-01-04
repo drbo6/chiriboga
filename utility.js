@@ -1088,6 +1088,120 @@ function ShowGauntletRecap(gauntletState) {
 }
 
 /**
+ * Show gauntlet lost modal when player loses a game
+ *
+ * @method ShowGauntletLostModal
+ * @param {Object} gauntletState the gauntlet state object
+ */
+function ShowGauntletLostModal(gauntletState) {
+  // Helper function to get perk name
+  function getPerkName(perkNum) {
+    // Perks 7-12 are disabled versions of perks 1-6
+    var basePerk = perkNum > 6 ? perkNum - 6 : perkNum;
+    var perkNames = {
+      1: 'Additional Funds',
+      2: 'Pre-Installed Neutral Ice',
+      3: 'Holdover Directive',
+      4: 'Liquidated Assets',
+      5: 'Pre-Installed Faction Ice',
+      6: 'Subsidiary Gains'
+    };
+    return perkNames[basePerk] || null;
+  }
+  
+  // Build opponent list HTML with thumbnails (show defeated status)
+  var opponentListHtml = '<div class="gauntlet-recap-opponents" style="overflow-y: auto; max-height: 400px; padding: 10px 0;">';
+  
+  if (gauntletState.opponents && gauntletState.opponents.length > 0) {
+    for (var i = 0; i < gauntletState.opponents.length; i++) {
+      var opponent = gauntletState.opponents[i];
+      var identityId = opponent.identity;
+      var identityCard = cardSet[identityId];
+      var identityTitle = identityCard ? GetTitle(identityCard) : 'Unknown Identity';
+      var identityFaction = opponent.faction || 'Unknown';
+      var isDefeated = opponent.hasbeendefeated || false;
+      
+      // Get perk info
+      var perkName = null;
+      var perkDisabled = opponent.perkDisabled || false;
+      if (typeof opponent.startingPerk === 'number' && opponent.startingPerk > 0) {
+        perkName = getPerkName(opponent.startingPerk);
+      }
+      
+      // Get card image if available
+      var imageFile = identityCard && identityCard.imageFile ? identityCard.imageFile : '';
+      imageFile = ChangeImageFileToJPG(imageFile);
+      var imageSrc = imageFile ? 'images/' + imageFile : '';
+      
+      // Build opponent item with optional clickable URL
+      var deckUrl = opponent.URL || '';
+      var itemStyle = 'display: flex; align-items: center; margin: 8px 0; padding: 5px; border-bottom: 1px solid rgba(51, 255, 51, 0.2);';
+      if (!isDefeated) {
+        itemStyle += ' opacity: 0.5;';
+      }
+      var onclickHandler = '';
+      if (deckUrl) {
+        itemStyle += ' cursor: pointer;';
+        onclickHandler = ' onclick="window.open(\'' + deckUrl + '\', \'_blank\');"';
+      }
+      opponentListHtml += '<div class="gauntlet-opponent-item" style="' + itemStyle + '"' + onclickHandler + '>';
+      
+      if (imageSrc) {
+        opponentListHtml += '<img src="' + imageSrc + '" style="width: 40px; height: 56px; object-fit: cover; margin-right: 10px; border: 1px solid #33ff33;' + (isDefeated ? '' : ' filter: grayscale(80%);') + '" alt="' + identityTitle + '" />';
+      } else {
+        opponentListHtml += '<div style="width: 40px; height: 56px; margin-right: 10px; border: 1px solid #33ff33; background: #111; display: flex; align-items: center; justify-content: center; font-size: 10px; color: #33ff33;">No Image</div>';
+      }
+      
+      opponentListHtml += '<div style="flex: 1;">';
+      opponentListHtml += '<div style="color: #33ff33; font-weight: bold;">' + opponent.name + (isDefeated ? ' ✓' : '') + '</div>';
+      opponentListHtml += '<div style="color: #66ff66; font-size: 12px;">' + identityTitle + '</div>';
+      if (perkName) {
+        var perkStyle = perkDisabled ? 'color: #ff6666; text-decoration: line-through;' : 'color: #ffcc00;';
+        opponentListHtml += '<div style="font-size: 10px; ' + perkStyle + '">' + perkName + (perkDisabled ? ' (Disabled)' : '') + '</div>';
+      }
+      opponentListHtml += '</div>';
+      opponentListHtml += '</div>';
+    }
+  }
+  
+  opponentListHtml += '</div>';
+  
+  // Count defeated opponents
+  var defeatedCount = gauntletState.defeated || 0;
+  var totalOpponents = gauntletState.opponents ? gauntletState.opponents.length : 0;
+  
+  // Create lost modal content (similar to recap but with GAUNTLET LOST title)
+  var lostHtml = '<div class="solo-menu" style="display: flex; flex-direction: column; align-items: center;">';
+  lostHtml += '<span class="menu-close" onclick="window.location.href=\'index.php\';" style="cursor: pointer; align-self: flex-end; margin-right: 10px; margin-top: 10px;">✕</span>';
+  lostHtml += '<div class="solo-logo" style="width: 100%;">';
+  lostHtml += '<h1 class="logo-text" style="color: var(--crt-red); text-shadow: 0 0 5px var(--crt-red), 0 0 15px var(--glow-red), 0 0 35px var(--glow-red-dark);">GAUNTLET LOST</h1>';
+  lostHtml += '</div>';
+  lostHtml += '<div style="color: #33ff33; font-family: monospace; padding: 20px; text-align: center; width: 100%;">';
+  lostHtml += '<div style="margin-bottom: 20px; font-size: 16px;">Progress: ' + defeatedCount + ' / ' + totalOpponents + ' opponents defeated</div>';
+  lostHtml += opponentListHtml;
+  lostHtml += '<div style="margin-top: 20px; padding-top: 20px; border-top: 2px solid #33ff33;">';
+  lostHtml += '<div style="display: flex; justify-content: center; gap: 10px;">';
+  lostHtml += '<button class="button" onclick="window.location.href=\'index.php\';">RETURN TO MENU</button>';
+  lostHtml += '</div>';
+  lostHtml += '</div>';
+  lostHtml += '</div>';
+  lostHtml += '</div>';
+  
+  // Display lost modal
+  var lostModal = document.getElementById('gauntlet-lost-modal');
+  if (!lostModal) {
+    lostModal = document.createElement('div');
+    lostModal.id = 'gauntlet-lost-modal';
+    lostModal.className = 'modal';
+    lostModal.style.display = 'flex';
+    document.body.appendChild(lostModal);
+  }
+  
+  lostModal.innerHTML = lostHtml;
+  lostModal.style.display = 'flex';
+}
+
+/**
  * Player wins the game (the game ends).<br/>Logs a message and disables command prompt.
  *
  * @method PlayerWin
@@ -1289,15 +1403,24 @@ function PlayerWin(player, msgstr) {
         }
       };
     } else {
-      // Corp won (runner lost) - show "Back to Menu" button
-      winPhase.Enumerate["back to menu"] = function () {
+      // Corp won (runner lost) - show "Continue Gauntlet" button that opens loss modal
+      winPhase.Enumerate["Continue Gauntlet"] = function () {
         return [{}];
       };
       winPhase.text = {
-        "back to menu": "Return to main menu"
+        "Continue Gauntlet": "Return to gauntlet menu"
       };
-      winPhase.Resolve["back to menu"] = function () {
-        window.location.href = 'index.php';
+      winPhase.Resolve["Continue Gauntlet"] = function () {
+        try {
+          // Parse the gauntlet state
+          var gauntletState = JSON.parse(LZString.decompressFromEncodedURIComponent(gauntletParam));
+          
+          // Show the GAUNTLET LOST modal (similar to GAUNTLET COMPLETE)
+          ShowGauntletLostModal(gauntletState);
+        } catch (e) {
+          console.error("Failed to show gauntlet lost modal:", e);
+          window.location.href = 'index.php';
+        }
       };
     }
   } else {
