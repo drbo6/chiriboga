@@ -886,14 +886,13 @@
 				// PREPARE HACK button
 				var prepareHackBonusMin = config.prepareHackBonusMin || 5;
 				var prepareHackBonusMax = config.prepareHackBonusMax || 15;
-				var canAffordPrepare = gauntletCredits >= prepareHackCost;
-				var prepareDisabled = canAffordPrepare ? '' : ' disabled';
-				var prepareStyle = canAffordPrepare ? 'width: 100%;' : 'width: 100%; opacity: 0.6; border-color: var(--border-red-dark); color: var(--crt-red-muted); cursor: default; background-color: rgba(12,24,12,0.7) !important; pointer-events: none;';
-				var prepareIconFilter = canAffordPrepare ? enabledIconFilter : disabledIconFilter;
-				modalHtml += '<button class="button"' + prepareDisabled + ' onclick="PrepareHack(' + opponentIndex + ');" style="' + prepareStyle + '">PREPARE HACK: ' + prepareHackCost + '<img src="images/nsg/NSG_CREDIT.svg" class="card-icon" alt="credit" style="margin-left: 2px; margin-bottom: 2px; height: 16px; display: inline-block; vertical-align: sub; filter: ' + prepareIconFilter + ';"></button>';
-				
-				modalHtml += '<hr style="width: 100%; border-color: var(--border-red-dark); margin: 5px 0;">';
-				
+			var allHacksCompleted = decklistRevealed && (!hasPerk || perkRevealed);
+			var canAffordPrepare = !allHacksCompleted && (gauntletCredits >= prepareHackCost);
+			var prepareDisabled = (!allHacksCompleted && canAffordPrepare) ? '' : ' disabled';
+			var prepareStyle = (!allHacksCompleted && canAffordPrepare) ? 'width: 100%;' : 'width: 100%; opacity: 0.6; border-color: var(--border-red-dark); color: var(--crt-red-muted); cursor: default; background-color: rgba(12,24,12,0.7) !important; pointer-events: none;';
+			var prepareIconFilter = (!allHacksCompleted && canAffordPrepare) ? enabledIconFilter : disabledIconFilter;
+			var prepareText = allHacksCompleted ? 'ALL HACKS COMPLETED' : 'PREPARE HACK: ' + prepareHackCost + '<img src="images/nsg/NSG_CREDIT.svg" class="card-icon" alt="credit" style="margin-left: 2px; margin-bottom: 2px; height: 16px; display: inline-block; vertical-align: sub; filter: ' + prepareIconFilter + ';">';
+			modalHtml += '<button class="button"' + prepareDisabled + ' onclick="PrepareHack(' + opponentIndex + ');" style="' + prepareStyle + '">' + prepareText + '</button>';
 				// VIEW DECKLIST button
 				if (decklistRevealed) {
 					modalHtml += '<button class="button" onclick="ViewOpponentDecklist(' + opponentIndex + ');" style="width: 100%;">VIEW DECKLIST [REVEALED]</button>';
