@@ -175,7 +175,7 @@ cardSet[35011] = {
         SpendClicks(runner, 3);
         //false means trash cannot be prevented (because it's a cost)
         Trash(this, false, function(cardsTrashed) {
-          GainCredits(runner, 9);
+          GainCredits(runner, 9, "", this);
         }, this);
       },
     },
@@ -587,7 +587,7 @@ cardSet[35014] = {
   responseOnRunSuccessful: {
     Resolve: function () {
       if (!this.runningWithThis) return;
-      GainCredits(runner, 6);
+      GainCredits(runner, 6, "", this);
     },
     automatic: true,
   },
@@ -2001,7 +2001,7 @@ cardSet[35023] = {
       if (this.flipped) {
         //Just flipped FROM Side A TO Side B
         //Side A gives 1 credit when flipping
-        GainCredits(runner, 1);
+        GainCredits(runner, 1, "", this);
       } else {
         //Just flipped FROM Side B TO Side A
         //Side B gives 1 card when flipping
@@ -2361,7 +2361,7 @@ cardSet[35001] = {
       this.usedThisTurn = true;
       
       //Gain 1 credit
-      GainCredits(runner, 1);
+      GainCredits(runner, 1, "", this);
       
       //Corp trashes 1 card from HQ
       if (corp.HQ.cards.length > 0) {
@@ -3055,7 +3055,7 @@ cardSet[35039] = {
         SpendClicks(corp, 3);
         
         //Gain 4 credits immediately (before trash/draw so they can be used)
-        GainCredits(corp, 4);
+        GainCredits(corp, 4, "", this);
         Log(GetTitle(cardRef) + " gains Corp 4[c]");
         
         //Trash is async, put rest in callback (false = cannot prevent)
@@ -4470,7 +4470,7 @@ cardSet[35017] = {
       //Gain 2 credits for each credit lost
       var creditsToGain = creditsLost * 2;
       if (creditsToGain > 0) {
-        GainCredits(runner, creditsToGain);
+        GainCredits(runner, creditsToGain, "", this);
       }
     },
     automatic: true,
@@ -5077,7 +5077,7 @@ cardSet[35033] = {
           Trash(choiceParams.card, false, function() {
             //Gain credits equal to printed install cost
             if (printedCost > 0) {
-              GainCredits(runner, printedCost);
+              GainCredits(runner, printedCost, "", this);
             }
             //Draw 1 card
             Draw(runner, 1);
@@ -5886,7 +5886,7 @@ cardSet[35061] = {
             cardRef,
             false,  //cannot be prevented (it's a cost)
             function(cardsTrashed) {
-              GainCredits(corp, creditsToGain);
+              GainCredits(corp, creditsToGain, "", this);
               LoseCredits(runner, creditsToLose);
             },
             cardRef
@@ -5953,7 +5953,7 @@ cardSet[35062] = {
   //When your turn begins, gain 1[credit].
   responseOnCorpTurnBegins: {
     Resolve: function(params) {
-      GainCredits(corp, 1);
+      GainCredits(corp, 1, "", this);
     },
     automatic: true,
   },
@@ -7489,7 +7489,7 @@ cardSet[35077] = {
     }
     else if (effectId === 4) {
       //Gain 2 credits
-      GainCredits(corp, 2);
+      GainCredits(corp, 2, "", this);
       if (effectNumber === 1) {
         cardRef._chooseEffect(2);
       }
@@ -7545,7 +7545,7 @@ cardSet[35081] = {
   
   //Gain 5[c]. If you played this operation from anywhere except HQ, gain [click].
   Resolve: function(params) {
-    GainCredits(corp, 5);
+    GainCredits(corp, 5, "", this);
     //Check if played from not-HQ (i.e., from Archives)
     if (this._playedFromArchives) {
       GainClicks(corp, 1);
