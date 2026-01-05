@@ -40,7 +40,7 @@ cardSet[30001] = {
     Resolve: function (params) {
       this.usedThisTurn = true;
 	  this.wasAccessingCard = false;
-      GainCredits(runner, 1);
+      GainCredits(runner, 1, "", this);
       Draw(runner, 1);
     },
   },
@@ -69,7 +69,7 @@ cardSet[30002] = {
     });
     function decisionCallback(params) {
       if (params.id == 0) {
-        GainCredits(runner, 6);
+        GainCredits(runner, 6, "", this);
       } else {
         Draw(runner, 4);
       }
@@ -571,7 +571,7 @@ cardSet[30007] = {
         var creditsToGain = 2 * Counters(this, "virus");
 		//false means trash cannot be prevented (because it's a cost)
         Trash(this, false, function(cardsTrashed) {
-          GainCredits(runner, creditsToGain);
+          GainCredits(runner, creditsToGain, "", this);
 		},this); 
       },
     },
@@ -832,7 +832,7 @@ cardSet[30010] = {
         this,
         function () {
           this.usedThisTurn = true;
-          GainCredits(runner, this.cardsAccessedThisRun);
+          GainCredits(runner, this.cardsAccessedThisRun, "", this);
         }
       );
       //**AI code
@@ -1727,7 +1727,7 @@ cardSet[30020] = {
   playCost: 1,
   //Gain 5[c]. If you have any [click] remaining, lose [click].
   Resolve: function (params) {
-    GainCredits(runner, 5);
+    GainCredits(runner, 5, "", this);
     LoseClicks(runner, 1);
   },
   AIWorthKeeping: function (installedRunnerCards, spareMU) {
@@ -1894,7 +1894,7 @@ cardSet[30023] = {
     },
   },
   SharedResolve: function () {
-    GainCredits(runner, 1);
+    GainCredits(runner, 1, "", this);
     this.SharedPhase.player = runner;
     this.SharedPhase.next = currentPhase;
     ChangePhase(this.SharedPhase);
@@ -2440,7 +2440,7 @@ cardSet[30030] = {
   cardType: "event",
   playCost: 5,
   Resolve: function (params) {
-    GainCredits(runner, 9);
+    GainCredits(runner, 9, "", this);
   },
   AIWorthKeeping: function (installedRunnerCards, spareMU) {
 	  //we love Sure Gamble, always keep it
@@ -3428,7 +3428,7 @@ cardSet[30043] = {
       return [];
     },
     Resolve: function (params) {
-      GainCredits(corp, 1);
+      GainCredits(corp, 1, "", this);
     },
     text: "When your discard phase ends",
   },
@@ -3714,7 +3714,7 @@ cardSet[30048] = {
     else return [{}];
   },
   Resolve: function (params) {
-    GainCredits(corp, 10);
+    GainCredits(corp, 10, "", this);
     if (params.card) Trash(params.card);
   },
   command: "discard",
@@ -3904,7 +3904,7 @@ cardSet[30051] = {
     },
     Resolve: function (params) {
       this.usedThisTurn = true;
-      if (params.id == 0) GainCredits(corp, 2);
+      if (params.id == 0) GainCredits(corp, 2, "", this);
       else Draw(corp, 2);
     },
   },
@@ -4302,7 +4302,7 @@ cardSet[30056] = {
     return choices;
   },
   Resolve: function (params) {
-    if (params.id != 1) GainCredits(corp, 3);
+    if (params.id != 1) GainCredits(corp, 3, "", this);
     if (params.id != 0) Draw(corp, 3);
   },
 };
@@ -4467,7 +4467,7 @@ cardSet[30059] = {
   //Whenever you advance a card, gain 2(c) if it had no advancement counters
   automaticOnAdvance: {
     Resolve: function (card) {
-      if (card.advancement == 1) GainCredits(corp, 2); //if it has 1 now then it had none before
+      if (card.advancement == 1) GainCredits(corp, 2, "", this); //if it has 1 now then it had none before
     },
   },
 };
@@ -4755,7 +4755,7 @@ cardSet[30064] = {
   playCost: 10,
   //Gain 15[c]
   Resolve: function (params) {
-    GainCredits(corp, 15);
+    GainCredits(corp, 15, "", this);
   },
 };
 cardSet[30065] = {
@@ -4910,7 +4910,7 @@ cardSet[30067] = {
   advancementRequirement: 4,
   responseOnScored: {
     Resolve: function () {
-      if (intended.score == this) GainCredits(corp, 7);
+      if (intended.score == this) GainCredits(corp, 7, "", this);
     },
     automatic: true,
   },
@@ -5211,7 +5211,7 @@ cardSet[30073] = {
     {
       text: "Gain 1[c].",
       Resolve: function () {
-        GainCredits(corp, 1);
+        GainCredits(corp, 1, "", this);
       },
       visual: { y: 73, h: 16 },
     },
@@ -5282,7 +5282,7 @@ cardSet[30075] = {
   subTypes: ["Transaction"],
   playCost: 5,
   Resolve: function (params) {
-    GainCredits(corp, 9);
+    GainCredits(corp, 9, "", this);
   },
 };
 cardSet[30076] = {

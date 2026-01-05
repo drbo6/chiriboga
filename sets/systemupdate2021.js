@@ -36,7 +36,6 @@ cardSet[31001] = {
         return ChoicesEncounteredSubroutines();
       },
       Resolve: function (params) {
-    GainCredits(corp, 1, "", this);
         SpendCredits(
           runner,
           0,
@@ -212,7 +211,6 @@ cardSet[31003] = {
 	},
 	responseOnPassesIce: {
 		Resolve: function (params) {
-    GainCredits(corp, 1, "", this);
 			//"By passing the last piece of ice protecting the server, the Runner is considered to have passed all of it." (Lukas Litzsinger)
 			for (var i=approachIce; i<attackedServer.ice.length; i++) {
 				if (!this.icePassedLastRun.includes(attackedServer.ice[i])) this.icePassedLastRun.push(attackedServer.ice[i]);
@@ -222,7 +220,6 @@ cardSet[31003] = {
 		availableWhenInactive: true,
 	},
 	Resolve: function (params) {
-    GainCredits(corp, 1, "", this);
 		Trash(params.card, true); //true means can be prevented
 	},
     AIPlayWhenCan: 2, //priority 2 (moderate)
@@ -248,7 +245,6 @@ cardSet[31004] = {
 	automatic:true,
   },
   Resolve: function (params) {
-    GainCredits(corp, 1, "", this);
 	this.runWasSuccessful = false;
     MakeRun(corp.archives);
   },
@@ -354,7 +350,6 @@ cardSet[31005] = {
 		return [{}];
 	},
 	Resolve: function (params) {
-    GainCredits(corp, 1, "", this);
 		Trash(this,true); //true means it can be prevented
 	}
   },
@@ -400,7 +395,6 @@ cardSet[31006] = {
         return ChoicesEncounteredSubroutines();
       },
       Resolve: function (params) {
-    GainCredits(corp, 1, "", this);
         SpendCredits(
           runner,
           1,
@@ -424,7 +418,6 @@ cardSet[31006] = {
         return [{}];
       },
       Resolve: function (params) {
-    GainCredits(corp, 1, "", this);
         SpendCredits(
           runner,
           1,
@@ -515,7 +508,6 @@ cardSet[31007] = {
         return [{}];
       },
       Resolve: function (params) {
-    GainCredits(corp, 1, "", this);
         this.usedThisTurn = true;
         RemoveCounters(this, "virus", 1);
 		TrashAccessedCard(true); //true means it can be prevented (it is not a cost)
@@ -585,7 +577,6 @@ cardSet[31008] = {
         return ChoicesEncounteredSubroutines();
       },
       Resolve: function (params) {
-    GainCredits(corp, 1, "", this);
         SpendCredits(
           runner,
           1,
@@ -689,7 +680,6 @@ cardSet[31010] = {
         return [{}];
       },
       Resolve: function (params) {
-    GainCredits(corp, 1, "", this);
         SpendClicks(runner, 1);
         TakeCredits(runner, this, 4); //removes from card, adds to credit pool
         if (!CheckCounters(this, "credits", 1)) {
@@ -927,7 +917,6 @@ cardSet[31014] = {
       return []; //no valid options to use this ability
     },
     Resolve: function (params) {
-    GainCredits(corp, 1, "", this);
 		if (typeof params.cards != 'undefined') {
 			//two were chosen, pseudophase for corp to choose one to RFG
 			var choices = ChoicesArrayCards(params.cards);
@@ -986,7 +975,6 @@ cardSet[31015] = {
     return choices;
   },
   Resolve: function (params) {
-    GainCredits(corp, 1, "", this);
 	this.modifyInstallCost.availableWhenInactive=true;
 	this.usingThisToInstallCard=params.card;
 	Install(params.card, params.host, false, null, true, null, this, null, function() {
@@ -1097,7 +1085,6 @@ cardSet[31016] = {
 	    return choices;	  
 	},
 	Resolve: function (params) {
-    GainCredits(corp, 1, "", this);
 		Derez(params.card);
 	},	
 	//play before run if server has worthwhile targets in it
@@ -1153,7 +1140,6 @@ cardSet[31017] = {
 	    return choices;	  
 	},
 	Resolve: function (params) {
-    GainCredits(corp, 1, "", this);
 		var thatice = params.card;
 		//The Corp may rez that ice. If they do not, they trash it.
 		var choices = [];
@@ -1252,7 +1238,6 @@ cardSet[31018] = {
     return ChoicesExistingServers();
   },
   Resolve: function (params) {
-    GainCredits(corp, 1, "", this);
 	this.encounteredIceThisRun=false;
     MakeRun(params.server);
   },
@@ -1262,7 +1247,6 @@ cardSet[31018] = {
 		return [];
 	},
     Resolve: function (params) {
-    GainCredits(corp, 1, "", this);
 		this.encounteredIceThisRun=true;
 		Bypass();
     },
@@ -1329,7 +1313,6 @@ cardSet[31019] = {
   },
   //Run HQ. If successful, access 2 additional cards when you breach the attacked server.
   Resolve: function (params) {
-    GainCredits(corp, 1, "", this);
     this.runWasSuccessful = false;
     MakeRun(corp.HQ);
   },
@@ -1382,7 +1365,6 @@ cardSet[31020] = {
     return [];
   },
   Resolve: function (params) {
-    GainCredits(corp, 1, "", this);
     RemoveTags(1);
 	if (CheckCredits(runner,1)) {
 		var choices = BinaryDecision(
@@ -1445,7 +1427,6 @@ cardSet[31021] = {
         return ChoicesEncounteredSubroutines();
       },
       Resolve: function (params) {
-    GainCredits(corp, 1, "", this);
         SpendCredits(
           runner,
           1,
@@ -1471,7 +1452,6 @@ cardSet[31021] = {
         return [{}];
       },
       Resolve: function (params) {
-    GainCredits(corp, 1, "", this);
         SpendCredits(
           runner,
           2,
@@ -1604,7 +1584,6 @@ cardSet[31022] = {
 	  return [];
 	},		
     Resolve: function (params) {
-    GainCredits(corp, 1, "", this);
 		this.chosenCard = params.card;
 		Log("Runner chose "+GetTitle(this.chosenCard,true)+" in "+ServerName(GetServer(params.card))+" for Femme Fatale");
     },
@@ -1624,7 +1603,6 @@ cardSet[31022] = {
 		return choices;
 	},
     Resolve: function (params) {
-    GainCredits(corp, 1, "", this);
 		if (params.id == 0) {
 			SpendCredits(
 			  runner,
@@ -1652,7 +1630,6 @@ cardSet[31022] = {
         return ChoicesEncounteredSubroutines();
       },
       Resolve: function (params) {
-    GainCredits(corp, 1, "", this);
         SpendCredits(
           runner,
           1,
@@ -1676,7 +1653,6 @@ cardSet[31022] = {
         return [{}];
       },
       Resolve: function (params) {
-    GainCredits(corp, 1, "", this);
         SpendCredits(
           runner,
           2,
@@ -1776,7 +1752,6 @@ cardSet[31023] = {
         return [{}];
       },
       Resolve: function (params) {
-    GainCredits(corp, 1, "", this);
         SpendClicks(runner, 1);
         this.runningWithThis = true;
         MakeRun(corp.archives);
@@ -1898,7 +1873,6 @@ cardSet[31024] = {
 	  return choices;
 	},
 	Resolve: function (params) {
-    GainCredits(corp, 1, "", this);
 	  this.madeSuccessfulRunOnChosenServerThisTurn = false;
       if (typeof params.server != 'undefined') {
 		  this.chosenServer = params.server;
@@ -1914,7 +1888,6 @@ cardSet[31024] = {
   //(The reason for the weird breachReplacementQueued approach is in case run end triggers fire before breach replacement completes)
   responseOnRunSuccessful: {
     Resolve: function (params) {
-    GainCredits(corp, 1, "", this);
       if (attackedServer == this.chosenServer && !this.madeSuccessfulRunOnChosenServerThisTurn) {
 		this.madeSuccessfulRunOnChosenServerThisTurn = true;
 		this.breachReplacementQueued=true; //make available as an option instead of this breach
@@ -1932,7 +1905,6 @@ cardSet[31024] = {
       return [];
 	},
     Resolve: function (params) {
-    GainCredits(corp, 1, "", this);
 	  this.breachReplacementQueued=false;
 	  GainCredits(runner,2);
     },
@@ -2090,7 +2062,6 @@ cardSet[31025] = {
 		return ChoicesArrayCards(this.setAsideCards);
       },
       Resolve: function (params) {
-    GainCredits(corp, 1, "", this);
         SpendClicks(runner, 1);
 		MoveCard(params.card,runner.grip);
 		Log("Runner added "+GetTitle(params.card,true)+" from set aside cards to grip");
@@ -2225,7 +2196,6 @@ cardSet[31027] = {
   playCost: 0,
   //Draw 3 cards.
   Resolve: function (params) {
-    GainCredits(corp, 1, "", this);
     Draw(runner, 3);
   },
   AIWorthKeeping: function (installedRunnerCards, spareMU) {
@@ -2285,7 +2255,6 @@ cardSet[31028] = {
 	return choices;
   },
   Resolve: function (params) {
-    GainCredits(corp, 1, "", this);
 	var chosenPile = runner.stack;
 	if (params.id == 1) chosenPile = runner.heap;
 	var choices = ChoicesArrayInstall(chosenPile,true,function (card) {
@@ -2388,7 +2357,6 @@ cardSet[31029] = {
 	automatic:true,
   },
   Resolve: function (params) {
-    GainCredits(corp, 1, "", this);
     this.runWasSuccessful = false;
     MakeRun(corp.RnD);
   },
@@ -2486,7 +2454,6 @@ cardSet[31030] = {
 	  return [];
 	},		
     Resolve: function (params) {
-    GainCredits(corp, 1, "", this);
 		var X = params.id;
         SpendCredits(
           runner,
@@ -2520,7 +2487,6 @@ cardSet[31030] = {
         return ChoicesEncounteredSubroutines();
       },
       Resolve: function (params) {
-    GainCredits(corp, 1, "", this);
         SpendCredits(
           runner,
           1,
@@ -2703,7 +2669,6 @@ cardSet[31031] = {
 	  return [];
 	},		
     Resolve: function (params) {
-    GainCredits(corp, 1, "", this);
 		this.chosenWord = params.button;
 		Log("Runner chose "+this.chosenWord+" for Chameleon");
     },
@@ -2728,7 +2693,6 @@ cardSet[31031] = {
         return ChoicesEncounteredSubroutines();
       },
       Resolve: function (params) {
-    GainCredits(corp, 1, "", this);
         SpendCredits(
           runner,
           1,
@@ -2916,7 +2880,6 @@ cardSet[31033] = {
         return ChoicesEncounteredSubroutines();
       },
       Resolve: function (params) {
-    GainCredits(corp, 1, "", this);
         SpendCredits(
           runner,
           1,
@@ -2940,7 +2903,6 @@ cardSet[31033] = {
         return [{}];
       },
       Resolve: function (params) {
-    GainCredits(corp, 1, "", this);
         SpendCredits(
           runner,
           1,
@@ -3208,7 +3170,6 @@ cardSet[31036] = {
         return [{}];
       },
       Resolve: function (params) {
-    GainCredits(corp, 1, "", this);
         SpendClicks(runner, 1);
         GainCredits(runner, 1);
 		Draw(runner, 1);
@@ -3263,7 +3224,6 @@ cardSet[31037] = {
   },
   runWasSuccessful: false,
   Resolve: function (params) {
-    GainCredits(corp, 1, "", this);
 	this.runWasSuccessful = false;
     MakeRun(params.server);
   },
@@ -3279,7 +3239,6 @@ cardSet[31037] = {
       return [];
     },
     Resolve: function (params) {
-    GainCredits(corp, 1, "", this);
       GainCredits(runner, 5);
     },
   },
@@ -3486,7 +3445,6 @@ cardSet[31040] = {
 		return [];
 	},
 	Resolve: function (params) {
-    GainCredits(corp, 1, "", this);
 	  this.usedThisTurn = true;
 	  if (params.card) {
 		this.chosenIce=params.card; //temporary to modify rez cost
@@ -3515,7 +3473,6 @@ cardSet[31041] = {
   //When you score this agenda, place 1 agenda counter on it for each hosted advancement counter past 3.
   responseOnScored: {
     Resolve: function (params) {
-    GainCredits(corp, 1, "", this);
 	  if (intended.score == this) {
 		  var advancementOverThree = this.advancement - 3;
 		  if (advancementOverThree > 0) AddCounters(this, "agenda", advancementOverThree);
@@ -3567,7 +3524,6 @@ cardSet[31041] = {
         return [];
       },
       Resolve: function (params) {
-    GainCredits(corp, 1, "", this);
 		if (params.card) {
 			RemoveCounters(this, "agenda", 1);
 			Log(GetTitle(params.card,true)+" added from Archives to HQ");
@@ -3609,7 +3565,6 @@ cardSet[31042] = {
 		return [{}];
 	},
     Resolve: function (params) {
-    GainCredits(corp, 1, "", this);
       if (CheckCounters(this, "credits", 2)) {
         //won't happen with less than 2 because it doesn't say 'take *up to* ...'
         TakeCredits(corp, this, 2); //removes from card, adds to credit pool
@@ -3729,7 +3684,6 @@ cardSet[31043] = {
         return choices;
       },
       Resolve: function (params) {
-    GainCredits(corp, 1, "", this);
         SpendClicks(runner, 1);
         Break(params.subroutine);
       },
@@ -3946,7 +3900,6 @@ cardSet[31045] = {
         return choices;
       },
       Resolve: function (params) {
-    GainCredits(corp, 1, "", this);
         SpendClicks(runner, 1);
         Break(params.subroutine);
       },
@@ -4099,7 +4052,6 @@ cardSet[31047] = {
 	return choices;
   },
   Resolve: function (params) {
-    GainCredits(corp, 1, "", this);
 	Log(GetTitle(params.card, true)+" added to HQ");
 	MoveCard(params.card, corp.HQ.cards);
   },
@@ -4118,7 +4070,6 @@ cardSet[31048] = {
   playCost: 4,
   //Gain [click] [click].
   Resolve: function (params) {
-    GainCredits(corp, 1, "", this);
 	GainClicks(corp,2);
   },
   AIFastAdvance:true, //is a card for fast advancing
@@ -4174,7 +4125,6 @@ cardSet[31049] = {
 		return choices;
       },
       Resolve: function (params) {
-    GainCredits(corp, 1, "", this);
 		var X = params.id;
 		var server = GetServer(this);
 		var rezzedIceProtectingThisServer = ChoicesInstalledCards(corp, function (card) {
@@ -4427,7 +4377,6 @@ cardSet[31051] = {
         return [];
       },
       Resolve: function (params) {
-    GainCredits(corp, 1, "", this);
 		this.usedThisRun = true;
 		RemoveCounters(this, "agenda", 1);
 		//damage can be prevented
@@ -4489,7 +4438,6 @@ cardSet[31052] = {
         return [];
       },
       Resolve: function (params) {
-    GainCredits(corp, 1, "", this);
 		RemoveCounters(this, "agenda", 1);
 		EndTheRun();
       },
@@ -4522,7 +4470,6 @@ cardSet[31053] = {
         return [{}];
       },
       Resolve: function (params) {
-    GainCredits(corp, 1, "", this);
         SpendClicks(corp, 1);
 		//false means trash cannot be prevented (because it's a cost)
         Trash(this, false, function(cardsTrashed) {
@@ -4838,7 +4785,6 @@ cardSet[31057] = {
   },
   //Note from Nisei CR 1.5 1.21.6: "If a resolving ability directs one or both players to look at or reveal a card or set of cards, each such card remains visible to the relevant player(s) until the entire ability is finished resolving or the card moves to a different location."
   Resolve: function (params) {
-    GainCredits(corp, 1, "", this);
 	//no need to spend the extra click, it's handled by the general code by being a Double
 	//create a list containing no nulls
 	var toReveal = [];
@@ -4904,7 +4850,6 @@ cardSet[31058] = {
 	  return targets;
   },
   Resolve: function (params) {
-    GainCredits(corp, 1, "", this);
 	var sources = ChoicesInstalledCards(corp, function(card) {
 		//**AI code (in this case, implemented by setting and returning only the preferred options)		
 		if (corp.AI) {
@@ -4971,7 +4916,6 @@ cardSet[31059] = {
       return []; //no valid options to use this ability
     },
     Resolve: function (params) {
-    GainCredits(corp, 1, "", this);
 	  //damage can be prevented
 	  Damage("net", 1, true);
     },
@@ -5015,7 +4959,6 @@ cardSet[31060] = {
 	  return [];
 	},
     Resolve: function (params) {
-    GainCredits(corp, 1, "", this);
 	  this.createdNewRemoteServerThisTurn=true;
 	  Draw(corp,1);		
     },
@@ -5041,7 +4984,6 @@ cardSet[31061] = {
 	  return [];
 	},		
     Resolve: function (params) {
-    GainCredits(corp, 1, "", this);
 		Rez(this.cardToRez, true); //true means ignore all costs
 		this.cardToRez = null;
     },
@@ -5196,7 +5138,6 @@ cardSet[31062] = {
   advancement: 0,
   responseOnScored: {
     Resolve: function (params) {
-    GainCredits(corp, 1, "", this);
 	  if (intended.score == this) {
 		  var advancementOverThree = this.advancement - 3;
 		  if (advancementOverThree > 1) AddCounters(this, "agenda", Math.floor(advancementOverThree*0.5));
@@ -5352,7 +5293,6 @@ cardSet[31064] = {
         return [{}];
       },
       Resolve: function (params) {
-    GainCredits(corp, 1, "", this);
         SpendClicks(corp, 1);
 		var creditsToLose = 4*Counters(this,"advancement");
 		//false means trash cannot be prevented (because it's a cost)
@@ -5407,7 +5347,6 @@ cardSet[31065] = {
 		return [];
 	},
     Resolve: function (params) {
-    GainCredits(corp, 1, "", this);
 		GainCredits(corp,1);
     },
   },
@@ -5416,7 +5355,6 @@ cardSet[31065] = {
     {
       text: "End the run unless the Runner pays 1[c].",
       Resolve: function (params) {
-    GainCredits(corp, 1, "", this);
         var choices = [];
         if (CheckCredits(runner, 1))
           choices.push({ id: 0, label: "Pay 1[c]", button: "Pay 1[c]" });
@@ -5470,7 +5408,6 @@ cardSet[31066] = {
 	  return [];
 	},
     Resolve: function (params) {
-    GainCredits(corp, 1, "", this);
 	  if (CheckCredits(runner, 3)) SpendCredits(runner, 3);
 	  else EndTheRun();
     },
@@ -5587,7 +5524,6 @@ cardSet[31068] = {
 	return choices;
   },
   Resolve: function (params) {
-    GainCredits(corp, 1, "", this);
 	var targets = ChoicesInstalledCards(corp, function(card) {
 		return CheckAdvance(card);
 	});
@@ -5675,14 +5611,13 @@ cardSet[31071] = {
   agendaPoints: 1,
   advancementRequirement: 2,
   responseOnScored: {
-    Enumerate: function () {
-      if (intended.score == this) return [{}];
-      return [];
-    },
     Resolve: function () {
-      GainCredits(corp, 7, "", this);
-      BadPublicity(1);
+      if (intended.score == this) {
+        GainCredits(corp, 7, "", this);
+        BadPublicity(1);
+      }
     },
+	automatic:true,
   },
 };
 
@@ -5707,16 +5642,14 @@ cardSet[31072] = {
   },
   //Whenever you advance this agenda, gain 2 credits. 
   //If there are 5 or more hosted advancement counters (including the counter just placed), gain 3 credits instead.
-  responseOnAdvance: {
-    Enumerate: function (card) {
-      if (card == this) return [{}];
-      return [];
+  automaticOnAdvance: {
+    Resolve: function (card) {
+	  if (card == this) {
+		if (card.advancement < 5) GainCredits(corp, 2, "", this);
+		else GainCredits(corp, 3, "", this);
+	  }
     },
-    Resolve: function () {
-      if (this.advancement < 5) GainCredits(corp, 2, "", this);
-      else GainCredits(corp, 3, "", this);
-    },
-    availableWhenInactive: true,
+	availableWhenInactive: true,
   },
   AIOverAdvance: true, //load 'em up
   AIAdvancementLimit: function() {
@@ -5741,7 +5674,6 @@ cardSet[31073] = {
   //When you score this agenda, place 1 agenda counter on it for each hosted advancement counter past 3.
   responseOnScored: {
     Resolve: function (params) {
-    GainCredits(corp, 1, "", this);
 	  if (intended.score == this) {
 		  var advancementOverThree = this.advancement - 3;
 		  if (advancementOverThree > 0) AddCounters(this, "agenda", advancementOverThree);
@@ -5787,7 +5719,6 @@ cardSet[31073] = {
 		return [];
 	  },
 	  Resolve: function (params) {
-    GainCredits(corp, 1, "", this);
 		RemoveCounters(this, "agenda", 1);
 	    /* Once a search through a deck is complete, whether or not any cards are found, the deck
 		must be immediately reshuffled before continuing to resolve any remaining effects from
@@ -6275,7 +6206,6 @@ cardSet[31078] = {
     return [{}];
   },
   Resolve: function (params) {
-    GainCredits(corp, 1, "", this);
 	Trace(5, function(successful) {
 		//damage can be prevented
 		if (successful) Damage("meat", this.printedAgendaPointsLastTurn, true);
@@ -6431,7 +6361,6 @@ cardSet[31080] = {
   //When your turn begins, gain 1 credit.
   responseOnCorpTurnBegins: {
     Resolve: function (params) {
-    GainCredits(corp, 1, "", this);
       GainCredits(corp,1);
     },
 	automatic:true, //for usability
@@ -6525,9 +6454,8 @@ cardSet[31082] = {
   //The first time each turn you play a copy of Subliminal Messaging, gain 1 click.
   Resolve: function (params) {
     GainCredits(corp, 1, "", this);
-
 	if (!this.copyPlayedThisTurn) {
-		GainClicks(corp, 1);
+		GainClicks(corp, 1, "", this);
 		this.copyPlayedThisTurn = true;
 	}
   },
@@ -6558,7 +6486,6 @@ cardSet[31082] = {
       return [];
     },
     Resolve: function (params) {
-    GainCredits(corp, 1, "", this);
       var binaryChoices = BinaryDecision(
         corp,
         "Reveal and add to HQ",
