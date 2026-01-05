@@ -751,35 +751,19 @@ function LoadDecks() {
   // // ----------------------------------------------------------------------------
   // // You can enable the debug menu at the top of init.js
 
-  if (true) { // Use this to easily disable everything below
+  if (false) { // Use this to easily disable everything below
 
      debugging = true; //set true to log extra details and pause execution on error
      viewAllFronts = true; //set true to see all card fronts (for testing)
      mainLoopDelay = 50; //for speedy AI vs AI testing (any faster than this and funny things happen at end-of-game)
 
-    RunnerTestField(30001, [], [30030,30005,30032,31007,30003,30031,31003,30004,31038,30028,31008,30031,30033,30029,30034,31006,31038,31039,31037,30029,30032,30031,30003,31039,30030,30032,31004,30008,31037,30008,30033,30033,30029,30030,31012,31038], [30028,30034,30028,31010,30034], [], [], cardBackTexturesRunner,glowTextures,strengthTextures);
-    CorpTestField(31040, [], [30038,31043,31045,31045,30042,30075,30040,30039,30067,31046,31041,30036,30075,30069,31043,30041,31045,30053,30042,30064,30037,31042,31047,31042,30050,30067,30064,31046,31044,31041,30050,31047,30038,30042,31043,30053,30075,30067,30037,31046,30039,30040,31042], [31044,30069,31041,30039], [], [], [30038], [[30037]], [], cardBackTexturesCorp,glowTextures,strengthTextures);
-    runner.stack[6].madeSuccessfulRunThisTurn=true;
-    runner.stack[6].icePassedLastRun=[corp.HQ.ice[0],];
-    corp.RnD.cards[6].cardsInstalledThisTurn=[corp.HQ.ice[0],corp.remoteServers[0].root[0],];
-    corp.RnD.cards[28].hostedCards = [];
-    corp.RnD.cards[41].cardsInstalledThisTurn=[corp.HQ.ice[0],corp.remoteServers[0].root[0],];
-    corp.RnD.cards[42].knownToRunner=true;
-    corp.HQ.ice[0].rezzed=true;
-    corp.HQ.cards[0].hostedCards = [];
-    corp.remoteServers[0].root[0].knownToRunner=true;
-    corp.remoteServers[0].root[0].AITurnsInstalled=1;
-    corp.remoteServers[0].AISuccessfulRuns=1;
-    corp.RnD.AISuccessfulRuns=1;
-
-
     // SET UP THE MAIN STATES FOR THE RUNNER AND CORP
     // ----------------------------------------------
 
     // RunnerTestField(1017, //identity
-    //   [30032, 30032, 35009, 35008], //heapCards
+    //   [30032, 30032, 35009, 35008, 30007, 30007], //heapCards
     //   [35015, 35022, 35022, 30033, 35014, 1039, 35030, 35005, 35016, 35034, 35004, 35010, 35007, 35009, 35008, 35029, 35025], //stackCards
-    //   [1030, 1030, 1030, 1030], //gripCards
+    //   [31024, 31024, 31004, 31024, 31024], //gripCards
     //   [35028, 30015, 35009, 35020, 35022, 30032], //installed 
     //   [], //stolen
     //   cardBackTexturesRunner,glowTextures,strengthTextures
@@ -792,8 +776,8 @@ function LoadDecks() {
     //   [], //archivesInstalled
     //   [35041], //rndInstalled
     //   [35042], //hqInstalled
-    //   [[35071, 35045, 30042, 35041, 35052,35079],[30067,35064],[31071, 35053],[31072, 35053, 35076],[35062, 35079]], //remotes (array of arrays)
-    //   [35070, 35070, 30068], //scored 35042,35052, 31075
+    //   [[35071, 35045, 30042, 35041, 35052,35079],[30067,35064],[31072, 35053, 35076]], //remotes (array of arrays)
+    //   [], //scored 35042,35052, 31075
     //   cardBackTexturesCorp,glowTextures,strengthTextures
     // );
 

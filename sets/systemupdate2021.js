@@ -1916,6 +1916,12 @@ cardSet[31024] = {
     automatic: true,
     availableWhenInactive: true,
   },
+  responseOnCorpTurnBegins: {
+  Resolve: function () {
+    this.chosenServer = null;
+  },
+  automatic: true,
+  },
   AIBreachReplacementValue: 1, //priority 1 (yes replace but there are better options)
   AIWorthKeeping: function (installedRunnerCards, spareMU) {
 	  //keep if need money and not wasteful (i.e. there is not already too many installed)
