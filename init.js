@@ -726,7 +726,15 @@ function Render() {
 
   previousViewingGrid = null;
 
-  cardRenderer.app.renderer.plugins.sprite.sprites.length = 0; //helps with garbage collection
+  //cardRenderer.app.renderer.plugins.sprite.sprites.length = 0; //helps with garbage collection
+
+  // helps with garbage collection (with null check for PIXI.js version compatibility)
+  // Trying to help @Spidz
+  if (cardRenderer.app && cardRenderer.app.renderer && cardRenderer.app.renderer.plugins && 
+      cardRenderer.app.renderer.plugins.sprite && cardRenderer.app.renderer.plugins.sprite.sprites) {
+    cardRenderer.app.renderer.plugins.sprite.sprites.length = 0;
+  }
+
   //https://github.com/pixijs/pixi-particles#note-on-emitter-cleanup
 
   // Removed legacy grey footer background; allow CSS green CRT gradient.
