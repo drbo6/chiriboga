@@ -2,6 +2,8 @@
 
 A single-player implementation of Android: Netrunner with AI opponents, a rogue-lite gauntlet mode and a refined cyberpunk interface. Built on the [Chiriboga engine](https://github.com/bobtheuberfish/chiriboga) by bobtheuberfish.
 
+Try it here: https://chiriboga.cronbach.com
+
 ![PHP](https://img.shields.io/badge/php-7.4%2B-blue)
 ![License](https://img.shields.io/badge/license-GPL--3.0-green)
 
@@ -11,6 +13,14 @@ A single-player implementation of Android: Netrunner with AI opponents, a rogue-
 - 🎮 **Multiple Game Modes** - Quick Game, Custom Game, Gauntlet Mode, and Tutorial
 - 📚 **Precon support** - Preconstructed decks for beginners to try out
 - 🎲 **Rogue-lite** - Face sequential opponents with a limited card pool, earn credits, and build your deck
+
+## How do I report bugs?
+
+Post them here: https://github.com/drbo6/chiriboga/issues
+
+If you do, there are two things that help a lot:
+- If there is a relevant game state, please open the menu and click on "Download Debug Log". If you upload that txt file here, I can restore your game state on my computer.
+- If you are on a computer, open the developer console (F12 in most browsers) and copy-paste any errors here.
 
 ## Credits
 
@@ -62,10 +72,6 @@ The following Elevation cards are not yet implemented (17 cards):
 - **35060** - Next Big Thing (Agenda - Initiative)
 - **35065** - Bigger Picture (Operation - Gray Ops)
 - **35066** - IP Enforcement (Operation - Gray Ops)
-- **35067** - Touch-ups (Operation - Double)
-
-## Weyland Consortium (1 card)
-- **35068** - BANGUN: When Disaster Strikes (Identity)
 
 # Debugging and Testing Guide for Chiriboga
 
