@@ -1782,10 +1782,22 @@
 			  for (var i = 0; i < playerIdentities.length; i++) {
 				var fullTitle = cardSet[playerIdentities[i]].title || '';
 				var shortTitle = fullTitle; // fallback
-				// Determine shortening based on side: runner before colon, corp after colon+space
+				// Determine shortening based on side: runner before colon, corp after colon+space (only if faction matches)
 				if (deckPlayer === corp) {
 					var colonIdx = fullTitle.indexOf(': ');
-					if (colonIdx > -1) shortTitle = fullTitle.substring(colonIdx + 2).trim();
+					if (colonIdx > -1) {
+						var beforeColon = fullTitle.substring(0, colonIdx).trim();
+						var afterColon = fullTitle.substring(colonIdx + 2).trim();
+						var faction = cardSet[playerIdentities[i]].faction || '';
+						// Normalize for comparison (remove non-letters and lowercase)
+						var beforeColonNorm = beforeColon.toLowerCase().replace(/[^a-z]/g, '');
+						var factionNorm = faction.toLowerCase().replace(/[^a-z]/g, '');
+						if (beforeColonNorm === factionNorm) {
+							shortTitle = afterColon;
+						} else {
+							shortTitle = beforeColon;
+						}
+					}
 				} else {
 					// Runner
 					if (fullTitle.indexOf(':') > -1) shortTitle = fullTitle.split(':')[0].trim();
@@ -2076,7 +2088,19 @@ GetFactionIcon(cardSet[playerIdentities[i]].faction) + shortTitle +
 						var shortTitle = fullTitle;
 						if (deckPlayer === corp) {
 							var colonIdx = fullTitle.indexOf(': ');
-							if (colonIdx > -1) shortTitle = fullTitle.substring(colonIdx + 2).trim();
+							if (colonIdx > -1) {
+								var beforeColon = fullTitle.substring(0, colonIdx).trim();
+								var afterColon = fullTitle.substring(colonIdx + 2).trim();
+								var faction = cardSet[playerIdentities[i].id].faction || '';
+								// Normalize for comparison (remove non-letters and lowercase)
+								var beforeColonNorm = beforeColon.toLowerCase().replace(/[^a-z]/g, '');
+								var factionNorm = faction.toLowerCase().replace(/[^a-z]/g, '');
+								if (beforeColonNorm === factionNorm) {
+									shortTitle = afterColon;
+								} else {
+									shortTitle = beforeColon;
+								}
+							}
 						} else {
 							if (fullTitle.indexOf(':') > -1) shortTitle = fullTitle.split(':')[0].trim();
 						}
