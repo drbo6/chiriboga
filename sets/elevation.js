@@ -7997,3 +7997,79 @@ cardSet[35067] = {
     }, "Touch-ups", "Choose a card type", cardRef);
   }
 };
+
+//BANGUN: When Disaster Strikes
+//Weyland Consortium Identity: Corp
+//Deck Size: 45, Influence Limit: 15
+//You may install agendas faceup. (This does not make their abilities active.)
+//Whenever the Runner accesses a faceup installed agenda, do 2 meat damage and give the Runner 1 tag.
+cardSet[35068] = {
+  title: "BANGUN: When Disaster Strikes",
+  imageFile: "35068.png",
+  player: corp,
+  faction: "Weyland Consortium",
+  cardType: "identity",
+  deckSize: 45,
+  influenceLimit: 15,
+  subTypes: ["Corp"],
+  
+  //You may install agendas faceup
+  responseOnInstall: {
+    Enumerate: function(card) {
+      //Only trigger for agendas that aren't already faceup (like Oaktown)
+      if (card.player === corp && CheckCardType(card, ["agenda"]) && !card.faceUp) {
+        var choices = [
+          { id: 0, label: "Install faceup", button: "Install faceup", agenda: card },
+          { id: 1, label: "Install facedown", button: "Install facedown" }
+        ];
+        
+        //**AI code - usually install faceup to threaten damage
+        if (corp.AI != null) {
+          //Install faceup if runner has enough cards to survive (makes them hesitate)
+          //Install facedown if we want to score quickly without telegraphing
+          var agendaPoints = card.agendaPoints || 0;
+          if (agendaPoints >= 3) {
+            //High value agenda - maybe keep hidden to score without warning
+            return [choices[1]]; //Install facedown
+          }
+          //Otherwise install faceup to threaten damage
+          return [choices[0]];
+        }
+        return choices;
+      }
+      return [];
+    },
+    Resolve: function(params) {
+      if (params.id === 0 && params.agenda) {
+        params.agenda.faceUp = true;
+        Log(GetTitle(params.agenda) + " installed faceup");
+      }
+    },
+    text: "Install agenda faceup?",
+  },
+  
+  //Whenever the Runner accesses a faceup installed agenda, do 2 meat damage and give the Runner 1 tag
+  automaticOnAccess: {
+    Resolve: function(card) {
+      //card parameter is accessingCard passed from AutomaticTriggers
+      //Must be an agenda
+      if (!CheckCardType(card, ["agenda"])) return;
+      
+      //Must be faceup
+      if (!card.faceUp) return;
+      
+      //Must be installed (not in Archives, R&D, HQ, or score areas)
+      if (!CheckInstalled(card)) return;
+      
+      //Double-check: must NOT be in Archives
+      if (card.cardLocation === corp.archives.cards) return;
+      
+      Log("BANGUN triggers: 2 meat damage and 1 tag");
+      var cardRef = this;
+      Damage("meat", 2, true, function(cardsTrashed) {
+        AddTags(1, function() {}, cardRef);
+      }, cardRef);
+    },
+    automatic: true,
+  },
+};

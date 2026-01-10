@@ -751,35 +751,36 @@ function LoadDecks() {
   // // ----------------------------------------------------------------------------
   // // You can enable the debug menu at the top of init.js
 
-  if (true) { // Use this to easily disable everything below
+  if (false) { // Use this to easily disable everything below
 
-     debugging = true; //set true to log extra details and pause execution on error
-     viewAllFronts = false; //set true to see all card fronts (for testing)
-     mainLoopDelay = 50; //for speedy AI vs AI testing (any faster than this and funny things happen at end-of-game)
+    debugging = true; //set true to log extra details and pause execution on error
+    mainLoopDelay = 50; //for speedy AI vs AI testing (any faster than this and funny things happen at end-of-game)
+    // viewAllFronts = false; //set true to see all card fronts (for testing)     
+
 
     // SET UP THE MAIN STATES FOR THE RUNNER AND CORP
     // ----------------------------------------------
 
-    RunnerTestField(1017, //identity
-      [30032, 30032, 35009, 35008, 30007, 30007], //heapCards
-      [35015, 35022, 35022, 30033, 35014, 1039, 35030, 35005, 35016, 35034, 35004, 35010, 35007, 35009, 35008, 35029, 35025], //stackCards
-      [31024, 31024, 31004, 31024, 31024], //gripCards
-      [35028, 30015, 35009, 35020, 35022, 30032], //installed 
-      [], //stolen
-      cardBackTexturesRunner,glowTextures,strengthTextures
-    );
+    // RunnerTestField(1017, //identity
+    //   [30032, 30032, 35009, 35008, 30007, 30007], //heapCards
+    //   [35015, 35022, 35022, 30033, 35014, 1039, 35030, 35005, 35016, 35034, 35004, 35010, 35007, 35009, 35008, 35029, 35025], //stackCards
+    //   [31024, 31024, 31004, 31024, 31024], //gripCards
+    //   [35028, 30015, 35009, 35020, 35022, 30032], //installed 
+    //   [], //stolen
+    //   cardBackTexturesRunner,glowTextures,strengthTextures
+    // );
 
-    CorpTestField(30059, //identity - 35035
-      [30037, 30047,30073,35075,30074,30075,35081,35081], //archivesCards
-      [30073,30072,30047,30073,30073,30039,30039,30039,30039,30039,35044,35044,35044,35045], //rndCards
-      [35055,35079,35040,35081,35067], //hqCards 
-      [], //archivesInstalled
-      [35041], //rndInstalled
-      [35042], //hqInstalled
-      [[35071, 35045, 30042, 35041, 35052,35079],[30067,35064],[31072, 35053, 35076]], //remotes (array of arrays)
-      [], //scored 35042,35052, 31075
-      cardBackTexturesCorp,glowTextures,strengthTextures
-    );
+    // CorpTestField(35068, //identity - 35035, 30059
+    //   [30037, 30047,30073,35075,30074,30075,35081,35081], //archivesCards
+    //   [30073,30072,30047,30073,30073,30039,30039,30039,30039,30039,35044,35044,35044,35045], //rndCards
+    //   [35055,35079,35040,35081,35067,30067], //hqCards 
+    //   [], //archivesInstalled
+    //   [35041], //rndInstalled
+    //   [35042], //hqInstalled
+    //   [[35071, 35045, 30042, 35041, 35052,35079],[35064],[31072, 35053, 35076]], //remotes (array of arrays)
+    //   [], //scored 35042,35052, 31075
+    //   cardBackTexturesCorp,glowTextures,strengthTextures
+    // );
 
     // // REZ ICE
     // // -------
@@ -812,7 +813,7 @@ function LoadDecks() {
     // // ----------------------------------------
 
     // GainCredits(runner,50);
-    GainCredits(corp,10);
+    // GainCredits(corp,10);
     
     // // SET THE PHASE
     // // -------------
