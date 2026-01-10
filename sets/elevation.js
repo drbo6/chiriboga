@@ -7927,8 +7927,11 @@ cardSet[35067] = {
       if (matchingCards.length === 0) {
         Log("No " + chosenTypeDisplay + " cards in grip");
         
-        //Show all grip cards as non-selectable display
-        var displayChoices = ChoicesArrayCards(runner.grip);
+        //Show all grip cards as non-selectable display (if any)
+        var displayChoices = [];
+        if (runner.grip.length > 0) {
+          displayChoices = ChoicesArrayCards(runner.grip);
+        }
         displayChoices.push({ id: -1, label: "Continue", button: "Continue" });
         
         //**AI code
