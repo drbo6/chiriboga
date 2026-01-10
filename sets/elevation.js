@@ -7768,3 +7768,86 @@ cardSet[35035] = {
     return false;
   },
 };
+//Byte!
+//Jinteki Asset: Ambush
+//Rez: 0, Trash: 0
+//While the Runner is accessing this asset in R&D, they must reveal it.
+//When the Runner accesses this asset anywhere except in Archives, you may pay 4 credits.
+//If you do, give the Runner 1 tag and do 3 net damage.
+cardSet[35050] = {
+  title: "Byte!",
+  imageFile: "35050.png",
+  cardText: "While the Runner is accessing this asset in R&D, they must reveal it. When the Runner accesses this asset anywhere except in Archives, you may pay 4 credits. If you do, give the Runner 1 tag and do 3 net damage.",
+  elo: 1500,
+  player: corp,
+  faction: "Jinteki",
+  influence: 2,
+  cardType: "asset",
+  subTypes: ["Ambush"],
+  rezCost: 0,
+  trashCost: 0,
+  responseOnAccess: {
+    Enumerate: function () {
+      if (accessingCard == this && this.cardLocation != corp.archives.cards) return [{}];
+      return [];
+    },
+    Resolve: function () {
+      var canAfford = CheckCredits(corp, 4, "using", this);
+      this.storedFaceUp = this.faceUp;
+      var ByteImplementation = function() {
+        var decisionCallback = function(params) {
+          if (params.id == 0) {
+            SpendCredits(
+              corp,
+              4,
+              "using",
+              this,
+              function () {
+                AddTags(1, function() {
+                  //damage can be prevented
+                  Damage("net", 3, true, function(cardsTrashed) {}, this);
+                }, this);
+              },
+              this
+            );
+          }
+        };
+        var choices = [];
+        if (canAfford) choices.push({ id:0, button:"4[c]: 1 tag and 3 net damage", label:"4[c]: 1 tag and 3 net damage"});
+        choices.push({ id:1, button:"Continue", label:"Continue"});
+        DecisionPhase(
+          corp,
+          choices,
+          decisionCallback,
+          this.title,
+          this.title,
+          this
+        );
+        if (corp.AI) corp.AI.preferred = { title: this.title, option: choices[0] };
+      }
+      //give runner a chance to take a look first so they're not bamboozled
+      var rdp = DecisionPhase(runner,[{button:"Continue",label:"Continue"}],function(){
+        if (this.cardLocation == corp.RnD.cards) Reveal(this, function(){
+          //keep card faceup until accessing is complete
+          this.faceUp = true;
+          ByteImplementation.call(this);
+        }, this, corp, canAfford);
+        else ByteImplementation.call(this);
+      },this.title,this.title,this);
+      rdp.requireHumanInput=canAfford;
+    },
+  },
+  automaticOnAccessComplete: {
+    Resolve: function (card) {
+      //Byte! is revealed until access completes (unless it is in Archives, in which case it becomes faceup as per NSG 4.4.6)
+      if (card == this && card.cardLocation != corp.archives.cards) if (!this.storedFaceUp) this.faceUp = false;
+    },
+    automatic: true,
+    availableWhenInactive: true,
+  },
+  RezUsability: function () {
+    //never
+    return false;
+  },
+  AIAvoidInstallingOverThis: true,
+};
