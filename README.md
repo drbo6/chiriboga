@@ -53,9 +53,6 @@ Card art and symbols are property of Null Signal Games and used under [CC BY-ND 
 
 The following Elevation cards are not yet implemented (17 cards):
 
-## Haas-Bioroid (1 card)
-- **35035** - LEO Construction: Labor Solutions (Identity)
-
 ## Jinteki (8 cards)
 - **35046** - AU Co.: The Gold Standard in Clones (Identity)
 - **35047** - PT Untaian: Life's Building Blocks (Identity)
