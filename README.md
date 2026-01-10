@@ -56,19 +56,21 @@ The following Elevation cards are not yet implemented (17 cards):
 ## Jinteki (8 cards)
 - **35046** - AU Co.: The Gold Standard in Clones (Identity)
 - **35047** - PT Untaian: Life's Building Blocks (Identity)
-- **35048** - Proprionegation (Agenda)
-- **35049** - Sericulture Expansion (Agenda)
+- **35048** - Proprionegation (Agenda) (Hidden Funds)
+- **35049** - Sericulture Expansion (Agenda) (Hidden Funds)
 - **35050** - Byte! (Asset - Ambush)
 - **35051** - Phật Gioan Baotixita (Asset - Executive)
-- **35056** - Mitra Aman (Upgrade - Clone)
+- **35056** - Mitra Aman (Upgrade - Clone) (Hidden Funds)
 
 ## NBN (9 cards)
 - **35057** - Nebula Talent Management: Making Stars (Identity - Flip)
 - **35058** - Synapse Global: Faster than Thought (Identity)
-- **35059** - Embedded Reporting (Agenda - Initiative)
-- **35060** - Next Big Thing (Agenda - Initiative)
-- **35065** - Bigger Picture (Operation - Gray Ops)
-- **35066** - IP Enforcement (Operation - Gray Ops)
+- **35059** - Embedded Reporting (Agenda - Initiative) (Fine Print)
+- **35060** - Next Big Thing (Agenda - Initiative) (Fine Print)
+- **35065** - Bigger Picture (Operation - Gray Ops) (Fine Print)
+- **35066** - IP Enforcement (Operation - Gray Ops) (Fine Print)
+
+I'll get to these when I have a minute.
 
 # Debugging and Testing Guide for Chiriboga
 
