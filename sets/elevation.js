@@ -7851,3 +7851,146 @@ cardSet[35050] = {
   },
   AIAvoidInstallingOverThis: true,
 };
+
+//Touch-ups
+//NBN Operation: Double
+//Cost: 2
+//As an additional cost to play this operation, spend click.
+//Place 2 advancement counters on 1 installed card you can advance.
+//If you do, choose a card type and reveal the grip.
+//Choose up to 2 revealed cards of that type. The Runner shuffles those cards into the stack.
+cardSet[35067] = {
+  title: "Touch-ups",
+  imageFile: "35067.png",
+  player: corp,
+  faction: "NBN",
+  influence: 3,
+  cardType: "operation",
+  subTypes: ["Double"],
+  playCost: 2,
+  
+  //Enumerate: Seamless Launch pattern - return advanceable cards
+  Enumerate: function() {
+    var choices = ChoicesInstalledCards(corp, function(card) {
+      return CheckAdvance(card);
+    });
+    if (choices.length < 1) return [];
+    
+    //**AI code
+    if (corp.AI != null) {
+      //Pick a random advanceable card
+      Shuffle(choices);
+    }
+    return choices;
+  },
+  
+  Resolve: function(params) {
+    var cardRef = this;
+    
+    //Step 1: Place 2 advancement counters
+    PlaceAdvancement(params.card, 2);
+    
+    //Step 2: Choose card type (Key Performance Indicators pattern)
+    var typeChoices = [
+      { id: 0, label: "Event", button: "Event", cardType: "event" },
+      { id: 1, label: "Hardware", button: "Hardware", cardType: "hardware" },
+      { id: 2, label: "Program", button: "Program", cardType: "program" },
+      { id: 3, label: "Resource", button: "Resource", cardType: "resource" }
+    ];
+    
+    //**AI code - random type selection
+    if (corp.AI != null) {
+      var randomIndex = RandomRange(0, 3);
+      corp.AI.preferred = { title: "Touch-ups", option: typeChoices[randomIndex] };
+    }
+    
+    DecisionPhase(corp, typeChoices, function(typeParams) {
+      var chosenType = typeParams.cardType;
+      var chosenTypeDisplay = chosenType.charAt(0).toUpperCase() + chosenType.slice(1);
+      Log("Corp chose " + chosenTypeDisplay);
+      
+      //Step 3: Reveal grip (set faceUp on all cards)
+      runner.grip.forEach(function(card) {
+        card.faceUp = true;
+      });
+      Log("Runner's grip revealed");
+      
+      //Step 4: Filter by chosen type
+      var matchingCards = [];
+      for (var i = 0; i < runner.grip.length; i++) {
+        if (CheckCardType(runner.grip[i], [chosenType])) {
+          matchingCards.push(runner.grip[i]);
+        }
+      }
+      
+      //If no matching cards, show all grip cards but only allow Continue
+      if (matchingCards.length === 0) {
+        Log("No " + chosenTypeDisplay + " cards in grip");
+        
+        //Show all grip cards as non-selectable display
+        var displayChoices = ChoicesArrayCards(runner.grip);
+        displayChoices.push({ id: -1, label: "Continue", button: "Continue" });
+        
+        //**AI code
+        if (corp.AI != null) {
+          corp.AI.preferred = { title: "Touch-ups", option: { id: -1 } };
+        }
+        
+        DecisionPhase(corp, displayChoices, function() {
+          runner.grip.forEach(function(card) { card.faceUp = false; });
+        }, "Touch-ups", "No " + chosenTypeDisplay + " cards in grip", cardRef);
+        return;
+      }
+      
+      //Step 5: Corp selects up to 2 cards (Celebrity Gift pattern)
+      var selectChoices = ChoicesArrayCards(matchingCards);
+      
+      //Add "Done" choice with dynamic button text
+      selectChoices.push({
+        id: selectChoices.length,
+        label: "Done",
+        multiSelectDynamicButtonText: function(numSelected) {
+          return "Shuffle " + numSelected + " card" + (numSelected == 1 ? '' : 's');
+        },
+        button: "Shuffle 0 cards"
+      });
+      
+      //Set up multi-select (up to 2)
+      var maxSelect = Math.min(2, matchingCards.length);
+      for (var i = 0; i < selectChoices.length; i++) {
+        selectChoices[i].cards = Array(maxSelect).fill(null);
+      }
+      
+      //**AI code - pick up to 2 cards to remove (just take first 2)
+      if (corp.AI != null) {
+        var cardsToShuffle = matchingCards.slice(0, Math.min(2, matchingCards.length));
+        corp.AI.preferred = { title: "Touch-ups", option: { cards: cardsToShuffle } };
+      }
+      
+      DecisionPhase(corp, selectChoices, function(selectParams) {
+        //Filter nulls
+        var selectedCards = [];
+        if (selectParams.cards) {
+          selectParams.cards.forEach(function(c) {
+            if (c) selectedCards.push(c);
+          });
+        }
+        
+        //Step 6: Shuffle selected cards into stack
+        selectedCards.forEach(function(card) {
+          MoveCard(card, runner.stack);
+        });
+        
+        if (selectedCards.length > 0) {
+          Shuffle(runner.stack);
+          Log(selectedCards.length + " card(s) shuffled into stack");
+        }
+        
+        //Reset faceUp on remaining grip cards
+        runner.grip.forEach(function(card) { card.faceUp = false; });
+        
+      }, "Touch-ups", "Choose up to 2 " + chosenTypeDisplay + " cards", cardRef);
+      
+    }, "Touch-ups", "Choose a card type", cardRef);
+  }
+};

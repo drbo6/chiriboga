@@ -3576,3 +3576,11 @@ body.deck-builder-page {
 	text-align: right;
 	min-width: 70px;
 }
+/* Remove chevron for footer buttons */
+#footer .button::before, #footer button::before {
+    content: none;
+}
+#footer .button, #footer button {
+    padding-right: 0.8em !important;
+    padding-left: 0.8em !important;
+}

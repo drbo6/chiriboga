@@ -754,7 +754,7 @@ function LoadDecks() {
   if (true) { // Use this to easily disable everything below
 
      debugging = true; //set true to log extra details and pause execution on error
-     viewAllFronts = true; //set true to see all card fronts (for testing)
+     viewAllFronts = false; //set true to see all card fronts (for testing)
      mainLoopDelay = 50; //for speedy AI vs AI testing (any faster than this and funny things happen at end-of-game)
 
     // SET UP THE MAIN STATES FOR THE RUNNER AND CORP
@@ -812,7 +812,7 @@ function LoadDecks() {
     // // ----------------------------------------
 
     // GainCredits(runner,50);
-    // GainCredits(corp,50);
+    GainCredits(corp,10);
     
     // // SET THE PHASE
     // // -------------
