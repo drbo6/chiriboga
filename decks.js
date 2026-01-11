@@ -751,57 +751,11 @@ function LoadDecks() {
   // // ----------------------------------------------------------------------------
   // // You can enable the debug menu at the top of init.js
 
-  if (true) { // Use this to easily disable everything below
+  if (false) { // Use this to easily disable everything below
 
     debugging = true; //set true to log extra details and pause execution on error
     mainLoopDelay = 50; //for speedy AI vs AI testing (any faster than this and funny things happen at end-of-game)
     viewAllFronts = true; //set true to see all card fronts (for testing)     
-
-
-    RunnerTestField(1001, [31038,30030,30030,30034,30034,30031,30031,30029,31037,30030,35008,35008,35009,30025,30026,30007,30007,30007], 
-      [30032,30017,31035,30028,1006,35034,31029,30028,30007,30007,30007,30007], 
-      [31009,31005,30029,35004], 
-      [30034,30033,30033,30006,1010,1009], [31071,31072], cardBackTexturesRunner,glowTextures,strengthTextures);
-CorpTestField(30059, [30075,31076,30075,31069,30064,30075,30066,30053,31080,30064], [31076,31080,31058,30062,31073,31076,31080,31066,31072,31042,31075,30063,31077,31075,31072,30053,30066,30064,30060], [30070,31058,31071], [], [31077,30063], [30062], [[30053,30063],[31073,31077,30062]], [31073,31071], cardBackTexturesCorp,glowTextures,strengthTextures);
-runner.grip[1].agendasInstalledThisTurn=[];
-runner.heap[8].runWasSuccessful=true;
-runner.heap[13].host=null;
-runner.heap[14].host=null;
-runner.rig.resources[1].credits=2;
-runner.rig.resources[2].credits=2;
-runner.rig.programs[1].virus=3;
-corp.scoreArea[0].faceUp=true;
-corp.scoreArea[0].agenda=2;
-corp.scoreArea[0].AITurnsInstalled=2;
-corp.scoreArea[1].faceUp=true;
-corp.archives.cards[0].faceUp=true;
-corp.archives.cards[1].faceUp=true;
-corp.archives.cards[1].host=null;
-corp.archives.cards[2].faceUp=true;
-corp.archives.cards[3].faceUp=true;
-corp.archives.cards[3].host=null;
-corp.archives.cards[4].faceUp=true;
-corp.archives.cards[5].faceUp=true;
-corp.archives.cards[6].faceUp=true;
-corp.archives.cards[7].faceUp=true;
-corp.archives.cards[7].host=null;
-corp.archives.cards[8].faceUp=true;
-corp.archives.cards[9].host=null;
-corp.RnD.ice[0].rezzed=true;
-corp.RnD.ice[0].advancement=3;
-corp.RnD.ice[1].rezzed=true;
-corp.RnD.ice[1].advancement=3;
-corp.RnD.ice[1].hostedCards = [];
-InstanceCardsPush(30004,corp.RnD.ice[1].hostedCards,1,cardBackTexturesRunner,glowTextures,strengthTextures)[0].host = corp.RnD.ice[1];
-corp.RnD.ice[1].hostedCards[0].faceUp=true;
-corp.RnD.ice[1].hostedCards[0].virus=2;
-corp.RnD.ice[1].hostedCards[0].host=corp.RnD.ice[1];
-corp.HQ.ice[0].rezzed=true;
-corp.remoteServers[0].root[0].AITurnsInstalled=1;
-corp.remoteServers[1].root[0].AITurnsInstalled=1;
-corp.archives.AISuccessfulRuns=2;
-corp.RnD.AISuccessfulRuns=3;
-corp.badPublicity = 1;
 
     // SET UP THE MAIN STATES FOR THE RUNNER AND CORP
     // ----------------------------------------------
