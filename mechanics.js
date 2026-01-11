@@ -1820,12 +1820,15 @@ function Expose(card) {
     if (intended.expose == null) return;
     //temporarily turn card face up
     intended.expose.faceUp = true;
+    intended.expose.knownToRunner = true; // Runner now knows what this card is
+    intended.expose.renderer.FaceUp(); // Update the visual display
     if (!intended.expose.renderer.zoomed) intended.expose.renderer.ToggleZoom();
     Log(GetTitle(intended.expose) + " exposed");
     function decisionCallback(params) {
       if (intended.expose.renderer.zoomed)
         intended.expose.renderer.ToggleZoom();
       intended.expose.faceUp = false;
+      intended.expose.renderer.FaceDown(); // Restore the visual display
     }
     DecisionPhase(
       otherPlayer,

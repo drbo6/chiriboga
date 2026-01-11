@@ -674,7 +674,7 @@ coreSet[1019] = {
   subTypes: ["Job"],
   playCost: 0,
   Resolve: function (params) {
-    GainCredits(runner, 3, "", this);
+    GainCredits(runner, 3);
   },
 };
 // coreSet[1020] = Forged Activation Orders - DUPLICATE: System Update 2021 has Forged Activation Orders (card 31017)
@@ -725,8 +725,116 @@ coreSet[1022] = {
     );
   },
 };
-// coreSet[1023] = Lemuria Codecracker - NOT IMPLEMENTED
-// coreSet[1024] = Desperado - NOT IMPLEMENTED
+coreSet[1023] = {
+  title: "Lemuria Codecracker",
+  imageFile: "01023.png",
+  player: runner,
+  faction: "Criminal",
+  influence: 1,
+  cardType: "hardware",
+  installCost: 1,
+  // [click], 1 credit: Expose 1 card. Use this ability only if you have made a successful run on HQ this turn.
+  madeSuccessfulRunOnHQThisTurn: false,
+  responseOnRunnerTurnBegins: {
+    Resolve: function () {
+      this.madeSuccessfulRunOnHQThisTurn = false;
+    },
+    automatic: true,
+    availableWhenInactive: true,
+  },
+  responseOnCorpTurnBegins: {
+    Resolve: function () {
+      this.madeSuccessfulRunOnHQThisTurn = false;
+    },
+    automatic: true,
+    availableWhenInactive: true,
+  },
+  responseOnRunSuccessful: {
+    Resolve: function () {
+      if (attackedServer == corp.HQ) {
+        this.madeSuccessfulRunOnHQThisTurn = true;
+      }
+    },
+    automatic: true,
+    availableWhenInactive: true,
+  },
+  abilities: [
+    {
+      text: "[click], 1[c]: Expose 1 card.",
+      Enumerate: function () {
+        // Must have made successful run on HQ this turn
+        if (!this.madeSuccessfulRunOnHQThisTurn) return [];
+        // Must have a click
+        if (!CheckActionClicks(runner, 1)) return [];
+        // Must be able to pay 1 credit
+        if (!CheckCredits(1, runner, "using", this)) return [];
+        // Must be an unrezzed installed Corp card to expose
+        var unrezzedCards = ChoicesInstalledCards(corp, function (card) {
+          return !card.rezzed;
+        });
+        if (unrezzedCards.length == 0) return [];
+        return [{}];
+      },
+      Resolve: function (params) {
+        SpendClicks(runner, 1);
+        var lemuriaCracker = this;
+        SpendCredits(runner, 1, "using", this, function () {
+          var choices = ChoicesInstalledCards(corp, function (card) {
+            return !card.rezzed;
+          });
+          function decisionCallback(params) {
+            Expose(params.card);
+          }
+          DecisionPhase(
+            runner,
+            choices,
+            decisionCallback,
+            null,
+            "Lemuria Codecracker",
+            lemuriaCracker
+          );
+        }, this);
+      },
+    },
+  ],
+  // AI: Use when there's meaningful information to gain
+  AIWouldUseAbility: function () {
+    if (!this.madeSuccessfulRunOnHQThisTurn) return false;
+    // Check if there are unrezzed cards we don't know about
+    var unknownUnrezzed = 0;
+    var installedCorpCards = InstalledCards(corp);
+    for (var i = 0; i < installedCorpCards.length; i++) {
+      if (!installedCorpCards[i].rezzed && !installedCorpCards[i].knownToRunner) {
+        unknownUnrezzed++;
+      }
+    }
+    // Worth using if there are unknown unrezzed cards
+    return unknownUnrezzed > 0;
+  },
+};
+coreSet[1024] = {
+  title: "Desperado",
+  imageFile: "01024.png",
+  player: runner,
+  faction: "Criminal",
+  influence: 3,
+  cardType: "hardware",
+  subTypes: ["Console"],
+  installCost: 3,
+  unique: true,
+  memoryUnits: 1,
+  // Gain 1 credit whenever you make a successful run.
+  responseOnRunSuccessful: {
+    Resolve: function () {
+      GainCredits(runner, 1, "", this);
+    },
+    automatic: true,
+  },
+  AIEconomyInstall: function() {
+    // High priority - Desperado is one of the best consoles
+    return 3;
+  },
+};
 // coreSet[1025] = Aurora - NOT IMPLEMENTED
 // coreSet[1026] = Femme Fatale - DUPLICATE: System Update 2021 has Femme Fatale
 // coreSet[1027] = Ninja

@@ -761,10 +761,10 @@ function LoadDecks() {
     // SET UP THE MAIN STATES FOR THE RUNNER AND CORP
     // ----------------------------------------------
 
-    RunnerTestField(1017, //identity
+    RunnerTestField(31001, //identity
       [30032, 30032, 35009, 35008, 30007, 30007], //heapCards
       [35015, 35022, 35022, 30033, 35014, 1039, 35030, 35005, 35016, 35034, 35004, 35010, 35007, 35009, 35008, 35029, 35025], //stackCards
-      [31024, 31024, 31004, 31024, 1018], //gripCards
+      [31024, 31024, 1024, 1023, 1018], //gripCards
       [35028, 30015, 35009, 35020, 35022, 30032], //installed 
       [], //stolen
       cardBackTexturesRunner,glowTextures,strengthTextures
