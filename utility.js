@@ -3512,9 +3512,12 @@ function URIParameter(name) {
   name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
   var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
     results = regex.exec(location.search);
-  return results === null
-    ? ""
-    : decodeURIComponent(results[1].replace(/\+/g, " "));
+  if (results === null) return "";
+  // Decode the URI component, then convert any spaces back to +
+  // This fixes URLs where + was converted to space (%20) during transit
+  // (e.g., by email clients, messaging apps, or certain browsers)
+  var decoded = decodeURIComponent(results[1]);
+  return decoded.replace(/ /g, "+");
 }
 
 //code to get combinations of k chosen from set
