@@ -114,7 +114,7 @@ coreSet[1004] = {
   },
   Resolve: function (params) {
     MakeRun(params.server);
-    GainCredits(runner, 9, "Stimhack");
+    GainCredits(runner, 9, "Stimhack", this);
   },
   responseOnRunEnds: {
     Resolve: function () {
@@ -550,12 +550,120 @@ coreSet[1017] = {
     },
     Resolve: function () {
       gabrielSantiagoMadeSuccessfulRunOnHQThisTurn = true;
-      GainCredits(runner, 2, "Gabriel Santiago");
+      GainCredits(runner, 2, "", this);
     },
     // NOT automatic - we need Enumerate to be checked!
   },
 };
-// coreSet[1018] = Account Siphon - NOT IMPLEMENTED (very complex)
+coreSet[1018] = {
+  title: "Account Siphon",
+  imageFile: "01018.png",
+  player: runner,
+  faction: "Criminal",
+  influence: 4,
+  cardType: "event",
+  subTypes: ["Run", "Sabotage"],
+  playCost: 0,
+  //Run HQ. If successful, instead of breaching HQ, you may force the Corp to lose up to 5 credits, 
+  //then you gain 2 credits for each credit lost and take 2 tags.
+  runWasSuccessful: false,
+  responseOnRunSuccessful: {
+    Resolve: function () {
+      this.runWasSuccessful = true;
+    },
+    automatic: true,
+  },
+  Resolve: function (params) {
+    this.runWasSuccessful = false;
+    MakeRun(corp.HQ);
+  },
+  specialOnInsteadOfBreaching: {
+    Enumerate: function () {
+      // Require successful run to replace breach
+      if (!this.runWasSuccessful) return [];
+      
+      // AI decision: should we use the siphon effect or breach normally?
+      if (runner.AI != null) {
+        var corpCredits = corp.creditPool;
+        var creditsCorpLoses = Math.min(corpCredits, 5);
+        var creditsRunnerGains = creditsCorpLoses * 2;
+        
+        // If Corp has very few credits, breaching HQ is probably better
+        // (get accesses instead of just taking 2 tags for minimal gain)
+        if (creditsCorpLoses < 2) return []; // Breach normally instead
+        
+        // Calculate if siphon is worth it vs breach
+        // Tags cost roughly 2 credits + 1 click each to clear = ~4 credits value for 2 tags
+        var tagCost = 4;
+        if (runner.tags > 0) tagCost = 2; // Already tagged, less penalty
+        if (runner.creditPool > 10) tagCost = tagCost * 0.5; // Rich runner can handle tags
+        
+        var netGain = creditsRunnerGains - tagCost;
+        var economicSwing = creditsCorpLoses + creditsRunnerGains;
+        
+        // Use siphon if the economic swing is significant
+        if (economicSwing < 6 && netGain < 2) return []; // Not worth it, breach instead
+      }
+      
+      // This is an optional replacement ("you may"), so return a single option
+      // The player can choose not to use it (breach normally instead)
+      return [{}];
+    },
+    Resolve: function (params) {
+      // Force the Corp to lose up to 5 credits
+      var creditsToLose = Math.min(corp.creditPool, 5);
+      var creditsLost = LoseCredits(corp, creditsToLose);
+      // Gain 2 credits for each credit lost
+      var creditsGained = creditsLost * 2;
+      if (creditsGained > 0) {
+        GainCredits(runner, creditsGained);
+      }
+      // Take 2 tags
+      AddTags(2);
+      Log("Account Siphon: Corp lost " + creditsLost + " credits, Runner gained " + creditsGained + " credits and took 2 tags");
+    },
+  },
+  AIBreachReplacementValue: 3, // High priority - this is usually what we want to do
+  AIBreachNotRequired: true, // The replacement effect is valuable even without breach
+  // Don't define AIWouldPlay for run events, instead use AIRunEventExtraPotential
+  AIRunEventExtraPotential: function (server, potential) {
+    // Only HQ
+    if (server != corp.HQ) return 0;
+    // Check for Crisium Grid
+    if (runner.AI._rootKnownToContainCopyOfCard(server, "Crisium Grid")) return 0;
+    
+    // Calculate economic value
+    var corpCredits = corp.creditPool;
+    var creditsCorpLoses = Math.min(corpCredits, 5);
+    var creditsRunnerGains = creditsCorpLoses * 2;
+    var netSwing = creditsCorpLoses + creditsRunnerGains; // Total economic swing
+    
+    // If Corp has very few credits, not worth it
+    if (creditsCorpLoses < 2) return 0;
+    
+    // Consider tag liability
+    // If Runner already has tags, additional tags are less harmful
+    var tagPenalty = 4; // Base cost of 2 tags (roughly 4 credits and clicks to clear)
+    if (runner.tags > 0) {
+      tagPenalty = 2; // Already tagged, so incremental tags less bad
+    }
+    // If Runner is very rich, tags are easier to deal with
+    if (runner.creditPool > 10) {
+      tagPenalty = tagPenalty * 0.5;
+    }
+    
+    // Calculate net value
+    var netValue = netSwing - tagPenalty;
+    
+    // Return a potential value scaled to how good the play is
+    // The scale is roughly: 0 = don't play, 1 = okay, 2+ = good
+    if (netValue >= 10) return 3.0; // Excellent - major swing
+    if (netValue >= 6) return 2.0;  // Great
+    if (netValue >= 3) return 1.0;  // Good
+    if (netValue >= 0) return 0.5;  // Marginal
+    return 0; // Not worth it
+  },
+};
 coreSet[1019] = {
   title: "Easy Mark",
   imageFile: "01019.png",
@@ -566,7 +674,7 @@ coreSet[1019] = {
   subTypes: ["Job"],
   playCost: 0,
   Resolve: function (params) {
-    GainCredits(runner, 3, "Easy Mark");
+    GainCredits(runner, 3, "", this);
   },
 };
 // coreSet[1020] = Forged Activation Orders - DUPLICATE: System Update 2021 has Forged Activation Orders (card 31017)
@@ -1106,7 +1214,7 @@ coreSet[1049] = {
   },
   Resolve: function (params) {
     if (params.id == 0) {
-      GainCredits(runner, 2);
+      GainCredits(runner, 2, "", this);
     } else if (params.id == 1) {
       var choices = ChoicesInstalledCards(corp, function (card) {
         if (card.rezzed == true) return false; //only include unrezzed installed cards
@@ -2184,7 +2292,7 @@ coreSet[1089] = {
 //   responseOnScored: {
 //     Resolve: function () {
 //       if (intended.score == this) {
-//         GainCredits(corp, 7);
+//         GainCredits(corp, 7, "", this);
 //         BadPublicity(1);
 //       }
 //     },
@@ -2235,7 +2343,7 @@ coreSet[1108] = {
       },
       Resolve: function (params) {
         SpendClicks(corp, 3);
-        GainCredits(corp, 7);
+        GainCredits(corp, 7, "", this);
       },
     },
   ],
@@ -2265,7 +2373,7 @@ coreSet[1108] = {
 //   subTypes: ["Transaction"],
 //   playCost: 5,
 //   Resolve: function (params) {
-//     GainCredits(corp, 9);
+//     GainCredits(corp, 9, "", this);
 //   },
 // };
 // DUPLICATE: System Gateway has Hedge Fund (card 30075)
