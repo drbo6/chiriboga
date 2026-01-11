@@ -2098,6 +2098,15 @@ function ExecuteChosen(chosenCommand) {
 }
 
 // Debug menu action handlers
+function debugToggleViewAllFronts() {
+  viewAllFronts = !viewAllFronts;
+  var btn = document.getElementById('debug-view-all-fronts-btn');
+  if (btn) {
+    btn.textContent = 'ViewAllFronts: ' + (viewAllFronts ? 'ON' : 'OFF');
+  }
+  Log('DEBUG: ViewAllFronts is now ' + (viewAllFronts ? 'ON' : 'OFF') + ' (AI behavior may change)');
+  Render();
+}
 function debugAddClick() {
   if (viewingPlayer && typeof viewingPlayer.clickTracker === 'number') {
     viewingPlayer.clickTracker++;
@@ -2364,6 +2373,12 @@ function ShowDebugMenuButtonIfEnabled() {
 function debugPopulateCardDropdown() {
   var dropdown = document.getElementById('debug-card-select');
   if (!dropdown) return;
+  
+  // Update ViewAllFronts button state
+  var viewAllFrontsBtn = document.getElementById('debug-view-all-fronts-btn');
+  if (viewAllFrontsBtn) {
+    viewAllFrontsBtn.textContent = 'ViewAllFronts: ' + (viewAllFronts ? 'ON' : 'OFF');
+  }
   
   // Clear existing options
   dropdown.innerHTML = '<option value="">-- Select a card --</option>';
