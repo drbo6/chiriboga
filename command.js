@@ -374,7 +374,7 @@ function ResolveClick(input) {
       var closestOption = 0; //index in relevantOptions, not validOptions
       for (var i = 0; i < relevantOptions.length; i++) {
         //no host? need to manually select (by button)
-        if (typeof relevantOptions[i].host == "undefined") {
+        if (!relevantOptions[i].host) {
 		  for (var j=0; j<relevantOptions.length; j++) {
 			  if (typeof relevantOptions[j].alt != 'undefined') relevantOptions[j].button = relevantOptions[j].alt;
 			  else if (typeof relevantOptions[j].label != 'undefined') relevantOptions[j].button = relevantOptions[j].label;

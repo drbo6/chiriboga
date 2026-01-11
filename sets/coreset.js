@@ -248,6 +248,8 @@ coreSet[1009] = {
             });
             if (choices.length == 0) {
               Log("Failed (no virus programs found)."); //even if there are no viruses, you can legally search and fail  (more info here: http://ancur.wikia.com/wiki/Democracy_and_Dogma_UFAQ#Mumbad_City_Hall)
+              Shuffle(runner.stack);
+              return;
             }
             function decisionCallback(params) {
               MoveCard(params.card, runner.stack); //move it to top...just makes it easier to view during reveal

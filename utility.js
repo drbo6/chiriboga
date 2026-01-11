@@ -2094,6 +2094,13 @@ function InstalledMemoryCost(destination = null, ignoreCards=[]) {
     //if a card with its own MU was specified, check the cards hosted there instead
     if (typeof destination.hostingMU !== "undefined")
       arrayToCheck = destination.hostedCards;
+  } else {
+    //when checking general MU, exclude programs hosted on cards with hostingMU (e.g. Djinn)
+    //per card text: "The memory costs of hosted programs do not count against your memory limit."
+    arrayToCheck = arrayToCheck.filter(function(card) {
+      if (card.host && typeof card.host.hostingMU !== "undefined") return false;
+      return true;
+    });
   }
 
   var imu = 0;
