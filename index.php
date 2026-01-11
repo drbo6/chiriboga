@@ -1,3 +1,6 @@
+<?php
+$version = "0.6.9-BETA";
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -185,7 +188,7 @@
           </div>
           <div class="spacer-grow"></div>
           <div class="meta-stack landscape-only">
-            <div class="version">BUILD 0.1.0-ALPHA // 2077.<?php echo date('m.d'); ?></div>
+            <div class="version">BUILD <?php echo $version; ?> // 2077.<?php echo date('m.d'); ?></div>
             <div class="status-bar">
               <span class="status-item" style="cursor:pointer;" onclick="openCredits()">CREDITS</span>
               <span class="status-item" id="threat-level">THREAT LEVEL: <span id="threat-color">1</span></span>
@@ -410,7 +413,7 @@
         </div>
 
         <div class="meta-stack portrait-only">
-          <div class="version">BUILD 0.6.8-BETA // 2077.<?php echo date('m.d'); ?></div>
+          <div class="version">BUILD <?php echo $version; ?> // 2077.<?php echo date('m.d'); ?></div>
           <div class="status-bar">
             <span class="status-item" style="cursor:pointer;" onclick="openCredits()">CREDITS</span>
             <span class="status-item" id="threat-level-portrait">THREAT LEVEL: <span id="threat-color-portrait">1</span></span>
