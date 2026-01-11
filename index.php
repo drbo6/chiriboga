@@ -216,14 +216,14 @@
                 <button class="credits-back" onclick="closeCredits()">BACK</button>
               </div>
               <div class="credits-scroll">
+                <h3>About Netrunner Solo Mode</h3>
+                <p>This Netrunner Solo Mode extension for the Chiriboga engine is developed by <a href="https://github.com/drbo6" target="_blank" rel="noopener">DrBo6</a>. It adds a more refined interface and game modes to the game. 
+                It is available on <a href="https://github.com/NEU-DrBo6/chiriboga" target="_blank" rel="noopener">Github</a> for bug reports and contributions.</p>                
                 <h3>About Chiriboga</h3>
-                <p><strong>Chiriboga</strong> is a Netrunner engine originally developed by <a href="https://github.com/bobtheuberfish" target="_blank" rel="noopener">bobtheuberfish</a>. 
+                <p><strong>Chiriboga</strong> is a Netrunner engine developed by <a href="https://github.com/bobtheuberfish" target="_blank" rel="noopener">bobtheuberfish</a>. 
                 It implements <em>Android: Netrunner</em> gameplay with an AI opponent. The source is available on <a href="https://github.com/bobtheuberfish/chiriboga" target="_blank" rel="noopener">Github</a>.</p>
                 <p>Special thanks to testers, including: BadEpsilon, bowlsley, D-Smith, eniteris, Kwaice, Mentlegen, olompumpa, R41B, saff, Saintis, Ysengrin.</p>
                 <p class="aside">"...but who ordered him to wear that hat?"</p>
-                <h3>Solo Mode</h3>
-                <p>The Solo Mode extension is developed by <a href="https://github.com/drbo6" target="_blank" rel="noopener">DrBo6</a>. It adds a more refined interface and game modes. 
-                It is available on <a href="https://github.com/NEU-DrBo6/chiriboga" target="_blank" rel="noopener">Github</a> as well.</p>
                 <h3>Pre‑constructed Decks</h3>
                 <p>Girometics SG+SU21 and NSG Core precons designed by <a href="https://netrunnerdb.com/en/decklists/find?faction=&sort=popularity&rotation_id=&author=Girometics&title=&is_legal=&mwl_code=&packs%5B%5D=su21&packs%5B%5D=sg" target="_blank">Girometics</a>. All other precons curated by <a href="https://github.com/drbo6" target="_blank" rel="noopener">DrBo6</a>. Click on them to see their creators on NetrunnerDB.com.</p>
                 <h3>Legal & Attribution</h3>
