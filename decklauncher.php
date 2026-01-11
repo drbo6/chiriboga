@@ -1879,6 +1879,13 @@ GetFactionIcon(cardSet[playerIdentities[i]].faction) + shortTitle +
 			      });
 			    }
 			  }, 150);
+			  
+			  // Hide loading overlay now that everything is ready
+			  $('#loading-overlay').addClass('hidden');
+			  // Remove from DOM after fade-out transition completes
+			  setTimeout(function() {
+			    $('#loading-overlay').remove();
+			  }, 350);
 			}
 
 			function Normalise(src) {
@@ -2132,6 +2139,24 @@ GetFactionIcon(cardSet[playerIdentities[i]].faction) + shortTitle +
 
 
 	<body onload="Init();">
+		<!-- Loading Overlay - hidden when page is ready -->
+		<div id="loading-overlay">
+			<div class="loading-text">Loading<span class="loading-dots"></span></div>
+			<div class="loading-bar"><div class="loading-bar-fill"></div></div>
+		</div>
+		<script>
+			// Animate loading dots
+			(function() {
+				var dots = document.querySelector('.loading-dots');
+				if (dots) {
+					var count = 0;
+					setInterval(function() {
+						count = (count + 1) % 4;
+						dots.textContent = '.'.repeat(count) || '';
+					}, 400);
+				}
+			})();
+		</script>
 		<div id="contentcontainer">
 			<div id="dataentry">
 				<div class="leftrow toprow">

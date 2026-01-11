@@ -764,7 +764,7 @@ function LoadDecks() {
     RunnerTestField(31001, //identity
       [30032, 30032, 35009, 35008, 30007, 30007], //heapCards
       [35015, 35022, 35022, 30033, 35014, 1039, 35030, 35005, 35016, 35034, 35004, 35010, 35007, 35009, 35008, 35029, 35025], //stackCards
-      [1027, 1025, 1037, 1042, 1029, 1031], //gripCards
+      [1027, 1025, 1037, 1042, 1029, 35034], //gripCards
       [], //installed 
       [], //stolen
       cardBackTexturesRunner,glowTextures,strengthTextures
@@ -826,7 +826,7 @@ function LoadDecks() {
 
     // ChangePhase(phases.runnerEndOfTurn);
     // AddTags(3);
-    // runner.clickTracker = 0;  
+    runner.clickTracker = 10;  
     // runner.rig.resources[0].power = 4;
     // corp.clickTracker = 20;
     // ChangePhase(phases.corpActionMain);
