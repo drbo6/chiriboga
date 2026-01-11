@@ -234,8 +234,9 @@ $version = "0.6.9-BETA";
                 <p>Chiriboga includes cards from <a href="https://nullsignal.games" target="_blank">Null Signal's</a> <em>System Gateway</em> and <em>System Update 2021</em>. 
                 Its card art & symbols are property of Null Signal Games and used under <a href="https://creativecommons.org/licenses/by-nd/4.0/" target="_blank" rel="noopener">CC BY-ND 4.0</a>. This is a fan implementation and it is not endorsed by NSG.</p>
                 <p>All trademarks, card imagery, and faction symbols remain property of their respective owners.</p>                                
-                <p>Deck of cards by Daniel Solis from <a href="https://thenounproject.com/browse/icons/term/deck-of-cards/" target="_blank" title="deck of cards Icons">Noun Project</a> (CC BY 3.0)</p>
-                <p>Book by Ralf Schmitzer from <a href="https://thenounproject.com/browse/icons/term/book/" target="_blank" title="Book Icons">Noun Project</a> (CC BY 3.0)</p>
+                <p>Deck of cards by Daniel Solis from <a href="https://thenounproject.com/icon/deck-of-cards-219525/" target="_blank" title="deck of cards Icons">Noun Project</a> (<a href="https://creativecommons.org/licenses/by/3.0/">CC BY 3.0</a>)</p>
+                <p>Book by Ralf Schmitzer from <a href="https://thenounproject.com/icon/book-548893/" target="_blank" title="Book Icons">Noun Project</a> (<a href="https://creativecommons.org/licenses/by/3.0/">CC BY 3.0</a>)</p>
+                <p>Debug by Studio GLD from <a href="https://thenounproject.com/icon/debug-3594500/" target="_blank" title="Debug Icons">Noun Project</a> (<a href="https://creativecommons.org/licenses/by/3.0/">CC BY 3.0</a>)</p>
                 <p class="tiny-note">Open source spirit: Contributions and feedback welcome.</p>
               </div>
             </div>
