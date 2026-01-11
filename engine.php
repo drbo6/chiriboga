@@ -20,6 +20,14 @@
 		?>
 		<?php echo '<script src="deck/lz-string.min.js?' . filemtime('deck/lz-string.min.js') . '"></script>'; ?>
 		<?php echo '<script src="deck/seedrandom.min.js?' . filemtime('deck/seedrandom.min.js') . '"></script>'; ?>
+		<!-- Google Analytics -->
+		<script async src="https://www.googletagmanager.com/gtag/js?id=G-Z6W2093RCW"></script>
+		<script>
+		window.dataLayer = window.dataLayer || [];
+		function gtag(){dataLayer.push(arguments);}
+		gtag('js', new Date());
+		gtag('config', 'G-Z6W2093RCW');
+		</script>
 		<script>
 			var cardSet = []; //prepare to receive card definitions
 			var setIdentifiers = []; //set identifiers

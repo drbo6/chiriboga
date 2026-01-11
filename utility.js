@@ -1425,6 +1425,63 @@ function PlayerWin(player, msgstr) {
   */
   var winner = player;
 
+// Track game end in Google Analytics
+  if (typeof gtag !== 'undefined') {
+    var gameMode = 'Regular';
+    if (URIParameter("t") !== "") {
+      gameMode = 'Tutorial';
+    } else if (URIParameter("g") !== "") {
+      gameMode = 'Gauntlet';
+    }
+    var eventParams = {
+      'game_mode': gameMode,
+      'player_side': viewingPlayer === corp ? 'Corp' : 'Runner',
+      'player_won': player === viewingPlayer,
+      'win_reason': msgstr,
+      'corp_agenda_points': AgendaPoints(corp),
+      'runner_agenda_points': AgendaPoints(runner)
+    };
+    // Add deck names for Regular mode
+    if (gameMode === 'Regular') {
+      try {
+        var corpDeckParam = URIParameter("c");
+        if (corpDeckParam !== "") {
+          var corpDeck = JSON.parse(LZString.decompressFromEncodedURIComponent(corpDeckParam));
+          if (corpDeck && corpDeck.name) {
+            eventParams['corp_deck_name'] = corpDeck.name;
+          }
+        }
+      } catch (e) {}
+      try {
+        var runnerDeckParam = URIParameter("r");
+        if (runnerDeckParam !== "") {
+          var runnerDeck = JSON.parse(LZString.decompressFromEncodedURIComponent(runnerDeckParam));
+          if (runnerDeck && runnerDeck.name) {
+            eventParams['runner_deck_name'] = runnerDeck.name;
+          }
+        }
+      } catch (e) {}
+    }
+    if (gameMode === 'Gauntlet') {
+      try {
+        var gauntletParam = URIParameter("g");
+        var gauntletState = JSON.parse(LZString.decompressFromEncodedURIComponent(gauntletParam));
+        if (gauntletState) {
+          if (gauntletState.seed) {
+            eventParams['seed'] = gauntletState.seed;
+          }
+          if (typeof gauntletState.defeated !== 'undefined') {
+            eventParams['opponents_defeated'] = gauntletState.defeated;
+          }
+          if (typeof gauntletState.gauntletLength !== 'undefined') {
+            eventParams['gauntlet_length'] = gauntletState.gauntletLength;
+          }
+        }
+      } catch (e) {}
+    }
+    gtag('event', 'game_end', eventParams);
+  }  
+
   var winnerMessage = "";
   var watermarkMessage = "";
   if (winner == corp) {

@@ -1830,6 +1830,19 @@ function SpansToCST(selecter) {
 }
 
 function StartGame() {
+  // Determine game mode from URL parameters and track it in Google Analytics
+  var gameMode = 'Regular';
+  if (URIParameter("t") !== "") {
+    gameMode = 'Tutorial';
+  } else if (URIParameter("g") !== "") {
+    gameMode = 'Gauntlet';
+  }
+  if (typeof gtag !== 'undefined') {
+    gtag('event', 'game_start', {
+      'game_mode': gameMode
+    });
+  }
+  
   if (!currentPhase) IncrementPhase(); //move to first phase
   if (!skipShuffleAndDraw) {
     
