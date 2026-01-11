@@ -1079,7 +1079,81 @@ coreSet[1030] = {
     },
   },
 };
-// coreSet[1031] = Data Dealer - NOT IMPLEMENTED
+coreSet[1031] = {
+  title: "Data Dealer",
+  imageFile: "01031.png",
+  player: runner,
+  faction: "Criminal",
+  influence: 2,
+  cardType: "resource",
+  subTypes: ["Connection", "Seedy"],
+  installCost: 0,
+  // [click], forfeit 1 agenda: Gain 9 credits.
+  abilities: [
+    {
+      text: "[click], forfeit 1 agenda: Gain 9[c].",
+      Enumerate: function () {
+        if (!CheckActionClicks(runner, 1)) return [];
+        // Must have an agenda in score area to forfeit
+        if (runner.scoreArea.length == 0) return [];
+        return [{}];
+      },
+      Resolve: function (params) {
+        SpendClicks(runner, 1);
+        var dataDealerCard = this;
+        // Choose agenda to forfeit
+        var choices = ChoicesArrayCards(runner.scoreArea);
+        
+        // AI: Prefer the lowest-value agenda
+        if (runner.AI != null && choices.length > 1) {
+          var lowestPts = Infinity;
+          var lowestChoice = choices[0];
+          for (var i = 0; i < choices.length; i++) {
+            var pts = choices[i].card.agendaPoints || 0;
+            if (pts < lowestPts) {
+              lowestPts = pts;
+              lowestChoice = choices[i];
+            }
+          }
+          choices = [lowestChoice];
+        }
+        
+        DecisionPhase(
+          runner,
+          choices,
+          function (params) {
+            Forfeit(params.card, function () {
+              GainCredits(runner, 9, "", dataDealerCard);
+            });
+          },
+          null,
+          "Data Dealer",
+          dataDealerCard
+        );
+      },
+    },
+  ],
+  // AI: Only use when desperate for credits and have a low-value agenda
+  AIWouldTrigger: function () {
+    // Don't use if we have plenty of money
+    if (Credits(runner) >= 10) return false;
+    
+    // Only forfeit 1-point agendas
+    var hasLowValueAgenda = false;
+    for (var i = 0; i < runner.scoreArea.length; i++) {
+      var pts = runner.scoreArea[i].agendaPoints || 0;
+      if (pts <= 1) {
+        hasLowValueAgenda = true;
+        break;
+      }
+    }
+    
+    // Only use if very poor and have a 1-pointer
+    if (Credits(runner) < 3 && hasLowValueAgenda) return true;
+    
+    return false;
+  },
+};
 coreSet[1032] = {
   title: "Decoy",
   imageFile: "01032.png",
