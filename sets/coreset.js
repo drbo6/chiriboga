@@ -1,4 +1,16 @@
 //CARD DEFINITIONS FOR CORE SET
+// ---------------- RUNNER CARDS
+// Account Siphon
+// Lemuria Codecracker
+// Desperado
+// Aurora
+// Ninja
+// Bank Job
+// Data Dealer
+// Tinkering
+// Battering Ram
+// Magnum Opus
+// Pipeline
 var coreSet = [];
 coreSet[1001] = {
   title: "Noise: Hacker Extraordinaire",
@@ -152,77 +164,7 @@ coreSet[1006] = {
     },
   },
 };
-// coreSet[1007] = {
-//   title: "Corroder",
-//   imageFile: "01007.png",
-//   player: runner,
-//   cardType: "program",
-//   subTypes: ["Icebreaker", "Fracter"],
-//   memoryCost: 1,
-//   installCost: 2,
-//   strength: 2,
-//   strengthBoost: 0,
-//   modifyStrength: {
-//     Resolve: function (card) {
-//       if (card == this) return this.strengthBoost;
-//       return 0;
-//     },
-//   },
-//   abilities: [
-//     {
-//       text: "Break barrier subroutine.",
-//       Enumerate: function () {
-//         if (!CheckEncounter()) return [];
-//         if (!CheckSubType(attackedServer.ice[approachIce], "Barrier"))
-//           return [];
-//         if (!CheckCredits(1, runner, "using", this)) return [];
-//         if (!CheckStrength(this)) return [];
-//         return ChoicesEncounteredSubroutines();
-//       },
-//       Resolve: function (params) {
-//         SpendCredits(
-//           runner,
-//           1,
-//           "using",
-//           this,
-//           function () {
-//             Break(params.subroutine);
-//           },
-//           this
-//         );
-//       },
-//     },
-//     {
-//       text: "+1 strength.",
-//       Enumerate: function () {
-//         if (!CheckEncounter()) return [];
-//         if (CheckStrength(this)) return [];
-//         if (!CheckUnbrokenSubroutines()) return [];
-//         if (!CheckCredits(1, runner, "using", this)) return [];
-//         return [{}];
-//       },
-//       Resolve: function (params) {
-//         SpendCredits(
-//           runner,
-//           1,
-//           "using",
-//           this,
-//           function () {
-//             BoostStrength(this, 1);
-//           },
-//           this
-//         );
-//       },
-//     },
-//   ],
-//   responseOnEncounterEnds: {
-//     Resolve: function () {
-//       this.strengthBoost = 0;
-//     },
-//     automatic: true,
-//   },
-// };
-// DUPLICATE: System Update 2021 has Corroder (card 31006)
+// coreSet[1007] = Corroder -  DUPLICATE: System Update 2021 has Corroder (card 31006)
 coreSet[1008] = {
   title: "Datasucker",
   imageFile: "01008.png",
@@ -388,41 +330,7 @@ coreSet[1010] = {
     automatic: true,
   },
 };
-// coreSet[1011] = {
-//   title: "Mimic",
-//   imageFile: "01011.png",
-//   player: runner,
-//   cardType: "program",
-//   subTypes: ["Icebreaker", "Killer"],
-//   memoryCost: 1,
-//   installCost: 3,
-//   strength: 3,
-//   abilities: [
-//     {
-//       text: "Break sentry subroutine.",
-//       Enumerate: function () {
-//         if (!CheckEncounter()) return [];
-//         if (!CheckSubType(attackedServer.ice[approachIce], "Sentry")) return [];
-//         if (!CheckCredits(1, runner, "using", this)) return [];
-//         if (!CheckStrength(this)) return [];
-//         return ChoicesEncounteredSubroutines();
-//       },
-//       Resolve: function (params) {
-//         SpendCredits(
-//           runner,
-//           1,
-//           "using",
-//           this,
-//           function () {
-//             Break(params.subroutine);
-//           },
-//           this
-//         );
-//       },
-//     },
-//   ],
-// };
-// DUPLICATE: System Update 2021 has Mimic (card 31008)
+// coreSet[1011] = Mimic - DUPLICATE: System Update 2021 has Mimic (card 31008)
 coreSet[1012] = {
   title: "Parasite",
   imageFile: "01012.png",
@@ -594,23 +502,7 @@ coreSet[1014] = {
     },
   ],
 };
-// coreSet[1015] = {
-//   title: "Ice Carver",
-//   imageFile: "01015.png",
-//   player: runner,
-//   cardType: "resource",
-//   subTypes: ["Virtual"],
-//   installCost: 3,
-//   unique: true,
-//   modifyStrength: {
-//     Resolve: function (card) {
-//       if (!CheckEncounter()) return 0;
-//       if (CheckCardType(card, ["ice"])) return -1;
-//       return 0; //no modification to strength
-//     },
-//   },
-// };
-// DUPLICATE: System Update 2021 has Ice Carver (card 31009)
+// coreSet[1015] = Ice Carver - DUPLICATE: System Update 2021 has Ice Carver (card 31009)
 coreSet[1016] = {
   title: "Wyldside",
   imageFile: "01016.png",
@@ -677,6 +569,7 @@ coreSet[1019] = {
     GainCredits(runner, 3, "Easy Mark");
   },
 };
+// coreSet[1020] = Forged Activation Orders - DUPLICATE: System Update 2021 has Forged Activation Orders (card 31017)
 // coreSet[1021] = Inside Job - DUPLICATE: System Update 2021 has Inside Job
 coreSet[1022] = {
   title: "Special Order",
@@ -726,80 +619,11 @@ coreSet[1022] = {
 };
 // coreSet[1023] = Lemuria Codecracker - NOT IMPLEMENTED
 // coreSet[1024] = Desperado - NOT IMPLEMENTED
-// coreSet[1025-1027] = (unknown cards)
+// coreSet[1025] = Aurora - NOT IMPLEMENTED
+// coreSet[1026] = Femme Fatale - DUPLICATE: System Update 2021 has Femme Fatale
+// coreSet[1027] = Ninja
 // coreSet[1028] = Sneakdoor Beta - DUPLICATE: System Update 2021 has Sneakdoor Beta
 // coreSet[1029] = Bank Job - NOT IMPLEMENTED
-coreSet[1019] = {
-  title: "Easy Mark",
-  imageFile: "01019.png",
-  player: runner,
-  faction: "Criminal",
-  influence: 1,
-  cardType: "event",
-  subTypes: ["Job"],
-  playCost: 0,
-  Resolve: function (params) {
-    GainCredits(runner, 3, "Easy Mark");
-  },
-};
-// coreSet[1020] = {
-//   title: "Forged Activation Orders",
-//   imageFile: "01020.png",
-//   player: runner,
-//   player: runner,
-//   cardType: "event",
-//   subTypes: ["Sabotage"],
-//   playCost: 1,
-//   Enumerate: function () {
-//     return ChoicesInstalledCards(corp, function (card) {
-//       if (card.cardType != "ice") return false;
-//       if (card.rezzed == true) return false;
-//       return true;
-//     });
-//   },
-//   Resolve: function (params) {
-//     var card = params.card;
-//     if (
-//       CheckRez(card, ["ice"]) &&
-//       CheckCredits(RezCost(card), corp, "rezzing", card)
-//     ) {
-//       var choicesb = [
-//         { card: card, id: 0, label: "Rez " + GetTitle(card, true) },
-//         { card: card, id: 1, label: "Trash " + GetTitle(card, true) },
-//       ];
-//       function decisionCallbackb(paramsb) {
-//         var card = paramsb.card;
-//         if (paramsb.id == 0) {
-//           SpendCredits(
-//             corp,
-//             RezCost(card),
-//             "rezzing",
-//             card,
-//             function () {
-//               Rez(card);
-//             },
-//             this
-//           );
-//         } else {
-//           Trash(card, true);
-//         }
-//       }
-//       DecisionPhase(
-//         corp,
-//         choicesb,
-//         decisionCallbackb,
-//         null,
-//         "Forged Activation Orders",
-//         this
-//       );
-//     } else {
-//       Log(GetTitle(card, true) + " cannot be rezzed");
-//       Trash(card, true);
-//     }
-//   },
-//   text: "Choose an unrezzed piece of ice",
-// };
-// DUPLICATE: System Update 2021 has Forged Activation Orders (card 31017)
 coreSet[1030] = {
   title: "Crash Space",
   imageFile: "01030.png",
@@ -849,6 +673,7 @@ coreSet[1030] = {
     },
   },
 };
+// coreSet[1031] = Data Dealer - NOT IMPLEMENTED
 coreSet[1032] = {
   title: "Decoy",
   imageFile: "01032.png",
@@ -917,17 +742,7 @@ coreSet[1033] = {
     automatic: true,
   },
 };
-// coreSet[1034] = {
-//   title: "Diesel",
-//   imageFile: "01034.png",
-//   player: runner,
-//   cardType: "event",
-//   playCost: 0,
-//   Resolve: function (params) {
-//     Draw(runner, 3);
-//   },
-// };
-// DUPLICATE: System Update 2021 has Diesel (card 31027)
+// coreSet[1034] = Diesel - DUPLICATE: System Update 2021 has Diesel (card 31027)
 coreSet[1035] = {
   title: "Modded",
   imageFile: "01035.png",
@@ -986,6 +801,8 @@ coreSet[1035] = {
     );
   },
 };
+// coreSet[1036] = The Maker's Eye - DUPLICATE: System Update 2021 has The Maker's Eye (card 31026)
+// coreSet[1037] = Tinkering
 coreSet[1038] = {
   title: "Akamatsu Mem Chip",
   imageFile: "01038.png",
@@ -1147,75 +964,9 @@ coreSet[1041] = {
     return false;
   },
 };
-// coreSet[1043] = {
-//   title: "Gordian Blade",
-//   imageFile: "01043.png",
-//   player: runner,
-//   cardType: "program",
-//   subTypes: ["Icebreaker", "Decoder"],
-//   memoryCost: 1,
-//   installCost: 4,
-//   strength: 2,
-//   strengthBoost: 0,
-//   modifyStrength: {
-//     Resolve: function (card) {
-//       if (card == this) return this.strengthBoost;
-//       return 0;
-//     },
-//   },
-//   responseOnRunEnds: {
-//     Resolve: function (card) {
-//       this.strengthBoost = 0;
-//     },
-//     automatic: true,
-//   },
-//   abilities: [
-//     {
-//       text: "Break code gate subroutine.",
-//       Enumerate: function () {
-//         if (!CheckEncounter()) return [];
-//         if (!CheckCredits(1, runner, "using", this)) return [];
-//         if (!CheckSubType(attackedServer.ice[approachIce], "Code Gate"))
-//           return [];
-//         if (!CheckStrength(this)) return [];
-//         return ChoicesEncounteredSubroutines();
-//       },
-//       Resolve: function (params) {
-//         SpendCredits(
-//           runner,
-//           1,
-//           "using",
-//           this,
-//           function () {
-//             Break(params.subroutine);
-//           },
-//           this
-//         );
-//       },
-//     },
-//     {
-//       text: "+1 strength for the remainder of this run.",
-//       Enumerate: function () {
-//         if (!CheckRunning()) return [];
-//         if (!CheckCredits(1, runner, "using", this)) return [];
-//         return [{}];
-//       },
-//       Resolve: function (params) {
-//         SpendCredits(
-//           runner,
-//           1,
-//           "using",
-//           this,
-//           function () {
-//             BoostStrength(this, 1);
-//           },
-//           this
-//         );
-//       },
-//     },
-//   ],
-// };
-// DUPLICATE: System Update 2021 has Gordian Blade (card 31033)
+// coreSet[1042] = Battering Ram  - NOT IMPLEMENTED
+// coreSet[1043] = Gordian Blade - DUPLICATE: System Update 2021 has Gordian Blade (card 31033)
+// coreSet[1044] = Magnum Opus  - NOT IMPLEMENTED
 var netShieldUsedThisTurn = false; //Multiple Net Shields cannot prevent more damage. [Official FAQ]
 coreSet[1045] = {
   title: "Net Shield",
@@ -1280,6 +1031,8 @@ coreSet[1045] = {
     },
   },
 };
+// coreSet[1046] = Pipeline  - NOT IMPLEMENTED
+// coreSet[1047] = Aesop's Pawnshop  - DUPLICATE: System Update 2021 has Aesop's Pawnshop (card 31035)
 coreSet[1048] = {
   title: "Sacrificial Construct",
   imageFile: "01048.png",
@@ -1373,17 +1126,7 @@ coreSet[1049] = {
     }
   },
 };
-// coreSet[1050] = {
-//   title: "Sure Gamble",
-//   imageFile: "01050.png",
-//   player: runner,
-//   cardType: "event",
-//   playCost: 5,
-//   Resolve: function (params) {
-//     GainCredits(runner, 9);
-//   },
-// };
-// DUPLICATE: System Gateway has Sure Gamble (card 30030)
+// coreSet[1050] = Sure Gamble - DUPLICATE: System Gateway has Sure Gamble (card 30030)
 coreSet[1051] = {
   title: "Crypsis",
   imageFile: "01051.png",
@@ -1534,6 +1277,7 @@ coreSet[1053] = {
     },
   ],
 };
+// ---------------- CORP CARDS
 coreSet[1057] = {
   title: "Aggressive Secretary",
   imageFile: "01057.png",
