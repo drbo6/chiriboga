@@ -616,7 +616,7 @@ coreSet[1018] = {
       // Gain 2 credits for each credit lost
       var creditsGained = creditsLost * 2;
       if (creditsGained > 0) {
-        GainCredits(runner, creditsGained);
+        GainCredits(runner, creditsGained, "", this);
       }
       // Take 2 tags
       AddTags(2);
@@ -674,7 +674,7 @@ coreSet[1019] = {
   subTypes: ["Job"],
   playCost: 0,
   Resolve: function (params) {
-    GainCredits(runner, 3);
+    GainCredits(runner, 3, "", this);
   },
 };
 // coreSet[1020] = Forged Activation Orders - DUPLICATE: System Update 2021 has Forged Activation Orders (card 31017)
@@ -1029,7 +1029,105 @@ coreSet[1027] = {
   },
 };
 // coreSet[1028] = Sneakdoor Beta - DUPLICATE: System Update 2021 has Sneakdoor Beta
-// coreSet[1029] = Bank Job - NOT IMPLEMENTED
+coreSet[1029] = {
+  title: "Bank Job",
+  imageFile: "01029.png",
+  player: runner,
+  faction: "Criminal",
+  influence: 2,
+  cardType: "resource",
+  subTypes: ["Job"],
+  installCost: 1,
+  credits: 0,
+  // When you install this resource, load 8 credits on it.
+  automaticOnInstall: {
+    Resolve: function (card) {
+      if (card == this) LoadCredits(this, 8);
+    },
+  },
+  // When it is empty, trash it. (handled in Resolve after taking credits)
+  
+  // Whenever you make a successful run on a remote server, instead of breaching that server,
+  // you may take any number of credits from this resource.
+  breachReplacementQueued: false,
+  responseOnRunSuccessful: {
+    Resolve: function () {
+      // Check if this is a remote server (no cards property) and Bank Job has credits
+      if (typeof attackedServer.cards === "undefined" && CheckCounters(this, "credits", 1)) {
+        this.breachReplacementQueued = true;
+      } else {
+        this.breachReplacementQueued = false;
+      }
+    },
+    automatic: true,
+    availableWhenInactive: true,
+  },
+  specialOnInsteadOfBreaching: {
+    Enumerate: function () {
+      if (this.breachReplacementQueued) {
+        // Create choices for taking 1 to all credits (like Atman's number selection)
+        var maxCredits = Counters(this, "credits");
+        var choices = [];
+        for (var i = 1; i <= maxCredits; i++) {
+          choices.push({ 
+            id: i, 
+            label: "" + i
+          });
+        }
+        
+        // AI: Always take all credits
+        if (runner.AI != null) {
+          choices = [{ id: maxCredits, label: "" + maxCredits }];
+        }
+        
+        return choices;
+      }
+      return [];
+    },
+    Resolve: function (params) {
+      this.breachReplacementQueued = false;
+      TakeCredits(runner, this, params.id);
+      // When it is empty, trash it
+      if (!CheckCounters(this, "credits", 1)) {
+        Trash(this, false);
+      }
+    },
+  },
+  responseOnRunEnds: {
+    Resolve: function () {
+      // Don't clear breachReplacementQueued here - it's cleared in specialOnInsteadOfBreaching.Resolve
+      // Clearing here would break the flow since ChangePhase(phases.runEnds) is called before Enumerate
+    },
+    automatic: true,
+    availableWhenInactive: true,
+  },
+  AIBreachReplacementValue: 2, // Moderate priority - getting credits is good
+  AIEconomyInstall: function() {
+    // Good economy card if there are remote servers to run
+    var remoteCount = 0;
+    for (var i = 0; i < corp.remoteServers.length; i++) {
+      if (corp.remoteServers[i].root.length > 0 || corp.remoteServers[i].ice.length > 0) {
+        remoteCount++;
+      }
+    }
+    if (remoteCount > 0) return 2;
+    return 1;
+  },
+  AIRunExtraPotential: function(server, potential) {
+    // Add potential for Bank Job credits on remote servers (no cards property = remote)
+    if (typeof server.cards === "undefined" && CheckCounters(this, "credits", 1)) {
+      // Runner AI knows this will prevent usual breach
+      var creditsAvailable = Counters(this, "credits");
+      return creditsAvailable * 0.3; // Value each credit at 0.3 potential
+    }
+    return 0;
+  },
+  AIPreventBreach: function(server) {
+    // Bank Job prevents breach when used (no cards property = remote)
+    if (typeof server.cards === "undefined" && CheckCounters(this, "credits", 1)) return true;
+    return false;
+  },
+};
 coreSet[1030] = {
   title: "Crash Space",
   imageFile: "01030.png",
