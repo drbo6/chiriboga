@@ -751,22 +751,36 @@
 				var oppjson = JSON.parse(
 				  LZString.decompressFromEncodedURIComponent(compressed)
 				);
-				opponentdeckimg = "images/"+ChangeImageFileToJPG(cardSet[oppjson.identity].imageFile);
+				// Check if card exists (might be from additional sets not yet loaded)
+				if (cardSet[oppjson.identity] && cardSet[oppjson.identity].imageFile) {
+					opponentdeckimg = "images/"+ChangeImageFileToJPG(cardSet[oppjson.identity].imageFile);
+				}
 			}
 
 			var deckPlayer = corp;
+			var pendingOpponentDeck = null; // Store compressed deck for later processing if eggs mode
 			if (URIParameter("r") !== "" && URIParameter("p") !== "c") {
 				deckPlayer = runner;
 				var uric = URIParameter("c");
 				if (uric) {
 					opponentdeckstr = "c="+uric+"&";
-					IdentityImageFromDeckString(uric);
+					// Check if eggs mode - defer image processing if so
+					if (window.location.search.indexOf('eggs=1') > -1) {
+						pendingOpponentDeck = uric;
+					} else {
+						IdentityImageFromDeckString(uric);
+					}
 				}					
 			} else {
 				var urir = URIParameter("r")
 				if (urir) {
 					opponentdeckstr = "r="+urir+"&";
-					IdentityImageFromDeckString(urir);
+					// Check if eggs mode - defer image processing if so
+					if (window.location.search.indexOf('eggs=1') > -1) {
+						pendingOpponentDeck = urir;
+					} else {
+						IdentityImageFromDeckString(urir);
+					}
 				}
 			}
 
@@ -898,6 +912,11 @@
 			  console.log('deckForUri before stringify:', deckForUri, 'identity type:', typeof deckForUri.identity);
 			  var string = JSON.stringify(deckForUri);
 			  var compressed = LZString.compressToEncodedURIComponent(string);
+			  
+			  // Build extra sets parameter string if additional sets are loaded or if eggs param is already in URL
+			  var hasEggsInUrl = window.location.search.indexOf('eggs=1') > -1;
+			  var extraSetsParam = (additionalSetsLoaded || hasEggsInUrl) ? "eggs=1&" : "";
+			  
 			  var launchAddress = "engine.php?p=" + dC + "&" + opponentdeckstr + dC + "=" + compressed;
 			  // Build address for switching sides. If we already have an opponent deck, make it the active deck; otherwise use random
 			  var existingOpponentCompressed = "";
@@ -912,17 +931,17 @@
 			  var opponentAddress;
 			  if (existingOpponentCompressed) {
 				// We are transitioning: new active side oC gets opponent deck; old active side becomes opponent
-				opponentAddress = "decklauncher.php?p=" + oC + "&" + oC + "=" + existingOpponentCompressed + "&" + dC + "=" + compressed;
+				opponentAddress = "decklauncher.php?" + extraSetsParam + "p=" + oC + "&" + oC + "=" + existingOpponentCompressed + "&" + dC + "=" + compressed;
 			  } else {
 				// No opponent deck yet: keep previous behavior (random opponent) while passing current deck as opposite param
-				opponentAddress = "decklauncher.php?p=" + oC + "&" + oC + "=random&" + dC + "=" + compressed;
+				opponentAddress = "decklauncher.php?" + extraSetsParam + "p=" + oC + "&" + oC + "=random&" + dC + "=" + compressed;
 			  }
 			  $("#launch").prop("href", launchAddress);
 			  $("#opponent").prop("href", opponentAddress);
 			  history.replaceState(
 				null,
 				"Chiriboga",
-				"decklauncher.php?" + opponentdeckstr + dC + "=" + compressed
+				"decklauncher.php?" + extraSetsParam + opponentdeckstr + dC + "=" + compressed
 			  );
 			}
 
@@ -1106,6 +1125,96 @@
 			}
 
 			function Init() {
+			  // Check if extra sets parameter was passed - if so, load them FIRST before continuing
+			  if (URIParameter("eggs") === "1") {
+				additionalSetsLoaded = true; // Mark as loaded so clicks don't try to reload
+				console.log('Extra sets parameter detected, loading additional card sets before init...');
+				LoadAdditionalSetsForInit(function() {
+					InitMain();
+				});
+			  } else {
+				InitMain();
+			  }
+			}
+			
+			// Load additional sets specifically for Init (rebuilds identity dropdown before continuing)
+			function LoadAdditionalSetsForInit(onComplete) {
+				var setsToLoad = ['coreset', 'midnightsun'];
+				var scriptsLoaded = 0;
+				
+				setsToLoad.forEach(function(setName) {
+					var script = document.createElement('script');
+					script.src = 'sets/' + setName + '.js?' + Date.now();
+					script.onload = function() {
+						scriptsLoaded++;
+						console.log('Loaded ' + setName + '.js for init');
+						if (scriptsLoaded === setsToLoad.length) {
+							console.log('All additional sets loaded for init. Rebuilding identity dropdown...');
+							
+							// Rebuild playerIdentities to include new sets
+							playerIdentities = [];
+							for (var i = 0; i < cardSet.length; i++) {
+								if (typeof cardSet[i] != 'undefined' && typeof cardSet[i].faction != 'undefined') {
+									if (cardSet[i].cardType == 'identity') {
+										if (deckPlayer == cardSet[i].player) playerIdentities.push(i);
+									}
+								}
+							}
+							// Sort identities alphabetically by display title
+							playerIdentities.sort(function(a,b){
+								var fullTitleA = cardSet[a].title || '';
+								var fullTitleB = cardSet[b].title || '';
+								var shortTitleA = fullTitleA;
+								var shortTitleB = fullTitleB;
+								if (deckPlayer === corp) {
+									var colonIdxA = fullTitleA.indexOf(': ');
+									if (colonIdxA > -1) shortTitleA = fullTitleA.substring(colonIdxA + 2).trim();
+									var colonIdxB = fullTitleB.indexOf(': ');
+									if (colonIdxB > -1) shortTitleB = fullTitleB.substring(colonIdxB + 2).trim();
+								} else {
+									if (fullTitleA.indexOf(':') > -1) shortTitleA = fullTitleA.split(':')[0].trim();
+									if (fullTitleB.indexOf(':') > -1) shortTitleB = fullTitleB.split(':')[0].trim();
+								}
+								return shortTitleA.localeCompare(shortTitleB);
+							});
+							
+							// Rebuild allCardIdsForPlayer to include new sets
+							allCardIdsForPlayer = [];
+							for (var i = 0; i < cardSet.length; i++) {
+								if (cardSet[i] && cardSet[i].player === deckPlayer && cardSet[i].cardType !== 'identity') {
+									allCardIdsForPlayer.push(i);
+								}
+							}
+							
+							// Rebuild titles array for autocomplete
+							titles = [];
+							for (var i = 0; i < cardSet.length; i++) {
+								if (typeof cardSet[i] !== "undefined") {
+									if (cardSet[i].player == deckPlayer && cardSet[i].cardType != 'identity') { 
+										titles.push(cardSet[i].title);
+									}
+								}
+							}
+							titles.sort();
+							
+							// Process pending opponent deck image now that sets are loaded
+							if (pendingOpponentDeck) {
+								IdentityImageFromDeckString(pendingOpponentDeck);
+							}
+							
+							if (typeof onComplete === 'function') {
+								onComplete();
+							}
+						}
+					};
+					script.onerror = function() {
+						console.error('Failed to load ' + setName + '.js');
+					};
+					document.head.appendChild(script);
+				});
+			}
+
+			function InitMain() {
 			  //set up autosuggest
 			  var autoMinLen = 1;
 			  $("#deck").on("keydown", function (event) {
@@ -1924,7 +2033,7 @@ GetFactionIcon(cardSet[playerIdentities[i]].faction) + shortTitle +
 			  $('#loading-overlay').addClass('hidden');
 			  // Remove from DOM after fade-out transition completes
 			  setTimeout(function() {
-			    $('#loading-overlay').remove();
+				$('#loading-overlay').remove();
 			  }, 350);
 			}
 
@@ -2073,104 +2182,120 @@ GetFactionIcon(cardSet[playerIdentities[i]].faction) + shortTitle +
 			// Click deck-stats 6 times to load additional sets
 			var deckStatsClickCount = 0;
 			var additionalSetsLoaded = false;
+			
+			// Function to load additional card sets (coreset and midnightsun)
+			function LoadAdditionalSets(onComplete) {
+				var setsToLoad = ['coreset', 'midnightsun'];
+				var scriptsLoaded = 0;
+				
+				setsToLoad.forEach(function(setName) {
+					var script = document.createElement('script');
+					script.src = 'sets/' + setName + '.js?' + Date.now();
+					script.onload = function() {
+						scriptsLoaded++;
+						console.log('Loaded ' + setName + '.js');
+						if (scriptsLoaded === setsToLoad.length) {
+							console.log('All additional sets loaded. Rebuilding card lists...');
+							RebuildCardListsAfterSetLoad();
+							// Call completion callback if provided
+							if (typeof onComplete === 'function') {
+								onComplete();
+							}
+						}
+					};
+					script.onerror = function() {
+						console.error('Failed to load ' + setName + '.js');
+					};
+					document.head.appendChild(script);
+				});
+			}
+			
+			// Function to rebuild card lists after loading additional sets
+			function RebuildCardListsAfterSetLoad() {
+				// Rebuild allCardIdsForPlayer to include new sets
+				allCardIdsForPlayer = [];
+				for (var i = 0; i < cardSet.length; i++) {
+					if (cardSet[i] && cardSet[i].player === deckPlayer && cardSet[i].cardType !== 'identity') {
+						allCardIdsForPlayer.push(i);
+					}
+				}
+				
+				// Rebuild playerIdentities dropdown
+				var currentIdentity = json.identity;
+				playerIdentities = [];
+				for (var i = 0; i < cardSet.length; i++) {
+					if (cardSet[i] && cardSet[i].player === deckPlayer && cardSet[i].cardType === 'identity') {
+						playerIdentities.push({ id: i, title: cardSet[i].title });
+					}
+				}
+				
+				// Sort identities by display short title
+				playerIdentities.sort(function(a,b){
+					var fullA = a.title || '';
+					var fullB = b.title || '';
+					var shortA = fullA;
+					var shortB = fullB;
+					if (deckPlayer === corp) {
+						var ca = fullA.indexOf(': ');
+						if (ca > -1) shortA = fullA.substring(ca+2).trim();
+						var cb = fullB.indexOf(': ');
+						if (cb > -1) shortB = fullB.substring(cb+2).trim();
+					} else {
+						if (fullA.indexOf(':') > -1) shortA = fullA.split(':')[0].trim();
+						if (fullB.indexOf(':') > -1) shortB = fullB.split(':')[0].trim();
+					}
+					return shortA.localeCompare(shortB);
+				});
+				
+				// Rebuild identity dropdown
+				var identityHTML = '';
+				for (var i = 0; i < playerIdentities.length; i++) {
+					var selected = (playerIdentities[i].id == currentIdentity) ? ' selected' : '';
+					var fullTitle = playerIdentities[i].title || '';
+					var shortTitle = fullTitle;
+					if (deckPlayer === corp) {
+						var colonIdx = fullTitle.indexOf(': ');
+						if (colonIdx > -1) {
+							var beforeColon = fullTitle.substring(0, colonIdx).trim();
+							var afterColon = fullTitle.substring(colonIdx + 2).trim();
+							var faction = cardSet[playerIdentities[i].id].faction || '';
+							// Normalize for comparison (remove non-letters and lowercase)
+							var beforeColonNorm = beforeColon.toLowerCase().replace(/[^a-z]/g, '');
+							var factionNorm = faction.toLowerCase().replace(/[^a-z]/g, '');
+							if (beforeColonNorm === factionNorm) {
+								shortTitle = afterColon;
+							} else {
+								shortTitle = beforeColon;
+							}
+						}
+					} else {
+						if (fullTitle.indexOf(':') > -1) shortTitle = fullTitle.split(':')[0].trim();
+					}
+					var icon = GetFactionIcon(cardSet[playerIdentities[i].id].faction);
+					identityHTML += '<option value="' + playerIdentities[i].id + '"' + selected + '>' + icon + shortTitle + '</option>';
+				}
+				$('#identityselect').html(identityHTML);
+				
+				// Ensure identity remains an integer after rebuild
+				json.identity = parseInt(json.identity);
+				
+				// Refresh the card list display
+				RenderAllCardsList();
+				AttachCardListEvents();
+				ApplyFilter();
+				UpdateCardCountsUI();
+				
+				// Update URLs to include the extra sets parameter
+				UpdateLaunchStrings();
+			}
+			
 			$(document).on('click', '.deck-stats', function() {
 				if (additionalSetsLoaded) return;
 				deckStatsClickCount++;
 				if (deckStatsClickCount >= 6) {
 					additionalSetsLoaded = true;
-					console.log('Loading additional card sets...');
-					
-					// Load coreset and midnightsun dynamically
-					var setsToLoad = ['coreset', 'midnightsun'];
-					var scriptsLoaded = 0;
-					
-					setsToLoad.forEach(function(setName) {
-						var script = document.createElement('script');
-						script.src = 'sets/' + setName + '.js?' + Date.now();
-						script.onload = function() {
-							scriptsLoaded++;
-							console.log('Loaded ' + setName + '.js');
-							if (scriptsLoaded === setsToLoad.length) {
-								console.log('All additional sets loaded. Rebuilding card lists...');
-								
-								// Rebuild allCardIdsForPlayer to include new sets
-								allCardIdsForPlayer = [];
-								for (var i = 0; i < cardSet.length; i++) {
-									if (cardSet[i] && cardSet[i].player === deckPlayer && cardSet[i].cardType !== 'identity') {
-										allCardIdsForPlayer.push(i);
-									}
-								}
-								
-								// Rebuild playerIdentities dropdown
-								var currentIdentity = json.identity;
-								playerIdentities = [];
-								for (var i = 0; i < cardSet.length; i++) {
-									if (cardSet[i] && cardSet[i].player === deckPlayer && cardSet[i].cardType === 'identity') {
-										playerIdentities.push({ id: i, title: cardSet[i].title });
-									}
-								}
-// Sort identities by display short title
-					playerIdentities.sort(function(a,b){
-						var fullA = a.title || '';
-						var fullB = b.title || '';
-						var shortA = fullA;
-						var shortB = fullB;
-						if (deckPlayer === corp) {
-							var ca = fullA.indexOf(': ');
-							if (ca > -1) shortA = fullA.substring(ca+2).trim();
-							var cb = fullB.indexOf(': ');
-							if (cb > -1) shortB = fullB.substring(cb+2).trim();
-						} else {
-							if (fullA.indexOf(':') > -1) shortA = fullA.split(':')[0].trim();
-							if (fullB.indexOf(':') > -1) shortB = fullB.split(':')[0].trim();
-						}
-						return shortA.localeCompare(shortB);
-					});
-					
-					// Rebuild identity dropdown
-					var identityHTML = '';
-					for (var i = 0; i < playerIdentities.length; i++) {
-						var selected = (playerIdentities[i].id == currentIdentity) ? ' selected' : '';
-						var fullTitle = playerIdentities[i].title || '';
-						var shortTitle = fullTitle;
-						if (deckPlayer === corp) {
-							var colonIdx = fullTitle.indexOf(': ');
-							if (colonIdx > -1) {
-								var beforeColon = fullTitle.substring(0, colonIdx).trim();
-								var afterColon = fullTitle.substring(colonIdx + 2).trim();
-								var faction = cardSet[playerIdentities[i].id].faction || '';
-								// Normalize for comparison (remove non-letters and lowercase)
-								var beforeColonNorm = beforeColon.toLowerCase().replace(/[^a-z]/g, '');
-								var factionNorm = faction.toLowerCase().replace(/[^a-z]/g, '');
-								if (beforeColonNorm === factionNorm) {
-									shortTitle = afterColon;
-								} else {
-									shortTitle = beforeColon;
-								}
-							}
-						} else {
-							if (fullTitle.indexOf(':') > -1) shortTitle = fullTitle.split(':')[0].trim();
-						}
-						var icon = GetFactionIcon(cardSet[playerIdentities[i].id].faction);
-						identityHTML += '<option value="' + playerIdentities[i].id + '"' + selected + '>' + icon + shortTitle + '</option>';
-								}
-								$('#identityselect').html(identityHTML);
-								
-								// Ensure identity remains an integer after rebuild
-								json.identity = parseInt(json.identity);
-								
-								// Refresh the card list display
-								RenderAllCardsList();
-								AttachCardListEvents();
-								ApplyFilter();
-								UpdateCardCountsUI();
-							}
-						};
-						script.onerror = function() {
-							console.error('Failed to load ' + setName + '.js');
-						};
-						document.head.appendChild(script);
-					});
+					console.log('Loading additional card sets via clicks...');
+					LoadAdditionalSets();
 				}
 			});
 		</script>
