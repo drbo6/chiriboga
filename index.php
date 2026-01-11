@@ -723,6 +723,13 @@ $version = "0.6.10-BETA";
       document.getElementById('set-core').checked = settingsOverrides.allowedSets.indexOf('core') !== -1;
       document.getElementById('set-ms').checked = settingsOverrides.allowedSets.indexOf('ms') !== -1;
       
+      // If any hidden sets are checked, reveal all hidden options
+      if (settingsOverrides.allowedSets.indexOf('core') !== -1 || settingsOverrides.allowedSets.indexOf('ms') !== -1) {
+        hiddenSetsRevealed = true;
+        document.getElementById('core-option').style.display = '';
+        document.getElementById('ms-option').style.display = '';
+      }
+      
       // Set game speed checkboxes
       document.getElementById('speed-settings-1').checked = (settingsOverrides.gameSpeed === 1000);
       document.getElementById('speed-settings-2').checked = (settingsOverrides.gameSpeed === 350);
@@ -908,6 +915,13 @@ $version = "0.6.10-BETA";
         item.appendChild(factionLabel);
         return item;
       }
+      
+      // Add description for factioned precons
+      var factionedDesc = document.createElement('div');
+      factionedDesc.className = 'precon-section-desc';
+      factionedDesc.style.cssText = 'padding: 4px 8px 8px 8px; font-size: 10px; color: #00ff00aa; line-height: 1.4;';
+      factionedDesc.textContent = 'The default Corp decks have been tested and should not lead to unexpected potentially game-breaking bugs.';
+      listContainer.appendChild(factionedDesc);
       
       // Add factioned precons first
       for (var i = 0; i < factionedPrecons.length; i++) {
