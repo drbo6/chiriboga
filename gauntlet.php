@@ -972,6 +972,7 @@
 				// Save state and refresh modal
 				SaveOpponentStateToURL();
 				UpdateLaunchStrings();
+				Parse(); // Update deck stats display to show new credit total
 				
 				// Refresh the modal to show updated credits and bonus
 				ShowHackOptionsForOpponent(opponentIndex);
@@ -1014,12 +1015,14 @@
 					delete failedHackChances[opponentIndex + '_decklist'];
 					SaveOpponentStateToURL();
 					UpdateLaunchStrings();
+					Parse(); // Update deck stats display to show new credit total
 					ShowHackResultModal(true, 'DECKLIST REVEALED', 'You successfully hacked into their systems and retrieved the decklist.', opponentIndex);
 				} else {
 					// Failure - record the failed chance for recovery bonus
 					failedHackChances[opponentIndex + '_decklist'] = effectiveChance;
 					SaveOpponentStateToURL();
 					UpdateLaunchStrings();
+					Parse(); // Update deck stats display to show new credit total
 					ShowHackResultModal(false, 'HACK FAILED', 'Your intrusion was detected and blocked. The chance has changed for your next attempt.', opponentIndex);
 				}
 			}
@@ -1075,6 +1078,7 @@
 					delete failedHackChances[opponentIndex + '_perk'];
 					SaveOpponentStateToURL();
 					UpdateLaunchStrings();
+					Parse(); // Update deck stats display to show new credit total
 					var perkName = GetPerkName(opp.startingPerk);
 					ShowHackResultModal(true, 'PERK REVEALED', 'You successfully breached their servers and revealed: "' + perkName + '".', opponentIndex);
 				} else {
@@ -1082,6 +1086,7 @@
 					failedHackChances[opponentIndex + '_perk'] = effectiveChance;
 					SaveOpponentStateToURL();
 					UpdateLaunchStrings();
+					Parse(); // Update deck stats display to show new credit total
 					ShowHackResultModal(false, 'HACK FAILED', 'Security protocols blocked your access. The chance has changed for your next attempt.', opponentIndex);
 				}
 			}
@@ -1130,6 +1135,7 @@
 					delete failedHackChances[opponentIndex + '_' + actionType];
 					SaveOpponentStateToURL();
 					UpdateLaunchStrings();
+					Parse(); // Update deck stats display to show new credit total
 					var perkName = GetPerkName(opp.startingPerk);
 					ShowHackResultModalWithCardLoss(true, 'PERK DISABLED', 'You successfully breached their servers and disabled a "' + perkName + '" perk.', opponentIndex, lostCards);
 				} else {
@@ -1137,6 +1143,7 @@
 					failedHackChances[opponentIndex + '_' + actionType] = effectiveChance;
 					SaveOpponentStateToURL();
 					UpdateLaunchStrings();
+					Parse(); // Update deck stats display to show new credit total
 					ShowHackResultModalWithCardLoss(false, 'HACK FAILED', 'Their security systems detected and removed the trojan you installed. The chance has changed for your next attempt.', opponentIndex, lostCards);
 				}
 			}
