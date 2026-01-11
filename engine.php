@@ -596,27 +596,7 @@
 						</select>
 						<button class="button" onclick="debugAddCardToHand()">Add Selected Card</button>
 					</div>
-					<div class="debug-card-group">
-						<label>AI Speed (ms delay)</label>
-					<input type="number" id="debug-ai-speed" min="75" max="1050" step="50" value="350" style="width:100%;padding:8px;margin:5px 0;background-color:#0a0a0a;color:#33ff33;border:2px solid #147014;border-radius:3px;font-family:monospace;font-size:14px;box-sizing:border-box;text-align:center;" onchange="debugSetAISpeed()">
-					<style>
-						#debug-ai-speed::-webkit-outer-spin-button,
-						#debug-ai-speed::-webkit-inner-spin-button {
-							-webkit-appearance: none;
-							appearance: none;
-							background-color: #147014;
-							color: #33ff33;
-							border: 1px solid #0a7c0a;
-							cursor: pointer;
-						}
-						#debug-ai-speed::-webkit-outer-spin-button:hover,
-						#debug-ai-speed::-webkit-inner-spin-button:hover {
-							background-color: #1a8c1a;
-						}
-					</style>
-						<button class="button" onclick="debugSetAISpeed()">Apply Speed</button>
-					</div>
-				<button class="button" id="debug-view-all-fronts-btn" onclick="debugToggleViewAllFronts()">View All Cards</button>
+					<button class="button" id="debug-view-all-fronts-btn" onclick="debugToggleViewAllFronts()">View All Cards</button>
 					<button class="button" onclick="debugStealScoreAgenda()">Steal/Score Agenda</button>
 					<button class="button" onclick="debugOpponentStealScoreAgenda()">Opponent Steal/Score Agenda</button>
 					<button class="button" onclick="debugWinGame()">Win the Game</button>
