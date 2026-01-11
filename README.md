@@ -71,6 +71,14 @@ The following Elevation cards are not yet implemented (17 cards):
 
 I'll get to these when I have a minute.
 
+## Setup
+
+1. Clone the repository
+2. Download the card images from [chiriboga.cronbach.com/images/images.zip](https://chiriboga.cronbach.com/images/images.zip)
+3. Extract the zip into the project root (should create an `images/` folder)
+
+> **Note:** Card images are not included in this repository due to licensing. See `LICENSE.txt` in the zip for attribution details.
+
 # Debugging and Testing Guide for Chiriboga
 
 This guide explains how to create specific board states, enable debugging features, and test scenarios in the Netrunner implementation.
