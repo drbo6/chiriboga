@@ -1426,7 +1426,7 @@ function PlayerWin(player, msgstr) {
   var winner = player;
 
 // Track game end in Google Analytics
-  if (typeof gtag !== 'undefined') {
+  if (typeof gtag !== 'undefined' && window.location.hostname !== 'localhost') {
     var gameMode = 'Regular';
     if (URIParameter("t") !== "") {
       gameMode = 'Tutorial';

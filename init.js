@@ -1837,7 +1837,7 @@ function StartGame() {
   } else if (URIParameter("g") !== "") {
     gameMode = 'Gauntlet';
   }
-  if (typeof gtag !== 'undefined') {
+  if (typeof gtag !== 'undefined' && window.location.hostname !== 'localhost') {
     gtag('event', 'game_start', {
       'game_mode': gameMode
     });
