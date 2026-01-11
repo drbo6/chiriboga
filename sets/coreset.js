@@ -1208,7 +1208,84 @@ coreSet[1035] = {
   },
 };
 // coreSet[1036] = The Maker's Eye - DUPLICATE: System Update 2021 has The Maker's Eye (card 31026)
-// coreSet[1037] = Tinkering
+coreSet[1037] = {
+  title: "Tinkering",
+  imageFile: "01037.png",
+  player: runner,
+  faction: "Shaper",
+  influence: 4,
+  cardType: "event",
+  subTypes: ["Mod"],
+  playCost: 0,
+  // Choose a piece of ice. That ice gains sentry, code gate, and barrier until the end of the turn.
+  affectedCard: null,
+  Enumerate: function () {
+    // Must be installed ice to target
+    var choices = ChoicesInstalledCards(corp, function (card) {
+      return CheckCardType(card, ["ice"]);
+    });
+    if (choices.length == 0) return [];
+    return [{}];
+  },
+  Resolve: function (params) {
+    var tinkeringCard = this;
+    var choices = ChoicesInstalledCards(corp, function (card) {
+      return CheckCardType(card, ["ice"]);
+    });
+    DecisionPhase(
+      runner,
+      choices,
+      function (params) {
+        tinkeringCard.affectedCard = params.card;
+        Log(GetTitle(params.card, true) + " gains sentry, code gate, and barrier until end of turn");
+      },
+      null,
+      "Tinkering",
+      tinkeringCard
+    );
+  },
+  modifySubTypes: {
+    Resolve: function (card) {
+      if (card == this.affectedCard) return { add: ["Sentry", "Code Gate", "Barrier"] };
+      return {};
+    },
+    automatic: true,
+    availableWhenInactive: true,
+  },
+  responseOnRunnerTurnEnds: {
+    Resolve: function () {
+      this.affectedCard = null;
+    },
+    automatic: true,
+    availableWhenInactive: true,
+  },
+  responseOnCorpTurnEnds: {
+    Resolve: function () {
+      this.affectedCard = null;
+    },
+    automatic: true,
+    availableWhenInactive: true,
+  },
+  // AI: Use when we have a decoder but no fracter/killer, and there's ice we can't break
+  AIWouldPlay: function () {
+    // Check if there's installed ice we might want to Tinker
+    var installedIce = ChoicesInstalledCards(corp, function (card) {
+      return CheckCardType(card, ["ice"]) && card.rezzed;
+    });
+    if (installedIce.length == 0) return false;
+    
+    // Check if we have a decoder installed (most common use case)
+    var hasDecoder = false;
+    var installedPrograms = InstalledCards(runner);
+    for (var i = 0; i < installedPrograms.length; i++) {
+      if (CheckSubType(installedPrograms[i], "Decoder")) {
+        hasDecoder = true;
+        break;
+      }
+    }
+    return hasDecoder;
+  },
+};
 coreSet[1038] = {
   title: "Akamatsu Mem Chip",
   imageFile: "01038.png",
@@ -1370,9 +1447,159 @@ coreSet[1041] = {
     return false;
   },
 };
-// coreSet[1042] = Battering Ram  - NOT IMPLEMENTED
+coreSet[1042] = {
+  title: "Battering Ram",
+  imageFile: "01042.png",
+  player: runner,
+  faction: "Shaper",
+  influence: 2,
+  cardType: "program",
+  subTypes: ["Icebreaker", "Fracter"],
+  memoryCost: 2,
+  installCost: 5,
+  strength: 3,
+  strengthBoost: 0,
+  modifyStrength: {
+    Resolve: function (card) {
+      if (card == this) return this.strengthBoost;
+      return 0;
+    },
+  },
+  // Interface -> 2 credits: Break up to 2 barrier subroutines.
+  // 1 credit: +1 strength for the remainder of this run.
+  abilities: [
+    {
+      text: "Break up to 2 barrier subroutines.",
+      Enumerate: function () {
+        if (!CheckEncounter()) return [];
+        if (!CheckSubType(attackedServer.ice[approachIce], "Barrier")) return [];
+        if (!CheckCredits(runner, 2, "using", this)) return [];
+        if (!CheckStrength(this)) return [];
+        return ChoicesEncounteredSubroutines();
+      },
+      Resolve: function (params) {
+        var batteringRam = this;
+        SpendCredits(
+          runner,
+          2,
+          "using",
+          this,
+          function () {
+            Break(params.subroutine);
+            var choices = ChoicesEncounteredSubroutines();
+            for (var i = 0; i < choices.length; i++) {
+              choices[i].label = "(Battering Ram) Break another subroutine. -> " + choices[i].label;
+            }
+            if (runner.AI == null || choices.length == 0)
+              choices.push({
+                id: choices.length,
+                label: "Continue",
+                button: "Continue",
+              });
+            DecisionPhase(
+              runner,
+              choices,
+              function (params) {
+                if (typeof params.subroutine !== "undefined")
+                  Break(params.subroutine);
+              },
+              "Break up to 2 barrier subroutines",
+              "Battering Ram",
+              batteringRam
+            );
+          },
+          this
+        );
+      },
+    },
+    {
+      text: "+1 strength for the remainder of this run.",
+      Enumerate: function () {
+        if (!CheckEncounter()) return [];
+        if (CheckStrength(this)) return [];
+        if (!CheckUnbrokenSubroutines()) return [];
+        if (!CheckSubType(attackedServer.ice[approachIce], "Barrier")) return [];
+        if (!CheckCredits(runner, 1, "using", this)) return [];
+        return [{}];
+      },
+      Resolve: function (params) {
+        SpendCredits(
+          runner,
+          1,
+          "using",
+          this,
+          function () {
+            BoostStrength(this, 1);
+          },
+          this
+        );
+      },
+    },
+  ],
+  responseOnRunEnds: {
+    Resolve: function () {
+      this.strengthBoost = 0;
+    },
+    automatic: true,
+  },
+  AIImplementBreaker: function(rc, result, point, server, cardStrength, iceAI, iceStrength, clicksLeft, creditsLeft) {
+    result = result.concat(
+      rc.ImplementIcebreaker(
+        point,
+        this,
+        cardStrength,
+        iceAI,
+        iceStrength,
+        ["Barrier"],
+        1,  // cost to boost strength
+        1,  // amount of strength boost
+        2,  // cost to break
+        2,  // subroutines broken per use
+        creditsLeft,
+        true  // persist strength mod for the run
+      )
+    );
+    return result;
+  },
+  AIPreferredInstallChoice: function (choices) {
+    if (runner.clickTracker < 2) return -1;
+    return 0;
+  },
+};
 // coreSet[1043] = Gordian Blade - DUPLICATE: System Update 2021 has Gordian Blade (card 31033)
-// coreSet[1044] = Magnum Opus  - NOT IMPLEMENTED
+coreSet[1044] = {
+  title: "Magnum Opus",
+  imageFile: "01044.png",
+  player: runner,
+  faction: "Shaper",
+  influence: 2,
+  cardType: "program",
+  memoryCost: 2,
+  installCost: 5,
+  // [click]: Gain 2 credits.
+  abilities: [
+    {
+      text: "[click]: Gain 2[c].",
+      Enumerate: function () {
+        if (!CheckActionClicks(runner, 1)) return [];
+        return [{}];
+      },
+      Resolve: function (params) {
+        SpendClicks(runner, 1);
+        GainCredits(runner, 2, "", this);
+      },
+    },
+  ],
+  AIWouldTrigger: function () {
+    // Always trigger if we can - Magnum Opus is great economy
+    return true;
+  },
+  AIEconomyInstall: function() {
+    // High priority - Magnum Opus is a cornerstone economy card
+    return 3;
+  },
+  AIEconomyTrigger: 3, // High priority trigger
+};
 var netShieldUsedThisTurn = false; //Multiple Net Shields cannot prevent more damage. [Official FAQ]
 coreSet[1045] = {
   title: "Net Shield",
@@ -1437,7 +1664,103 @@ coreSet[1045] = {
     },
   },
 };
-// coreSet[1046] = Pipeline  - NOT IMPLEMENTED
+coreSet[1046] = {
+  title: "Pipeline",
+  imageFile: "01046.png",
+  player: runner,
+  faction: "Shaper",
+  influence: 1,
+  cardType: "program",
+  subTypes: ["Icebreaker", "Killer"],
+  memoryCost: 1,
+  installCost: 3,
+  strength: 1,
+  strengthBoost: 0,
+  modifyStrength: {
+    Resolve: function (card) {
+      if (card == this) return this.strengthBoost;
+      return 0;
+    },
+  },
+  // Interface -> 1 credit: Break 1 sentry subroutine.
+  // 2 credits: +1 strength for the remainder of this run.
+  abilities: [
+    {
+      text: "Break 1 sentry subroutine.",
+      Enumerate: function () {
+        if (!CheckEncounter()) return [];
+        if (!CheckSubType(attackedServer.ice[approachIce], "Sentry")) return [];
+        if (!CheckCredits(runner, 1, "using", this)) return [];
+        if (!CheckStrength(this)) return [];
+        return ChoicesEncounteredSubroutines();
+      },
+      Resolve: function (params) {
+        SpendCredits(
+          runner,
+          1,
+          "using",
+          this,
+          function () {
+            Break(params.subroutine);
+          },
+          this
+        );
+      },
+    },
+    {
+      text: "+1 strength for the remainder of this run.",
+      Enumerate: function () {
+        if (!CheckEncounter()) return [];
+        if (CheckStrength(this)) return [];
+        if (!CheckUnbrokenSubroutines()) return [];
+        if (!CheckSubType(attackedServer.ice[approachIce], "Sentry")) return [];
+        if (!CheckCredits(runner, 2, "using", this)) return [];
+        return [{}];
+      },
+      Resolve: function (params) {
+        SpendCredits(
+          runner,
+          2,
+          "using",
+          this,
+          function () {
+            BoostStrength(this, 1);
+          },
+          this
+        );
+      },
+    },
+  ],
+  responseOnRunEnds: {
+    Resolve: function () {
+      this.strengthBoost = 0;
+    },
+    automatic: true,
+  },
+  AIImplementBreaker: function(rc, result, point, server, cardStrength, iceAI, iceStrength, clicksLeft, creditsLeft) {
+    result = result.concat(
+      rc.ImplementIcebreaker(
+        point,
+        this,
+        cardStrength,
+        iceAI,
+        iceStrength,
+        ["Sentry"],
+        2,  // cost to boost strength
+        1,  // amount of strength boost
+        1,  // cost to break
+        1,  // subroutines broken per use
+        creditsLeft,
+        true  // persist strength mod for the run
+      )
+    );
+    return result;
+  },
+  AIPreferredInstallChoice: function (choices) {
+    if (runner.clickTracker < 2) return -1;
+    return 0;
+  },
+};
 // coreSet[1047] = Aesop's Pawnshop  - DUPLICATE: System Update 2021 has Aesop's Pawnshop (card 31035)
 coreSet[1048] = {
   title: "Sacrificial Construct",

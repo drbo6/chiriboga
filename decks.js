@@ -764,7 +764,7 @@ function LoadDecks() {
     RunnerTestField(31001, //identity
       [30032, 30032, 35009, 35008, 30007, 30007], //heapCards
       [35015, 35022, 35022, 30033, 35014, 1039, 35030, 35005, 35016, 35034, 35004, 35010, 35007, 35009, 35008, 35029, 35025], //stackCards
-      [1027, 1025, 1024, 1023, 1018], //gripCards
+      [1027, 1025, 1037, 1042, 1044, 1046], //gripCards
       [], //installed 
       [], //stolen
       cardBackTexturesRunner,glowTextures,strengthTextures
@@ -777,7 +777,7 @@ function LoadDecks() {
       [], //archivesInstalled
       [35041], //rndInstalled
       [35042], //hqInstalled
-      [[35071, 30072],[35071, 35079],[35071, 35052]], //remotes (array of arrays)
+      [[35071, 30039, 30072],[35071, 35079],[35071, 30047, 35052]], //remotes (array of arrays)
       [], //scored 35042,35052, 31075
       cardBackTexturesCorp,glowTextures,strengthTextures
     );
@@ -812,7 +812,7 @@ function LoadDecks() {
     // // GIVE EVERYONE SOME CREDITS TO START WITH
     // // ----------------------------------------
 
-    GainCredits(runner,10);
+    GainCredits(runner,13);
     GainCredits(corp,10);
     
     // // SET THE PHASE
