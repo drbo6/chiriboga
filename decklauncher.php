@@ -204,10 +204,48 @@
 
 			function UpdateDeckTextareaFromCounts() {
 				var lines = [];
+				// Get card IDs that are in the deck
+				var deckCardIds = [];
 				for (var i=0;i<allCardIdsForPlayer.length;i++) {
 					var id = allCardIdsForPlayer[i];
 					var ct = deckCounts[id] || 0;
-					if (ct>0) lines.push(ct+" "+cardSet[id].title);
+					if (ct>0) deckCardIds.push(id);
+				}
+				// Sort according to currentSort
+				deckCardIds.sort(function(idA, idB) {
+					var cardA = cardSet[idA];
+					var cardB = cardSet[idB];
+					if (!cardA || !cardB) return 0;
+					if (currentSort === 'id') {
+						return idA - idB;
+					} else if (currentSort === 'name') {
+						return (cardA.title || '').localeCompare(cardB.title || '');
+					} else if (currentSort === 'influence') {
+						var influenceA = cardA.influence || 0;
+						var influenceB = cardB.influence || 0;
+						if (influenceA !== influenceB) return influenceA - influenceB;
+						return (cardA.title || '').localeCompare(cardB.title || '');
+					} else if (currentSort === 'type') {
+						var typeOrderA = GetTypeOrder(idA);
+						var typeOrderB = GetTypeOrder(idB);
+						if (typeOrderA !== typeOrderB) return typeOrderA - typeOrderB;
+						var subA = (cardA.subTypes && cardA.subTypes.length) ? cardA.subTypes.join(',') : (cardA.subtype || '');
+						var subB = (cardB.subTypes && cardB.subTypes.length) ? cardB.subTypes.join(',') : (cardB.subtype || '');
+						if (subA < subB) return -1;
+						if (subA > subB) return 1;
+						return (cardA.title || '').localeCompare(cardB.title || '');
+					} else if (currentSort === 'faction') {
+						var factionOrderA = GetFactionOrder(idA);
+						var factionOrderB = GetFactionOrder(idB);
+						if (factionOrderA !== factionOrderB) return factionOrderA - factionOrderB;
+						return (cardA.title || '').localeCompare(cardB.title || '');
+					}
+					return 0;
+				});
+				// Build lines from sorted card IDs
+				for (var i=0;i<deckCardIds.length;i++) {
+					var id = deckCardIds[i];
+					lines.push(deckCounts[id]+" "+cardSet[id].title);
 				}
 				$("#deck").val(lines.join("\n"));
 			}
@@ -342,6 +380,7 @@
 					$('#sortdeck').html('SORT BY:<br>ID');
 				}
 				SortCardContainer();
+				UpdateDeckTextareaFromCounts();
 			}
 
 			// Random Deck function
@@ -637,6 +676,7 @@
 					$('#sortdeck').html('SORT BY:<br>ID');
 				}
 				SortCardContainer();
+				UpdateDeckTextareaFromCounts();
 			}
 
 		function ApplyFilter() {
