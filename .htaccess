@@ -75,7 +75,9 @@ ServerSignature Off
     # Block attempts like /image.png/evil.php
     RewriteCond %{REQUEST_URI} \.(png|jpg|jpeg|gif|svg|css|js)/ [NC]
     RewriteRule . - [F]
-    # Block direct access to backup/source files
+    # Allow images.zip download
+    RewriteCond %{REQUEST_URI} !^/images/images\.zip$ [NC]
+    # Block direct access to other backup/source files
     RewriteRule ^.*\.(bak|sql|zip|tar|gz)$ - [F]
 </IfModule>
 
