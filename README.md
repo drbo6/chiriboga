@@ -71,7 +71,7 @@ The following Elevation cards are not yet implemented (17 cards):
 
 I'll get to these when I have a minute.
 
-## Setup
+# Setup
 
 1. Clone the repository
 2. Download the card images from [chiriboga.cronbach.com/images/images.zip](https://chiriboga.cronbach.com/images/images.zip)
