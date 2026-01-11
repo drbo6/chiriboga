@@ -5408,7 +5408,7 @@ cardSet[35024] = {
 };
 
 //Empiricist
-//Jinteki Ice: Code Gate - AP
+//Jinteki Ice: Sentry - AP - Observer
 //Rez: 7, Strength: 5
 //[sub] Draw 1 card. You may add 1 card from HQ to the top of R&D.
 //[sub] Do 1 net damage. Give the Runner 1 tag.
@@ -5420,7 +5420,7 @@ cardSet[35052] = {
   faction: "Jinteki",
   influence: 3,
   cardType: "ice",
-  subTypes: ["Code Gate", "AP"],
+  subTypes: ["Sentry", "AP", "Observer"],
   rezCost: 7,
   strength: 5,
   subroutines: [

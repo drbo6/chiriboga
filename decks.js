@@ -755,7 +755,7 @@ function LoadDecks() {
 
     debugging = true; //set true to log extra details and pause execution on error
     mainLoopDelay = 50; //for speedy AI vs AI testing (any faster than this and funny things happen at end-of-game)
-    // viewAllFronts = false; //set true to see all card fronts (for testing)     
+    viewAllFronts = true; //set true to see all card fronts (for testing)     
 
 
     // SET UP THE MAIN STATES FOR THE RUNNER AND CORP
@@ -764,8 +764,8 @@ function LoadDecks() {
     RunnerTestField(31001, //identity
       [30032, 30032, 35009, 35008, 30007, 30007], //heapCards
       [35015, 35022, 35022, 30033, 35014, 1039, 35030, 35005, 35016, 35034, 35004, 35010, 35007, 35009, 35008, 35029, 35025], //stackCards
-      [31024, 31024, 1024, 1023, 1018], //gripCards
-      [35028, 30015, 35009, 35020, 35022, 30032], //installed 
+      [1027, 1025, 1024, 1023, 1018], //gripCards
+      [], //installed 
       [], //stolen
       cardBackTexturesRunner,glowTextures,strengthTextures
     );
@@ -777,7 +777,7 @@ function LoadDecks() {
       [], //archivesInstalled
       [35041], //rndInstalled
       [35042], //hqInstalled
-      [[35071, 35045, 30042, 35041, 35052,35079],[35064],[31072, 35053, 35076]], //remotes (array of arrays)
+      [[35071, 30072],[35071, 35079],[35071, 35052]], //remotes (array of arrays)
       [], //scored 35042,35052, 31075
       cardBackTexturesCorp,glowTextures,strengthTextures
     );
@@ -793,12 +793,12 @@ function LoadDecks() {
     //   corp.remoteServers[0].ice[i].rezzed = true;
     // }
     // corp.remoteServers[3].root[0].rezzed=true;
-    // corp.remoteServers[0].ice[0].rezzed=true;
+    corp.remoteServers[0].ice[0].rezzed=true;
     // corp.remoteServers[0].ice[1].rezzed=true;
     // corp.remoteServers[0].ice[2].rezzed=true;
+    corp.remoteServers[1].ice[0].rezzed=true;
     // corp.remoteServers[1].ice[0].rezzed=true;
-    // corp.remoteServers[1].ice[0].rezzed=true;
-    // corp.remoteServers[2].ice[0].rezzed=true;
+    corp.remoteServers[2].ice[0].rezzed=true;
     // corp.remoteServers[2].ice[1].rezzed=true;
     // corp.remoteServers[0].root[0].knownToRunner=true;
     // corp.archives.ice[0].rezzed=true;

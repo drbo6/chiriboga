@@ -835,9 +835,199 @@ coreSet[1024] = {
     return 3;
   },
 };
-// coreSet[1025] = Aurora - NOT IMPLEMENTED
+coreSet[1025] = {
+  title: "Aurora",
+  imageFile: "01025.png",
+  player: runner,
+  faction: "Criminal",
+  influence: 1,
+  cardType: "program",
+  subTypes: ["Icebreaker", "Fracter"],
+  memoryCost: 1,
+  installCost: 3,
+  strength: 1,
+  strengthBoost: 0,
+  modifyStrength: {
+    Resolve: function (card) {
+      if (card == this) return this.strengthBoost;
+      return 0;
+    },
+  },
+  // Interface -> 2 credits: Break 1 barrier subroutine.
+  // 2 credits: +3 strength.
+  abilities: [
+    {
+      text: "Break 1 barrier subroutine.",
+      Enumerate: function () {
+        if (!CheckEncounter()) return [];
+        if (!CheckSubType(attackedServer.ice[approachIce], "Barrier")) return [];
+        if (!CheckCredits(runner, 2, "using", this)) return [];
+        if (!CheckStrength(this)) return [];
+        return ChoicesEncounteredSubroutines();
+      },
+      Resolve: function (params) {
+        SpendCredits(
+          runner,
+          2,
+          "using",
+          this,
+          function () {
+            Break(params.subroutine);
+          },
+          this
+        );
+      },
+    },
+    {
+      text: "+3 strength.",
+      Enumerate: function () {
+        if (!CheckEncounter()) return [];
+        if (CheckStrength(this)) return [];
+        if (!CheckUnbrokenSubroutines()) return [];
+        if (!CheckSubType(attackedServer.ice[approachIce], "Barrier")) return [];
+        if (!CheckCredits(runner, 2, "using", this)) return [];
+        return [{}];
+      },
+      Resolve: function (params) {
+        SpendCredits(
+          runner,
+          2,
+          "using",
+          this,
+          function () {
+            BoostStrength(this, 3);
+          },
+          this
+        );
+      },
+    },
+  ],
+  responseOnEncounterEnds: {
+    Resolve: function () {
+      this.strengthBoost = 0;
+    },
+    automatic: true,
+  },
+  AIImplementBreaker: function(rc, result, point, server, cardStrength, iceAI, iceStrength, clicksLeft, creditsLeft) {
+    result = result.concat(
+      rc.ImplementIcebreaker(
+        point,
+        this,
+        cardStrength,
+        iceAI,
+        iceStrength,
+        ["Barrier"],
+        2,  // cost to boost strength
+        3,  // amount of strength boost
+        2,  // cost to break
+        1,  // subroutines broken per use
+        creditsLeft
+      )
+    );
+    return result;
+  },
+  AIPreferredInstallChoice: function (choices) {
+    if (runner.clickTracker < 2) return -1;
+    return 0;
+  },
+};
 // coreSet[1026] = Femme Fatale - DUPLICATE: System Update 2021 has Femme Fatale
-// coreSet[1027] = Ninja
+coreSet[1027] = {
+  title: "Ninja",
+  imageFile: "01027.png",
+  player: runner,
+  faction: "Criminal",
+  influence: 2,
+  cardType: "program",
+  subTypes: ["Icebreaker", "Killer"],
+  memoryCost: 1,
+  installCost: 4,
+  strength: 0,
+  strengthBoost: 0,
+  modifyStrength: {
+    Resolve: function (card) {
+      if (card == this) return this.strengthBoost;
+      return 0;
+    },
+  },
+  // Interface -> 1 credit: Break 1 sentry subroutine.
+  // 3 credits: +5 strength.
+  abilities: [
+    {
+      text: "Break 1 sentry subroutine.",
+      Enumerate: function () {
+        if (!CheckEncounter()) return [];
+        if (!CheckSubType(attackedServer.ice[approachIce], "Sentry")) return [];
+        if (!CheckCredits(runner, 1, "using", this)) return [];
+        if (!CheckStrength(this)) return [];
+        return ChoicesEncounteredSubroutines();
+      },
+      Resolve: function (params) {
+        SpendCredits(
+          runner,
+          1,
+          "using",
+          this,
+          function () {
+            Break(params.subroutine);
+          },
+          this
+        );
+      },
+    },
+    {
+      text: "+5 strength.",
+      Enumerate: function () {
+        if (!CheckEncounter()) return [];
+        if (CheckStrength(this)) return [];
+        if (!CheckUnbrokenSubroutines()) return [];
+        if (!CheckSubType(attackedServer.ice[approachIce], "Sentry")) return [];
+        if (!CheckCredits(runner, 3, "using", this)) return [];
+        return [{}];
+      },
+      Resolve: function (params) {
+        SpendCredits(
+          runner,
+          3,
+          "using",
+          this,
+          function () {
+            BoostStrength(this, 5);
+          },
+          this
+        );
+      },
+    },
+  ],
+  responseOnEncounterEnds: {
+    Resolve: function () {
+      this.strengthBoost = 0;
+    },
+    automatic: true,
+  },
+  AIImplementBreaker: function(rc, result, point, server, cardStrength, iceAI, iceStrength, clicksLeft, creditsLeft) {
+    result = result.concat(
+      rc.ImplementIcebreaker(
+        point,
+        this,
+        cardStrength,
+        iceAI,
+        iceStrength,
+        ["Sentry"],
+        3,  // cost to boost strength
+        5,  // amount of strength boost
+        1,  // cost to break
+        1,  // subroutines broken per use
+        creditsLeft
+      )
+    );
+    return result;
+  },
+  AIPreferredInstallChoice: function (choices) {
+    if (runner.clickTracker < 2) return -1;
+    return 0;
+  },
+};
 // coreSet[1028] = Sneakdoor Beta - DUPLICATE: System Update 2021 has Sneakdoor Beta
 // coreSet[1029] = Bank Job - NOT IMPLEMENTED
 coreSet[1030] = {
