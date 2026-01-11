@@ -3584,3 +3584,94 @@ body.deck-builder-page {
     padding-right: 0.8em !important;
     padding-left: 0.8em !important;
 }
+/* ================================================
+   LOADING OVERLAY - CRT Style
+   ================================================ */
+#loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: var(--bg-dark, #0a100a);
+    z-index: 99999;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    transition: opacity 0.3s ease-out;
+}
+
+#loading-overlay.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+#loading-overlay .loading-text {
+    font-family: "Share Tech Mono", "Courier New", monospace;
+    font-size: 24px;
+    color: var(--crt-green, #33ff33);
+    text-shadow: 
+        0 0 5px var(--crt-green, #33ff33),
+        0 0 15px var(--glow-green, #00aa00),
+        0 0 30px var(--glow-green-dark, #008800);
+    animation: loading-pulse 1.5s ease-in-out infinite;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+}
+
+#loading-overlay .loading-dots {
+    display: inline-block;
+    width: 30px;
+    text-align: left;
+}
+
+#loading-overlay .loading-bar {
+    margin-top: 20px;
+    width: 200px;
+    height: 4px;
+    background-color: var(--border-green-dark, #184e18);
+    border-radius: 2px;
+    overflow: hidden;
+    box-shadow: 0 0 10px var(--glow-green-dark, #008800);
+}
+
+#loading-overlay .loading-bar-fill {
+    height: 100%;
+    width: 30%;
+    background-color: var(--crt-green, #33ff33);
+    box-shadow: 0 0 10px var(--crt-green, #33ff33);
+    animation: loading-bar-slide 1.2s ease-in-out infinite;
+}
+
+@keyframes loading-pulse {
+    0%, 100% { opacity: 0.7; }
+    50% { opacity: 1; }
+}
+
+@keyframes loading-bar-slide {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(400%); }
+}
+
+/* CRT scanline effect on loading overlay */
+#loading-overlay::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: repeating-linear-gradient(
+        to bottom,
+        rgba(51, 255, 51, 0.03) 0px,
+        rgba(51, 255, 51, 0.03) 2px,
+        rgba(0, 0, 0, 0.08) 3px,
+        rgba(0, 0, 0, 0.08) 4px
+    );
+    z-index: 1;
+}
+
+#loading-overlay .loading-text,
+#loading-overlay .loading-bar {
+    position: relative;
+    z-index: 2;
+}

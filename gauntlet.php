@@ -2312,8 +2312,14 @@
 				// Load or generate the gauntlet card set now that cardData is loaded
 				LoadOrGenerateGauntletState();
 
-				// Rebuild identity dropdown now that deckPlayer is runner
-				PopulateIdentityDropdown();
+				// DRBO6: Gauntlet mode - force runner as the player
+				// This must be set BEFORE PopulateIdentityDropdown() to ensure proper filtering
+				deckPlayer = runner;
+				
+				// Wrap DOM-dependent code in document.ready to handle cached JSON loading before DOM is ready
+				$(document).ready(function() {
+					// Rebuild identity dropdown now that deckPlayer is runner AND DOM is ready
+					PopulateIdentityDropdown();
 
 			// Load runner deck from URL parameter (r) - the player's deck
 			var specifiedRunnerDeck = URIParameter("r");
@@ -2551,7 +2557,16 @@
 						window.PopulatePreconDropdownForIdentity(effectiveId);
 					}
 				} catch(e) { /* ignore */ }
-			});
+				
+				// Hide loading overlay now that everything is ready
+				$('#loading-overlay').addClass('hidden');
+				// Remove from DOM after fade-out transition completes
+				setTimeout(function() {
+					$('#loading-overlay').remove();
+				}, 350);
+				
+				}); // end $(document).ready()
+			}); // end $.getJSON
 
 			//UTILITY: ensure deckCounts matches json.cards
 			function RecalculateDeckCounts() {
@@ -4758,6 +4773,24 @@
 
 
 	<body class="deck-builder-page" onload="Init();">
+		<!-- Loading Overlay - hidden when page is ready -->
+		<div id="loading-overlay">
+			<div class="loading-text">Loading<span class="loading-dots"></span></div>
+			<div class="loading-bar"><div class="loading-bar-fill"></div></div>
+		</div>
+		<script>
+			// Animate loading dots
+			(function() {
+				var dots = document.querySelector('.loading-dots');
+				if (dots) {
+					var count = 0;
+					setInterval(function() {
+						count = (count + 1) % 4;
+						dots.textContent = '.'.repeat(count) || '';
+					}, 400);
+				}
+			})();
+		</script>
 		<div id="contentcontainer">
 			<div id="dataentry">
 				<div class="leftrow toprow">
