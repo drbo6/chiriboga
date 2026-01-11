@@ -2102,7 +2102,7 @@ function debugToggleViewAllFronts() {
   viewAllFronts = !viewAllFronts;
   var btn = document.getElementById('debug-view-all-fronts-btn');
   if (btn) {
-    btn.textContent = 'ViewAllFronts: ' + (viewAllFronts ? 'ON' : 'OFF');
+    btn.textContent = viewAllFronts ? 'Hide All Cards' : 'View All Cards';
   }
   Log('DEBUG: ViewAllFronts is now ' + (viewAllFronts ? 'ON' : 'OFF') + ' (AI behavior may change)');
   Render();
@@ -2377,7 +2377,7 @@ function debugPopulateCardDropdown() {
   // Update ViewAllFronts button state
   var viewAllFrontsBtn = document.getElementById('debug-view-all-fronts-btn');
   if (viewAllFrontsBtn) {
-    viewAllFrontsBtn.textContent = 'ViewAllFronts: ' + (viewAllFronts ? 'ON' : 'OFF');
+    viewAllFrontsBtn.textContent = viewAllFronts ? 'Hide All Cards' : 'View All Cards';
   }
   
   // Clear existing options

@@ -616,7 +616,7 @@
 					</style>
 						<button class="button" onclick="debugSetAISpeed()">Apply Speed</button>
 					</div>
-					<button class="button" id="debug-view-all-fronts-btn" onclick="debugToggleViewAllFronts()">View All Card Fronts</button>
+				<button class="button" id="debug-view-all-fronts-btn" onclick="debugToggleViewAllFronts()">View All Cards</button>
 					<button class="button" onclick="debugStealScoreAgenda()">Steal/Score Agenda</button>
 					<button class="button" onclick="debugOpponentStealScoreAgenda()">Opponent Steal/Score Agenda</button>
 					<button class="button" onclick="debugWinGame()">Win the Game</button>
