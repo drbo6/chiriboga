@@ -1,5 +1,5 @@
 <?php
-$version = "0.6.10-BETA";
+$version = "0.6.11-BETA";
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -303,7 +303,7 @@ $version = "0.6.10-BETA";
                     <label for="balanced-factions-toggle" class="switch-label"></label>
                   </div>
                 </div>
-                <div class="settings-group" title="Shop packs only contain cards matching their category (e.g. Anarch pack will contain only Anarch cards). This makes the game easier and scores less points.">
+                <div class="settings-group" title="Shop packs only contain cards matching their category (e.g. Anarch pack = only Anarch cards). Makes the game easier.">
                   <label class="settings-label">STRICT PACKS</label>
                   <div class="settings-switch">
                     <input type="checkbox" id="strict-packs-toggle" onchange="toggleStrictPacks()">

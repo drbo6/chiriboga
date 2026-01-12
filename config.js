@@ -92,6 +92,13 @@ var gauntletConfig = {
   // If false, cards are selected purely randomly from the matching pool
   balancedFactions: true,
 
+  // ===== STRICT PACKS =====
+  // If true, shop packs only contain cards that match their category
+  // (e.g. Anarch Pack = only Anarch + Neutral cards, Program Pack = only programs)
+  // This makes the game easier but applies a 20% score penalty
+  // If false, pack names only indicate weighted probabilities
+  strictPacks: false,
+
   // ===== ALLOWED IDENTITIES =====
   // Specify which identities can be used in gauntlet mode
   // Leave empty array to allow all identities

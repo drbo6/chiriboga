@@ -1109,12 +1109,22 @@ function ShowGauntletRecap(gauntletState) {
   var rawScore = agendaStolen - agendaScored + creditBonus;
   var score = Math.max(0, rawScore);
   
+  // Apply Strict Packs penalty (20% reduction)
+  var strictPacksPenalty = 0;
+  if (gauntletState.strictPacks) {
+    strictPacksPenalty = Math.round(score * 0.2);
+    score = Math.max(0, score - strictPacksPenalty);
+  }
+  
   console.log("=== GAUNTLET COMPLETE SCORE CALCULATION ===");
   console.log("agendaStolen (all games): +" + agendaStolen);
   console.log("agendaScored (all games): -" + agendaScored);
   console.log("credits: " + baseCredits + " + creditsWon (all games): " + creditsWon + " = " + totalCredits);
   console.log("creditBonus: round(" + totalCredits + " / " + creditScoreDivisor + ") = " + creditBonus);
   console.log("rawScore: " + agendaStolen + " - " + agendaScored + " + " + creditBonus + " = " + rawScore);
+  if (gauntletState.strictPacks) {
+    console.log("strictPacksPenalty: -" + strictPacksPenalty + " (20% of " + (score + strictPacksPenalty) + ")");
+  }
   console.log("FINAL SCORE: " + score);
   
   // Update achievements and high scores
@@ -1201,6 +1211,9 @@ function ShowGauntletRecap(gauntletState) {
   recapHtml += opponentListHtml;
   recapHtml += '<div style="margin-top: 20px; padding-top: 20px; border-top: 2px solid #33ff33; font-size: 18px;">';
   recapHtml += '<div style="color: #ffff00; font-weight: bold;">SCORE: ' + score + '</div>';
+  if (gauntletState.strictPacks && strictPacksPenalty > 0) {
+    recapHtml += '<div style="color: #ff9900; font-size: 12px; margin-top: 5px;">(Strict Packs: -' + strictPacksPenalty + ')</div>';
+  }
   recapHtml += '</div>';
   recapHtml += '<div style="display: flex; justify-content: center; margin-top: 20px;"><button class="button" onclick="window.location.href=\'index.php\';">RETURN TO MENU</button></div>';
   recapHtml += '</div>';
@@ -1281,12 +1294,22 @@ function ShowGauntletLostModal(gauntletState) {
   var rawScore = totalAgendaStolen - totalAgendaScored + creditBonus;
   var score = Math.max(0, rawScore);
   
+  // Apply Strict Packs penalty (20% reduction)
+  var strictPacksPenalty = 0;
+  if (gauntletState.strictPacks) {
+    strictPacksPenalty = Math.round(score * 0.2);
+    score = Math.max(0, score - strictPacksPenalty);
+  }
+  
   console.log("=== GAUNTLET LOST SCORE CALCULATION ===");
   console.log("agendaStolen (previous): " + agendaStolenPrev + " + (this game): " + agendaStolenThisGame + " = +" + totalAgendaStolen);
   console.log("agendaScored (previous): " + agendaScoredPrev + " + (this game): " + agendaScoredThisGame + " = -" + totalAgendaScored);
   console.log("credits: " + baseCredits + " + agendaCredits: (" + agendaStolenThisGame + " × " + agendaPointStolenReward + ") + (" + agendaScoredThisGame + " × " + agendaPointScoredReward + ") = " + baseCredits + " + " + agendaCreditsThisGame + " = " + totalCredits);
   console.log("creditBonus: round(" + totalCredits + " / " + creditScoreDivisor + ") = " + creditBonus);
   console.log("rawScore: " + totalAgendaStolen + " - " + totalAgendaScored + " + " + creditBonus + " = " + rawScore);
+  if (gauntletState.strictPacks) {
+    console.log("strictPacksPenalty: -" + strictPacksPenalty + " (20% of " + (score + strictPacksPenalty) + ")");
+  }
   console.log("FINAL SCORE: " + score);
   
   // Update high scores (but not achievements since gauntlet was not completed)
@@ -1381,6 +1404,9 @@ function ShowGauntletLostModal(gauntletState) {
   lostHtml += opponentListHtml;
   lostHtml += '<div style="margin-top: 20px; padding-top: 20px; border-top: 2px solid #33ff33; font-size: 18px;">';
   lostHtml += '<div style="color: #ffff00; font-weight: bold;">SCORE: ' + score + '</div>';
+  if (gauntletState.strictPacks && strictPacksPenalty > 0) {
+    lostHtml += '<div style="color: #ff9900; font-size: 12px; margin-top: 5px;">(Strict Packs: -' + strictPacksPenalty + ')</div>';
+  }
   lostHtml += '</div>';
   lostHtml += '<div style="display: flex; justify-content: center; margin-top: 20px;">';
   lostHtml += '<button class="button" onclick="window.location.href=\'index.php\';">RETURN TO MENU</button>';
