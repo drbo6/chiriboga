@@ -290,17 +290,24 @@ $version = "0.6.10-BETA";
                   </div>
                 </div>
                 <div class="settings-group" title="Cycle through all four corp factions before repeating any faction">
-                  <label class="settings-label">ALTERNATE FACTIONS</label>
+                  <label class="settings-label">ALTERNATE CORPS</label>
                   <div class="settings-switch">
                     <input type="checkbox" id="alternate-factions-toggle" onchange="toggleAlternateFactions()">
                     <label for="alternate-factions-toggle" class="switch-label"></label>
                   </div>
                 </div>
                 <div class="settings-group" title="Distribute runner cards evenly across all factions in your Gauntlet starting card pool">
-                  <label class="settings-label">BALANCED FACTIONS</label>
+                  <label class="settings-label">BALANCED CARD POOL</label>
                   <div class="settings-switch">
                     <input type="checkbox" id="balanced-factions-toggle" onchange="toggleBalancedFactions()">
                     <label for="balanced-factions-toggle" class="switch-label"></label>
+                  </div>
+                </div>
+                <div class="settings-group" title="Shop packs only contain cards matching their category (e.g. Anarch pack will contain only Anarch cards). This makes the game easier and scores less points.">
+                  <label class="settings-label">STRICT PACKS</label>
+                  <div class="settings-switch">
+                    <input type="checkbox" id="strict-packs-toggle" onchange="toggleStrictPacks()">
+                    <label for="strict-packs-toggle" class="switch-label"></label>
                   </div>
                 </div>
                 <div class="settings-group" title="Card sets available for building your runner deck in Gauntlet mode">
@@ -439,6 +446,7 @@ $version = "0.6.10-BETA";
       gauntletLength: null,
       alternateFactions: null,
       balancedFactions: null,
+      strictPacks: null,
       allowedSets: null,
       preconOverrides: {}  // Maps precon name to boolean override for useForGauntlet
     };
@@ -685,6 +693,9 @@ $version = "0.6.10-BETA";
       settingsOverrides.balancedFactions = (saved && typeof saved.balancedFactions === 'boolean') 
         ? saved.balancedFactions 
         : (gauntletConfig.balancedFactions || false);
+      settingsOverrides.strictPacks = (saved && typeof saved.strictPacks === 'boolean') 
+        ? saved.strictPacks 
+        : (gauntletConfig.strictPacks || false);
       settingsOverrides.allowedSets = (saved && Array.isArray(saved.allowedSets)) 
         ? saved.allowedSets.slice() 
         : (gauntletConfig.allowedSets ? gauntletConfig.allowedSets.slice() : []);
@@ -718,6 +729,7 @@ $version = "0.6.10-BETA";
       document.getElementById('gauntlet-length-value').textContent = settingsOverrides.gauntletLength;
       document.getElementById('alternate-factions-toggle').checked = settingsOverrides.alternateFactions;
       document.getElementById('balanced-factions-toggle').checked = settingsOverrides.balancedFactions;
+      document.getElementById('strict-packs-toggle').checked = settingsOverrides.strictPacks;
       document.getElementById('set-su21').checked = settingsOverrides.allowedSets.indexOf('su21') !== -1;
       document.getElementById('set-elev').checked = settingsOverrides.allowedSets.indexOf('elev') !== -1;
       document.getElementById('set-core').checked = settingsOverrides.allowedSets.indexOf('core') !== -1;
@@ -754,6 +766,7 @@ $version = "0.6.10-BETA";
           gauntletLength: settingsOverrides.gauntletLength,
           alternateFactions: settingsOverrides.alternateFactions,
           balancedFactions: settingsOverrides.balancedFactions,
+          strictPacks: settingsOverrides.strictPacks,
           allowedSets: settingsOverrides.allowedSets,
           preconOverrides: settingsOverrides.preconOverrides,
           gameSpeed: settingsOverrides.gameSpeed,
@@ -793,6 +806,11 @@ $version = "0.6.10-BETA";
     
     function toggleBalancedFactions() {
       settingsOverrides.balancedFactions = document.getElementById('balanced-factions-toggle').checked;
+      saveSettings();
+    }
+    
+    function toggleStrictPacks() {
+      settingsOverrides.strictPacks = document.getElementById('strict-packs-toggle').checked;
       saveSettings();
     }
     
@@ -1411,6 +1429,7 @@ $version = "0.6.10-BETA";
         creditsWonText: "",
         gauntletLength: gauntletLength,
         allowedSets: settingsOverrides.allowedSets || [],
+        strictPacks: settingsOverrides.strictPacks || false,
         seed: seed,
         shopPurchaseCount: 0
       };

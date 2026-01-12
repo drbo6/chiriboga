@@ -1579,7 +1579,11 @@
 				buycardsHtml += '<h1 class="logo-text" style="text-align: center; color: var(--crt-red); text-shadow: 0 0 5px var(--crt-red), 0 0 15px var(--glow-red), 0 0 35px var(--glow-red-dark); margin: 20px 0;">AESOP\'S PAWN SHOP</h1>';
 				buycardsHtml += '<div style="color: var(--crt-red); font-family: monospace; padding: 20px; text-align: center; width: 100%;">';
 				buycardsHtml += '<p>Current Credits: <span id="shop-credits">' + gauntletCredits + '</span><img src="images/nsg/NSG_CREDIT.svg" class="card-icon" alt="credit" style="margin-left: 0px; margin-bottom: 2px; height: 16px; display: inline-block; vertical-align: sub; filter: invert(1) brightness(0.5) sepia(1) saturate(5) hue-rotate(80deg);"></p>';
-				buycardsHtml += '<p style="color: var(--crt-green); font-size: 11px; margin-top: 10px;">Pack names indicate what factions or card types you are more likely to find inside.</p>';
+				if (gauntletStrictPacks) {
+					buycardsHtml += '<p style="color: var(--crt-green); font-size: 11px; margin-top: 10px;">Strict Packs: Cards will match their pack\'s faction or type.</p>';
+				} else {
+					buycardsHtml += '<p style="color: var(--crt-green); font-size: 11px; margin-top: 10px;">Pack names indicate what factions or card types you are more likely to find inside.</p>';
+				}
 				buycardsHtml += '</div>';
 				buycardsHtml += '<div id="shop-buttons" style="display: flex; flex-direction: column; justify-content: center; gap: 10px; width: 100%; padding: 20px; min-height: 200px;">';
 				
@@ -1778,6 +1782,7 @@
 			// Global variables for shop
 			var gauntletSeed = '';
 			var gauntletAllowedSets = [];
+			var gauntletStrictPacks = false;
 			var selectedShopPacks = [];
 			var shopPurchaseCount = 0; // Track number of purchases for deterministic but varying pack selection
 
@@ -1840,6 +1845,22 @@
 				// Each card's weight = typeWeight * factionWeight
 				var weightedPool = []; // Array of {cardId, weight}
 				
+				// For strict packs, determine what faction/type this pack requires based on name
+				var strictFaction = null;
+				var strictType = null;
+				if (gauntletStrictPacks && packConfig.name) {
+					var packNameLower = packConfig.name.toLowerCase();
+					// Check for faction names
+					if (packNameLower.indexOf('anarch') !== -1) strictFaction = 'anarch';
+					else if (packNameLower.indexOf('criminal') !== -1) strictFaction = 'criminal';
+					else if (packNameLower.indexOf('shaper') !== -1) strictFaction = 'shaper';
+					// Check for type names
+					if (packNameLower.indexOf('program') !== -1) strictType = 'program';
+					else if (packNameLower.indexOf('hardware') !== -1) strictType = 'hardware';
+					else if (packNameLower.indexOf('event') !== -1) strictType = 'event';
+					else if (packNameLower.indexOf('resource') !== -1) strictType = 'resource';
+				}
+				
 				for (var cardId = 0; cardId < cardSet.length; cardId++) {
 					var card = cardSet[cardId];
 					if (!card) continue;
@@ -1852,12 +1873,8 @@
 						if (gauntletAllowedSets.indexOf(cardSetCode) === -1) continue;
 					}
 					
-					// Get type weight
+					// Get card type and faction
 					var cardType = (card.cardType || '').toLowerCase();
-					var typeWeight = packConfig.typeFactors[cardType] || 0;
-					if (typeWeight <= 0) continue;
-					
-					// Get faction weight
 					var cardFaction = (card.faction || '').toLowerCase();
 					var factionKey = null;
 					if (cardFaction === 'anarch' || cardFaction === 'anarch-runner') factionKey = 'anarch';
@@ -1865,6 +1882,19 @@
 					else if (cardFaction === 'shaper' || cardFaction === 'shaper-runner') factionKey = 'shaper';
 					else if (cardFaction === 'neutral' || cardFaction === 'neutral-runner') factionKey = 'neutral';
 					
+					// Strict packs filtering - card must match the pack's category
+					if (gauntletStrictPacks) {
+						// If pack has a strict faction requirement, card must match (or be neutral)
+						if (strictFaction && factionKey !== strictFaction && factionKey !== 'neutral') continue;
+						// If pack has a strict type requirement, card must match
+						if (strictType && cardType !== strictType) continue;
+					}
+					
+					// Get type weight
+					var typeWeight = packConfig.typeFactors[cardType] || 0;
+					if (typeWeight <= 0) continue;
+					
+					// Get faction weight
 					var factionWeight = factionKey ? (packConfig.factionFactors[factionKey] || 0) : 0;
 					if (factionWeight <= 0) continue;
 					
@@ -2203,6 +2233,8 @@
 							
 							// Extract allowed sets from gauntlet state (must happen before identity dropdown population)
 							gauntletAllowedSets = gauntletState.allowedSets || [];
+							// Extract strict packs setting from gauntlet state
+							gauntletStrictPacks = gauntletState.strictPacks || false;
 							
 							if (gauntletState && gauntletState.subset) {
 								gauntletCardCounts = {};
@@ -2398,6 +2430,8 @@
 				gauntletSeed = gauntletState.seed || '';
 				// Store allowed sets from gauntlet state
 				gauntletAllowedSets = gauntletState.allowedSets || [];
+				// Store strict packs setting from gauntlet state
+				gauntletStrictPacks = gauntletState.strictPacks || false;
 				
 				// Build cardIdToSet mapping from cardData.json pack_code
 				// Only map cards that exist in both cardData.json and the .js files
