@@ -760,37 +760,37 @@ function LoadDecks() {
     // SET UP THE MAIN STATES FOR THE RUNNER AND CORP
     // ----------------------------------------------
 
-    // RunnerTestField(31001, //identity
-    //   [30032, 30032, 35009, 35008, 30007, 30007], //heapCards
-    //   [35015, 35022, 35022, 30033, 35014, 1039, 35030, 35005, 35016, 35034, 35004, 35010, 35007, 35009, 35008, 35029, 35025], //stackCards
-    //   [1027, 1025, 1037, 1042, 1029, 35034], //gripCards
-    //   [], //installed 
-    //   [], //stolen
-    //   cardBackTexturesRunner,glowTextures,strengthTextures
-    // );
+    RunnerTestField(31001, //identity
+      [30032, 30032, 35009, 35008, 30007, 30007], //heapCards
+      [35015, 35022, 35022, 30033, 35014, 1039, 35030, 35005, 35016, 35034], //stackCards
+      [], //gripCards
+      [], //installed 
+      [], //stolen
+      cardBackTexturesRunner,glowTextures,strengthTextures
+    );
 
-    // CorpTestField(35068, //identity - 35035, 30059
-    //   [30037, 30047,30073,35075,30074,30075,35081,35081], //archivesCards
-    //   [30073,30072,30047,30073,30073,30039,30039,30039,30039,30039,35044,35044,35044,35045], //rndCards
-    //   [35055,35079,35040,35081,35067,30067], //hqCards 
-    //   [], //archivesInstalled
-    //   [35041], //rndInstalled
-    //   [35042], //hqInstalled
-    //   [[35071, 30072],[35071, 35079],[35071, 35052]], //remotes (array of arrays)
-    //   [], //scored 35042,35052, 31075
-    //   cardBackTexturesCorp,glowTextures,strengthTextures
-    // );
+    CorpTestField(35068, //identity - 35035, 30059
+      [30037, 30047,30073,35075,30074,30075,35081,35081], //archivesCards
+      [30073,30072,30047,30073,30073,30039,30039,30039,30039,30039,35044,35044,35044,35045], //rndCards
+      [35055,35079,35040,35081,35067,30067], //hqCards 
+      [], //archivesInstalled
+      [35041, 35075], //rndInstalled
+      [35042, 35075], //hqInstalled
+      [[35071, 30072, 35075],[35071, 35079, 35075],[35071, 35052, 35075]], //remotes (array of arrays)
+      [], //scored 35042,35052, 31075
+      cardBackTexturesCorp,glowTextures,strengthTextures
+    );
 
     // // REZ ICE
     // // -------
 
     // corp.archives.ice[0].rezzed=true;
-    // corp.RnD.ice[0].rezzed=true;
-    // corp.HQ.ice[0].rezzed=true;
+     corp.RnD.ice[1].rezzed=true;
+     corp.HQ.ice[1].rezzed=true;
     // corp.remoteServers[0].root[0].rezzed=true;
-    // for (var i = 0; i < 3; i++) {
-    //   corp.remoteServers[0].ice[i].rezzed = true;
-    // }
+    for (var i = 0; i < 3; i++) {
+      corp.remoteServers[i].ice[1].rezzed = true;
+    }
     // corp.remoteServers[3].root[0].rezzed=true;
     // corp.remoteServers[0].ice[0].rezzed=true;
     // corp.remoteServers[0].ice[1].rezzed=true;
