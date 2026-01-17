@@ -3216,6 +3216,13 @@ cardSet[35042] = {
   ],
   
   //**AI code
+  AIImplementIce: function(rc, result, maxCorpCred, incomplete) {
+    result.sr = [];
+    if ((corp.HQ.cards.length == 0)&&(corp.archives.cards.length == 0)) result.sr.push([[]]); //push a blank sr so that indices match
+    else result.sr.push([["misc_moderate"]]);
+    result.sr.push([["endTheRun"]]);
+    return result;
+  },
   AIRezReasons: function() {
     return { facecheck: true, etr: true };
   },
@@ -3412,6 +3419,10 @@ cardSet[35075] = {
   ],
   
   //**AI code
+  AIImplementIce: function(rc, result, maxCorpCred, incomplete) {
+    result.sr = [[["endTheRun"]], [["endTheRun"]]];
+	  return result;
+  },
   AIRezReasons: function() {
     return { facecheck: true, etr: true };
   },
@@ -3566,6 +3577,18 @@ cardSet[35041] = {
   ],
   
   //**AI code
+  AIImplementIce: function(rc, result, maxCorpCred, incomplete) {
+    result.sr = [];
+    //No need to fear program trash if none are installed
+    var installedPrograms = ChoicesInstalledCards(runner, function (card) {
+      return CheckCardType(card, ["program"]);
+    });
+    if (installedPrograms.length > 0) result.sr.push([["misc_serious"]]);
+    else result.sr.push([[]]); //push a blank sr so that indices match
+
+    result.sr.push([["netDamage"]]);
+	  return result;
+  },
   AIRezReasons: function() {
     return { facecheck: true, program_trash: true, damage: true };
   },
@@ -4251,6 +4274,65 @@ cardSet[35053] = {
   ],
   
   //AI code
+  AIImplementIce: function(rc, result, maxCorpCred, incomplete) {
+    let ret = [];
+    // Install from archives
+    if (corp.archives.cards.length == 0) ret.push([[]]); //push a blank sr so that indices match
+    else ret.push([["misc_moderate"]]);
+
+    // Rez one piece of ice
+    var installedIce = InstalledCards(corp).filter(x => x.cardType == "ice");
+    let rezzedIce = installedIce.filter(x => x.rezzed);
+    // Only matters if any ice is unrezzed
+    if(installedIce.length != rezzedIce.length) { ret.push([["misc_moderate"]]); }
+    else { ret.push([[]]); }
+
+    // Order potential subroutines by severities
+    // TODO: There should probably be a separate function to do this in a more bulletproof way, which
+    // can be shared with other cards with "resolve subroutine on another card" effects
+    const severities = ["endTheRun", "netDamage", "misc_serious", "tag", "misc_moderate", "payCredits", "loseCredits", "loseClicks", "misc_minor"];
+    // AI only knows about rezzed ice for this
+
+    // Resolve a Sentry subroutine
+    let worstSR = [[]];
+    let worstSRidx = severities.length;
+    rezzedIce.filter(card => card.subTypes.some(subtype => subtype == "Sentry")).forEach(sentry => {
+      // Find the worst-case subroutines by running AIImplementIce on each one (unfortunately the best way 
+      // to do this with how this function works)
+      // TODO: Could come up with a better heuristic that accounts for multi-effect subroutines,
+      // so the AI can distinguish between Rototurret and Karuna amounts of netDamage, for example
+      sentry.AIImplementIce(rc, result, maxCorpCred, incomplete);
+      result.sr.forEach(x => {
+        let worst = x.flat().filter(y => severities.includes(y)).sort((a,b) => severities.indexOf(a) < severities.indexOf(b));
+        if(!worst || worst.length == 0) { return; }
+        let widx = severities.indexOf(worst[0]);
+        if(widx < worstSRidx) { worstSR = x; worstSRidx = widx; }
+      });
+    });
+    // Append worst found
+    ret.push(worstSR);
+
+    // Resolve a Code Gate subroutine (not one on another Mycoweb)
+    worstSR = [[]];
+    worstSRidx = severities.length;
+    rezzedIce.filter(card =>  card.title != "Mycoweb" && card.subTypes.some(subtype => subtype == "Code Gate")).forEach(codeGate => {
+      // Find the worst-case subroutines by running AIImplementIce on each one (unfortunately the best way 
+      // to do this with how this function works)
+      // TODO: Could come up with a better heuristic that accounts for multi-effect subroutines,
+      // so the AI can distinguish between Rototurret and Karuna amounts of netDamage, for example
+      codeGate.AIImplementIce(rc, result, maxCorpCred, incomplete);
+      result.sr.forEach(x => {
+        let worst = x.flat().filter(y => severities.includes(y)).sort((a,b) => severities.indexOf(a) < severities.indexOf(b));
+        if(!worst || worst.length == 0) { return; }
+        let widx = severities.indexOf(worst[0]);
+        if(widx < worstSRidx) { worstSR = x; worstSRidx = widx; }
+      });
+    });
+    // Append worst found
+    ret.push(worstSR);
+    result.sr = ret;
+	  return result;
+  },
   AIRezReasons: function() {
     return { facecheck: true };
   },
