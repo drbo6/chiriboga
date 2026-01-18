@@ -751,7 +751,7 @@ function LoadDecks() {
   // // ----------------------------------------------------------------------------
   // // You can enable the debug menu at the top of init.js
 
-  if (false) { // Use this to easily disable everything below
+  if (true) { // Use this to easily disable everything below
 
     debugging = true; //set true to log extra details and pause execution on error
     mainLoopDelay = 50; //for speedy AI vs AI testing (any faster than this and funny things happen at end-of-game)
@@ -764,7 +764,7 @@ function LoadDecks() {
       [30032, 30032, 35009, 35008, 30007, 30007], //heapCards
       [35015, 35022, 35022, 30033, 35014, 1039, 35030, 35005, 35016, 35034], //stackCards
       [], //gripCards
-      [], //installed 
+      [30006, 30005, 33017], //installed 
       [], //stolen
       cardBackTexturesRunner,glowTextures,strengthTextures
     );
@@ -774,9 +774,9 @@ function LoadDecks() {
       [30073,30072,30047,30073,30073,30039,30039,30039,30039,30039,35044,35044,35044,35045], //rndCards
       [35055,35079,35040,35081,35067,30067], //hqCards 
       [], //archivesInstalled
-      [35041, 35075], //rndInstalled
+      [35041, 30039], //rndInstalled
       [35042, 35075], //hqInstalled
-      [[35071, 30072, 35075],[35071, 35079, 35075],[35071, 35052, 35075]], //remotes (array of arrays)
+      [[35071, 30072, 30039],[35071, 35079, 35075],[35071, 35052, 35075]], //remotes (array of arrays)
       [], //scored 35042,35052, 31075
       cardBackTexturesCorp,glowTextures,strengthTextures
     );

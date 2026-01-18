@@ -437,6 +437,53 @@ cardSet[33007] = {
   },
 };
 
+//Cezve
+//Criminal Program
+//Cost: 2, Influence: 3, Memory: 1
+//2 recurring credits (When you install this card and before your turn begins, refill to 2 hosted credits.)
+//You can spend hosted credits during runs on central servers.
+cardSet[33017] = {
+  title: "Cezve",
+  imageFile: "33017.png",
+  player: runner,
+  faction: "Criminal",
+  influence: 3,
+  cardType: "program",
+  installCost: 2,
+  memoryCost: 1,
+  recurringCredits: 2,
+  canUseCredits: function (doing, card) {
+    //Can only use credits during a run on a central server
+    //Central servers have a .cards property (HQ, R&D, Archives)
+    if (attackedServer === null) return false;
+    if (typeof attackedServer.cards === "undefined") return false;
+    //Can be used for anything during runs on central servers (including boosting icebreakers)
+    return true;
+  },
+  //AI: Tell the run calculator about extra credits available on central servers
+  AIRunPoolCreditOffset: function(server, runEventCardToUse) {
+    //Only provide credits for runs on central servers
+    if (typeof server.cards === "undefined") return 0; //not a central server
+    return this.credits; //return the current hosted credits
+  },
+  AIInstallBeforeRun: function(server, potential, useRunEvent, runCreditCost, runClickCost) {
+    //Install before run on central servers if credits would help
+    if (typeof server.cards === "undefined") return 0; //not a central server
+    if (this.credits > 0 && runCreditCost > 0) return 1; //yes, install
+    return 0;
+  },
+  AIWorthKeeping: function (installedRunnerCards, spareMU) {
+    //Worth keeping if we have spare MU and plan to run centrals
+    if (spareMU >= 1) return true;
+    return false;
+  },
+  AIPreferredInstallChoice: function(choices) {
+    //Install if we have spare MU
+    if (MemoryUnits() - InstalledMemoryCost() >= 1) return 0;
+    return -1;
+  },
+};
+
 cardSet[33008] = {
   title: "Avgustina Ivanovskaya",
   imageFile: "33008.png",
