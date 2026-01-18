@@ -110,7 +110,7 @@ var setRegistry = {
   decklauncherSets: [
     'systemgateway',
     'systemupdate2021',
-    'elevation',
+    // 'elevation',
     // 'midnightsun',
     // 'coreset',    
   ],
