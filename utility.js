@@ -1274,7 +1274,7 @@ function ShowGauntletLostModal(gauntletState) {
       for (var i = 0; i < corp.scoreArea.length; i++) {
         var agenda = corp.scoreArea[i];
         // Exclude Holdover Directive (ID 10) and Subsidiary Gains (ID 11)
-        if (agenda.cardId !== 10 && agenda.cardId !== 11) {
+        if (agenda.setNumber !== 10 && agenda.setNumber !== 11) {
           agendaScoredThisGame += (agenda.agendaPoints || 0);
         }
       }
@@ -1606,6 +1606,17 @@ function PlayerWin(player, msgstr) {
               var runnerPoints = AgendaPoints(runner);
               var corpPoints = AgendaPoints(corp);
               
+              // Calculate corp points excluding perk agendas (Holdover Directive ID 10, Subsidiary Gains ID 11)
+              var corpPointsExcludingPerks = 0;
+              if (corp.scoreArea && corp.scoreArea.length > 0) {
+                for (var i = 0; i < corp.scoreArea.length; i++) {
+                  var agenda = corp.scoreArea[i];
+                  if (agenda.setNumber !== 10 && agenda.setNumber !== 11) {
+                    corpPointsExcludingPerks += (agenda.agendaPoints || 0);
+                  }
+                }
+              }
+              
               // Check if this was a boss opponent (4th, 8th, 12th - i.e. index 3, 7, 11)
               var opponentNumber = (typeof currentOpponentIndex === 'number') ? currentOpponentIndex + 1 : 0;
               var isBossOpponent = (opponentNumber > 0 && opponentNumber % 4 === 0);
@@ -1636,17 +1647,17 @@ function PlayerWin(player, msgstr) {
                 for (var i = 0; i < corp.scoreArea.length; i++) {
                   var agenda = corp.scoreArea[i];
                   // Exclude Holdover Directive (ID 10) and Subsidiary Gains (ID 11)
-                  if (agenda.cardId !== 10 && agenda.cardId !== 11) {
+                  if (agenda.setNumber !== 10 && agenda.setNumber !== 11) {
                     var agendaCredits = agenda.agendaPoints * agendaPointScored;
                     breakdownLines.push({ label: agenda.title + " scored", value: agendaCredits });
                   }
                 }
               }
               
-              // Calculate total credits for this match
+              // Calculate total credits for this match (use corpPointsExcludingPerks to exclude perk agendas)
               var creditsThisMatch = victory 
                 + (agendaPointStolen * runnerPoints) 
-                + (agendaPointScored * corpPoints)
+                + (agendaPointScored * corpPointsExcludingPerks)
                 + (isBossOpponent ? bossBeatenReward : 0);
               
               // Check if minimalCredits floor applies
@@ -1670,7 +1681,7 @@ function PlayerWin(player, msgstr) {
               
               gauntletState.creditsWonText = textLines.join("\n");
               gauntletState.creditsWon = (gauntletState.creditsWon || 0) + creditsThisMatch;
-              console.log("Credits won this match: " + creditsThisMatch + " (victory:" + victory + " boss:" + (isBossOpponent ? bossBeatenReward : 0) + " agenda:" + (agendaPointStolen * runnerPoints) + "/" + (agendaPointScored * corpPoints) + " total: " + gauntletState.creditsWon + ")");
+              console.log("Credits won this match: " + creditsThisMatch + " (victory:" + victory + " boss:" + (isBossOpponent ? bossBeatenReward : 0) + " agenda:" + (agendaPointStolen * runnerPoints) + "/" + (agendaPointScored * corpPointsExcludingPerks) + " total: " + gauntletState.creditsWon + ")");
             } catch (rewardError) {
               console.error("Error calculating credits won:", rewardError);
               // Just use victory as default if calculation fails
