@@ -484,6 +484,177 @@ cardSet[33017] = {
   },
 };
 
+//Revolver
+//Criminal Program: Icebreaker - Killer - Weapon
+//Cost: 2, Influence: 3, Memory: 1, Strength: 1
+//When you install this program, place 6 power counters on it.
+//Interface -> [trash] or hosted power counter: Break 1 sentry subroutine.
+//2[credit]: +3 strength.
+cardSet[33018] = {
+  title: "Revolver",
+  imageFile: "33018.png",
+  player: runner,
+  faction: "Criminal",
+  influence: 3,
+  cardType: "program",
+  subTypes: ["Icebreaker", "Killer", "Weapon"],
+  installCost: 2,
+  memoryCost: 1,
+  strength: 1,
+  strengthBoost: 0,
+  modifyStrength: {
+    Resolve: function (card) {
+      if (card == this) return this.strengthBoost;
+      return 0;
+    },
+  },
+  //When you install this program, place 6 power counters on it.
+  automaticOnInstall: {
+    Resolve: function (card) {
+      if (card == this) AddCounters(this, "power", 6);
+    },
+  },
+  //Interface -> [trash] or hosted power counter: Break 1 sentry subroutine.
+  //2[credit]: +3 strength.
+  abilities: [
+    {
+      text: "Break 1 sentry subroutine (trash or use power counter)",
+      Enumerate: function () {
+        if (!CheckEncounter()) return [];
+        if (!CheckSubType(attackedServer.ice[approachIce], "Sentry")) return [];
+        if (!CheckStrength(this)) return [];
+        var subroutines = ChoicesEncounteredSubroutines();
+        if (subroutines.length === 0) return [];
+        
+        //Can pay with trash or power counter
+        var hasCounter = CheckCounters(this, "power", 1);
+        var canTrash = CheckTrash(this);
+        if (!hasCounter && !canTrash) return [];
+        
+        return subroutines;
+      },
+      Resolve: function (params) {
+        var revolver = this;
+        var hasCounter = CheckCounters(this, "power", 1);
+        var canTrash = CheckTrash(this);
+        
+        //If both options available, let player choose
+        if (hasCounter && canTrash) {
+          var choices = [
+            { id: 0, label: "Use hosted power counter", button: "Power Counter" },
+            { id: 1, label: "Trash Revolver", button: "Trash" },
+          ];
+          DecisionPhase(
+            runner,
+            choices,
+            function(chosenParams) {
+              if (chosenParams.id === 0) {
+                RemoveCounters(revolver, "power", 1);
+                Break(params.subroutine);
+              } else {
+                Trash(revolver, true);
+                Break(params.subroutine);
+              }
+            },
+            "Revolver",
+            "Pay cost to break subroutine",
+            this
+          );
+        } else if (hasCounter) {
+          //Only counter available
+          RemoveCounters(this, "power", 1);
+          Break(params.subroutine);
+        } else {
+          //Only trash available
+          Trash(this, true);
+          Break(params.subroutine);
+        }
+      },
+    },
+    {
+      text: "+3 strength.",
+      Enumerate: function () {
+        if (!CheckEncounter()) return [];
+        if (CheckStrength(this)) return [];
+        if (!CheckUnbrokenSubroutines()) return [];
+        if (!CheckCredits(runner, 2, "using", this)) return [];
+        return [{}];
+      },
+      Resolve: function (params) {
+        SpendCredits(
+          runner,
+          2,
+          "using",
+          this,
+          function () {
+            BoostStrength(this, 3);
+          },
+          this
+        );
+      },
+    },
+  ],
+  responseOnEncounterEnds: {
+    Resolve: function () {
+      this.strengthBoost = 0;
+    },
+    automatic: true,
+  },
+  AIImplementBreaker: function(rc, result, point, server, cardStrength, iceAI, iceStrength, clicksLeft, creditsLeft) {
+    //note: args for ImplementIcebreaker are: point, card, cardStrength, iceAI, iceStrength, iceSubTypes, costToUpStr, amtToUpStr, costToBreak, amtToBreak, creditsLeft
+    
+    //Check if we have power counters or can trash
+    var countersRemaining = Counters(this, "power");
+    var canUse = countersRemaining > 0;
+    
+    //Count how many sentry subroutines already broken by Revolver at this point
+    var sr_broken_by_this = 0;
+    for (var i = 0; i < point.sr_broken.length; i++) {
+      if (point.sr_broken[i].use == this) sr_broken_by_this++;
+    }
+    
+    //Can use up to remaining counters, then one more time by trashing
+    if (sr_broken_by_this < countersRemaining + 1 && canUse) {
+      result = result.concat(
+        rc.ImplementIcebreaker(
+          point,
+          this,
+          cardStrength,
+          iceAI,
+          iceStrength,
+          ["Sentry"],
+          2,  //cost to boost strength
+          3,  //amount to boost strength
+          0,  //cost to break (power counter, effectively free)
+          1,  //amount to break
+          creditsLeft
+        )
+      );
+    }
+    
+    return result;
+  },
+  AIPreferredInstallChoice: function (choices) {
+    //Install if we have MU available
+    if (MemoryUnits() - InstalledMemoryCost() >= 1) return 0;
+    return -1;
+  },
+  AIWorthKeeping: function (installedRunnerCards, spareMU) {
+    //Keep if it still has counters or if we need a killer
+    if (Counters(this, "power") > 0) return true;
+    
+    //Check if we have another killer installed
+    for (var i = 0; i < installedRunnerCards.length; i++) {
+      if (installedRunnerCards[i] !== this && CheckSubType(installedRunnerCards[i], "Killer")) {
+        return false; //have another killer, ok to trash
+      }
+    }
+    
+    //No other killer, keep even without counters (can still trash to break)
+    return true;
+  },
+};
+
 cardSet[33008] = {
   title: "Avgustina Ivanovskaya",
   imageFile: "33008.png",
