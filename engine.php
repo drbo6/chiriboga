@@ -37,7 +37,11 @@
 		echo '<link rel="stylesheet" type="text/css" href="style.css?' . filemtime('style.css') . '" />';
 		$jsfiles = array('init','phase', 'command', 'checks', 'mechanics', 'utility', 'config');
 
-		// Load card sets
+		// =================================================================
+		// ENGINE SETS - Always loads ALL sets for full game functionality
+		// This ensures any deck from any mode can be played
+		// See setRegistry in config.js for set documentation
+		// =================================================================
 		$sets = ["coreset","systemgateway","systemupdate2021","midnightsun","elevation","gauntlet"];
 		foreach ($sets as $set) {
 			array_push($jsfiles, 'sets/'.$set);

@@ -157,13 +157,119 @@
 		<?php
 		echo '<script src="utility.js?' . filemtime('utility.js') . '"></script>';
 			echo '<script src="config.js?' . filemtime('config.js') . '"></script>';
-		// Load card sets
-		$sets = ["coreset", "midnightsun", "systemgateway","systemupdate2021","elevation"];
-		foreach ($sets as $set) {
-			echo '<script src="sets/'.$set.'.js?' . filemtime('sets/'.$set.'.js') . '"></script>';
-		}
+		// =================================================================
+		// GAUNTLET SETS - Base set only, additional sets loaded via JS
+		// User settings from localStorage determine which sets are loaded
+		// =================================================================
+		// Base set always loaded (System Gateway)
+		$baseSet = "systemgateway";
+		echo '<script src="sets/'.$baseSet.'.js?' . filemtime('sets/'.$baseSet.'.js') . '"></script>';
 		
 		?>
+		<script>
+		// Flag to track when additional sets are loaded
+		window._gauntletSetsReady = false;
+		
+		// Dynamic set loader for gauntlet
+		// Maps set codes to file names
+		var setFileMap = {
+			'su21': 'systemupdate2021',
+			'elev': 'elevation',
+			'core': 'coreset',
+			'ms': 'midnightsun'
+		};
+		
+		// Reverse map: file names to codes
+		var fileToCodeMap = {
+			'systemupdate2021': 'su21',
+			'elevation': 'elev',
+			'coreset': 'core',
+			'midnightsun': 'ms',
+			'systemgateway': 'sg'
+		};
+		
+		// Load additional sets based on localStorage settings (allowedSets for gauntlet)
+		function loadGauntletSets(callback) {
+			var setsToLoad = [];
+			var usedLocalStorage = false;
+			
+			// Try to read allowed sets from localStorage
+			try {
+				var savedJson = localStorage.getItem('chiriboga-settings');
+				if (savedJson) {
+					var saved = JSON.parse(savedJson);
+					if (saved && Array.isArray(saved.allowedSets) && saved.allowedSets.length > 0) {
+						// Filter out 'sg' (already loaded) and map to file names
+						for (var i = 0; i < saved.allowedSets.length; i++) {
+							var code = saved.allowedSets[i];
+							if (code !== 'sg' && setFileMap[code]) {
+								setsToLoad.push(setFileMap[code]);
+							}
+						}
+						if (setsToLoad.length > 0) {
+							usedLocalStorage = true;
+							console.log('Loading gauntlet sets from localStorage:', setsToLoad);
+						}
+					}
+				}
+			} catch (e) {
+				console.warn('Could not load gauntlet sets from localStorage:', e);
+			}
+			
+			// If no valid settings from localStorage, use defaults from setRegistry
+			if (!usedLocalStorage) {
+				if (typeof setRegistry !== 'undefined' && Array.isArray(setRegistry.gauntletSets)) {
+					for (var i = 0; i < setRegistry.gauntletSets.length; i++) {
+						var setName = setRegistry.gauntletSets[i];
+						if (setName !== 'systemgateway') {
+							setsToLoad.push(setName);
+						}
+					}
+					console.log('Loading gauntlet sets from setRegistry defaults:', setsToLoad);
+				} else {
+					// Fallback defaults
+					setsToLoad = ['systemupdate2021'];
+					console.log('Loading gauntlet sets from hardcoded fallback:', setsToLoad);
+				}
+			}
+			
+			if (setsToLoad.length === 0) {
+				console.log('No additional gauntlet sets to load.');
+				window._gauntletSetsReady = true;
+				if (callback) callback();
+				return;
+			}
+			
+			var scriptsLoaded = 0;
+			var scriptsToLoad = setsToLoad.length;
+			
+			setsToLoad.forEach(function(setName) {
+				var script = document.createElement('script');
+				script.src = 'sets/' + setName + '.js?' + Date.now();
+				script.onload = function() {
+					scriptsLoaded++;
+					console.log('Loaded ' + setName + '.js');
+					if (scriptsLoaded === scriptsToLoad) {
+						console.log('All gauntlet sets loaded.');
+						window._gauntletSetsReady = true;
+						if (callback) callback();
+					}
+				};
+				script.onerror = function() {
+					console.error('Failed to load ' + setName + '.js');
+					scriptsLoaded++;
+					if (scriptsLoaded === scriptsToLoad) {
+						window._gauntletSetsReady = true;
+						if (callback) callback();
+					}
+				};
+				document.head.appendChild(script);
+			});
+		}
+		
+		// Start loading sets immediately (don't wait for body onload)
+		loadGauntletSets();
+		</script>
 		<script>
 			var json = { cards: [] };
 			var opponentdeckstr = "";
@@ -201,27 +307,6 @@
 			// Function to register a precon deck
 			function registerPrecon(deck) {
 				preconDecks.push(deck);
-			}
-
-			// Helper function to get image path with hi-res support if enabled
-			function GetImagePath(imageFile) {
-				var useHiRes = false;
-				try {
-					var savedJson = localStorage.getItem('chiriboga-settings');
-					if (savedJson) {
-						var savedSettings = JSON.parse(savedJson);
-						if (savedSettings && typeof savedSettings.enableHiRes === 'boolean') {
-							useHiRes = savedSettings.enableHiRes;
-						} else if (typeof gauntletConfig !== 'undefined' && typeof gauntletConfig.enableHiRes === 'boolean') {
-							useHiRes = gauntletConfig.enableHiRes;
-						}
-					} else if (typeof gauntletConfig !== 'undefined' && typeof gauntletConfig.enableHiRes === 'boolean') {
-						useHiRes = gauntletConfig.enableHiRes;
-					}
-				} catch (e) { /* ignore JSON parse/localStorage errors */ }
-				
-				var basePath = useHiRes ? 'images/hires/' : 'images/';
-				return basePath + ChangeImageFileToJPG(imageFile);
 			}
 
 			// Function to show gauntlet welcome modal
@@ -2004,9 +2089,10 @@
 				// Display each card copy individually
 				for (var i = 0; i < sortedCardsGenerated.length; i++) {
 					var cardId = sortedCardsGenerated[i];
+					if (!cardSet[cardId]) continue; // Skip cards from unloaded sets
 					shopDisplayCardIds.push(cardId);
 					var cardTitle = cardSet[cardId].title || 'Unknown Card';
-					var imgSrc = GetImagePath(cardSet[cardId].imageFile);
+					var imgSrc = GetImagePath(cardSet[cardId].imageFile || '');
 					
 					listHtml += '<div style="position: relative; text-align: center; cursor: pointer;" onclick="ShowLightbox(' + cardId + ');">';
 					listHtml += '<img src="' + imgSrc + '" alt="' + cardTitle + '" style="width: 120px; height: auto; border: 2px solid var(--glow-green); border-radius: 4px; transition: transform 0.2s; opacity: 0.9;" onmouseover="this.style.transform=\'scale(1.05)\'; this.style.opacity=\'1\';" onmouseout="this.style.transform=\'scale(1)\'; this.style.opacity=\'0.9\';">';
@@ -2348,17 +2434,25 @@
 					}
 				}
 
-				// Load or generate the gauntlet card set now that cardData is loaded
-				LoadOrGenerateGauntletState();
+				// Wait for additional sets to be loaded before processing gauntlet state
+				function waitForSetsAndContinue() {
+					if (!window._gauntletSetsReady) {
+						// Sets still loading, check again in 50ms
+						setTimeout(waitForSetsAndContinue, 50);
+						return;
+					}
+					
+					// Load or generate the gauntlet card set now that sets and cardData are loaded
+					LoadOrGenerateGauntletState();
 
-				// DRBO6: Gauntlet mode - force runner as the player
-				// This must be set BEFORE PopulateIdentityDropdown() to ensure proper filtering
-				deckPlayer = runner;
-				
-				// Wrap DOM-dependent code in document.ready to handle cached JSON loading before DOM is ready
-				$(document).ready(function() {
-					// Rebuild identity dropdown now that deckPlayer is runner AND DOM is ready
-					PopulateIdentityDropdown();
+					// DRBO6: Gauntlet mode - force runner as the player
+					// This must be set BEFORE PopulateIdentityDropdown() to ensure proper filtering
+					deckPlayer = runner;
+					
+					// Wrap DOM-dependent code in document.ready to handle cached JSON loading before DOM is ready
+					$(document).ready(function() {
+						// Rebuild identity dropdown now that deckPlayer is runner AND DOM is ready
+						PopulateIdentityDropdown();
 
 			// Load runner deck from URL parameter (r) - the player's deck
 			var specifiedRunnerDeck = URIParameter("r");
@@ -2371,18 +2465,18 @@
 				// Check if the identity from the URL is available in the filtered dropdown
 				var identityInDropdown = $("#identityselect option[value=" + json.identity + "]").length > 0;
 				
-				if (identityInDropdown) {
+				if (identityInDropdown && cardSet[json.identity]) {
 					// Update identity dropdown and image
 					$("#identityselect option[value=" + json.identity + "]").prop("selected", "selected");
 					$("#identity").prop("src", "images/" + ChangeImageFileToJPG(cardSet[json.identity].imageFile));
 				} else {
-					// Identity not available (set not allowed), fall back to first available identity
+					// Identity not available (set not loaded), fall back to first available identity
 					var firstIdentity = $("#identityselect option:first").val();
 					if (firstIdentity && cardSet[firstIdentity]) {
 						json.identity = parseInt(firstIdentity);
 						$("#identityselect").val(firstIdentity);
 						$("#identity").prop("src", "images/" + ChangeImageFileToJPG(cardSet[firstIdentity].imageFile));
-						console.warn("Identity from URL not in allowed sets, falling back to:", cardSet[firstIdentity].title);
+						console.warn("Identity from URL not in loaded sets, falling back to:", cardSet[firstIdentity].title);
 					}
 				}
 			} else {
@@ -2401,7 +2495,12 @@
 					LZString.decompressFromEncodedURIComponent(specifiedCorpDeck)
 				);
 				opponentdeckstr = "c=" + specifiedCorpDeck + "&";
-				opponentdeckimg = "images/" + ChangeImageFileToJPG(cardSet[oppjson.identity].imageFile);
+				if (cardSet[oppjson.identity] && cardSet[oppjson.identity].imageFile) {
+					opponentdeckimg = "images/" + ChangeImageFileToJPG(cardSet[oppjson.identity].imageFile);
+				} else {
+					console.warn("Opponent identity not in loaded sets:", oppjson.identity);
+					opponentdeckimg = ""; // Will use placeholder
+				}
 			}
 			
 			// Debug: Log decoded parameters
@@ -2536,17 +2635,21 @@
 			// Display deck output and opponent info (matching decklauncher.php pattern)
 			RecalculateDeckCounts();
 			
-			// Display deck stats
-			var deckSizeTarget = cardSet[json.identity].deckSize;
-			var influenceLimit = cardSet[json.identity].influenceLimit;
-			var totalCards = json.cards.length;
-			var totalInfluence = 0;
-			for (var i = 0; i < json.cards.length; i++) {
-				var cardId = json.cards[i];
-				if (cardSet[cardId].faction !== cardSet[json.identity].faction) {
-					totalInfluence += cardSet[cardId].influence;
+			// Display deck stats (only if identity is from a loaded set)
+			if (!cardSet[json.identity]) {
+				console.warn("Identity not in loaded sets, skipping deck stats display");
+				$("#output").html('<div class="deck-stats"><div class="deck-stat bad">Identity not available - please select a valid identity</div></div>');
+			} else {
+				var deckSizeTarget = cardSet[json.identity].deckSize;
+				var influenceLimit = cardSet[json.identity].influenceLimit;
+				var totalCards = json.cards.length;
+				var totalInfluence = 0;
+				for (var i = 0; i < json.cards.length; i++) {
+					var cardId = json.cards[i];
+					if (cardSet[cardId] && cardSet[cardId].faction !== cardSet[json.identity].faction) {
+						totalInfluence += (cardSet[cardId].influence || 0);
+					}
 				}
-			}
 			
 			var validityOutput = '<div class="deck-stats">';
 			// Cards stat
@@ -2576,6 +2679,7 @@
 			validityOutput += '<div class="deck-stat"><span class="stat-label">Credits:</span> '+gauntletCredits+'</div>';
 			validityOutput += '</div>';
 			$("#output").html(validityOutput);
+			} // end if (cardSet[json.identity])
 			
 			// Hide opponent display - opponents are now accessed via Play Deck and Hack Opponents buttons
 			$("#opponentid").hide();
@@ -2607,6 +2711,11 @@
 				}, 350);
 				
 				}); // end $(document).ready()
+				} // end waitForSetsAndContinue()
+				
+				// Start waiting for sets
+				waitForSetsAndContinue();
+				
 			}); // end $.getJSON
 
 			//UTILITY: ensure deckCounts matches json.cards
@@ -2787,8 +2896,8 @@
 				pendingSellCardId = id;
 				pendingSellQuantity = 1; // Reset to default
 				var cardName = cardSet[id] ? cardSet[id].title : 'Unknown Card';
-			var imgSrc = GetImagePath(cardSet[id].imageFile);
-			var availableCount = gauntletCardCounts[id] || 0;
+				var imgSrc = cardSet[id] && cardSet[id].imageFile ? GetImagePath(cardSet[id].imageFile) : '';
+				var availableCount = gauntletCardCounts[id] || 0;
 				
 				var modalHtml = '<div class="solo-menu" style="display: flex; flex-direction: column; align-items: center; max-width: 400px;">';
 				modalHtml += '<div class="solo-logo" style="width: 100%;">';
@@ -3448,15 +3557,15 @@
 					var cardId = cardsToShow[i];
 					if (typeof cardSet[cardId] !== 'undefined' && cardSet[cardId].player == deckPlayer && cardSet[cardId].cardType !== 'identity') {
 						allCardIdsForPlayer.push(cardId);
-						var imgSrc = 'images/'+ChangeImageFileToJPG(cardSet[cardId].imageFile);
+						var imgSrc = cardSet[cardId].imageFile ? 'images/'+ChangeImageFileToJPG(cardSet[cardId].imageFile) : '';
 						var gauntletQty = gauntletCardCounts[cardId] || 0;
 						var deckQty = deckCounts[cardId] || 0;
 						// Show both quantities in format: gauntlet | deck
 						// Mobile fix: loading="eager" prevents browser lazy-loading, decoding="sync" ensures immediate decode
 						allCardsHtml += '<div class="card-item" data-id="'+cardId+'">'
 							+'<div class="count-badge" data-id="'+cardId+'">'+gauntletQty+' | '+deckQty+'</div>'
-							+'<img class="card-image" src="'+imgSrc+'" alt="'+cardSet[cardId].title+'" loading="eager" decoding="sync" />'
-							+'<div class="card-title">'+cardSet[cardId].title+'</div>'
+							+'<img class="card-image" src="'+imgSrc+'" alt="'+(cardSet[cardId].title || '')+'" loading="eager" decoding="sync" />'
+							+'<div class="card-title">'+(cardSet[cardId].title || 'Unknown')+' </div>'
 							+'<div class="card-controls">'
 								+'<button type="button" class="remove-btn" data-id="'+cardId+'">-</button>'
 								+'<button type="button" class="sell-btn" data-id="'+cardId+'"><img src="images/nsg/NSG_CREDIT.svg" class="card-icon" alt="sell" style="height: 14px; filter: brightness(0) saturate(100%) invert(76%) sepia(85%) saturate(2206%) hue-rotate(81deg) brightness(118%) contrast(119%);" loading="eager" /></button>'
@@ -3804,7 +3913,12 @@
 				var oppjson = JSON.parse(
 				  LZString.decompressFromEncodedURIComponent(compressed)
 				);
-				opponentdeckimg = "images/"+ChangeImageFileToJPG(cardSet[oppjson.identity].imageFile);
+				if (cardSet[oppjson.identity] && cardSet[oppjson.identity].imageFile) {
+					opponentdeckimg = "images/"+ChangeImageFileToJPG(cardSet[oppjson.identity].imageFile);
+				} else {
+					console.warn("Identity not in loaded sets:", oppjson.identity);
+					opponentdeckimg = "";
+				}
 			}
 
 			// DRBO6: Gauntlet mode - force runner as the player
@@ -3845,9 +3959,13 @@
 						for (var q=0; q<qty; q++) oppDeckObj.cards.push(parseInt(cc));
 					}
 					var oppCompressed = LZString.compressToEncodedURIComponent(JSON.stringify(oppDeckObj));
-					var paramKey = (cardSet[oppDeckObj.identity].player === corp) ? "c" : "r";
-					opponentdeckstr = paramKey + "=" + oppCompressed + "&";
-					opponentdeckimg = "images/" + ChangeImageFileToJPG(cardSet[oppDeckObj.identity].imageFile);
+					if (cardSet[oppDeckObj.identity]) {
+						var paramKey = (cardSet[oppDeckObj.identity].player === corp) ? "c" : "r";
+						opponentdeckstr = paramKey + "=" + oppCompressed + "&";
+						if (cardSet[oppDeckObj.identity].imageFile) {
+							opponentdeckimg = "images/" + ChangeImageFileToJPG(cardSet[oppDeckObj.identity].imageFile);
+						}
+					}
 				}
 			}
 
@@ -3913,7 +4031,6 @@
 			}
 
 			function UpdateLaunchStrings() {
-			  //console.log(json);
 			  // Build deck object for URI: include metadata only if deck not modified
 			  var deckForUri;
 			  if (deckModified) {
@@ -4054,13 +4171,15 @@
 				thisLineArray[0]++;
 				deckListArray[line] = thisLineArray.join(" ");
 				$("#deck").text(deckListArray.join("\n"));
-				$(this).append(
-				  '<img src="images/' +
-					ChangeImageFileToJPG(cardSet[id].imageFile) +
-					'" style="margin-left: -120px; transform:rotate(' +
-					(Math.random() * 10 - 5) +
-					'deg);">'
-				);
+				if (cardSet[id] && cardSet[id].imageFile) {
+					$(this).append(
+					  '<img src="images/' +
+						ChangeImageFileToJPG(cardSet[id].imageFile) +
+						'" style="margin-left: -120px; transform:rotate(' +
+						(Math.random() * 10 - 5) +
+						'deg);">'
+					);
+				}
 				json.cards.push(id); //just on the end is fine
 				Parse();
 				//}
@@ -4138,15 +4257,26 @@
 				}
 				//also update the identity if it is legacy
 				if (parseInt(json.identity) < 10001) json.identity = parseInt(json.identity) + 30000;
-				//update select
-				$("#identityselect option[value=" + json.identity + "]").prop(
-				  "selected",
-				  "selected"
-				);
-				$("#identity").prop(
-				  "src",
-				  GetImagePath(cardSet[json.identity].imageFile)
-				);
+				//update select if identity is in loaded sets
+				if (cardSet[json.identity]) {
+					$("#identityselect option[value=" + json.identity + "]").prop(
+					  "selected",
+					  "selected"
+					);
+					$("#identity").prop(
+					  "src",
+					  GetImagePath(cardSet[json.identity].imageFile)
+					);
+				} else {
+					// Identity not in loaded sets - use first available
+					var firstIdentity = $("#identityselect option:first").val();
+					if (firstIdentity && cardSet[firstIdentity]) {
+						json.identity = parseInt(firstIdentity);
+						$("#identityselect").val(firstIdentity);
+						$("#identity").prop("src", GetImagePath(cardSet[firstIdentity].imageFile));
+						console.warn("Deck identity not in loaded sets, falling back to:", cardSet[firstIdentity].title);
+					}
+				}
 				for (var i = 0; i < json.cards.length; i++) {
 			      //increment count, add to playerCards if not present yet
 			      var pci = playerCards.indexOf(json.cards[i]);
@@ -4212,6 +4342,35 @@
 			}
 
 			function Init() {
+			  // Wait for additional sets to be loaded
+			  if (!window._gauntletSetsReady) {
+			    setTimeout(Init, 50); // Check again in 50ms
+			    return;
+			  }
+			  
+			  // Rebuild titles array now that all sets are loaded
+			  titles = [];
+			  for (var i=0; i<cardSet.length; i++) {
+				if (typeof cardSet[i] !== "undefined") {
+				  if (cardSet[i].player == deckPlayer && cardSet[i].cardType != 'identity') { 
+					var setCardTitle = cardSet[i].title;
+					titles.push(setCardTitle);
+				  }
+				}
+			  }
+			  titles.sort();
+			  console.log('Rebuilt titles with ' + titles.length + ' cards after sets loaded');
+			  
+			  // Rebuild playerIdentities array now that all sets are loaded
+			  playerIdentities = [];
+			  for (var i=0; i<cardSet.length; i++) {
+				if (typeof cardSet[i] != 'undefined' && typeof cardSet[i].faction != 'undefined') {
+				  if (cardSet[i].cardType == 'identity') {
+					if (deckPlayer == cardSet[i].player) playerIdentities.push(i);
+				  }
+				}
+			  }
+			  console.log('Rebuilt playerIdentities with ' + playerIdentities.length + ' identities after sets loaded');
 			  
 			  //set up autosuggest
 			  var autoMinLen = 1;
@@ -4288,10 +4447,12 @@
 			  //identity select will update stats but keep current deck
 			  $("#identityselect").change(function () {
 					json.identity = parseInt($("select#identityselect option:checked").val());
-					$("#identity").prop(
-						"src",
-						GetImagePath(cardSet[json.identity].imageFile)
-					);
+					if (cardSet[json.identity] && cardSet[json.identity].imageFile) {
+						$("#identity").prop(
+							"src",
+							GetImagePath(cardSet[json.identity].imageFile)
+						);
+					}
 					// In gauntlet mode, keep deckPlayer as runner (don't allow side switching)
 					// The selected identity should always be a runner identity
 					deckPlayer = runner;
@@ -4635,34 +4796,6 @@
 				}
 			});
 			}
-		  // Call it initially (will be called again after setting runner mode)
-		  // PopulateIdentityDropdown(); // DRBO6: Already called in $.getJSON callback
-			  // Hide Export JS Deck by default; reveal via secret gesture
-			  (function(){
-				var exportBtn = document.getElementById('exportjs');
-				if (exportBtn) exportBtn.style.display = 'none';
-				var clickCount = 0;
-				// When lightbox image is clicked, if it's the identity, count up to 6
-				$(document).off('click._expsec','#lightbox-img').on('click._expsec','#lightbox-img', function(){
-					var shownId = window.currentLightboxCardId;
-					if (json && parseInt(json.identity) === shownId) {
-						clickCount++;
-						if (clickCount >= 6) {
-							if (exportBtn) exportBtn.style.display = '';
-						}
-					} else {
-						// Reset if not identity card
-						clickCount = 0;
-					}
-				});
-				// Reset counter when closing lightbox
-				$(document).off('click._expsec_close','#lightbox-close, #lightbox').on('click._expsec_close','#lightbox-close, #lightbox', function(e){
-					// Only reset if actually closing
-					if (e.target.id === 'lightbox' || e.target.id === 'lightbox-close') {
-						clickCount = 0;
-					}
-				});
-			  })();
 			  
 			  // Mobile fix: Force a repaint after initial render to ensure all elements are visible
 			  // Some mobile browsers skip painting absolute-positioned elements until scroll
@@ -4714,12 +4847,19 @@
 			  $("#output").html("");
 			  //visual deck preview retired
 
+			  // Check if identity is valid
+			  if (!json.identity || !cardSet[json.identity]) {
+			    $("#output").html('<div class="deck-stats"><div class="deck-stat bad">No valid identity selected</div></div>');
+			    return;
+			  }
+
 			  //read from deckCounts (source of truth) and rebuild json.cards
 			  var validDeck = true;
 			  var totalCards = 0;
 			  var totalInfluence = 0;
 			  var totalAgendaPoints = 0; //only for corp
 			  json.cards = [];
+			  var identityFaction = cardSet[json.identity].faction;
 			  
 			  for (var id in deckCounts) {
 				var cardCount = deckCounts[id];
@@ -4728,7 +4868,7 @@
 						for (var j = 0; j < cardCount; j++) {
 							json.cards.push(parseInt(id));
 							totalCards++;
-							if (cardSet[id].faction !== cardSet[json.identity].faction) totalInfluence += cardSet[id].influence;
+							if (cardSet[id].faction !== identityFaction) totalInfluence += (cardSet[id].influence || 0);
 							if (deckPlayer == corp && typeof cardSet[id].agendaPoints !== 'undefined') totalAgendaPoints += cardSet[id].agendaPoints;
 						}
 					} else {

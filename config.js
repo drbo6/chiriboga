@@ -1,4 +1,61 @@
-// Gauntlet Mode Configuration
+// =============================================================================
+// SET REGISTRY - Controls which card sets are loaded in each game mode
+// =============================================================================
+// 
+// This is the central configuration for set availability across game modes.
+// Sets are now loaded dynamically based on user settings stored in localStorage.
+// These arrays define the DEFAULT sets when no user settings exist.
+//
+// Available sets:
+//   - coreset         : Core Set cards (code: 'core')
+//   - systemgateway   : System Gateway (code: 'sg')
+//   - systemupdate2021: System Update 2021 (code: 'su21')
+//   - midnightsun     : Midnight Sun (code: 'ms')
+//   - elevation       : Elevation (code: 'elev')
+//   - gauntlet        : Special gauntlet-only cards (engine only)
+//   - tutorial        : Tutorial cards (engine only)
+//
+// Engine mode (engine.php) always loads ALL sets for full game functionality.
+// User settings in index.php override these defaults via localStorage.
+// =============================================================================
+
+var setRegistry = {
+  // All available card sets with their file names and set codes
+  // The 'code' is used for settings storage and UI checkboxes
+  // Set 'hidden: true' to hide a set from the index.php settings UI
+  // Set 'untested: true' to show "(Untested)" after the set name
+  availableSets: {
+    coreset:          { file: 'coreset',          code: 'core', name: 'Core Set',           hidden: true,  untested: true  },
+    systemgateway:    { file: 'systemgateway',    code: 'sg',   name: 'System Gateway',     hidden: false, untested: false },
+    systemupdate2021: { file: 'systemupdate2021', code: 'su21', name: 'System Update 2021', hidden: false, untested: false },
+    midnightsun:      { file: 'midnightsun',      code: 'ms',   name: 'Midnight Sun',       hidden: true,  untested: true  },
+    elevation:        { file: 'elevation',        code: 'elev', name: 'Elevation',          hidden: false, untested: true  },
+  },
+
+  // DEFAULT sets for GAUNTLET mode (when no localStorage settings exist)
+  // User can change via Settings > Gauntlet Settings > Load Player Sets
+  gauntletSets: [
+    'systemgateway',
+    'systemupdate2021',
+    // 'coreset',
+    // 'midnightsun',
+    // 'elevation',
+  ],
+
+  // DEFAULT sets for CUSTOM GAME / Decklauncher mode (when no localStorage settings exist)
+  // User can change via Settings > Custom Game Settings > Load Sets
+  decklauncherSets: [
+    'systemgateway',
+    'systemupdate2021',
+    // 'elevation',
+    // 'coreset',
+    // 'midnightsun',
+  ],
+};
+
+// =============================================================================
+// GAUNTLET MODE CONFIGURATION
+// =============================================================================
 // Define the card subset that is available in gauntlet mode
 
 var gauntletConfig = {
@@ -119,17 +176,6 @@ var gauntletConfig = {
     // Corp identities (currently unused)
     corpIds: []
   },
-
-  // ===== ALLOWED SETS =====
-  // Specify which card sets to include in the gauntlet card pool
-  // Leave empty array to allow all sets
-  // Valid set codes: 'sg' (System Gateway), 'su21' (System Update 2021), 'ms' (Midnight Sun), 'elev' (Elevation)
-  allowedSets: [
-    'sg',     // System Gateway
-    'su21',   // System Update 2021
-    //'ms',     // Midnight Sun
-    //'elev'    // Elevation
-  ],
 
   // ===== LOCKED FIXED CARDS =====
   // If true, cards listed in fixedCards are excluded from the initial random card pool

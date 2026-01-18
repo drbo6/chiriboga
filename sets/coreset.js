@@ -2929,6 +2929,8 @@ coreSet[1080] = {
   faction: "NBN",
   cardType: "identity",
   subTypes: ["Megacorp"],
+  deckSize: 45,
+  influenceLimit: 15,
   recurringCredits: 2,
   canUseCredits: function (doing, card) {
     if (doing == "trace") return true;

@@ -280,6 +280,13 @@ $version = "0.6.11-BETA";
                     <label for="enable-hires-toggle" class="switch-label"></label>
                   </div>
                 </div>
+                <div class="settings-section-header">CUSTOM GAME SETTINGS</div>
+                <div class="settings-group" title="Card sets loaded in the Custom Game deck builder">
+                  <label class="settings-label" id="custom-sets-label" onclick="handleLoadSetsClick()">LOAD<br />SETS</label>
+                  <div class="settings-checkboxes" id="custom-sets-checkboxes">
+                    <!-- Populated dynamically by JavaScript based on setRegistry -->
+                  </div>
+                </div>
                 <div class="settings-section-header">GAUNTLET SETTINGS</div>
                 <div class="settings-group" title="Number of opponents you must defeat to complete the Gauntlet">
                   <label class="settings-label">GAUNTLET LENGTH</label>
@@ -310,29 +317,10 @@ $version = "0.6.11-BETA";
                     <label for="strict-packs-toggle" class="switch-label"></label>
                   </div>
                 </div>
-                <div class="settings-group" title="Card sets available for building your runner deck in Gauntlet mode">
-                  <label class="settings-label" id="allowed-sets-label" onclick="handleAllowedSetsClick();">ALLOWED<br />PLAYER SETS</label>
-                  <div class="settings-checkboxes">
-                    <label class="checkbox-label checkbox-disabled" title="Core set, always included">
-                      <input type="checkbox" id="set-sg" checked disabled>
-                      <span class="checkbox-text">System Gateway</span>
-                    </label>
-                    <label class="checkbox-label" title="Additional cards from System Update 2021">
-                      <input type="checkbox" id="set-su21" onchange="toggleAllowedSet('su21')">
-                      <span class="checkbox-text">System Update 2021</span>
-                    </label>
-                    <label class="checkbox-label" title="Elevation expansion cards (probably bugs here, but hopefully not game-breaking)">
-                      <input type="checkbox" id="set-elev" onchange="toggleAllowedSet('elev')">
-                      <span class="checkbox-text">Elevation (Untested)</span>
-                    </label>
-                    <label class="checkbox-label hidden-set-option" id="core-option" title="Original Core Set cards" style="display: none;">
-                      <input type="checkbox" id="set-core" onchange="toggleAllowedSet('core')">
-                      <span class="checkbox-text">Core Set (Untested)</span>
-                    </label>
-                    <label class="checkbox-label hidden-set-option" id="ms-option" title="Midnight Sun expansion cards" style="display: none;">
-                      <input type="checkbox" id="set-ms" onchange="toggleAllowedSet('ms')">
-                      <span class="checkbox-text">Midnight Sun (Untested)</span>
-                    </label>
+                <div class="settings-group" title="Card sets loaded for building your runner deck in Gauntlet mode">
+                  <label class="settings-label" id="allowed-sets-label" onclick="handleLoadSetsClick()">LOAD<br />PLAYER SETS</label>
+                  <div class="settings-checkboxes" id="gauntlet-sets-checkboxes">
+                    <!-- Populated dynamically by JavaScript based on setRegistry -->
                   </div>
                 </div>
                 <div class="settings-section-header" title="Select which corp decks can appear as opponents in Gauntlet mode">GAUNTLET OPPONENTS</div>
@@ -448,6 +436,7 @@ $version = "0.6.11-BETA";
       balancedFactions: null,
       strictPacks: null,
       allowedSets: null,
+      customSets: null,  // Sets loaded in Custom Game / decklauncher
       preconOverrides: {}  // Maps precon name to boolean override for useForGauntlet
     };
     
@@ -635,31 +624,118 @@ $version = "0.6.11-BETA";
     // END ACHIEVEMENTS SYSTEM
     // ========================================
     
+    function toggleCustomSet(setCode) {
+      var checkbox = document.getElementById('custom-set-' + setCode);
+      var idx = settingsOverrides.customSets.indexOf(setCode);
+      if (checkbox.checked && idx === -1) {
+        settingsOverrides.customSets.push(setCode);
+      } else if (!checkbox.checked && idx !== -1) {
+        settingsOverrides.customSets.splice(idx, 1);
+      }
+      saveSettings();
+    }
+    
     // Hidden sets reveal tracking
     var hiddenSetsRevealed = false;
-    var allowedSetsClickCount = 0;
-    var allowedSetsClickTimeout = null;
+    var hiddenSetsClickCount = 0;
+    var hiddenSetsClickTimeout = null;
     
-    // Handle clicks on "Allowed Player Sets" label to reveal hidden options
-    function handleAllowedSetsClick() {
+    // Check if hidden sets were previously revealed
+    function checkHiddenSetsRevealed() {
+      try {
+        var saved = localStorage.getItem('chiriboga-settings');
+        if (saved) {
+          var parsed = JSON.parse(saved);
+          if (parsed.hiddenSetsRevealed === true) {
+            hiddenSetsRevealed = true;
+          }
+        }
+      } catch (e) {}
+    }
+    
+    // Handle clicks on "Load Sets" labels to reveal hidden options
+    function handleLoadSetsClick() {
       if (hiddenSetsRevealed) return; // Already revealed
       
-      allowedSetsClickCount++;
+      hiddenSetsClickCount++;
       
       // Reset click count after 2 seconds of no clicks
-      if (allowedSetsClickTimeout) {
-        clearTimeout(allowedSetsClickTimeout);
+      if (hiddenSetsClickTimeout) {
+        clearTimeout(hiddenSetsClickTimeout);
       }
-      allowedSetsClickTimeout = setTimeout(function() {
-        allowedSetsClickCount = 0;
+      hiddenSetsClickTimeout = setTimeout(function() {
+        hiddenSetsClickCount = 0;
       }, 2000);
       
       // Reveal hidden options after 6 clicks
-      if (allowedSetsClickCount >= 6) {
+      if (hiddenSetsClickCount >= 6) {
         hiddenSetsRevealed = true;
-        document.getElementById('core-option').style.display = '';
-        document.getElementById('ms-option').style.display = '';
+        // Save to localStorage
+        try {
+          var saved = localStorage.getItem('chiriboga-settings');
+          var settings = saved ? JSON.parse(saved) : {};
+          settings.hiddenSetsRevealed = true;
+          localStorage.setItem('chiriboga-settings', JSON.stringify(settings));
+        } catch (e) {}
+        // Repopulate checkboxes to show hidden sets
+        populateSetCheckboxes();
+        // Re-apply checkbox states
+        initializeSettings();
       }
+    }
+    
+    // Populate set checkboxes dynamically based on setRegistry
+    // Sets with hidden: true will not be displayed unless hiddenSetsRevealed is true
+    // Sets with untested: true will show "(Untested)" after the name
+    function populateSetCheckboxes() {
+      var customContainer = document.getElementById('custom-sets-checkboxes');
+      var gauntletContainer = document.getElementById('gauntlet-sets-checkboxes');
+      
+      if (!customContainer || !gauntletContainer) return;
+      if (typeof setRegistry === 'undefined' || !setRegistry.availableSets) return;
+      
+      var customHtml = '';
+      var gauntletHtml = '';
+      
+      // Define display order
+      var setOrder = ['systemgateway', 'systemupdate2021', 'elevation', 'coreset', 'midnightsun'];
+      
+      for (var i = 0; i < setOrder.length; i++) {
+        var setKey = setOrder[i];
+        var set = setRegistry.availableSets[setKey];
+        if (!set) continue;
+        
+        // Skip hidden sets unless revealed
+        if (set.hidden === true && !hiddenSetsRevealed) continue;
+        
+        var code = set.code;
+        var name = set.name;
+        var displayName = set.untested === true ? name + ' (Untested)' : name;
+        var isSystemGateway = (code === 'sg');
+        
+        // Build checkbox HTML for Custom Game sets
+        if (isSystemGateway) {
+          customHtml += '<label class="checkbox-label checkbox-disabled" title="Core set, always included">';
+          customHtml += '<input type="checkbox" id="custom-set-' + code + '" checked disabled>';
+        } else {
+          customHtml += '<label class="checkbox-label" title="' + name + ' cards">';
+          customHtml += '<input type="checkbox" id="custom-set-' + code + '" onchange="toggleCustomSet(\'' + code + '\')">';
+        }
+        customHtml += '<span class="checkbox-text">' + displayName + '</span></label>';
+        
+        // Build checkbox HTML for Gauntlet sets
+        if (isSystemGateway) {
+          gauntletHtml += '<label class="checkbox-label checkbox-disabled" title="Core set, always included">';
+          gauntletHtml += '<input type="checkbox" id="set-' + code + '" checked disabled>';
+        } else {
+          gauntletHtml += '<label class="checkbox-label" title="' + name + ' cards">';
+          gauntletHtml += '<input type="checkbox" id="set-' + code + '" onchange="toggleAllowedSet(\'' + code + '\')">';
+        }
+        gauntletHtml += '<span class="checkbox-text">' + displayName + '</span></label>';
+      }
+      
+      customContainer.innerHTML = customHtml;
+      gauntletContainer.innerHTML = gauntletHtml;
     }
     
     // Load settings from localStorage, falling back to config defaults
@@ -696,13 +772,43 @@ $version = "0.6.11-BETA";
       settingsOverrides.strictPacks = (saved && typeof saved.strictPacks === 'boolean') 
         ? saved.strictPacks 
         : (gauntletConfig.strictPacks || false);
+      
+      // Load gauntlet allowed sets (default from setRegistry.gauntletSets)
+      var defaultAllowedSets = (typeof setRegistry !== 'undefined' && Array.isArray(setRegistry.gauntletSets))
+        ? setRegistry.gauntletSets.map(function(s) {
+            // Convert set file names to set codes
+            if (typeof setRegistry.availableSets !== 'undefined' && setRegistry.availableSets[s]) {
+              return setRegistry.availableSets[s].code;
+            }
+            return s;
+          })
+        : ['sg', 'su21'];
       settingsOverrides.allowedSets = (saved && Array.isArray(saved.allowedSets)) 
         ? saved.allowedSets.slice() 
-        : (gauntletConfig.allowedSets ? gauntletConfig.allowedSets.slice() : []);
+        : defaultAllowedSets;
       
       // Ensure System Gateway is always included
       if (settingsOverrides.allowedSets.indexOf('sg') === -1) {
         settingsOverrides.allowedSets.push('sg');
+      }
+      
+      // Load custom game sets (default: sg, su21, elev per setRegistry.decklauncherSets)
+      var defaultCustomSets = (typeof setRegistry !== 'undefined' && Array.isArray(setRegistry.decklauncherSets))
+        ? setRegistry.decklauncherSets.map(function(s) {
+            // Convert set file names to set codes
+            if (typeof setRegistry.availableSets !== 'undefined' && setRegistry.availableSets[s]) {
+              return setRegistry.availableSets[s].code;
+            }
+            return s;
+          })
+        : ['sg', 'su21', 'elev'];
+      settingsOverrides.customSets = (saved && Array.isArray(saved.customSets)) 
+        ? saved.customSets.slice() 
+        : defaultCustomSets;
+      
+      // Ensure System Gateway is always included in custom sets
+      if (settingsOverrides.customSets.indexOf('sg') === -1) {
+        settingsOverrides.customSets.push('sg');
       }
       
       // Load precon overrides
@@ -730,16 +836,23 @@ $version = "0.6.11-BETA";
       document.getElementById('alternate-factions-toggle').checked = settingsOverrides.alternateFactions;
       document.getElementById('balanced-factions-toggle').checked = settingsOverrides.balancedFactions;
       document.getElementById('strict-packs-toggle').checked = settingsOverrides.strictPacks;
-      document.getElementById('set-su21').checked = settingsOverrides.allowedSets.indexOf('su21') !== -1;
-      document.getElementById('set-elev').checked = settingsOverrides.allowedSets.indexOf('elev') !== -1;
-      document.getElementById('set-core').checked = settingsOverrides.allowedSets.indexOf('core') !== -1;
-      document.getElementById('set-ms').checked = settingsOverrides.allowedSets.indexOf('ms') !== -1;
       
-      // If any hidden sets are checked, reveal all hidden options
-      if (settingsOverrides.allowedSets.indexOf('core') !== -1 || settingsOverrides.allowedSets.indexOf('ms') !== -1) {
-        hiddenSetsRevealed = true;
-        document.getElementById('core-option').style.display = '';
-        document.getElementById('ms-option').style.display = '';
+      // Update Gauntlet Sets UI (dynamically created, may not exist if hidden)
+      for (var setKey in setRegistry.availableSets) {
+        var set = setRegistry.availableSets[setKey];
+        var gauntletCheckbox = document.getElementById('set-' + set.code);
+        if (gauntletCheckbox) {
+          gauntletCheckbox.checked = settingsOverrides.allowedSets.indexOf(set.code) !== -1;
+        }
+      }
+      
+      // Update Custom Game Sets UI (dynamically created, may not exist if hidden)
+      for (var setKey in setRegistry.availableSets) {
+        var set = setRegistry.availableSets[setKey];
+        var customCheckbox = document.getElementById('custom-set-' + set.code);
+        if (customCheckbox) {
+          customCheckbox.checked = settingsOverrides.customSets.indexOf(set.code) !== -1;
+        }
       }
       
       // Set game speed checkboxes
@@ -768,10 +881,12 @@ $version = "0.6.11-BETA";
           balancedFactions: settingsOverrides.balancedFactions,
           strictPacks: settingsOverrides.strictPacks,
           allowedSets: settingsOverrides.allowedSets,
+          customSets: settingsOverrides.customSets,
           preconOverrides: settingsOverrides.preconOverrides,
           gameSpeed: settingsOverrides.gameSpeed,
           debugMenuEnabled: settingsOverrides.debugMenuEnabled,
-          enableHiRes: settingsOverrides.enableHiRes
+          enableHiRes: settingsOverrides.enableHiRes,
+          hiddenSetsRevealed: hiddenSetsRevealed,
         };
         localStorage.setItem('chiriboga-settings', JSON.stringify(toSave));
       } catch (e) {
@@ -1488,6 +1603,12 @@ $version = "0.6.11-BETA";
       // Select initial random decks
       selectRandomDecks();
 
+      // Check if hidden sets were previously revealed
+      checkHiddenSetsRevealed();
+      
+      // Populate set checkboxes dynamically (respects hidden flag in config)
+      populateSetCheckboxes();
+      
       // Initialize settings from config
       initializeSettings();
       
