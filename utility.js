@@ -1269,7 +1269,16 @@ function ShowGauntletLostModal(gauntletState) {
     agendaStolenThisGame = AgendaPoints(runner);
   }
   if (typeof corp !== 'undefined' && corp) {
-    agendaScoredThisGame = AgendaPoints(corp);
+    // Calculate corp agenda points excluding perk agendas (Holdover Directive and Subsidiary Gains)
+    if (corp.scoreArea && corp.scoreArea.length > 0) {
+      for (var i = 0; i < corp.scoreArea.length; i++) {
+        var agenda = corp.scoreArea[i];
+        // Exclude Holdover Directive (ID 10) and Subsidiary Gains (ID 11)
+        if (agenda.cardId !== 10 && agenda.cardId !== 11) {
+          agendaScoredThisGame += (agenda.agendaPoints || 0);
+        }
+      }
+    }
   }
   
   // Get config values for agenda credit rewards
@@ -1622,11 +1631,15 @@ function PlayerWin(player, msgstr) {
               }
               
               // Scored agendas by corp (corp's score area) - these are penalties
+              // Exclude Holdover Directive (ID 10) and Subsidiary Gains (ID 11) as these are perk agendas
               if (corp.scoreArea && corp.scoreArea.length > 0) {
                 for (var i = 0; i < corp.scoreArea.length; i++) {
                   var agenda = corp.scoreArea[i];
-                  var agendaCredits = agenda.agendaPoints * agendaPointScored;
-                  breakdownLines.push({ label: agenda.title + " scored", value: agendaCredits });
+                  // Exclude Holdover Directive (ID 10) and Subsidiary Gains (ID 11)
+                  if (agenda.cardId !== 10 && agenda.cardId !== 11) {
+                    var agendaCredits = agenda.agendaPoints * agendaPointScored;
+                    breakdownLines.push({ label: agenda.title + " scored", value: agendaCredits });
+                  }
                 }
               }
               
