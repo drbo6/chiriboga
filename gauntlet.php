@@ -2224,13 +2224,15 @@
 					
 					// Build cardIdToSet mapping from cardData.json pack_code
 					// This must happen before identity filtering
-					var packCodeToSet = {
-						'core': 'core',
-						'sg': 'sg',
-						'su21': 'su21',
-						'ms': 'ms',
-						'elev': 'elev'
-					};
+					
+					// Build packCodeToSet dynamically from setRegistry
+					var packCodeToSet = {};
+					if (typeof setRegistry !== 'undefined' && setRegistry.availableSets) {
+						for (var setKey in setRegistry.availableSets) {
+							var set = setRegistry.availableSets[setKey];
+							packCodeToSet[set.code] = set.code;
+						}
+					}
 					
 					if (cardData && cardData.data) {
 						for (var i = 0; i < cardData.data.length; i++) {
@@ -2246,25 +2248,20 @@
 					}
 					
 					// Fallback: Map cards by ID range for cards not in cardData.json
+					// Uses idRange from setRegistry.availableSets
 					for (var cardId in cardSet) {
 						if (!cardSet[cardId]) continue;
 						if (cardIdToSet[cardId]) continue; // Already mapped
 						var cardIdInt = parseInt(cardId);
-						var cardIdStr = String(cardId);
 						
-						// Core Set uses 1xxx range (1000-1999)
-						if (cardIdInt >= 1000 && cardIdInt <= 1999) {
-							cardIdToSet[cardId] = 'core';
-						} else {
-							var prefix = cardIdStr.substring(0, 2);
-							var idRangeMap = {
-								'30': 'sg',      // System Gateway (30000-30999)
-								'31': 'su21',    // System Update 2021 (31000-31999)
-								'33': 'ms',      // Midnight Sun (33000-33999)
-								'35': 'elev'     // Elevation (35000-35999)
-							};
-							if (idRangeMap[prefix]) {
-								cardIdToSet[cardId] = idRangeMap[prefix];
+						// Check each set's idRange from config
+						if (typeof setRegistry !== 'undefined' && setRegistry.availableSets) {
+							for (var setKey in setRegistry.availableSets) {
+								var set = setRegistry.availableSets[setKey];
+								if (set.idRange && cardIdInt >= set.idRange[0] && cardIdInt <= set.idRange[1]) {
+									cardIdToSet[cardId] = set.code;
+									break;
+								}
 							}
 						}
 					}

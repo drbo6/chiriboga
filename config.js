@@ -3,20 +3,80 @@
 // =============================================================================
 // 
 // This is the central configuration for set availability across game modes.
-// Sets are now loaded dynamically based on user settings stored in localStorage.
+// Sets are loaded dynamically based on user settings stored in localStorage.
 // These arrays define the DEFAULT sets when no user settings exist.
 //
-// Available sets:
-//   - coreset         : Core Set cards (code: 'core')
-//   - systemgateway   : System Gateway (code: 'sg')
-//   - systemupdate2021: System Update 2021 (code: 'su21')
-//   - midnightsun     : Midnight Sun (code: 'ms')
-//   - elevation       : Elevation (code: 'elev')
-//   - gauntlet        : Special gauntlet-only cards (engine only)
-//   - tutorial        : Tutorial cards (engine only)
+// =============================================================================
+// HOW TO ADD A NEW SET
+// =============================================================================
 //
-// Engine mode (engine.php) always loads ALL sets for full game functionality.
-// User settings in index.php override these defaults via localStorage.
+// 1. CREATE THE SET FILE
+//    - Create a new file: sets/yoursetname.js
+//    - Follow the format of existing set files (e.g., systemgateway.js)
+//    - Each card needs a unique ID in an unused range:
+//        Core Set:           1000-1999
+//        System Gateway:     30000-30999
+//        System Update 2021: 31000-31999
+//        Midnight Sun:       33000-33999
+//        Elevation:          35000-35999
+//    - Choose an unused range for your new set (e.g., 36000-36999)
+//
+// 2. ADD TO availableSets BELOW
+//    Add an entry to the availableSets object:
+//
+//    yoursetname: { 
+//      file: 'yoursetname',      // Filename without .js extension (in /sets/)
+//      code: 'yrsn',             // Short code for localStorage (2-4 chars)
+//      name: 'Your Set Name',    // Display name shown in settings UI
+//      hidden: true,             // true = hidden until easter egg revealed
+//      untested: true,           // true = shows "(Untested)" in settings
+//      idRange: [36000, 36999],  // Card ID range [start, end] for this set
+//    },
+//
+// 3. ADD TO CARD DATA (for card images and metadata)
+//    - Add card entries to carddata/carddata.json
+//    - Each entry needs: code, title, pack_code (your set's code)
+//    - This enables card images and NRDB-style data lookups
+//
+// 4. (OPTIONAL) ADD TO DEFAULT SETS IF YOU WANT ALWAYS LOAD THEM LIKE SYSTEM GATEWAY
+//    - Add 'yoursetname' to gauntletSets array for gauntlet mode defaults
+//    - Add 'yoursetname' to decklauncherSets array for custom game defaults
+//    - Note: systemgateway is always loaded and cannot be disabled
+//
+// 5. (OPTIONAL) UPDATE populateSetCheckboxes() IN index.php
+//    Find the setOrder array and add your set key to control display order:
+//    var setOrder = ['systemgateway', 'systemupdate2021', 'elevation', 
+//                    'coreset', 'midnightsun', 'yoursetname'];
+//
+// =============================================================================
+// SET PROPERTIES REFERENCE
+// =============================================================================
+//
+// file:     The filename in /sets/ without the .js extension
+// code:     Short identifier used in localStorage and internal references
+// name:     Human-readable name displayed in the settings UI
+// hidden:   If true, set won't appear in settings until user clicks the
+//           "Load Sets" label 6 times (easter egg). Use for incomplete sets.
+// untested: If true, "(Untested)" is appended to the name in settings UI
+// idRange:  [start, end] - The card ID range for this set. Used to map cards
+//           to sets when carddata.json doesn't have pack_code info.
+//
+// =============================================================================
+// CURRENT SETS
+// =============================================================================
+//
+//   Key              File               Code   Description
+//   ─────────────────────────────────────────────────────────────────────
+//   coreset          coreset.js         core   Original Core Set (1000-1999)
+//   systemgateway    systemgateway.js   sg     System Gateway (30000-30999)
+//   systemupdate2021 systemupdate2021.js su21  System Update 2021 (31000-31999)
+//   midnightsun      midnightsun.js     ms     Midnight Sun (33000-33999)
+//   elevation        elevation.js       elev   Elevation (35000-35999)
+//
+// Special engine-only sets (not in registry, loaded directly by engine.php):
+//   gauntlet         gauntlet.js        -      Gauntlet-specific cards
+//   tutorial         tutorial.js        -      Tutorial cards
+//
 // =============================================================================
 
 var setRegistry = {
@@ -24,22 +84,25 @@ var setRegistry = {
   // The 'code' is used for settings storage and UI checkboxes
   // Set 'hidden: true' to hide a set from the index.php settings UI
   // Set 'untested: true' to show "(Untested)" after the set name
+  // Set 'idRange: [start, end]' for card ID range (used for set detection)
   availableSets: {
-    coreset:          { file: 'coreset',          code: 'core', name: 'Core Set',           hidden: true,  untested: true  },
-    systemgateway:    { file: 'systemgateway',    code: 'sg',   name: 'System Gateway',     hidden: false, untested: false },
-    systemupdate2021: { file: 'systemupdate2021', code: 'su21', name: 'System Update 2021', hidden: false, untested: false },
-    midnightsun:      { file: 'midnightsun',      code: 'ms',   name: 'Midnight Sun',       hidden: true,  untested: true  },
-    elevation:        { file: 'elevation',        code: 'elev', name: 'Elevation',          hidden: false, untested: true  },
+    systemgateway:    { file: 'systemgateway',    code: 'sg',   name: 'System Gateway',     hidden: false, untested: false, idRange: [30000, 30999] },
+    systemupdate2021: { file: 'systemupdate2021', code: 'su21', name: 'System Update 2021', hidden: false, untested: false, idRange: [31000, 31999] },
+    midnightsun:      { file: 'midnightsun',      code: 'ms',   name: 'Midnight Sun',       hidden: true,  untested: true,  idRange: [33000, 33999] },
+    elevation:        { file: 'elevation',        code: 'elev', name: 'Elevation',          hidden: false, untested: true,  idRange: [35000, 35999] },
+    coreset:          { file: 'coreset',          code: 'core', name: 'Core Set',           hidden: true,  untested: true,  idRange: [1000, 1999]   },    
   },
 
   // DEFAULT sets for GAUNTLET mode (when no localStorage settings exist)
   // User can change via Settings > Gauntlet Settings > Load Player Sets
+  // Note: All sets are always LOADED in gauntlet.php so opponent decks work,
+  // but only sets listed here (or in user's localStorage) populate the player's card pool
   gauntletSets: [
     'systemgateway',
     'systemupdate2021',
-    // 'coreset',
+    // 'elevation',    
     // 'midnightsun',
-    // 'elevation',
+    // 'coreset',    
   ],
 
   // DEFAULT sets for CUSTOM GAME / Decklauncher mode (when no localStorage settings exist)
@@ -47,9 +110,9 @@ var setRegistry = {
   decklauncherSets: [
     'systemgateway',
     'systemupdate2021',
-    // 'elevation',
-    // 'coreset',
+    'elevation',
     // 'midnightsun',
+    // 'coreset',    
   ],
 };
 

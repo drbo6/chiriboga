@@ -684,9 +684,29 @@ $version = "0.6.11-BETA";
       }
     }
     
+    // Count cards in a set based on idRange
+    // forGauntlet: if true, only count runner cards; if false, count both corp and runner
+    function countCardsInSet(idRange, forGauntlet) {
+      if (!idRange || idRange.length !== 2) return 0;
+      var count = 0;
+      var minId = idRange[0];
+      var maxId = idRange[1];
+      
+      for (var cardId in cardSet) {
+        var id = parseInt(cardId);
+        if (id >= minId && id <= maxId && cardSet[cardId]) {
+          var card = cardSet[cardId];
+          // For gauntlet, only count runner cards
+          if (forGauntlet && card.player !== runner) continue;
+          count++;
+        }
+      }
+      return count;
+    }
+    
     // Populate set checkboxes dynamically based on setRegistry
     // Sets with hidden: true will not be displayed unless hiddenSetsRevealed is true
-    // Sets with untested: true will show "(Untested)" after the name
+    // Sets with untested: true will show "(Untested, X)" after the name where X is card count
     function populateSetCheckboxes() {
       var customContainer = document.getElementById('custom-sets-checkboxes');
       var gauntletContainer = document.getElementById('gauntlet-sets-checkboxes');
@@ -698,7 +718,7 @@ $version = "0.6.11-BETA";
       var gauntletHtml = '';
       
       // Define display order
-      var setOrder = ['systemgateway', 'systemupdate2021', 'elevation', 'coreset', 'midnightsun'];
+      var setOrder = ['systemgateway', 'systemupdate2021', 'elevation', 'midnightsun', 'coreset'];
       
       for (var i = 0; i < setOrder.length; i++) {
         var setKey = setOrder[i];
@@ -710,7 +730,16 @@ $version = "0.6.11-BETA";
         
         var code = set.code;
         var name = set.name;
-        var displayName = set.untested === true ? name + ' (Untested)' : name;
+        
+        // For untested sets, add card count
+        var customDisplayName = name;
+        var gauntletDisplayName = name;
+        if (set.untested === true) {
+          var customCardCount = countCardsInSet(set.idRange, false); // Count all cards for custom game
+          var gauntletCardCount = countCardsInSet(set.idRange, true); // Count only runner cards for gauntlet
+          customDisplayName = name + ' (Untested, ' + customCardCount + ')';
+          gauntletDisplayName = name + ' (Untested, ' + gauntletCardCount + ')';
+        }
         var isSystemGateway = (code === 'sg');
         
         // Build checkbox HTML for Custom Game sets
@@ -721,7 +750,7 @@ $version = "0.6.11-BETA";
           customHtml += '<label class="checkbox-label" title="' + name + ' cards">';
           customHtml += '<input type="checkbox" id="custom-set-' + code + '" onchange="toggleCustomSet(\'' + code + '\')">';
         }
-        customHtml += '<span class="checkbox-text">' + displayName + '</span></label>';
+        customHtml += '<span class="checkbox-text">' + customDisplayName + '</span></label>';
         
         // Build checkbox HTML for Gauntlet sets
         if (isSystemGateway) {
@@ -731,7 +760,7 @@ $version = "0.6.11-BETA";
           gauntletHtml += '<label class="checkbox-label" title="' + name + ' cards">';
           gauntletHtml += '<input type="checkbox" id="set-' + code + '" onchange="toggleAllowedSet(\'' + code + '\')">';
         }
-        gauntletHtml += '<span class="checkbox-text">' + displayName + '</span></label>';
+        gauntletHtml += '<span class="checkbox-text">' + gauntletDisplayName + '</span></label>';
       }
       
       customContainer.innerHTML = customHtml;
