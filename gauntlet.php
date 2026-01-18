@@ -172,65 +172,22 @@
 		
 		// Dynamic set loader for gauntlet
 		// Maps set codes to file names
-		var setFileMap = {
-			'su21': 'systemupdate2021',
-			'elev': 'elevation',
-			'core': 'coreset',
-			'ms': 'midnightsun'
-		};
-		
-		// Reverse map: file names to codes
-		var fileToCodeMap = {
-			'systemupdate2021': 'su21',
-			'elevation': 'elev',
-			'coreset': 'core',
-			'midnightsun': 'ms',
-			'systemgateway': 'sg'
-		};
-		
-		// Load additional sets based on localStorage settings (allowedSets for gauntlet)
+		// Load ALL additional sets for gauntlet mode
+		// All sets must be loaded so opponent precon decks work regardless of player settings
+		// Player's allowedSets preference only affects which cards go into their card pool
 		function loadGauntletSets(callback) {
 			var setsToLoad = [];
-			var usedLocalStorage = false;
 			
-			// Try to read allowed sets from localStorage
-			try {
-				var savedJson = localStorage.getItem('chiriboga-settings');
-				if (savedJson) {
-					var saved = JSON.parse(savedJson);
-					if (saved && Array.isArray(saved.allowedSets) && saved.allowedSets.length > 0) {
-						// Filter out 'sg' (already loaded) and map to file names
-						for (var i = 0; i < saved.allowedSets.length; i++) {
-							var code = saved.allowedSets[i];
-							if (code !== 'sg' && setFileMap[code]) {
-								setsToLoad.push(setFileMap[code]);
-							}
-						}
-						if (setsToLoad.length > 0) {
-							usedLocalStorage = true;
-							console.log('Loading gauntlet sets from localStorage:', setsToLoad);
-						}
+			// Load ALL available sets (except systemgateway which is already loaded via PHP)
+			if (typeof setRegistry !== 'undefined' && setRegistry.availableSets) {
+				for (var setKey in setRegistry.availableSets) {
+					if (setKey !== 'systemgateway') {
+						setsToLoad.push(setRegistry.availableSets[setKey].file);
 					}
 				}
-			} catch (e) {
-				console.warn('Could not load gauntlet sets from localStorage:', e);
-			}
-			
-			// If no valid settings from localStorage, use defaults from setRegistry
-			if (!usedLocalStorage) {
-				if (typeof setRegistry !== 'undefined' && Array.isArray(setRegistry.gauntletSets)) {
-					for (var i = 0; i < setRegistry.gauntletSets.length; i++) {
-						var setName = setRegistry.gauntletSets[i];
-						if (setName !== 'systemgateway') {
-							setsToLoad.push(setName);
-						}
-					}
-					console.log('Loading gauntlet sets from setRegistry defaults:', setsToLoad);
-				} else {
-					// Fallback defaults
-					setsToLoad = ['systemupdate2021'];
-					console.log('Loading gauntlet sets from hardcoded fallback:', setsToLoad);
-				}
+			} else {
+				// Fallback if setRegistry not available
+				setsToLoad = ['systemupdate2021', 'elevation', 'coreset', 'midnightsun'];
 			}
 			
 			if (setsToLoad.length === 0) {
@@ -2317,14 +2274,20 @@
 						try {
 							var gauntletState = JSON.parse(LZString.decompressFromEncodedURIComponent(gauntletParam));
 							
-							// Extract allowed sets from gauntlet state (must happen before identity dropdown population)
+							// Extract all gauntlet state values
 							gauntletAllowedSets = gauntletState.allowedSets || [];
-							// Extract strict packs setting from gauntlet state
 							gauntletStrictPacks = gauntletState.strictPacks || false;
+							gauntletCredits = gauntletState.credits || 0;
+							gauntletSeed = gauntletState.seed || '';
+							gauntletOpponents = gauntletState.opponents || [];
+							shopPurchaseCount = gauntletState.shopPurchaseCount || 0;
+							if (gauntletState.hackAttempts) {
+								hackAttemptCounters = gauntletState.hackAttempts;
+							}
 							
+							// Rebuild card subset from state
 							if (gauntletState && gauntletState.subset) {
 								gauntletCardCounts = {};
-								// Rebuild gauntletCardIds from counts and validate card IDs
 								gauntletCardIds = [];
 								for (var cardId in gauntletState.subset) {
 									var cardIdInt = parseInt(cardId);
@@ -2345,6 +2308,27 @@
 							GenerateGauntletCardSet();
 						}
 					} else {
+						// No gauntlet state from URL - read allowedSets from localStorage
+						try {
+							var savedSettings = localStorage.getItem('chiriboga-settings');
+							if (savedSettings) {
+								var parsed = JSON.parse(savedSettings);
+								if (parsed && Array.isArray(parsed.allowedSets)) {
+									gauntletAllowedSets = parsed.allowedSets;
+								}
+								if (parsed && typeof parsed.strictPacks === 'boolean') {
+									gauntletStrictPacks = parsed.strictPacks;
+								}
+							}
+						} catch(e) {
+							console.warn("Could not read settings from localStorage:", e);
+						}
+						
+						// Ensure System Gateway is always included
+						if (gauntletAllowedSets.indexOf('sg') === -1) {
+							gauntletAllowedSets.push('sg');
+						}
+						
 						// Generate the gauntlet card set now that cardData is loaded
 						GenerateGauntletCardSet();
 					}
@@ -2412,6 +2396,13 @@
 								if (cardSet[cardId].player !== runner) continue;
 								if (cardSet[cardId].cardType !== cardType) continue;
 								if (cardSet[cardId].cardType === 'identity') continue; // Skip identities
+								
+								// Filter by allowed sets (if set)
+								if (gauntletAllowedSets && gauntletAllowedSets.length > 0) {
+									var cardSetCode = cardIdToSet[cardId] || '';
+									if (gauntletAllowedSets.indexOf(cardSetCode) === -1) continue;
+								}
+								
 								if (CardMatchesRequirement(cardId, matchSubtypes, excludeSubtypes)) {
 									matchingCards.push(parseInt(cardId));
 								}
@@ -2503,120 +2494,18 @@
 				}
 			}
 			
-			// Debug: Log decoded parameters
-			var decodedR = URIParameter("r");
-			var decodedC = URIParameter("c");
+			// Handle gauntlet-specific DOM operations (requires gauntlet state)
 			var decodedG = URIParameter("g");
-			
-			if (decodedR) {
-				console.log("Decoded r parameter:", JSON.parse(LZString.decompressFromEncodedURIComponent(decodedR)));
-			}
-			if (decodedC) {
-				console.log("Decoded c parameter:", JSON.parse(LZString.decompressFromEncodedURIComponent(decodedC)));
-			}
 			if (decodedG) {
 				var gauntletState = JSON.parse(LZString.decompressFromEncodedURIComponent(decodedG));
-				console.log("Decoded g parameter:", gauntletState);
 				
 				// Disable identity dropdown if player has already defeated opponents
 				if (gauntletState.defeated > 0) {
 					$("#identityselect").prop("disabled", true).prop("title", "You cannot change identities after your first win.");
 				}
 				
-				// Store credits from gauntlet state
-				gauntletCredits = gauntletState.credits || 0;
-				// Store seed from gauntlet state
-				gauntletSeed = gauntletState.seed || '';
-				// Store allowed sets from gauntlet state
-				gauntletAllowedSets = gauntletState.allowedSets || [];
-				// Store strict packs setting from gauntlet state
-				gauntletStrictPacks = gauntletState.strictPacks || false;
-				
-				// Build cardIdToSet mapping from cardData.json pack_code
-				// Only map cards that exist in both cardData.json and the .js files
-				var packCodeToSet = {
-					'core': 'core',
-					'sg': 'sg',
-					'su21': 'su21',
-					'ms': 'ms',
-					'elev': 'elev'
-				};
-				
-				if (cardData && cardData.data) {
-					for (var i = 0; i < cardData.data.length; i++) {
-						var c = cardData.data[i];
-						var cardId = c.code;
-						// Only map if card exists in cardSet
-						if (cardSet[cardId]) {
-							var packCode = c.pack_code || '';
-							var setCode = packCodeToSet[packCode] || packCode;
-							cardIdToSet[cardId] = setCode;
-						}
-					}
-				}
-				
-				// Fallback: Map cards by ID range for cards not in cardData.json
-				for (var cardId in cardSet) {
-					if (!cardSet[cardId]) continue;
-					if (cardIdToSet[cardId]) continue; // Already mapped
-					var cardIdInt = parseInt(cardId);
-					var cardIdStr = String(cardId);
-					
-					// Core Set uses 1xxx range (1000-1999)
-					if (cardIdInt >= 1000 && cardIdInt <= 1999) {
-						cardIdToSet[cardId] = 'core';
-					} else {
-						var prefix = cardIdStr.substring(0, 2);
-						var idRangeMap = {
-							'30': 'sg',      // System Gateway (30000-30999)
-							'31': 'su21',    // System Update 2021 (31000-31999)
-							'33': 'ms',      // Midnight Sun (33000-33999)
-							'35': 'elev'     // Elevation (35000-35999)
-						};
-						if (idRangeMap[prefix]) {
-							cardIdToSet[cardId] = idRangeMap[prefix];
-						}
-					}
-				}
-				
-				// Note: cardIdToSet mapping is now populated from cardData.json
-				console.log("cardIdToSet mapping ready:", Object.keys(cardIdToSet).length, "cards mapped");
-				console.log("gauntletAllowedSets:", gauntletAllowedSets);
-				
-				// Debug: Show breakdown of mapped cards by set
-				var setBreakdown = {};
-				for (var cardId in cardIdToSet) {
-					var setCode = cardIdToSet[cardId];
-					setBreakdown[setCode] = (setBreakdown[setCode] || 0) + 1;
-				}
-				console.log("Cards per set:", setBreakdown);
-				
-				// Restore shop purchase count from gauntlet state for persistence across reloads
-				shopPurchaseCount = gauntletState.shopPurchaseCount || 0;
-				
-				// Store opponents globally for opponent display
-				gauntletOpponents = gauntletState.opponents || [];
-				
-				// Load hack attempt counters from state
-				if (gauntletState.hackAttempts) {
-					hackAttemptCounters = gauntletState.hackAttempts;
-				}
-				
-				// Log opponent names and URLs
-				if (gauntletState.opponents && gauntletState.opponents.length > 0) {
-					console.log("Gauntlet Opponents:");
-					for (var i = 0; i < gauntletState.opponents.length; i++) {
-						var opponentName = gauntletState.opponents[i].name || 'Unknown Opponent';
-						var opponentFaction = gauntletState.opponents[i].faction || 'Unknown Faction';
-						var opponentURL = gauntletState.opponents[i].URL || 'No URL';
-						var opponentDefeated = gauntletState.opponents[i].hasbeendefeated || false;
-						console.log((i + 1) + ". " + opponentName + " (" + opponentFaction + ") - URL: " + opponentURL + " - Defeated: " + opponentDefeated);
-					}
-				}
-				
 				// Select random packs on page load so they're deterministic
 				selectedShopPacks = SelectRandomShopPacks();
-				console.log("Shop packs selected:", selectedShopPacks.map(function(p) { return p.name; }));
 				
 				// Show welcome modal if this is the start of a gauntlet (defeated === 0)
 				if (gauntletState.defeated === 0) {
