@@ -131,12 +131,46 @@ $version = "0.6.11-BETA";
   echo '<script src="utility.js?' . filemtime('utility.js') . '"></script>';
   echo '<script src="config.js?' . filemtime('config.js') . '"></script>';
 
-  // Load card sets
-  $sets = ["coreset","systemgateway","systemupdate2021","midnightsun","elevation"];
-  foreach ($sets as $set) {
-    echo '<script src="sets/'.$set.'.js?' . filemtime('sets/'.$set.'.js') . '"></script>';
-  }
+  // =================================================================
+  // CARD SETS - Dynamically loaded from setRegistry in config.js
+  // =================================================================
   
+  // Output filetimes for all set files (for proper cache busting in JS)
+  $setFiles = glob('sets/*.js');
+  $setFiletimes = array();
+  foreach ($setFiles as $setFile) {
+    $setName = basename($setFile, '.js');
+    $setFiletimes[$setName] = filemtime($setFile);
+  }
+  echo '<script>var setFiletimes = ' . json_encode($setFiletimes) . ';</script>';
+  ?>
+  <script>
+  // Dynamically load all sets from setRegistry (defined in config.js)
+  (function() {
+    var setsToLoad = [];
+    
+    // Get all sets from setRegistry.availableSets
+    if (typeof setRegistry !== 'undefined' && setRegistry.availableSets) {
+      for (var setKey in setRegistry.availableSets) {
+        setsToLoad.push(setRegistry.availableSets[setKey].file);
+      }
+    } else {
+      // Fallback if setRegistry not available
+      console.error('setRegistry not found in config.js, using fallback sets');
+      setsToLoad = ['coreset', 'systemgateway', 'systemupdate2021', 'midnightsun', 'parhelion', 'elevation'];
+    }
+    
+    // Document.write script tags with proper cache busting from PHP filetimes
+    for (var i = 0; i < setsToLoad.length; i++) {
+      var setName = setsToLoad[i];
+      var timestamp = (typeof setFiletimes !== 'undefined' && setFiletimes[setName]) 
+        ? setFiletimes[setName] 
+        : Date.now();
+      document.write('<script src="sets/' + setName + '.js?' + timestamp + '"><\/script>');
+    }
+  })();
+  </script>
+  <?php
   // Load preconstructed decks
   $preconDir = 'precons';
   if (is_dir($preconDir)) {
