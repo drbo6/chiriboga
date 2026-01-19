@@ -247,7 +247,7 @@ var gauntletConfig = {
   // ===== LOCKED FIXED CARDS =====
   // If true, cards listed in fixedCards are excluded from the initial random card pool
   // If false, fixed cards can also appear in the initial random card pool
-  lockedFixedCards: true,
+  lockedFixedCards: false,
 
   // ===== FIXED CARDS =====
   // Specific card IDs with exact quantities

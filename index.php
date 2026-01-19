@@ -1228,26 +1228,22 @@ $version = "0.6.11-BETA";
         if (!settingsOverrides.allowedSets || settingsOverrides.allowedSets.length === 0) return true;
         
         var allowedSets = settingsOverrides.allowedSets;
-        var cardIdStr = String(cardId);
-        
-        // Map card ID ranges to set codes
-        var cardSetMap = {
-          '30': 'sg',      // System Gateway (30000-30999)
-          '31': 'su21',    // System Update 2021 (31000-31999)
-          '33': 'ms',      // Midnight Sun (33000-33999)
-          '35': 'elev'     // Elevation (35000-35999)
-        };
-        
-        // Get the set code for this card
         var cardIdInt = parseInt(cardId);
         var cardSetCode = null;
         
-        // Core Set uses 1xxx range (1000-1999)
-        if (cardIdInt >= 1000 && cardIdInt <= 1999) {
-          cardSetCode = 'core';
-        } else {
-          var cardSetPrefix = cardIdStr.substring(0, 2);
-          cardSetCode = cardSetMap[cardSetPrefix];
+        // Use setRegistry to determine which set this card belongs to
+        if (typeof setRegistry !== 'undefined' && setRegistry.availableSets) {
+          for (var setKey in setRegistry.availableSets) {
+            var setInfo = setRegistry.availableSets[setKey];
+            if (setInfo.idRange && setInfo.idRange.length === 2) {
+              var minId = setInfo.idRange[0];
+              var maxId = setInfo.idRange[1];
+              if (cardIdInt >= minId && cardIdInt <= maxId) {
+                cardSetCode = setInfo.code;
+                break;
+              }
+            }
+          }
         }
         
         if (!cardSetCode) return false;
