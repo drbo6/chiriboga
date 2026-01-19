@@ -69,10 +69,12 @@
 //   ─────────────────────────────────────────────────────────────────────
 //   coreset          coreset.js         core   Original Core Set (1000-1999)
 //   downfall         downfall.js        df     Downfall (26001-26065)
+//   uprising         uprising.js        ur     Uprising (26066-26130)
 //   systemgateway    systemgateway.js   sg     System Gateway (30000-30999)
 //   systemupdate2021 systemupdate2021.js su21  System Update 2021 (31000-31999)
 //   midnightsun      midnightsun.js     ms     Midnight Sun (33000-33065)
 //   parhelion        parhelion.js       ph     Parhelion (33066-33128)
+//   rebellion        rebellion.js       rwr    Rebellion Without Rehearsal (34066-34130)
 //   elevation        elevation.js       elev   Elevation (35000-35999)
 //
 // Special engine-only sets (not in registry, loaded directly by engine.php):
@@ -95,6 +97,8 @@ var setRegistry = {
     midnightsun:      { file: 'midnightsun',      code: 'ms',   name: 'Midnight Sun',       hidden: true,  untested: true,  idRange: [33000, 33065] },
     parhelion:        { file: 'parhelion',        code: 'ph',   name: 'Parhelion',          hidden: true,  untested: true,  idRange: [33066, 33128] },
     elevation:        { file: 'elevation',        code: 'elev', name: 'Elevation',          hidden: false, untested: true,  idRange: [35000, 35999] },
+    uprising:         { file: 'uprising',         code: 'ur',   name: 'Uprising',           hidden: true,  untested: true,  idRange: [26066, 26130] },
+    rebellion:        { file: 'rebellion',        code: 'rwr',  name: 'Rebellion Without Rehearsal', hidden: true, untested: true, idRange: [34066, 34130] },
     coreset:          { file: 'coreset',          code: 'core', name: 'Core Set',           hidden: true,  untested: true,  idRange: [1000, 1999]   },    
   },
 

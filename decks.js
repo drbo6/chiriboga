@@ -751,7 +751,7 @@ function LoadDecks() {
   // // ----------------------------------------------------------------------------
   // // You can enable the debug menu at the top of init.js
 
-  if (false) { // Use this to easily disable everything below
+  if (true) { // Use this to easily disable everything below
 
     // debugging = true; //set true to log extra details and pause execution on error
     mainLoopDelay = 50; //for speedy AI vs AI testing (any faster than this and funny things happen at end-of-game)
@@ -765,7 +765,7 @@ function LoadDecks() {
     RunnerTestField(31002, //identity - Reina Roja
       [], //heapCards
       [], //stackCards
-      [26003, 30020, 30005, 30006], //gripCards - Chisel (to test installing), Sure Gamble, Conduit
+      [26003, 26073, 26073, 30005, 30006], //gripCards - Chisel (to test installing), Sure Gamble, Conduit
       [30003], //installed - Docklands Pass (console for MU)
       [], //stolen
       cardBackTexturesRunner,glowTextures,strengthTextures
@@ -778,7 +778,7 @@ function LoadDecks() {
       [], //archivesInstalled
       [30073, 30072], //rndInstalled - Ping (str 1), Logjam (str 2) - outermost first
       [], //hqInstalled
-      [], //remotes
+      [[30069],[30069],[30069],[30069]], //remotes
       [], //scored
       cardBackTexturesCorp,glowTextures,strengthTextures
     );
