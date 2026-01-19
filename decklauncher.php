@@ -1550,13 +1550,21 @@
 									deckCounts[cardId] = (deckCounts[cardId] || 0) + 1;
 								}
 								
-								// Update UI
-								$("#identityselect").val(json.identity).trigger('change');
-								$("#identity").prop("src", "images/" + ChangeImageFileToJPG(cardSet[json.identity].imageFile));
+								// Update deckPlayer FIRST so UpdateDeckTextareaFromCounts works correctly
 								deckPlayer = cardSet[json.identity].player;
 								
-								// Update textarea with deck contents
+								// Update textarea with deck contents BEFORE triggering identity change
+								// (because the change handler calls Parse() which reads from textarea)
 								UpdateDeckTextareaFromCounts();
+								
+								// Now update the identity dropdown (without triggering change handler)
+								$("#identityselect").val(json.identity);
+								$("#identity").prop("src", "images/" + ChangeImageFileToJPG(cardSet[json.identity].imageFile));
+								
+								// Repopulate precon dropdown
+								if (typeof window.PopulatePreconDropdownForIdentity === 'function') {
+									window.PopulatePreconDropdownForIdentity(json.identity);
+								}
 								
 								// Parse and refresh
 								Parse();
@@ -2290,7 +2298,7 @@
 			</div>
 		</div>
 		<!-- Delete Confirmation Modal -->
-		<div id="delete-confirm-modal" class="modal">
+		<div id="delete-confirm-modal" class="modal" style="z-index: 20;">
 			<div class="solo-menu" style="max-width:400px;">
 				<div class="solo-logo">
 					<h1 class="logo-text" style="color: var(--crt-red); text-shadow: 0 0 5px var(--crt-red), 0 0 15px var(--glow-red), 0 0 35px var(--glow-red-dark);">CONFIRM DELETE</h1>
