@@ -766,7 +766,7 @@ function LoadDecks() {
   RunnerTestField(30001,
     [], //heap
     [30007, 30007, 30007], //stack
-    [31003, 35034], //grip
+    [31003, 35034, 33092], //grip
     [30018, 35034], //installed: Side Hustle, En Passant, Red Team
     [],
     cardBackTexturesRunner,glowTextures,strengthTextures

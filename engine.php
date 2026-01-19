@@ -38,18 +38,64 @@
 		$jsfiles = array('init','phase', 'command', 'checks', 'mechanics', 'utility', 'config');
 
 		// =================================================================
-		// ENGINE SETS - Always loads ALL sets for full game functionality
-		// This ensures any deck from any mode can be played
+		// ENGINE SETS - Dynamically loaded from setRegistry in config.js
+		// All sets are loaded for full game functionality
 		// See setRegistry in config.js for set documentation
 		// =================================================================
-		$sets = ["coreset","systemgateway","systemupdate2021","midnightsun","elevation","gauntlet"];
-		foreach ($sets as $set) {
-			array_push($jsfiles, 'sets/'.$set);
-		}
 		
-		$jsfiles = array_merge($jsfiles, array('sets/tutorial', 'decks', 'runcalculator', 'ai_corp', 'ai_runner'));
+		// Load core JS files first (including config.js which defines setRegistry)
 		$maxfilemtime = 0;
 		foreach ($jsfiles as $jsfile) {
+			$thisfilemtime = filemtime($jsfile.'.js');
+			echo '<script src="'.$jsfile.'.js?' . $thisfilemtime . '"></script>';
+			if ($thisfilemtime > $maxfilemtime) {
+				$maxfilemtime = $thisfilemtime;
+			}
+		}
+		
+		// Output filetimes for all set files (for proper cache busting in JS)
+		$setFiles = glob('sets/*.js');
+		$setFiletimes = array();
+		foreach ($setFiles as $setFile) {
+			$setName = basename($setFile, '.js');
+			$setFiletimes[$setName] = filemtime($setFile);
+		}
+		echo '<script>var setFiletimes = ' . json_encode($setFiletimes) . ';</script>';
+		?>
+		<script>
+		// Dynamically load all sets from setRegistry (defined in config.js)
+		(function() {
+			var setsToLoad = [];
+			
+			// Get all sets from setRegistry.availableSets
+			if (typeof setRegistry !== 'undefined' && setRegistry.availableSets) {
+				for (var setKey in setRegistry.availableSets) {
+					setsToLoad.push(setRegistry.availableSets[setKey].file);
+				}
+			} else {
+				// Fallback if setRegistry not available
+				console.error('setRegistry not found in config.js, using fallback sets');
+				setsToLoad = ['coreset', 'systemgateway', 'systemupdate2021', 'midnightsun', 'parhelion', 'elevation'];
+			}
+			
+			// Add engine-only sets (not in registry, used for tutorials and gauntlet perks)
+			setsToLoad.push('gauntlet');
+			setsToLoad.push('tutorial');
+			
+			// Document.write script tags with proper cache busting from PHP filetimes
+			for (var i = 0; i < setsToLoad.length; i++) {
+				var setName = setsToLoad[i];
+				var timestamp = (typeof setFiletimes !== 'undefined' && setFiletimes[setName]) 
+					? setFiletimes[setName] 
+					: Date.now();
+				document.write('<script src="sets/' + setName + '.js?' + timestamp + '"><\/script>');
+			}
+		})();
+		</script>
+		<?php
+		// Load remaining JS files
+		$remainingFiles = array('decks', 'runcalculator', 'ai_corp', 'ai_runner');
+		foreach ($remainingFiles as $jsfile) {
 			$thisfilemtime = filemtime($jsfile.'.js');
 			echo '<script src="'.$jsfile.'.js?' . $thisfilemtime . '"></script>';
 			if ($thisfilemtime > $maxfilemtime) {

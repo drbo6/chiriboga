@@ -17,7 +17,8 @@
 //        Core Set:           1000-1999
 //        System Gateway:     30000-30999
 //        System Update 2021: 31000-31999
-//        Midnight Sun:       33000-33999
+//        Midnight Sun:       33000-33065
+//        Parhelion:          33066-33128
 //        Elevation:          35000-35999
 //    - Choose an unused range for your new set (e.g., 36000-36999)
 //
@@ -70,7 +71,8 @@
 //   coreset          coreset.js         core   Original Core Set (1000-1999)
 //   systemgateway    systemgateway.js   sg     System Gateway (30000-30999)
 //   systemupdate2021 systemupdate2021.js su21  System Update 2021 (31000-31999)
-//   midnightsun      midnightsun.js     ms     Midnight Sun (33000-33999)
+//   midnightsun      midnightsun.js     ms     Midnight Sun (33000-33065)
+//   parhelion        parhelion.js       ph     Parhelion (33066-33128)
 //   elevation        elevation.js       elev   Elevation (35000-35999)
 //
 // Special engine-only sets (not in registry, loaded directly by engine.php):
@@ -88,7 +90,8 @@ var setRegistry = {
   availableSets: {
     systemgateway:    { file: 'systemgateway',    code: 'sg',   name: 'System Gateway',     hidden: false, untested: false, idRange: [30000, 30999] },
     systemupdate2021: { file: 'systemupdate2021', code: 'su21', name: 'System Update 2021', hidden: false, untested: false, idRange: [31000, 31999] },
-    midnightsun:      { file: 'midnightsun',      code: 'ms',   name: 'Midnight Sun',       hidden: true,  untested: true,  idRange: [33000, 33999] },
+    midnightsun:      { file: 'midnightsun',      code: 'ms',   name: 'Midnight Sun',       hidden: true,  untested: true,  idRange: [33000, 33065] },
+    parhelion:        { file: 'parhelion',        code: 'ph',   name: 'Parhelion',          hidden: true,  untested: true,  idRange: [33066, 33128] },
     elevation:        { file: 'elevation',        code: 'elev', name: 'Elevation',          hidden: false, untested: true,  idRange: [35000, 35999] },
     coreset:          { file: 'coreset',          code: 'core', name: 'Core Set',           hidden: true,  untested: true,  idRange: [1000, 1999]   },    
   },
@@ -102,6 +105,7 @@ var setRegistry = {
     'systemupdate2021',
     // 'elevation',    
     // 'midnightsun',
+    // 'parhelion',
     // 'coreset',    
   ],
 
@@ -112,6 +116,7 @@ var setRegistry = {
     'systemupdate2021',
     // 'elevation',
     // 'midnightsun',
+    // 'parhelion',
     // 'coreset',    
   ],
 };
