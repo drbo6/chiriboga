@@ -533,7 +533,7 @@ tutorial[4] = {
 			TutorialMessage("You have an installed resource called Verbal Plasticity which causes your first draw each turn to be 2 cards instead of 1.\n\nThe diamond on the card next to its name indicates it is UNIQUE, meaning you can only have 1 copy installed at a time.",true,function(){
 				TutorialMessage("You have learned about advancing, scoring, and damage.\n\nYou are ready to move on to the last part of the tutorial.",true);
 				TutorialReplacer = function (input) {
-				  window.location.href = 'engine.php?p=c&mentor=5';
+				  window.location.href = 'engine.php?p=c&mentor=5&t=1';
 				  return true;
 				};
 			});
@@ -706,7 +706,7 @@ tutorial[3] = {
 		TutorialWhitelist = null; //not using whitelist
         TutorialMessage("You have learned about assets, trash costs and different ways to make runs.\n\nYou are ready to move on to the next part of the tutorial.");
         TutorialReplacer = function (input) {
-		  window.location.href = 'engine.php?p=r&mentor=4';
+		  window.location.href = 'engine.php?p=r&mentor=4&t=1';
           return true;
         };
       },
@@ -1009,7 +1009,7 @@ tutorial[2] = {
 		TutorialWhitelist = null; //not using whitelist
         TutorialMessage("You have learned about ice and icebreakers.\n\nYou are ready to move on to the next part of the tutorial.");
         TutorialReplacer = function (input) {
-		  window.location.href = 'engine.php?p=r&mentor=3';
+		  window.location.href = 'engine.php?p=r&mentor=3&t=1';
           return true;
         };
       },
@@ -1099,7 +1099,7 @@ tutorial[1] = {
 			TutorialMessage("You can do better!\n\nClick Continue below to try again.");
 		}
         TutorialReplacer = function (input) {
-		  if (runner.creditPool >= 13) window.location.href = 'engine.php?p=r&mentor=2';
+		  if (runner.creditPool >= 13) window.location.href = 'engine.php?p=r&mentor=2&t=1';
 		  else {
 			  //reset
 			  runner.creditPool = 1;
@@ -1241,7 +1241,7 @@ tutorial[0] = {
 		TutorialWhitelist = null; //not using whitelist
         TutorialMessage("The agenda you have stolen is worth 2 AGENDA POINTS.\nYou win if you steal 7 agenda points from the Corp (6 when using the starter decks in this tutorial).\n\nClick Continue to move to the next part of this tutorial.");
         TutorialReplacer = function (input) {
-		  window.location.href = 'engine.php?p=r&mentor=1';
+		  window.location.href = 'engine.php?p=r&mentor=1&t=1';
           return true;
         };
       },
