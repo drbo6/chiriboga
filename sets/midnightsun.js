@@ -748,3 +748,109 @@ cardSet[33008] = {
 	  return false;
   },
 };
+
+//No Free Lunch (33020)
+//Criminal Resource, cost 0, influence 1
+//[trash]: Gain 3[credit].
+//[trash]: Remove 1 tag.
+cardSet[33020] = {
+  title: "No Free Lunch",
+  imageFile: "33020.png",
+  player: runner,
+  faction: "Criminal",
+  influence: 1,
+  cardType: "resource",
+  subTypes: [],
+  installCost: 0,
+  
+  abilities: [
+    //First ability: Trash to gain 3 credits
+    {
+      text: "Gain 3[c]",
+      Enumerate: function () {
+        //Can be used during action phase (check sets checkedClick for filtering)
+        //or during paid ability windows in runs
+        var inActionPhase = CheckActionClicks(runner, 0);
+        var inRunPaidWindow = (typeof attackedServer !== 'undefined' && attackedServer !== null);
+        if (!inActionPhase && !inRunPaidWindow) return [];
+        return [{}];
+      },
+      Resolve: function (params) {
+        //Trash is a cost (cannot be prevented)
+        Trash(this, false, function(cardsTrashed) {
+          GainCredits(runner, 3, "", this);
+        }, this);
+      },
+    },
+    //Second ability: Trash to remove 1 tag
+    {
+      text: "Remove 1 tag",
+      Enumerate: function () {
+        //Can be used during action phase (check sets checkedClick for filtering)
+        //or during paid ability windows in runs
+        var inActionPhase = CheckActionClicks(runner, 0);
+        var inRunPaidWindow = (typeof attackedServer !== 'undefined' && attackedServer !== null);
+        if (!inActionPhase && !inRunPaidWindow) return [];
+        //Must have at least 1 tag to remove
+        if (runner.tags < 1) return [];
+        return [{}];
+      },
+      Resolve: function (params) {
+        //Trash is a cost (cannot be prevented)
+        Trash(this, false, function(cardsTrashed) {
+          RemoveTags(1);
+        }, this);
+      },
+    },
+  ],
+  
+  //AI: Determine which ability to use
+  //Returns the index of the preferred ability (0 for credits, 1 for tag removal)
+  //Or false if neither should be triggered now
+  AIWouldTrigger: function () {
+    //Priority 1: Remove tag if tagged (unless tag-me strategy)
+    if (runner.tags > 0) {
+      //Check if we're running a tag-me strategy
+      var tagMe = false;
+      var installedResources = InstalledCards(runner).filter(function(c) {
+        return CheckCardType(c, ["resource"]);
+      });
+      //If we have valuable resources, we probably don't want to stay tagged
+      //If we have very few resources, might be tag-me
+      if (installedResources.length <= 2) {
+        //Check for counter-surveillance or similar tag-me cards
+        for (var i = 0; i < runner.grip.length; i++) {
+          if (runner.grip[i].title === "Counter Surveillance") tagMe = true;
+        }
+        for (var i = 0; i < InstalledCards(runner).length; i++) {
+          if (InstalledCards(runner)[i].title === "Counter Surveillance") tagMe = true;
+        }
+      }
+      
+      //If not tag-me, use tag removal ability
+      if (!tagMe) {
+        return 1; //Second ability (remove tag)
+      }
+    }
+    
+    //Priority 2: Gain credits if low on money
+    if (Credits(runner) < 3) {
+      return 0; //First ability (gain credits)
+    }
+    
+    //Don't trigger yet - save for when we need it
+    return false;
+  },
+  
+  //For AI economy evaluation
+  AIEconomyInstall: function() {
+    return 2; //Medium priority - it's free to install and provides flexible value
+  },
+  
+  AIEconomyTrigger: 1, //Low priority for economy - better saved for tag removal
+  
+  AIWorthKeeping: function (installedRunnerCards, spareMU) {
+    //Always worth keeping - free install and flexible utility
+    return true;
+  },
+};

@@ -3397,8 +3397,7 @@ function ChoicesTriggerableAbilities(player, limitTo = "") {
   for (var i = 0; i < activeCards.length; i++) {
     var abilities = ChoicesAbility(activeCards[i], limitTo);
     for (var j = 0; j < abilities.length; j++) {
-      var choiceLabel =
-        "(" + GetTitle(activeCards[i], true) + ") " + abilities[j].ability.text;
+      var choiceLabel = abilities[j].ability.text;
 	  var choiceObj = {
         card: activeCards[i],
         ability: abilities[j].ability,
@@ -3416,8 +3415,7 @@ function ChoicesTriggerableAbilities(player, limitTo = "") {
       if (typeof corpCards[i].runnerAbilities !== 'undefined') {
         var abilities = ChoicesAbility(corpCards[i], limitTo, "runnerAbilities");
         for (var j = 0; j < abilities.length; j++) {
-          var choiceLabel =
-            "(" + GetTitle(corpCards[i], true) + ") " + abilities[j].ability.text;
+          var choiceLabel = abilities[j].ability.text;
           var choiceObj = {
             card: corpCards[i],
             ability: abilities[j].ability,

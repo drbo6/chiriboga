@@ -760,12 +760,12 @@ function LoadDecks() {
     // SET UP THE MAIN STATES FOR THE RUNNER AND CORP
     // ----------------------------------------------
 
-    // TEST: Flux Capacitor (33087) - Charge mechanic when breaking subroutines
-    RunnerTestField(31001, //identity - Lat
+    // TEST: No Free Lunch (33020) - Trash for credits or tag removal
+    RunnerTestField(31002, //identity - Reina Roja
       [], //heapCards
-      [], //stackCards
-      [30006, 30005, 30004, 33087], //gripCards - Boomerang, Conduit, Botulus (for breaking subs)
-      [33018, 31039], //installed - Revolver (has power counters), Dr. Nuka Vrolyck (has power counters), Flux Capacitor
+      [33020, 33020, 30005, 30006], //stackCards - 2x No Free Lunch in stack to draw later
+      [33020, 30020, 30005], //gripCards - No Free Lunch, Sure Gamble, Conduit
+      [33020, 33020], //installed - 2x No Free Lunch already installed
       [], //stolen
       cardBackTexturesRunner,glowTextures,strengthTextures
     );
@@ -777,7 +777,7 @@ function LoadDecks() {
       [], //archivesInstalled
       [30072, 30073], //rndInstalled - Logjam (code gate), Ping (barrier)
       [], //hqInstalled
-      [], //remotes
+      [[30072, 30074]], //remotes - a remote with ice and an agenda
       [], //scored
       cardBackTexturesCorp,glowTextures,strengthTextures
     );
@@ -786,14 +786,14 @@ function LoadDecks() {
     corp.RnD.ice[0].rezzed = true;
     corp.RnD.ice[1].rezzed = true;
 
-    runner.rig.programs[0].power = 4;
-    runner.rig.resources[0].power = 4;
-
-    // GIVE CREDITS
-    GainCredits(runner, 20);
+    // GIVE CREDITS - start with low credits to encourage using the ability
+    GainCredits(runner, 2);
     GainCredits(corp, 10);
 
-    // START A RUN ON R&D TO TEST FLUX CAPACITOR
+    // ADD TAGS - to test tag removal ability
+    AddTags(2);
+
+    // START RUNNER TURN
     ChangePhase(phases.runnerActionMain);
     
     // RunnerTestField(31001, //identity
