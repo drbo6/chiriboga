@@ -415,42 +415,42 @@
 				var $container = $('#cardcontainer');
 				var $cards = $container.children('.card-item').detach();
 				
-				   $cards.sort(function(a, b) {
-					   var idA = parseInt($(a).attr('data-id'));
-					   var idB = parseInt($(b).attr('data-id'));
-					   var cardA = cardSet[idA];
-					   var cardB = cardSet[idB];
-					   if (!cardA || !cardB) return 0;
-					   if (currentSort === 'id') {
-						   return idA - idB;
-					   } else if (currentSort === 'name') {
-						   return (cardA.title || '').localeCompare(cardB.title || '');
-					   } else if (currentSort === 'influence') {
-						   var influenceA = cardA.influence || 0;
-						   var influenceB = cardB.influence || 0;
-						   if (influenceA !== influenceB) return influenceA - influenceB;
-						   // Secondary: alphabetical by title
-						   return (cardA.title || '').localeCompare(cardB.title || '');
-					   } else if (currentSort === 'type') {
-						   var typeOrderA = GetTypeOrder(idA);
-						   var typeOrderB = GetTypeOrder(idB);
-						   if (typeOrderA !== typeOrderB) return typeOrderA - typeOrderB;
-						   // Secondary: subtype (array or string, fallback to empty string)
-						   var subA = (cardA.subTypes && cardA.subTypes.length) ? cardA.subTypes.join(',') : (cardA.subtype || '');
-						   var subB = (cardB.subTypes && cardB.subTypes.length) ? cardB.subTypes.join(',') : (cardB.subtype || '');
-						   if (subA < subB) return -1;
-						   if (subA > subB) return 1;
-						   // Tertiary: alphabetical by title
-						   return (cardA.title || '').localeCompare(cardB.title || '');
-					   } else if (currentSort === 'faction') {
-						   var factionOrderA = GetFactionOrder(idA);
-						   var factionOrderB = GetFactionOrder(idB);
-						   if (factionOrderA !== factionOrderB) return factionOrderA - factionOrderB;
-						   // Alphabetical within faction
-						   return (cardA.title || '').localeCompare(cardB.title || '');
-					   }
-					   return 0;
-				   });
+				$cards.sort(function(a, b) {
+					var idA = parseInt($(a).attr('data-id'));
+					var idB = parseInt($(b).attr('data-id'));
+					var cardA = cardSet[idA];
+					var cardB = cardSet[idB];
+					if (!cardA || !cardB) return 0;
+					if (currentSort === 'id') {
+						return idA - idB;
+					} else if (currentSort === 'name') {
+						return (cardA.title || '').localeCompare(cardB.title || '');
+					} else if (currentSort === 'influence') {
+						var influenceA = cardA.influence || 0;
+						var influenceB = cardB.influence || 0;
+						if (influenceA !== influenceB) return influenceA - influenceB;
+						// Secondary: alphabetical by title
+						return (cardA.title || '').localeCompare(cardB.title || '');
+					} else if (currentSort === 'type') {
+						var typeOrderA = GetTypeOrder(idA);
+						var typeOrderB = GetTypeOrder(idB);
+						if (typeOrderA !== typeOrderB) return typeOrderA - typeOrderB;
+						// Secondary: subtype (array or string, fallback to empty string)
+						var subA = (cardA.subTypes && cardA.subTypes.length) ? cardA.subTypes.join(',') : (cardA.subtype || '');
+						var subB = (cardB.subTypes && cardB.subTypes.length) ? cardB.subTypes.join(',') : (cardB.subtype || '');
+						if (subA < subB) return -1;
+						if (subA > subB) return 1;
+						// Tertiary: alphabetical by title
+						return (cardA.title || '').localeCompare(cardB.title || '');
+					} else if (currentSort === 'faction') {
+						var factionOrderA = GetFactionOrder(idA);
+						var factionOrderB = GetFactionOrder(idB);
+						if (factionOrderA !== factionOrderB) return factionOrderA - factionOrderB;
+						// Alphabetical within faction
+						return (cardA.title || '').localeCompare(cardB.title || '');
+					}
+					return 0;
+				});
 				
 				$container.append($cards);
 			}
@@ -565,7 +565,7 @@
 				if (!cardSet[cardId]) return;
 				
 				var card = cardSet[cardId];
-			var imgSrc = GetImagePath(card.imageFile);
+				var imgSrc = GetImagePath(card.imageFile);
 				
 				// Find matching card in cardData by title
 				var cardInfo = null;
@@ -578,75 +578,76 @@
 					}
 				}
 				
-			// Build card text display
-			if (cardInfo) {
-				var infoHTML = '<div class="card-text-info">';
-				infoHTML += '<h2>' + cardInfo.title + '</h2>';
-				
-				// Helper function to capitalize first letter only
-				function capitalizeFirst(str) {
-					if (!str) return '';
-					return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
-				}
-				
-				// Type and keywords - capitalize first letter only
-				var typeLine = capitalizeFirst(cardInfo.type_code || '');
-				if (cardInfo.keywords) {
-					typeLine += ': ' + capitalizeFirst(cardInfo.keywords || '');
-				}
-				
-				// Handle cost display based on card type
-				if (cardInfo.type_code === 'agenda') {
-					// For agendas: advancement_cost/agenda_points followed by agenda icon
-					if (cardInfo.advancement_cost !== undefined && cardInfo.agenda_points !== undefined) {
-						typeLine += ' · ' + cardInfo.advancement_cost + '/' + cardInfo.agenda_points + ' <img src="images/nsg/NSG_AGENDA.svg" class="card-icon" alt="agenda points">';
+				// Build card text display
+				if (cardInfo) {
+					var infoHTML = '<div class="card-text-info">';
+					infoHTML += '<h2>' + cardInfo.title + '</h2>';
+					
+					// Helper function to capitalize first letter only
+					function capitalizeFirst(str) {
+						if (!str) return '';
+						return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
 					}
-				} else {
-					// For non-agendas: cost followed by credit icon
-					if (cardInfo.cost !== undefined && cardInfo.cost !== null) {
-						typeLine += ' · ' + cardInfo.cost + '<img src="images/nsg/NSG_CREDIT.svg" class="card-icon" alt="credit">';
+					
+					// Type and keywords - capitalize first letter only
+					var typeLine = capitalizeFirst(cardInfo.type_code || '');
+					if (cardInfo.keywords) {
+						typeLine += ': ' + capitalizeFirst(cardInfo.keywords || '');
 					}
-				}
-				
-				infoHTML += '<p class="card-type">' + typeLine + '</p>';
-				
-				// Faction - special handling for NBN, HB, and neutral
-				var factionDisplay = '';
-				if (cardInfo.faction_code === 'nbn') {
-					factionDisplay = 'NBN';
-				} else if (cardInfo.faction_code === 'hb') {
-					factionDisplay = 'HB';
-				} else if (cardInfo.faction_code === 'neutral-corp' || cardInfo.faction_code === 'neutral-runner') {
-					factionDisplay = 'Neutral';
-				} else {
-					factionDisplay = capitalizeFirst(cardInfo.faction_code || '');
-				}
-				infoHTML += '<p class="card-faction">' + factionDisplay + '</p>';
-				
-			// Card text - replace bracketed words with images (NSG SVG format)
-			if (cardInfo.text) {
-				var cardText = cardInfo.text.replace(/\[([^\]]+)\]/g, function(match, word) {
-					// Only convert to icon if the word contains at least one letter (not just numbers)
-					if (!/[a-zA-Z]/.test(word)) {
-						return match; // Return original text like [5] unchanged
+					
+					// Handle cost display based on card type
+					if (cardInfo.type_code === 'agenda') {
+						// For agendas: advancement_cost/agenda_points followed by agenda icon
+						if (cardInfo.advancement_cost !== undefined && cardInfo.agenda_points !== undefined) {
+							typeLine += ' · ' + cardInfo.advancement_cost + '/' + cardInfo.agenda_points + ' <img src="images/nsg/NSG_AGENDA.svg" class="card-icon" alt="agenda points">';
+						}
+					} else {
+						// For non-agendas: cost followed by credit icon
+						if (cardInfo.cost !== undefined && cardInfo.cost !== null) {
+							typeLine += ' · ' + cardInfo.cost + '<img src="images/nsg/NSG_CREDIT.svg" class="card-icon" alt="credit">';
+						}
 					}
-					var iconName = word.toUpperCase();
-					// Special case: Reformat the text for NSG icons
-					if (iconName === 'TRASH') iconName = 'TRASH_ABILITY';
-					if (iconName === 'RECURRING-CREDIT' || iconName === 'RECURRING_CREDIT') iconName = 'RECURRING_CREDIT';
-					if (iconName === 'BAD-PUBLICITY' || iconName === 'BAD_PUBLICITY') iconName = 'BAD_PUBLICITY';
-					return '<img src="images/nsg/NSG_' + iconName + '.svg" class="card-icon" alt="' + word + '">';
-				});
-				// Replace newlines with <br> tags (handle both literal \n and actual newlines)
-				cardText = cardText.replace(/\\n/g, '<br>').replace(/\n/g, '<br>');
-				infoHTML += '<div class="card-text">' + cardText + '</div>';
-			}
-			
-			// Flavor text
-			if (cardInfo.flavor) {
-				var flavorText = cardInfo.flavor.replace(/\\n/g, '<br>').replace(/\n/g, '<br>');
-				infoHTML += '<p class="card-flavor">' + flavorText + '</p>';
-			}				infoHTML += '</div>';
+					
+					infoHTML += '<p class="card-type">' + typeLine + '</p>';
+					
+					// Faction - special handling for NBN, HB, and neutral
+					var factionDisplay = '';
+					if (cardInfo.faction_code === 'nbn') {
+						factionDisplay = 'NBN';
+					} else if (cardInfo.faction_code === 'hb') {
+						factionDisplay = 'HB';
+					} else if (cardInfo.faction_code === 'neutral-corp' || cardInfo.faction_code === 'neutral-runner') {
+						factionDisplay = 'Neutral';
+					} else {
+						factionDisplay = capitalizeFirst(cardInfo.faction_code || '');
+					}
+					infoHTML += '<p class="card-faction">' + factionDisplay + '</p>';
+					
+					// Card text - replace bracketed words with images (NSG SVG format)
+					if (cardInfo.text) {
+						var cardText = cardInfo.text.replace(/\[([^\]]+)\]/g, function(match, word) {
+							// Only convert to icon if the word contains at least one letter (not just numbers)
+							if (!/[a-zA-Z]/.test(word)) {
+								return match; // Return original text like [5] unchanged
+							}
+							var iconName = word.toUpperCase();
+							// Special case: Reformat the text for NSG icons
+							if (iconName === 'TRASH') iconName = 'TRASH_ABILITY';
+							if (iconName === 'RECURRING-CREDIT' || iconName === 'RECURRING_CREDIT') iconName = 'RECURRING_CREDIT';
+							if (iconName === 'BAD-PUBLICITY' || iconName === 'BAD_PUBLICITY') iconName = 'BAD_PUBLICITY';
+							return '<img src="images/nsg/NSG_' + iconName + '.svg" class="card-icon" alt="' + word + '">';
+						});
+						// Replace newlines with <br> tags (handle both literal \n and actual newlines)
+						cardText = cardText.replace(/\\n/g, '<br>').replace(/\n/g, '<br>');
+						infoHTML += '<div class="card-text">' + cardText + '</div>';
+					}
+					
+					// Flavor text
+					if (cardInfo.flavor) {
+						var flavorText = cardInfo.flavor.replace(/\\n/g, '<br>').replace(/\n/g, '<br>');
+						infoHTML += '<p class="card-flavor">' + flavorText + '</p>';
+					}
+					infoHTML += '</div>';
 					$('#lightbox-text').html(infoHTML);
 				} else {
 					$('#lightbox-text').html('<div class="card-text-info"><p>Card data not found</p></div>');
@@ -1755,7 +1756,7 @@
 							 });
 						  }
 
-// Bind Save Deck button
+					  // Bind Save Deck button
 					  $('#savedeck').off('click').on('click', SaveDeck);
 					  
 					  // Bind Load Deck button
@@ -1813,148 +1814,82 @@
 						  // Check and update Load Deck button visibility
 						  UpdateLoadDeckButtonVisibility();
 
-													// Export current deck as a JS precon and download
-													function ExportJSDeck() {
-														try {
-															if (!json || !json.identity || !Array.isArray(json.cards)) {
-																alert('No deck loaded to export.');
-																return;
-															}
-															var name = prompt('Enter a name for this JS deck:', 'My Precon Deck');
-															if (!name) return;
+			// Import a JS precon file and set it as the current deck (no eval)
+			function ImportJSDeckFromText(text) {
+				try {
+					// Basic size guard
+					if (!text || text.length > 200000) { // ~200KB limit
+						alert('Deck file too large or empty.');
+						return;
+					}
 
-															var counts = {};
-															for (var i=0;i<json.cards.length;i++) {
-																var id = json.cards[i];
-																counts[id] = (counts[id]||0)+1;
-															}
+					// Strip BOM and normalize line endings
+					text = String(text).replace(/^\uFEFF/, '').replace(/\r\n?|\n/g, '\n');
 
-															var lines = [];
-															lines.push('// Exported preconstructed deck');
-															lines.push('registerPrecon({');
-															lines.push('    name: ' + JSON.stringify(name) + ',');
-															lines.push('    identity: ' + JSON.stringify(String(json.identity)) + ',');
-															lines.push('    useAsCustomDefault: false,');
-															lines.push('    deck_set: "none",');
-															lines.push('    cards: {');
-															var keys = Object.keys(counts).sort(function(a,b){return parseInt(a)-parseInt(b);} );
-															for (var k=0;k<keys.length;k++) {
-																var cardId = keys[k];
-																var count = counts[cardId];
-																var comment = '';
-																if (cardSet[parseInt(cardId)] && cardSet[parseInt(cardId)].title) {
-																	comment = '  // ' + cardSet[parseInt(cardId)].title;
-																}
-																lines.push('        ' + JSON.stringify(String(cardId)) + ': ' + count + ',' + comment);
-															}
-															// Remove trailing comma from the last card line
-															for (var i=lines.length-1;i>=0;i--) {
-																if (/^\s*\d/.test(lines[i]) || /:\s*\d+,/.test(lines[i])) {
-																	lines[i] = lines[i].replace(/,\s*(\/\/.*)?$/,'$1');
-																	break;
-																}
-															}
-															lines.push('    }');
-															lines.push('});');
-															var content = lines.join('\n');
+					// Very conservative parse of registerPrecon({ ... }) without executing
+					// 1) Find the registerPrecon call and capture the object literal body
+					var callMatch = text.match(/registerPrecon\s*\(\s*\{([\s\S]*?)\}\s*\)\s*;?/);
+					if (!callMatch) { alert('Invalid JS deck file format.'); return; }
+					var body = callMatch[1];
 
-															var blob = new Blob([content], {type: 'application/javascript'});
-															var a = document.createElement('a');
-															var safeName = name.replace(/[^A-Za-z0-9 _.-]/g,'').trim() || 'deck';
-															a.download = safeName + '.js';
-															a.href = URL.createObjectURL(blob);
-															document.body.appendChild(a);
-															a.click();
-															document.body.removeChild(a);
-															URL.revokeObjectURL(a.href);
-														} catch(e) {
-															console.error(e);
-															alert('Failed to export JS deck: ' + e.message);
-														}
-													}
+					// 2) Extract name and identity as string or number
+					var nameMatch = body.match(/\bname\s*:\s*(["'])([^"']*)\1/);
+					var identityMatch = body.match(/\bidentity\s*:\s*(["']?)(\d+)\1/);
+					var cardsMatch = body.match(/\bcards\s*:\s*\{([\s\S]*?)\}/);
+					if (!identityMatch || !cardsMatch) { alert('Missing identity or cards in deck file.'); return; }
+					var deckName = nameMatch ? nameMatch[2].trim() : 'Imported Deck';
+					var identityId = parseInt(identityMatch[2], 10);
+					var cardsBlock = cardsMatch[1];
 
-													// Import a JS precon file and set it as the current deck (no eval)
-													function ImportJSDeckFromText(text) {
-														try {
-															// Basic size guard
-															if (!text || text.length > 200000) { // ~200KB limit
-																alert('Deck file too large or empty.');
-																return;
-															}
+					// 3) Parse cards block of lines like "30002": 1, // comment
+					var cards = {};
+					var lineRegex = /(["']?)(\d+)\1\s*:\s*(\d+)\s*,?/g;
+					var m;
+					var totalEntries = 0;
+					while ((m = lineRegex.exec(cardsBlock)) !== null) {
+						var cardId = parseInt(m[2], 10);
+						var qty = parseInt(m[3], 10);
+						if (qty > 0 && qty <= 99) { // reasonable bound
+							cards[cardId] = qty;
+							totalEntries++;
+							if (totalEntries > 1000) { alert('Too many card entries.'); return; }
+						}
+					}
+					if (!totalEntries) { alert('No cards found in deck file.'); return; }
 
-															// Strip BOM and normalize line endings
-															text = String(text).replace(/^\uFEFF/, '').replace(/\r\n?|\n/g, '\n');
+					// Validate identity exists
+					if (!cardSet[identityId] || cardSet[identityId].cardType !== 'identity') {
+						alert('Identity in deck file is not recognized.');
+						return;
+					}
 
-															// Very conservative parse of registerPrecon({ ... }) without executing
-															// 1) Find the registerPrecon call and capture the object literal body
-															var callMatch = text.match(/registerPrecon\s*\(\s*\{([\s\S]*?)\}\s*\)\s*;?/);
-															if (!callMatch) { alert('Invalid JS deck file format.'); return; }
-															var body = callMatch[1];
+					// Apply imported deck safely
+					json = { identity: identityId, cards: [] };
+					deckPlayer = cardSet[identityId].player;
+					deckCounts = {};
+					Object.keys(cards).forEach(function(idStr){
+						var idNum = parseInt(idStr, 10);
+						var qty = cards[idNum] || 0;
+						// Ignore unknown card ids
+						if (!cardSet[idNum]) return;
+						deckCounts[idNum] = qty;
+						for (var i=0;i<qty;i++) json.cards.push(idNum);
+					});
 
-															// 2) Extract name and identity as string or number
-															var nameMatch = body.match(/\bname\s*:\s*(["'])([^"']*)\1/);
-															var identityMatch = body.match(/\bidentity\s*:\s*(["']?)(\d+)\1/);
-															var cardsMatch = body.match(/\bcards\s*:\s*\{([\s\S]*?)\}/);
-															if (!identityMatch || !cardsMatch) { alert('Missing identity or cards in deck file.'); return; }
-															var deckName = nameMatch ? nameMatch[2].trim() : 'Imported Deck';
-															var identityId = parseInt(identityMatch[2], 10);
-															var cardsBlock = cardsMatch[1];
+					// Update identity select, image, and card list
+					$('#identityselect').val(identityId);
+					$('#identity').prop('src', 'images/' + ChangeImageFileToJPG(cardSet[identityId].imageFile));
+					RenderAllCardsList();
 
-															// 3) Parse cards block of lines like "30002": 1, // comment
-															var cards = {};
-															var lineRegex = /(["']?)(\d+)\1\s*:\s*(\d+)\s*,?/g;
-															var m;
-															var totalEntries = 0;
-															while ((m = lineRegex.exec(cardsBlock)) !== null) {
-																var cardId = parseInt(m[2], 10);
-																var qty = parseInt(m[3], 10);
-																if (qty > 0 && qty <= 99) { // reasonable bound
-																	cards[cardId] = qty;
-																	totalEntries++;
-																	if (totalEntries > 1000) { alert('Too many card entries.'); return; }
-																}
-															}
-															if (!totalEntries) { alert('No cards found in deck file.'); return; }
-
-															// Validate identity exists
-															if (!cardSet[identityId] || cardSet[identityId].cardType !== 'identity') {
-																alert('Identity in deck file is not recognized.');
-																return;
-															}
-
-															// Apply imported deck safely
-															json = { identity: identityId, cards: [] };
-															deckPlayer = cardSet[identityId].player;
-															deckCounts = {};
-															Object.keys(cards).forEach(function(idStr){
-																var idNum = parseInt(idStr, 10);
-																var qty = cards[idNum] || 0;
-																// Ignore unknown card ids
-																if (!cardSet[idNum]) return;
-																deckCounts[idNum] = qty;
-																for (var i=0;i<qty;i++) json.cards.push(idNum);
-															});
-
-															// Update identity select, image, and card list
-															$('#identityselect').val(identityId);
-															$('#identity').prop('src', 'images/' + ChangeImageFileToJPG(cardSet[identityId].imageFile));
-															RenderAllCardsList();
-
-															UpdateDeckTextareaFromCounts();
-															Parse();
-															UpdateCardCountsUI();
-															alert('JS deck imported and loaded: ' + deckName);
-														} catch(e) {
-															console.error(e);
-															alert('Failed to import JS deck: ' + e.message);
-														}
-													}
-
-													// Wire the new buttons and file input
-													(function(){
-														var exportBtn = document.getElementById('exportjs');
-														if (exportBtn) exportBtn.addEventListener('click', ExportJSDeck);
-													})();
+					UpdateDeckTextareaFromCounts();
+					Parse();
+					UpdateCardCountsUI();
+					alert('JS deck imported and loaded: ' + deckName);
+				} catch(e) {
+					console.error(e);
+					alert('Failed to import JS deck: ' + e.message);
+				}
+			}
 
 			// Load preconstructed deck
 			function LoadPrecon() {
@@ -2046,7 +1981,7 @@
 				  "<option value=" +
 					playerIdentities[i] +
 					">" +
-GetFactionIcon(cardSet[playerIdentities[i]].faction) + shortTitle +
+					GetFactionIcon(cardSet[playerIdentities[i]].faction) + shortTitle +
 					"</option>\n"
 				);
 			  }
@@ -2222,7 +2157,9 @@ GetFactionIcon(cardSet[playerIdentities[i]].faction) + shortTitle +
 		  } else {
 			  $("#opponentid").hide();
 		  }
-		}			//function for testing and debugging
+		}
+
+			//function for testing and debugging
 			function TestGeneration(seed=0) {
 				Math.seedrandom(seed);
 				$('#identityselect').change();
@@ -2302,9 +2239,6 @@ GetFactionIcon(cardSet[playerIdentities[i]].faction) + shortTitle +
 					</div>
 					<div style="margin-top:8px;">
 						<button id="importdeckfromNRDB" class="button" type="button">Import Deck from NRDB</button>
-					</div>
-					<div style="margin-top:8px;">
-						<button id="exportjs" class="button" type="button" style="width:85%; display:block; margin:0 auto;">Export JS Deck</button>
 					</div>
 					<br/>
 				</div>
