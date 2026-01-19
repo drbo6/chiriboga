@@ -4258,6 +4258,33 @@
 			  }
 			  console.log('Rebuilt playerIdentities with ' + playerIdentities.length + ' identities after sets loaded');
 			  
+			  // Log decoded parameters (r, c, g) - same as decks.js in engine.php
+			  var decodedR = URIParameter("r");
+			  var decodedC = URIParameter("c");
+			  var decodedG = URIParameter("g");
+			  
+			  if (decodedR) {
+			    try {
+			      console.log("Decoded r parameter:", JSON.parse(LZString.decompressFromEncodedURIComponent(decodedR)));
+			    } catch(e) {
+			      console.log("Could not decode r parameter");
+			    }
+			  }
+			  if (decodedC) {
+			    try {
+			      console.log("Decoded c parameter:", JSON.parse(LZString.decompressFromEncodedURIComponent(decodedC)));
+			    } catch(e) {
+			      console.log("Could not decode c parameter");
+			    }
+			  }
+			  if (decodedG) {
+			    try {
+			      console.log("Decoded g parameter:", JSON.parse(LZString.decompressFromEncodedURIComponent(decodedG)));
+			    } catch(e) {
+			      console.log("Could not decode g parameter");
+			    }
+			  }
+			  
 			  //set up autosuggest
 			  var autoMinLen = 1;
 			  $("#deck").on("keydown", function (event) {
