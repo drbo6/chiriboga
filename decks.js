@@ -750,7 +750,23 @@ function LoadDecks() {
   // // SET P=R OR P=C IN THE URL TO VIEW AS RUNNER OR CORP RESPECTIVELY
   // // ----------------------------------------------------------------------------
 
-  
+  // // Card Type Reference Examples
+  // // ----------------------------
+  // // Each card type with a sample card code
+  // // RUNNER CARD TYPES:
+  // //   identity  - 30001 (René "Loup" Arcemont: Party Animal)
+  // //   event     - 30002 (Wildcat Strike)
+  // //   hardware  - 30003 (Carnivore)
+  // //   program   - 30004 (Botulus)
+  // //   resource  - 30009 (Cookbook)
+    
+  // // CORP CARD TYPES:
+  // //   identity  - 30035 (Haas-Bioroid: Precision Design)
+  // //   agenda    - 30036 (Luminal Transubstantiation)
+  // //   asset     - 30037 (Nico Campaign)
+  // //   ice       - 30038 (Ansel 1.0)
+  // //   operation - 30040 (Seamless Launch)
+  // //   upgrade   - 30042 (Manegarm Skunkworks)
 
   if (false) { // Use this to easily disable everything below
 

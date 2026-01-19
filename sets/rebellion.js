@@ -53,16 +53,24 @@ cardSet[34082] = {
       //**AI decision
       if (runner.AI != null) {
         //AI decides based on whether bypass is worth the cost
-        var shouldBypass = true;
+        var shouldBypass = false;
         
-        //Don't bypass if it would leave us too poor
-        if (Credits(runner) - numSubs < 2) {
-          shouldBypass = false;
+        //Calculate if we can afford it comfortably
+        var creditsAfter = Credits(runner) - numSubs;
+        
+        //Bypass if we have plenty of credits (keep at least 3)
+        if (creditsAfter >= 3) {
+          shouldBypass = true;
         }
         
-        //Always bypass expensive-to-break ice
-        if (numSubs <= 2) {
+        //Bypass cheap ice (1-2 subs) even if it leaves us poorer
+        if (numSubs <= 2 && creditsAfter >= 0) {
           shouldBypass = true;
+        }
+        
+        //Don't bypass if it would bankrupt us
+        if (creditsAfter < 0) {
+          shouldBypass = false;
         }
         
         if (shouldBypass) {
@@ -234,8 +242,12 @@ cardSet[34082] = {
     if (numSubs == 0) return [];
     
     //Include option to bypass by paying credits
-    var effects = [{ credits: -numSubs, source: this }];
+    //Format: effects is array of "payCredits" strings, one per credit spent
+    var credEff = [];
+    for (var i = 0; i < numSubs; i++) {
+      credEff.push("payCredits");
+    }
     var persistents = [{ use: this, target: iceAI.ice, iceIdx: iceIdx, action: "bypass" }];
-    return [{ effects: effects, persistents: persistents }];
+    return [{ effects: credEff, persistents: persistents }];
   },
 };
