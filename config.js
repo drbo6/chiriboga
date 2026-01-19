@@ -114,9 +114,13 @@ var setRegistry = {
   gauntletSets: [
     'systemgateway',
     'systemupdate2021',
-    // 'elevation',    
+    // 'downfall',
+    // 'uprising',
     // 'midnightsun',
     // 'parhelion',
+    // 'automatainitiative',
+    // 'rebellion',
+    // 'elevation',  
     // 'coreset',    
   ],
 
@@ -125,10 +129,14 @@ var setRegistry = {
   decklauncherSets: [
     'systemgateway',
     'systemupdate2021',
-    // 'elevation',
+    // 'downfall',
+    // 'uprising',
     // 'midnightsun',
     // 'parhelion',
-    // 'coreset',    
+    // 'automatainitiative',
+    //'rebellion',
+    // 'elevation',  
+    // 'coreset',       
   ],
 };
 

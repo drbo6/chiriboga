@@ -718,13 +718,60 @@
 			var showingOnlySelected = false;
 			var currentFilter = 'all'; // Will cycle through 'all' and set codes from setRegistry
 			
-			// Build filter options dynamically from setRegistry
+			// Build filter options dynamically from LOADED sets only
+			// (based on localStorage settings or setRegistry defaults)
 			var filterOptions = ['all'];
 			var filterLabels = { 'all': 'ALL CARDS' };
+			
+			// Helper to get default set codes from setRegistry
+			function getDefaultSetCodes() {
+				var codes = ['sg']; // System Gateway always included
+				if (typeof setRegistry !== 'undefined' && Array.isArray(setRegistry.decklauncherSets)) {
+					for (var i = 0; i < setRegistry.decklauncherSets.length; i++) {
+						var setName = setRegistry.decklauncherSets[i];
+						if (setName !== 'systemgateway' && setRegistry.availableSets[setName]) {
+							var code = setRegistry.availableSets[setName].code;
+							if (codes.indexOf(code) === -1) {
+								codes.push(code);
+							}
+						}
+					}
+				}
+				return codes;
+			}
+			
+			// Determine which sets are actually loaded
+			var loadedSetCodes = ['sg']; // System Gateway is always loaded
+			try {
+				var savedJson = localStorage.getItem('chiriboga-settings');
+				if (savedJson) {
+					var saved = JSON.parse(savedJson);
+					if (saved && Array.isArray(saved.customSets) && saved.customSets.length > 0) {
+						// Use localStorage settings
+						for (var i = 0; i < saved.customSets.length; i++) {
+							var code = saved.customSets[i];
+							if (code !== 'sg' && loadedSetCodes.indexOf(code) === -1) {
+								loadedSetCodes.push(code);
+							}
+						}
+					} else {
+						// localStorage exists but no customSets - use defaults
+						loadedSetCodes = getDefaultSetCodes();
+					}
+				} else {
+					// No localStorage - use defaults from setRegistry
+					loadedSetCodes = getDefaultSetCodes();
+				}
+			} catch (e) {
+				console.warn('Could not read settings for filter, using defaults:', e);
+				loadedSetCodes = getDefaultSetCodes();
+			}
+			
+			// Build filter options from loaded sets only
 			if (typeof setRegistry !== 'undefined' && setRegistry.availableSets) {
 				for (var setKey in setRegistry.availableSets) {
 					var set = setRegistry.availableSets[setKey];
-					if (set && set.code) {
+					if (set && set.code && loadedSetCodes.indexOf(set.code) !== -1) {
 						filterOptions.push(set.code);
 						filterLabels[set.code] = set.code.toUpperCase();
 					}
@@ -1151,15 +1198,25 @@
 						console.warn("Deck identity not in loaded sets, falling back to:", cardSet[firstIdentity].title);
 					}
 				}
+				var skippedCards = 0;
 				for (var i = 0; i < json.cards.length; i++) {
+				  var cardId = json.cards[i];
+				  // Skip cards that aren't in loaded sets
+				  if (typeof cardSet[cardId] === 'undefined') {
+					skippedCards++;
+					continue;
+				  }
 			      //increment count, add to playerCards if not present yet
-			      var pci = playerCards.indexOf(json.cards[i]);
+			      var pci = playerCards.indexOf(cardId);
 				  if (pci < 0) {
 					pci = playerCards.length;
-					playerCards.push(json.cards[i]);
+					playerCards.push(cardId);
 					countSoFar[pci] = 1;
 				  }
 				  else countSoFar[pci]++;
+				}
+				if (skippedCards > 0) {
+				  console.warn('Skipped ' + skippedCards + ' cards not in loaded sets');
 				}
 			  } //create a deck for this identity - try precon first, then random generation
 			  else {
@@ -1548,7 +1605,27 @@
 								
 								// Load the deck into the current deck
 								json.identity = parseInt(deck.identity);
-								json.cards = deck.cards.slice();
+								
+								// Check if identity exists in loaded sets
+								if (typeof cardSet[json.identity] === 'undefined') {
+									alert('Deck identity is not in loaded sets. Please enable the required card set in Settings.');
+									return;
+								}
+								
+								// Filter out cards not in loaded sets
+								json.cards = [];
+								var skippedCards = 0;
+								for (var i = 0; i < deck.cards.length; i++) {
+									var cardId = deck.cards[i];
+									if (typeof cardSet[cardId] !== 'undefined') {
+										json.cards.push(cardId);
+									} else {
+										skippedCards++;
+									}
+								}
+								if (skippedCards > 0) {
+									console.warn('Skipped ' + skippedCards + ' cards not in loaded sets');
+								}
 								
 								// Rebuild deckCounts from json.cards
 								deckCounts = {};
@@ -1581,7 +1658,11 @@
 								UpdateCardCountsUI();
 								
 								// Show success message but keep modal open
-								$('#load-deck-modal-message').html('<span style="color: #33ff33;">Deck "' + deck.name + '" loaded successfully!</span>');
+								var successMsg = 'Deck "' + deck.name + '" loaded successfully!';
+								if (skippedCards > 0) {
+									successMsg += ' (' + skippedCards + ' cards skipped - not in loaded sets)';
+								}
+								$('#load-deck-modal-message').html('<span style="color: #33ff33;">' + successMsg + '</span>');
 							} catch(e) {
 								console.error('Error loading deck:', e);
 								alert('Error loading deck: ' + e.message);
