@@ -927,6 +927,9 @@ function Break(subroutine) {
     );
   }
   Log('Subroutine "' + subroutine.text + '" broken');
+  
+  // Trigger responseOnSubroutineBroken for cards like Flux Capacitor
+  TriggeredResponsePhase(runner, "responseOnSubroutineBroken", [subroutine], null, "Subroutine Broken");
 }
 
 /**

@@ -2760,6 +2760,31 @@ function Counters(card, counter) {
 }
 
 /**
+ * Get list of choices for Charge mechanic (cards with at least 1 power counter).
+ *
+ * @method ChoicesCharge
+ * @param {Player} player corp or runner
+ * @returns {Params[]} list of card choices
+ */
+function ChoicesCharge(player) {
+  return ChoicesInstalledCards(player, function(card) {
+    return Counters(card, "power") >= 1;
+  });
+}
+
+/**
+ * Charge a card (add 1 power counter to a card that already has one).
+ *
+ * @method ChargeCard
+ * @param {Card} card card to charge
+ */
+function ChargeCard(card) {
+  if (Counters(card, "power") >= 1) {
+    AddCounters(card, "power", 1);
+  }
+}
+
+/**
  * Gets the runner's link, including effects.<br/>Nothing is logged.
  *
  * @method Link

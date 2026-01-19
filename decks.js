@@ -751,7 +751,7 @@ function LoadDecks() {
   // // ----------------------------------------------------------------------------
   // // You can enable the debug menu at the top of init.js
 
-  if (false) { // Use this to easily disable everything below
+  if (true) { // Use this to easily disable everything below
 
     // debugging = true; //set true to log extra details and pause execution on error
     mainLoopDelay = 50; //for speedy AI vs AI testing (any faster than this and funny things happen at end-of-game)
@@ -760,6 +760,42 @@ function LoadDecks() {
     // SET UP THE MAIN STATES FOR THE RUNNER AND CORP
     // ----------------------------------------------
 
+    // TEST: Flux Capacitor (33087) - Charge mechanic when breaking subroutines
+    RunnerTestField(31001, //identity - Lat
+      [], //heapCards
+      [], //stackCards
+      [30006, 30005, 30004, 33087], //gripCards - Boomerang, Conduit, Botulus (for breaking subs)
+      [33018, 31039], //installed - Revolver (has power counters), Dr. Nuka Vrolyck (has power counters), Flux Capacitor
+      [], //stolen
+      cardBackTexturesRunner,glowTextures,strengthTextures
+    );
+
+    CorpTestField(30059, //identity - The Outfit
+      [], //archivesCards
+      [], //rndCards
+      [], //hqCards 
+      [], //archivesInstalled
+      [30072, 30073], //rndInstalled - Logjam (code gate), Ping (barrier)
+      [], //hqInstalled
+      [], //remotes
+      [], //scored
+      cardBackTexturesCorp,glowTextures,strengthTextures
+    );
+
+    // REZ ICE
+    corp.RnD.ice[0].rezzed = true;
+    corp.RnD.ice[1].rezzed = true;
+
+    runner.rig.programs[0].power = 4;
+    runner.rig.resources[0].power = 4;
+
+    // GIVE CREDITS
+    GainCredits(runner, 20);
+    GainCredits(corp, 10);
+
+    // START A RUN ON R&D TO TEST FLUX CAPACITOR
+    ChangePhase(phases.runnerActionMain);
+    
     // RunnerTestField(31001, //identity
     //   [30032, 30032, 35009, 35008, 30007, 30007], //heapCards
     //   [35015, 35022, 35022, 30033, 35014, 1039, 35030, 35005, 35016, 35034], //stackCards

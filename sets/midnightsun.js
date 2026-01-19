@@ -518,7 +518,7 @@ cardSet[33018] = {
   //2[credit]: +3 strength.
   abilities: [
     {
-      text: "Break 1 sentry subroutine (trash or use power counter)",
+      text: "Break 1 sentry subroutine",
       Enumerate: function () {
         if (!CheckEncounter()) return [];
         if (!CheckSubType(attackedServer.ice[approachIce], "Sentry")) return [];
