@@ -15,6 +15,7 @@
 //    - Follow the format of existing set files (e.g., systemgateway.js)
 //    - Each card needs a unique ID in an unused range:
 //        Core Set:           1000-1999
+//        Downfall:           26001-26065
 //        System Gateway:     30000-30999
 //        System Update 2021: 31000-31999
 //        Midnight Sun:       33000-33065
@@ -67,6 +68,7 @@
 //   Key              File               Code   Description
 //   ─────────────────────────────────────────────────────────────────────
 //   coreset          coreset.js         core   Original Core Set (1000-1999)
+//   downfall         downfall.js        df     Downfall (26001-26065)
 //   systemgateway    systemgateway.js   sg     System Gateway (30000-30999)
 //   systemupdate2021 systemupdate2021.js su21  System Update 2021 (31000-31999)
 //   midnightsun      midnightsun.js     ms     Midnight Sun (33000-33065)
@@ -89,6 +91,7 @@ var setRegistry = {
   availableSets: {
     systemgateway:    { file: 'systemgateway',    code: 'sg',   name: 'System Gateway',     hidden: false, untested: false, idRange: [30000, 30999] },
     systemupdate2021: { file: 'systemupdate2021', code: 'su21', name: 'System Update 2021', hidden: false, untested: false, idRange: [31000, 31999] },
+    downfall:         { file: 'downfall',         code: 'df',   name: 'Downfall',           hidden: true,  untested: true,  idRange: [26001, 26065] },
     midnightsun:      { file: 'midnightsun',      code: 'ms',   name: 'Midnight Sun',       hidden: true,  untested: true,  idRange: [33000, 33065] },
     parhelion:        { file: 'parhelion',        code: 'ph',   name: 'Parhelion',          hidden: true,  untested: true,  idRange: [33066, 33128] },
     elevation:        { file: 'elevation',        code: 'elev', name: 'Elevation',          hidden: false, untested: true,  idRange: [35000, 35999] },

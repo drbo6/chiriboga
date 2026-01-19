@@ -214,6 +214,10 @@ function CheckStrength(card) {
   if (attackedServer == null || approachIce < 0 || !encountering) {
     return false;
   }
+  //Check if ice still exists (might have been trashed during encounter)
+  if (!attackedServer.ice || !attackedServer.ice[approachIce]) {
+    return false;
+  }
 
   var cardStrength = Strength(card);
   var iceStrength = Strength(attackedServer.ice[approachIce]);

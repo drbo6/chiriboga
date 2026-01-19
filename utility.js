@@ -3072,6 +3072,10 @@ function ModifyingTriggers(
  */
 function ChoicesEncounteredSubroutines() {
   var ret = [];
+  //Check if ice still exists (might have been trashed during encounter)
+  if (!attackedServer || !attackedServer.ice || !attackedServer.ice[approachIce]) {
+    return ret;
+  }
   for (var i = 0; i < attackedServer.ice[approachIce].subroutines.length; i++) {
     var subroutine = attackedServer.ice[approachIce].subroutines[i];
     if (!subroutine.broken) {

@@ -751,7 +751,7 @@ function LoadDecks() {
   // // ----------------------------------------------------------------------------
   // // You can enable the debug menu at the top of init.js
 
-  if (false) { // Use this to easily disable everything below
+  if (true) { // Use this to easily disable everything below
 
     // debugging = true; //set true to log extra details and pause execution on error
     mainLoopDelay = 50; //for speedy AI vs AI testing (any faster than this and funny things happen at end-of-game)
@@ -760,12 +760,13 @@ function LoadDecks() {
     // SET UP THE MAIN STATES FOR THE RUNNER AND CORP
     // ----------------------------------------------
 
-    // TEST: No Free Lunch (33020) - Trash for credits or tag removal
+    // TEST: Chisel (26003) - Virus Trojan that trashes ice when strength <= 0
+    // Ping (30073) has strength 1, Logjam (30072) has strength 2
     RunnerTestField(31002, //identity - Reina Roja
       [], //heapCards
-      [33020, 33020, 30005, 30006], //stackCards - 2x No Free Lunch in stack to draw later
-      [33020, 30020, 30005], //gripCards - No Free Lunch, Sure Gamble, Conduit
-      [33020, 33020], //installed - 2x No Free Lunch already installed
+      [], //stackCards
+      [26003, 30020, 30005, 30006], //gripCards - Chisel (to test installing), Sure Gamble, Conduit
+      [30003], //installed - Docklands Pass (console for MU)
       [], //stolen
       cardBackTexturesRunner,glowTextures,strengthTextures
     );
@@ -775,25 +776,34 @@ function LoadDecks() {
       [], //rndCards
       [], //hqCards 
       [], //archivesInstalled
-      [30072, 30073], //rndInstalled - Logjam (code gate), Ping (barrier)
+      [30073, 30072], //rndInstalled - Ping (str 1), Logjam (str 2) - outermost first
       [], //hqInstalled
-      [[30072, 30074]], //remotes - a remote with ice and an agenda
+      [], //remotes
       [], //scored
       cardBackTexturesCorp,glowTextures,strengthTextures
     );
 
-    // REZ ICE
-    corp.RnD.ice[0].rezzed = true;
-    corp.RnD.ice[1].rezzed = true;
+    // REZ ICE on R&D
+    corp.RnD.ice[0].rezzed = true; // Ping (str 1) - outermost
+    corp.RnD.ice[1].rezzed = true; // Logjam (str 2) - innermost
 
-    // GIVE CREDITS - start with low credits to encourage using the ability
-    GainCredits(runner, 2);
+    // INSTALL CHISEL ON OUTERMOST ICE (Ping)
+    // Ping has strength 1, so with 1 virus counter Chisel will trash it
+    var targetIce = corp.RnD.ice[0]; // Ping
+    targetIce.hostedCards = [];
+    var chiselCard = InstanceCardsPush(26003, targetIce.hostedCards, 1, cardBackTexturesRunner, glowTextures, strengthTextures)[0];
+    chiselCard.host = targetIce;
+    chiselCard.virus = 0; // Start with 0 counters - first encounter will add 1, second will trash
+
+    // GIVE CREDITS
+    GainCredits(runner, 10);
     GainCredits(corp, 10);
 
-    // ADD TAGS - to test tag removal ability
-    AddTags(2);
-
-    // START RUNNER TURN
+    // START RUNNER ACTION PHASE
+    // Runner can: 
+    // 1. Run R&D to encounter Ping with Chisel (will add virus counter, reducing Ping to str 0)
+    // 2. Run again to trash Ping
+    // 3. Install second Chisel on Logjam
     ChangePhase(phases.runnerActionMain);
     
     // RunnerTestField(31001, //identity
