@@ -482,10 +482,11 @@ cardSet[35034] = {
       var creditsToTake = this.credits;
       Log("Side Hustle pays out " + creditsToTake + " credits");
       TakeCredits(runner, this, creditsToTake);
-      //Trash is unpreventable since it's part of the mandatory triggered effect
-      Trash(this, false, function(cardsTrashed) {
-        Draw(runner, 1);
-      }, this);
+      //Use MoveCard to avoid phase change in automatic trigger (trash is unpreventable anyway)
+      Log(GetTitle(this, true) + " trashed");
+      MoveCard(this, runner.heap);
+      this.faceUp = true;
+      Draw(runner, 1);
     }
   },
   
