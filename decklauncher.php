@@ -159,6 +159,8 @@
 				if (savedJson) {
 					var saved = JSON.parse(savedJson);
 					if (saved && Array.isArray(saved.customSets) && saved.customSets.length > 0) {
+						// Valid localStorage settings found - use them instead of defaults
+						usedLocalStorage = true;
 						// Filter out 'sg' (already loaded) and map to file names
 						for (var i = 0; i < saved.customSets.length; i++) {
 							var code = saved.customSets[i];
@@ -167,8 +169,9 @@
 							}
 						}
 						if (setsToLoad.length > 0) {
-							usedLocalStorage = true;
 							console.log('Loading custom sets from localStorage:', setsToLoad);
+						} else {
+							console.log('localStorage settings found, only System Gateway enabled');
 						}
 					}
 				}
