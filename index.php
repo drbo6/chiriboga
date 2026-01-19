@@ -1348,16 +1348,24 @@ $version = "0.6.11-BETA";
       var alternateFactions = settingsOverrides.alternateFactions;
       
       // Initialize perk pools for opponent starting perks
-      var regularPerks = [1,1,1,2,2,2,3,3,3];
+      // Regular perks are clustered: each cluster contains [1,2,3] shuffled
+      // This ensures perks 1, 2, and 3 each appear once before any repeats
+      var regularPerks = [];
+      for (var cluster = 0; cluster < 3; cluster++) {
+        var clusterPerks = [1, 2, 3];
+        // Shuffle this cluster
+        for (var i = clusterPerks.length - 1; i > 0; i--) {
+          var j = Math.floor(Math.random() * (i + 1));
+          var temp = clusterPerks[i];
+          clusterPerks[i] = clusterPerks[j];
+          clusterPerks[j] = temp;
+        }
+        // Add shuffled cluster to pool
+        regularPerks = regularPerks.concat(clusterPerks);
+      }
       var bossPerks = [4,5,6];
       
-      // Shuffle the perk pools
-      for (var i = regularPerks.length - 1; i > 0; i--) {
-        var j = Math.floor(Math.random() * (i + 1));
-        var temp = regularPerks[i];
-        regularPerks[i] = regularPerks[j];
-        regularPerks[j] = temp;
-      }
+      // Shuffle the boss perk pool
       for (var i = bossPerks.length - 1; i > 0; i--) {
         var j = Math.floor(Math.random() * (i + 1));
         var temp = bossPerks[i];
