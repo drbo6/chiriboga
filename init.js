@@ -2157,8 +2157,6 @@ function debugLoseGame() {
 
 // Steal or Score a random agenda (depending on whether player is Runner or Corp)
 function debugStealScoreAgenda() {
-  $('#debug-modal').css('display','none');
-  
   if (viewingPlayer === runner) {
     // Runner steals an agenda - find agendas in corp's servers
     var agendas = [];
@@ -2260,8 +2258,6 @@ function debugStealScoreAgenda() {
 
 // Opponent Steals or Scores a random agenda (opposite of debugStealScoreAgenda)
 function debugOpponentStealScoreAgenda() {
-  $('#debug-modal').css('display','none');
-  
   if (viewingPlayer === corp) {
     // Opponent is Runner - they steal an agenda from corp's servers
     var agendas = [];
