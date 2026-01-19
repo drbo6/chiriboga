@@ -44,10 +44,8 @@
 //    - Add 'yoursetname' to decklauncherSets array for custom game defaults
 //    - Note: systemgateway is always loaded and cannot be disabled
 //
-// 5. (OPTIONAL) UPDATE populateSetCheckboxes() IN index.php
-//    Find the setOrder array and add your set key to control display order:
-//    var setOrder = ['systemgateway', 'systemupdate2021', 'elevation', 
-//                    'coreset', 'midnightsun', 'yoursetname'];
+// 5. (OPTIONAL) The display order in index.php settings UI follows the order
+//    sets are defined in availableSets above. Place new sets in desired position.
 //
 // =============================================================================
 // SET PROPERTIES REFERENCE
@@ -87,6 +85,7 @@ var setRegistry = {
   // Set 'hidden: true' to hide a set from the index.php settings UI
   // Set 'untested: true' to show "(Untested)" after the set name
   // Set 'idRange: [start, end]' for card ID range (used for set detection)
+  // NOTE: Display order in settings UI follows the order defined here
   availableSets: {
     systemgateway:    { file: 'systemgateway',    code: 'sg',   name: 'System Gateway',     hidden: false, untested: false, idRange: [30000, 30999] },
     systemupdate2021: { file: 'systemupdate2021', code: 'su21', name: 'System Update 2021', hidden: false, untested: false, idRange: [31000, 31999] },

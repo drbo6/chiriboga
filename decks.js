@@ -751,7 +751,7 @@ function LoadDecks() {
   // // ----------------------------------------------------------------------------
   // // You can enable the debug menu at the top of init.js
 
-  if (true) { // Use this to easily disable everything below
+  if (false) { // Use this to easily disable everything below
 
     // debugging = true; //set true to log extra details and pause execution on error
     mainLoopDelay = 50; //for speedy AI vs AI testing (any faster than this and funny things happen at end-of-game)
@@ -759,35 +759,6 @@ function LoadDecks() {
 
     // SET UP THE MAIN STATES FOR THE RUNNER AND CORP
     // ----------------------------------------------
-
-
-
-  // Side Hustle (35034), En Passant (35012), Red Team (35009)
-  RunnerTestField(30001,
-    [], //heap
-    [30007, 30007, 30007], //stack
-    [31003, 35034, 33092], //grip
-    [30018, 35034], //installed: Side Hustle, En Passant, Red Team
-    [],
-    cardBackTexturesRunner,glowTextures,strengthTextures
-  );
-
-  CorpTestField(30059,
-    [], //archives
-    [30067, 30067, 30067, 30067, 30067], //rnd
-    [30067, 30067], //hq
-    [], [], [], [], [],
-    cardBackTexturesCorp,glowTextures,strengthTextures
-  );
-
-  runner.rig.resources[0].credits = 12;
-  runner.rig.resources[1].credits = 5;
-
-  GainCredits(runner, 10);
-  GainCredits(corp, 10);
-
-  ChangePhase(phases.runnerStartResponse);
-
 
     // RunnerTestField(31001, //identity
     //   [30032, 30032, 35009, 35008, 30007, 30007], //heapCards

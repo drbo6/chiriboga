@@ -75,7 +75,7 @@
 			} else {
 				// Fallback if setRegistry not available
 				console.error('setRegistry not found in config.js, using fallback sets');
-				setsToLoad = ['coreset', 'systemgateway', 'systemupdate2021', 'midnightsun', 'parhelion', 'elevation'];
+				setsToLoad = ['systemgateway', 'systemupdate2021'];
 			}
 			
 			// Add engine-only sets (not in registry, used for tutorials and gauntlet perks)

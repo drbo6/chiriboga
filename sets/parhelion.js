@@ -24,23 +24,24 @@ cardSet[33092] = {
   },
   
   //Click ability: spend 1 power counter to draw 3 cards
-  Enumerate: function () {
-    if (!CheckActionPhase()) return [];
-    if (!CheckClicks(1)) return [];
-    if (!CheckCounters(this, "power", 1)) return [];
-    return [{}];
-  },
-  Resolve: function (params) {
-    SpendClicks(1);
-    SpendCounters(this, "power", 1);
-    Draw(runner, 3);
-    //Check if empty and trash
-    if (!CheckCounters(this, "power", 1)) {
-      Log(GetTitle(this, true) + " trashed (empty)");
-      MoveCard(this, runner.heap);
-      this.faceUp = true;
-    }
-  },
+  abilities: [
+    {
+      text: "Draw 3 cards.",
+      Enumerate: function () {
+        if (!CheckActionClicks(runner, 1)) return [];
+        if (!CheckCounters(this, "power", 1)) return [];
+        return [{}];
+      },
+      Resolve: function (params) {
+        SpendClicks(runner, 1);
+        RemoveCounters(this, "power", 1);
+        Draw(runner, 3, function() {
+          //Check if empty and trash
+          if (!CheckCounters(this, "power", 1)) Trash(this);
+        }, this);
+      },
+    },
+  ],
   
   //AI helper functions
   AIWouldUse: function () {

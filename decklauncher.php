@@ -130,13 +130,23 @@
 		window._customSetsReady = false;
 		
 		// Dynamic set loader for decklauncher
-		// Maps set codes to file names
-		var setFileMap = {
-			'su21': 'systemupdate2021',
-			'elev': 'elevation',
-			'core': 'coreset',
-			'ms': 'midnightsun'
-		};
+		// Build setFileMap dynamically from setRegistry (defined in config.js)
+		var setFileMap = {};
+		if (typeof setRegistry !== 'undefined' && setRegistry.availableSets) {
+			for (var setKey in setRegistry.availableSets) {
+				var set = setRegistry.availableSets[setKey];
+				if (set && set.code && set.file) {
+					setFileMap[set.code] = set.file;
+				}
+			}
+		} else {
+			// Fallback if setRegistry not available
+			console.error('setRegistry not found in config.js, using fallback setFileMap');
+			setFileMap = {
+				'sg': 'systemgateway',
+				'su21': 'systemupdate2021'
+			};
+		}
 		
 		// Load additional sets based on localStorage settings
 		function loadCustomSets(callback) {
@@ -178,7 +188,7 @@
 					console.log('Loading custom sets from setRegistry defaults:', setsToLoad);
 				} else {
 					// Fallback defaults
-					setsToLoad = ['systemupdate2021', 'elevation'];
+					setsToLoad = ['systemupdate2021'];
 					console.log('Loading custom sets from hardcoded fallback:', setsToLoad);
 				}
 			}
@@ -706,7 +716,25 @@
 			});
 
 			var showingOnlySelected = false;
-			var currentFilter = 'all'; // 'all', 'systemgateway', 'systemupdate2021'
+			var currentFilter = 'all'; // Will cycle through 'all' and set codes from setRegistry
+			
+			// Build filter options dynamically from setRegistry
+			var filterOptions = ['all'];
+			var filterLabels = { 'all': 'ALL CARDS' };
+			if (typeof setRegistry !== 'undefined' && setRegistry.availableSets) {
+				for (var setKey in setRegistry.availableSets) {
+					var set = setRegistry.availableSets[setKey];
+					if (set && set.code) {
+						filterOptions.push(set.code);
+						filterLabels[set.code] = set.code.toUpperCase();
+					}
+				}
+			} else {
+				// Fallback if setRegistry not available
+				filterOptions = ['all', 'sg', 'su21'];
+				filterLabels = { 'all': 'ALL CARDS', 'sg': 'SG', 'su21': 'SU21' };
+			}
+			var filterIndex = 0;
 
 			function ClearDeck() {
 				json.cards = [];
@@ -718,36 +746,18 @@
 			}
 
 			function CycleFilter() {
-				if (currentFilter === 'all') {
-					currentFilter = 'systemgateway';
-					$('#filterdeck').html('FILTER:<br>SG');
-				} else if (currentFilter === 'systemgateway') {
-					currentFilter = 'systemupdate2021';
-					$('#filterdeck').html('FILTER:<br>SU21');
-				} else if (currentFilter === 'systemupdate2021') {
-					currentFilter = 'elevation';
-					$('#filterdeck').html('FILTER:<br>ELEV');
-				} else {
-					currentFilter = 'all';
-					$('#filterdeck').html('FILTER:<br>ALL CARDS');
-				}
+				filterIndex = (filterIndex + 1) % filterOptions.length;
+				currentFilter = filterOptions[filterIndex];
+				var label = filterLabels[currentFilter] || currentFilter.toUpperCase();
+				$('#filterdeck').html('FILTER:<br>' + label);
 				ApplyFilter();
 			}
 
 			function CycleFilterReverse() {
-				if (currentFilter === 'all') {
-					currentFilter = 'elevation';
-					$('#filterdeck').html('FILTER:<br>ELEV');
-				} else if (currentFilter === 'elevation') {
-					currentFilter = 'systemupdate2021';
-					$('#filterdeck').html('FILTER:<br>SU21');
-				} else if (currentFilter === 'systemupdate2021') {
-					currentFilter = 'systemgateway';
-					$('#filterdeck').html('FILTER:<br>SG');
-				} else {
-					currentFilter = 'all';
-					$('#filterdeck').html('FILTER:<br>ALL CARDS');
-				}
+				filterIndex = (filterIndex - 1 + filterOptions.length) % filterOptions.length;
+				currentFilter = filterOptions[filterIndex];
+				var label = filterLabels[currentFilter] || currentFilter.toUpperCase();
+				$('#filterdeck').html('FILTER:<br>' + label);
 				ApplyFilter();
 			}
 
@@ -795,12 +805,9 @@
 					
 					if (cardInfo) {
 						var packCode = cardInfo.pack_code || '';
-						if (currentFilter === 'systemgateway' && packCode === 'sg') {
+						// currentFilter is now a set code (e.g., 'sg', 'su21', 'elev', 'ms', 'ph')
+						if (packCode === currentFilter) {
 							$(this).show();
-						} else if (currentFilter === 'systemupdate2021' && packCode === 'su21') {
-							$(this).show();
-						} else if (currentFilter === 'elevation' && packCode === 'elev') {
-							$(this).show();							
 						} else {
 							$(this).hide();
 						}

@@ -187,7 +187,7 @@
 				}
 			} else {
 				// Fallback if setRegistry not available
-				setsToLoad = ['systemupdate2021', 'elevation', 'coreset', 'midnightsun'];
+				setsToLoad = ['systemupdate2021'];
 			}
 			
 			if (setsToLoad.length === 0) {
@@ -3708,7 +3708,25 @@
 			});
 
 			var showingOnlySelected = false;
-			var currentFilter = 'all'; // 'all', 'systemgateway', 'systemupdate2021'
+			var currentFilter = 'all'; // Will cycle through 'all' and set codes from setRegistry
+			
+			// Build filter options dynamically from setRegistry
+			var filterOptions = ['all'];
+			var filterLabels = { 'all': 'ALL CARDS' };
+			if (typeof setRegistry !== 'undefined' && setRegistry.availableSets) {
+				for (var setKey in setRegistry.availableSets) {
+					var set = setRegistry.availableSets[setKey];
+					if (set && set.code) {
+						filterOptions.push(set.code);
+						filterLabels[set.code] = set.code.toUpperCase();
+					}
+				}
+			} else {
+				// Fallback if setRegistry not available
+				filterOptions = ['all', 'sg', 'su21'];
+				filterLabels = { 'all': 'ALL CARDS', 'sg': 'SG', 'su21': 'SU21' };
+			}
+			var filterIndex = 0;
 
 			function ClearDeck() {
 				json.cards = [];
@@ -3721,19 +3739,10 @@
 			}
 
 			function CycleFilter() {
-				if (currentFilter === 'all') {
-					currentFilter = 'systemgateway';
-					$('#filterdeck').html('FILTER:<br>SG');
-				} else if (currentFilter === 'systemgateway') {
-					currentFilter = 'systemupdate2021';
-					$('#filterdeck').html('FILTER:<br>SU21');
-				} else if (currentFilter === 'systemupdate2021') {
-					currentFilter = 'elevation';
-					$('#filterdeck').html('FILTER:<br>ELEV');
-				} else {
-					currentFilter = 'all';
-					$('#filterdeck').html('FILTER:<br>ALL CARDS');
-				}
+				filterIndex = (filterIndex + 1) % filterOptions.length;
+				currentFilter = filterOptions[filterIndex];
+				var label = filterLabels[currentFilter] || currentFilter.toUpperCase();
+				$('#filterdeck').html('FILTER:<br>' + label);
 				ApplyFilter();
 			}
 
@@ -3760,12 +3769,9 @@
 					
 					if (cardInfo) {
 						var packCode = cardInfo.pack_code || '';
-						if (currentFilter === 'systemgateway' && packCode === 'sg') {
+						// currentFilter is now a set code (e.g., 'sg', 'su21', 'elev', 'ms', 'ph')
+						if (packCode === currentFilter) {
 							$(this).show();
-						} else if (currentFilter === 'systemupdate2021' && packCode === 'su21') {
-							$(this).show();
-						} else if (currentFilter === 'elevation' && packCode === 'elev') {
-							$(this).show();							
 						} else {
 							$(this).hide();
 						}

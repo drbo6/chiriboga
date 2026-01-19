@@ -157,7 +157,7 @@ $version = "0.6.11-BETA";
     } else {
       // Fallback if setRegistry not available
       console.error('setRegistry not found in config.js, using fallback sets');
-      setsToLoad = ['coreset', 'systemgateway', 'systemupdate2021', 'midnightsun', 'parhelion', 'elevation'];
+      setsToLoad = ['systemgateway', 'systemupdate2021'];
     }
     
     // Document.write script tags with proper cache busting from PHP filetimes
@@ -751,11 +751,9 @@ $version = "0.6.11-BETA";
       var customHtml = '';
       var gauntletHtml = '';
       
-      // Define display order
-      var setOrder = ['systemgateway', 'systemupdate2021', 'elevation', 'midnightsun', 'coreset'];
-      
-      for (var i = 0; i < setOrder.length; i++) {
-        var setKey = setOrder[i];
+      // Iterate through all sets in setRegistry.availableSets
+      // Display order follows the order defined in config.js
+      for (var setKey in setRegistry.availableSets) {
         var set = setRegistry.availableSets[setKey];
         if (!set) continue;
         
