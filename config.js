@@ -16,10 +16,13 @@
 //    - Each card needs a unique ID in an unused range:
 //        Core Set:           1000-1999
 //        Downfall:           26001-26065
+//        Uprising:           26066-26130
 //        System Gateway:     30000-30999
 //        System Update 2021: 31000-31999
 //        Midnight Sun:       33000-33065
 //        Parhelion:          33066-33128
+//        The Automata Initiative: 34001-34065
+//        Rebellion Without Rehearsal: 34066-34130
 //        Elevation:          35000-35999
 //    - Choose an unused range for your new set (e.g., 36000-36999)
 //
@@ -74,6 +77,7 @@
 //   systemupdate2021 systemupdate2021.js su21  System Update 2021 (31000-31999)
 //   midnightsun      midnightsun.js     ms     Midnight Sun (33000-33065)
 //   parhelion        parhelion.js       ph     Parhelion (33066-33128)
+//   automatainitiative automatainitiative.js tai The Automata Initiative (34001-34065)
 //   rebellion        rebellion.js       rwr    Rebellion Without Rehearsal (34066-34130)
 //   elevation        elevation.js       elev   Elevation (35000-35999)
 //
@@ -96,6 +100,7 @@ var setRegistry = {
     downfall:         { file: 'downfall',         code: 'df',   name: 'Downfall',           hidden: true,  untested: true,  idRange: [26001, 26065] },
     midnightsun:      { file: 'midnightsun',      code: 'ms',   name: 'Midnight Sun',       hidden: true,  untested: true,  idRange: [33000, 33065] },
     parhelion:        { file: 'parhelion',        code: 'ph',   name: 'Parhelion',          hidden: true,  untested: true,  idRange: [33066, 33128] },
+    automatainitiative: { file: 'automatainitiative', code: 'tai', name: 'The Automata Initiative', hidden: true, untested: true, idRange: [34001, 34065] },
     elevation:        { file: 'elevation',        code: 'elev', name: 'Elevation',          hidden: false, untested: true,  idRange: [35000, 35999] },
     uprising:         { file: 'uprising',         code: 'ur',   name: 'Uprising',           hidden: true,  untested: true,  idRange: [26066, 26130] },
     rebellion:        { file: 'rebellion',        code: 'rwr',  name: 'Rebellion Without Rehearsal', hidden: true, untested: true, idRange: [34066, 34130] },

@@ -750,7 +750,7 @@ function LoadDecks() {
   // // SET P=R OR P=C IN THE URL TO VIEW AS RUNNER OR CORP RESPECTIVELY
   // // ----------------------------------------------------------------------------
 
-  // // Card Type Reference Examples
+// // Card Type Reference Examples
   // // ----------------------------
   // // Each card type with a sample card code
   // // RUNNER CARD TYPES:
@@ -759,6 +759,9 @@ function LoadDecks() {
   // //   hardware  - 30003 (Carnivore)
   // //   program   - 30004 (Botulus)
   // //   resource  - 30009 (Cookbook)
+  // //   killer    - 30015 (Carmen)
+  // //   decoder   - 30005 (Buzzsaw)
+  // //   fracter   - 30006 (Cleaver)
     
   // // CORP CARD TYPES:
   // //   identity  - 30035 (Haas-Bioroid: Precision Design)
@@ -767,8 +770,11 @@ function LoadDecks() {
   // //   ice       - 30038 (Ansel 1.0)
   // //   operation - 30040 (Seamless Launch)
   // //   upgrade   - 30042 (Manegarm Skunkworks)
+  // //   sentry    - 30047 (Karuna)
+  // //   code gate - 30054 (Funhouse)
+  // //   barrier   - 30039 (Bran 1.0)
 
-  if (false) { // Use this to easily disable everything below
+  if (true) { // Use this to easily disable everything below
 
     // debugging = true; //set true to log extra details and pause execution on error
     mainLoopDelay = 50; //for speedy AI vs AI testing (any faster than this and funny things happen at end-of-game)
@@ -782,7 +788,7 @@ function LoadDecks() {
     RunnerTestField(31002, //identity - Reina Roja
       [], //heapCards
       [], //stackCards
-      [26003, 34082, 26073, 30005, 30006], //gripCards - Chisel (to test installing), Sure Gamble, Conduit
+      [34017, 34017, 26073, 30005, 30006], //gripCards - Chisel (to test installing), Sure Gamble, Conduit
       [30003], //installed - Docklands Pass (console for MU)
       [], //stolen
       cardBackTexturesRunner,glowTextures,strengthTextures
@@ -795,7 +801,7 @@ function LoadDecks() {
       [], //archivesInstalled
       [30073, 30072], //rndInstalled - Ping (str 1), Logjam (str 2) - outermost first
       [], //hqInstalled
-      [[30069],[30069],[30069],[30069]], //remotes
+      [[30069],[30069, 1074,30039],[30069],[30069]], //remotes 01074
       [], //scored
       cardBackTexturesCorp,glowTextures,strengthTextures
     );
@@ -814,7 +820,7 @@ function LoadDecks() {
 
     // GIVE CREDITS
     GainCredits(runner, 10);
-    GainCredits(corp, 10);
+    GainCredits(corp, 20);
 
     // START RUNNER ACTION PHASE
     // Runner can: 

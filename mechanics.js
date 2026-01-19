@@ -1502,6 +1502,11 @@ function Derez(card) {
   if (card.rezzed) card.knownToRunner = true;
   card.rezzed = false;
   Log(GetTitle(card, true) + " derezzed");
+  //trigger responseOnDerez for cards that care about derezzing
+  //Note: TriggeredResponsePhase already has an early-exit if no triggers exist,
+  //but we call AutomaticTriggers first which doesn't have that check
+  AutomaticTriggers("automaticOnDerez", [card]);
+  TriggeredResponsePhase(playerTurn, "responseOnDerez", [card], function() {}, "Derez");
 }
 
 /**

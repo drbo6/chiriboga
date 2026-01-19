@@ -1908,8 +1908,19 @@ class CorpAI {
 		//ignore effect of hosted cards for some ice e.g. Magnet
 		if (!card.AIDisablesHostedPrograms) {
 		  //if a card is hosted (e.g. Tranquilizer) only rez if super rich (the *5 is arbitrary, observe and tweak)
+		  //exception: cards with AIHostedDoesNotPreventRez are not threatening (e.g. Saci just gives runner 3c)
 		  if ( (typeof(card.hostedCards) !== 'undefined') && (card.hostedCards.length > 0) && (Credits(corp) < currentRezCost*5) ) {
-			  rezIce = false;
+			  //check if any hosted card is actually threatening
+			  var hasThreateningHosted = false;
+			  for (var h=0; h<card.hostedCards.length; h++) {
+				  if (!card.hostedCards[h].AIHostedDoesNotPreventRez) {
+					  hasThreateningHosted = true;
+					  break;
+				  }
+			  }
+			  if (hasThreateningHosted) {
+				  rezIce = false;
+			  }
 		  }
 		}
 	  }
