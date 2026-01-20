@@ -14,7 +14,7 @@ registerPrecon({
 	useForCustomGame: true,
 	// deck_set: The set or category this deck belongs to
 	deck_set: "Girometics SG+SU21",
-	URL: "https://claude.ai/chat/61b290bd-a0ff-403a-8a84-c534c9624b3d",
+	URL: "https://netrunnerdb.com/en/decklist/f9e64e9e-7733-460b-bfe5-7d8c6aab3fa1/-sg-su21-ken-express-tenma-the-well-paced-speedrunner",
 	notes: "This identity rewards you for playing run events often, so this deck uses Forged Activation Orders to scout servers safely and Atman (powered by Leech counters from all those runs) as your main tool for breaking through security barriers.",
 	cards: {
 		"30008": 2,  // Leech
