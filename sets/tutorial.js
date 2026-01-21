@@ -59,7 +59,7 @@ tutorial[5] = {
 		corp.RnD.ice[0].rezzed=true;
 		corp.HQ.ice[0].rezzed=true;
         ChangePhase(phases.corpStartDraw);
-        TutorialMessage("For this last part of the tutorial, we will view the game as Corp.\n\nYou can view your facedown installed cards but the Runner cannot.",true);
+        TutorialMessage("Welcome to part 5 of the tutorial series, in which we will review 'Upgrades and Root'.\n\nFor this last guided part of the tutorial series, we will view the game as Corp.\n\nYou can view your facedown installed cards but the Runner cannot.",true);
       },
     },
     {
@@ -349,7 +349,7 @@ tutorial[4] = {
 		corp.remoteServers[0].root[0].advancement=1;
 		corp.remoteServers[1].root[0].advancement=1;
         ChangePhase(phases.corpStartDraw);
-		TutorialMessage("One basic Corp action is to ADVANCE a card by spending a click and a credit to place one advancement counter on it.\n\nOnly some cards can be advanced (all agendas and some specific cards).",true);
+		TutorialMessage("Welcome to part 5 of the tutorial series, in which we will review 'Advancing and Scoring'.\n\nOne basic Corp action is to ADVANCE a card by spending a click and a credit to place one advancement counter on it.\n\nOnly some cards can be advanced (all agendas and some specific cards).",true);
       },
     },
     {
@@ -589,7 +589,7 @@ tutorial[3] = {
 		corp.identityCard.faceUp=true; //not sure why this is needed but it is
         ChangePhase(phases.runnerMulligan);
 		runner.clickTracker=0;
-        TutorialMessage("In a normal game, both players start with 5 credits, 5 cards in hand, and no cards installed.\n\nEach player's IDENTITY card is shown face up, and can have abilities (these ones don't).",true,function(){
+        TutorialMessage("Welcome to part 4 of the tutorial series, in which we will review 'Assets and Trash Cost'.\n\nIn a normal game, both players start with 5 credits, 5 cards in hand, and no cards installed.\n\nEach player's IDENTITY card is shown face up, and can have abilities (these ones don't).",true,function(){
 			TutorialMessage("At the start of a normal game, each player has an opportunity to take a MULLIGAN (shuffle the five cards back into the deck and draw five new cards).\n\nIn this case, choose to keep your hand.");
 			TutorialReplacer = function (input) {
 			  if (input == "m") {
@@ -776,7 +776,7 @@ tutorial[2] = {
 			cardBackTexturesCorp,glowTextures,strengthTextures);
 		corp.identityCard.faceUp=true; //not sure why this is needed but it is
         ChangePhase(phases.corpStartDraw);
-        TutorialMessage("In a normal game, the Corp always starts.\n\nThe Corp must draw a card at the start of their turn, and then has 3 clicks to use during their turn.",true);
+        TutorialMessage("Welcome to part 3 of the tutorial series, in which we will review 'Ice and Icebreakers'. It typically takes less than 5 minutes. You can access it directly from the tutorial menu at a later time if you want to quit at this time.\n\nIn a normal game, the Corp always starts.\n\nThe Corp must draw a card at the start of their turn, and then has 3 clicks to use during their turn.\n\nLet's click continue and watch the Corp start their turn.",true);
       },
     },
     {
@@ -814,7 +814,7 @@ tutorial[2] = {
 		TutorialCommandMessage = {}
 		TutorialWhitelist = null; //not using whitelist
 		Render();
-        TutorialMessage("The second card the Corp installed has created a new server.\n\nServers other than Archives, R&D and HQ are called REMOTE servers.\nThere is nothing in this remote server yet.",true);
+        TutorialMessage("The second card the Corp installed has created a new server.\n\nServers other than Archives, R&D and HQ are called REMOTE servers.\n\nThere is nothing in this remote server yet.",true);
       },
     },
     {
@@ -1065,7 +1065,7 @@ tutorial[1] = {
 		runner.rig.resources[0].credits=3;
         ChangePhase(phases.runnerStartResponse);
 		corp.clickTracker=0;
-        TutorialMessage("Cards come in various colors.\n\nThese represent the FACTION and do not have any effect during the game (although cards of the the same faction are commonly similar).",true,function() {
+        TutorialMessage("Welcome to part 2 of the tutorial series, in which we will review 'Credits and Card Types'. It typically takes less than 5 minutes. You can access it directly from the tutorial menu at a later time if you want to quit at this time.\n\nHave you noticed that cards come in various colors?\n\nThese represent the FACTION and do not have any effect during the game (although cards of the the same faction are commonly similar).",true,function() {
 			TutorialMessage("During a game, both players will often gain and spend CREDITS.\n\nRight now, you (the Runner) currently have 1 credit in your CREDIT POOL (shown below) and the Corp has 5 credits in theirs.",true);
 		});
       },
@@ -1169,7 +1169,7 @@ tutorial[0] = {
 		corp.identityCard.faceUp=true; //not sure why this is needed but it is
         ChangePhase(phases.runnerStartResponse);
 		corp.clickTracker=0;
-        TutorialMessage("Welcome to Netrunner!\n\nYou are the RUNNER (your cards have red backs), and your opponent is the CORP (cards with blue backs).\n\nIf you ever have questions during this tutorial, click the booklet icon next to the menu button to read through the rules.",true);
+        TutorialMessage("Welcome to Netrunner!\n\nYou are the RUNNER (your cards have red backs), and your opponent is the CORP (cards with blue backs).\n\nIf you ever have questions during this tutorial, click the booklet icon next to the menu button to read through the rules.\n\nThis part of the tutorial series will review 'Clicks and Runs'. It will take less than 5 minutes.",true);
       },
     },
     {
