@@ -3,7 +3,7 @@ registerPrecon({
     // name: Display name of the precon deck
     name: "Taxing Reality",
     // identity: Card ID of the identity/commander for this deck
-    identity: "31002",
+    identity: "30051",
     // useAsCustomDefault: Whether this deck is the default choice for its identity when auto-selecting
     useAsCustomDefault: false,
     // useForQuickGame: Whether to include this deck in Quick Game selection
