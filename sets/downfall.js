@@ -38,26 +38,32 @@ cardSet[26003] = {
   //Whenever you encounter host ice, if its strength is 0 or less, trash it.
   //Otherwise, place 1 virus counter on this program.
   responseOnEncounter: {
-    Resolve: function (card) {
+    Enumerate: function (card) {
       //Only trigger when encountering host ice
-      if (!CheckEncounter()) return;
-      if (!this.host) return; //Host gone
-      if (attackedServer.ice[approachIce] != this.host) return;
-      
+      if (!CheckEncounter()) return [];
+      if (!this.host) return [];
+      if (attackedServer.ice[approachIce] != this.host) return [];
+      return [{}]; //Mandatory trigger - one option
+    },
+    Resolve: function (params) {
       var hostIce = this.host;
+      if (!hostIce) return; //Safety check
       var iceStrength = Strength(hostIce);
       
       if (iceStrength <= 0) {
         //Trash the host ice
         Log(GetTitle(this) + " trashes " + GetTitle(hostIce));
-        Trash(hostIce, true); //true = can be prevented
+        Trash(hostIce, false);
+        //End the encounter since the ice is gone
+        //The runner will pass this position per CR rule 8.5.10
+        encountering = false;
       } else {
         //Place 1 virus counter
         AddCounters(this, "virus", 1);
       }
     },
     text: "Chisel triggers",
-    automatic: true, //Mandatory trigger - no player choice involved
+    //Note: NOT automatic because Trash() causes phase changes for responseOnWouldTrash
   },
   
   //AI: Marks Chisel as a special breaker (non-icebreaker that deals with ice)

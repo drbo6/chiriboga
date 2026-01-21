@@ -112,6 +112,7 @@ phaseTemplates.standardResponse = {
       );
       Log("Encountering " + GetTitle(attackedServer.ice[approachIce], true));
       encountering = true;
+      encounteredIce = attackedServer.ice[approachIce]; //store reference to the ice being encountered
 	  //first the automatic triggers
       AutomaticTriggers("automaticOnEncounter", [attackedServer.ice[approachIce]]);
 	  //then the Enumerate ones
@@ -420,7 +421,10 @@ phaseTemplates.globalTriggers = {
 	  console.log("SPOILER: Runner has "+runner.creditPool+" credit(s), "+runner.tags+" tag(s) and "+runner.grip.length+" card(s) in hand: "+JSON.stringify(runner.grip));
     }
     //end of encounter needs to...end the encounter
-    if (currentPhase.identifier == "Run EncounterEnd") encountering = false;
+    if (currentPhase.identifier == "Run EncounterEnd") {
+      encountering = false;
+      encounteredIce = null;
+    }
     
     //START DRBO6 - EDIT FOR MAINTENANCE ACCESS
     // //log approach to server
@@ -1345,6 +1349,10 @@ phases.runSubroutines = {
   identifier: "Run Subroutines",
   Init: function () {
     if (approachIce > attackedServer.ice.length - 1) subroutine = -1;
+    //if ice was trashed or changed (e.g. Chisel trashed host ice), skip subroutines
+    else if (encounteredIce && attackedServer.ice[approachIce] !== encounteredIce) {
+      subroutine = -1; //the ice at this position is not the one we were encountering
+    }
     //if ice was trashed, any remaining subroutines won't fire
     else {
       var approachedIce = attackedServer.ice[approachIce];
@@ -1361,6 +1369,11 @@ phases.runSubroutines = {
     trigger: function () {
       if (approachIce >= attackedServer.ice.length) subroutine = -1; //e.g. data mine trashes itself
       if (subroutine < 0) return [];
+      //if ice was trashed or changed (e.g. Chisel), skip subroutines
+      if (encounteredIce && attackedServer.ice[approachIce] !== encounteredIce) {
+        subroutine = -1;
+        return [];
+      }
       var approachedIce = attackedServer.ice[approachIce];
       //loop through skipping broken subroutines
       for (; subroutine < approachedIce.subroutines.length; subroutine++) {
@@ -1661,6 +1674,7 @@ phases.runEnds.Resolve.n = function () {
     attackedServer = null;
     approachIce = -1;
     encountering = false;
+    encounteredIce = null;
     movement = false;
     UnbreakAll(null); //for visual history we've left subroutines broken until now. let's reset them all
     // Remove run-active class from body to restore green CRT theme

@@ -25,6 +25,7 @@ var attackedServer = null;
 var approachIce = -1; //index, 0 is innermost ice
 var forceNextIce = null; //if not null, next approach is to this ice index
 var encountering = false; //if encountering ice
+var encounteredIce = null; //reference to the ice being encountered (to detect if it changes mid-encounter)
 var movement = false; //if in movement phase
 var subroutine = -1; //for resolving subroutines
 var accessedCards = {root: [], cards: []}; //these cards can no longer be access candidates during this breach

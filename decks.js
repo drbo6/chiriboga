@@ -774,60 +774,58 @@ function LoadDecks() {
   // //   code gate - 30054 (Funhouse)
   // //   barrier   - 30039 (Bran 1.0)
 
-  if (false) { // Use this to easily disable everything below
+  if (true) { // Use this to easily disable everything below
 
-    // debugging = true; //set true to log extra details and pause execution on error
+    debugging = true; //set true to log extra details and pause execution on error
     mainLoopDelay = 50; //for speedy AI vs AI testing (any faster than this and funny things happen at end-of-game)
-    // viewAllFronts = true; //set true to see all card fronts (for testing)     
+    viewAllFronts = true; //set true to see all card fronts (for testing)     
 
     // SET UP THE MAIN STATES FOR THE RUNNER AND CORP
     // ----------------------------------------------
 
     // TEST: Chisel (26003) - Virus Trojan that trashes ice when strength <= 0
     // Ping (30073) has strength 1, Logjam (30072) has strength 2
-    RunnerTestField(31002, //identity - Reina Roja
-      [], //heapCards
-      [], //stackCards
-      [34017, 34017, 26073, 30005, 30006], //gripCards - Chisel (to test installing), Sure Gamble, Conduit
-      [30003], //installed - Docklands Pass (console for MU)
-      [], //stolen
-      cardBackTexturesRunner,glowTextures,strengthTextures
-    );
+ RunnerTestField(30001, [30030,30032,30030,30029,30030,30029,30028,33018,1008,30016,31037], [30034,35011,30033,1014,30034,30029,30033,1005,30031,35003,30032,31015,30028], [35029,33002,35031,30034,30032,30028,33017], [31036,30033,30031,30031,31007,30015,35032], [31071,31073], cardBackTexturesRunner,glowTextures,strengthTextures);
+CorpTestField(30059, [30075,30064,30053,30066,30056,30063,31058,31082,31082,31042], [30074,31071,30062,30053,30064,30062,31072,31076,31058,30066,30075,31075,30063,30075,31076,31072,30056,30070], [31073,31072,31042,30060,31071], [], [31077,31075], [31076,31077,31066], [[31073,31077,30074]], [], cardBackTexturesCorp,glowTextures,strengthTextures);
+runner.scoreArea[1].rezzed=false;
+runner.stack[9].accessedTitlesThisRun=[];
+runner.heap[1].host=null;
+runner.heap[8].host=null;
+runner.heap[10].runWasSuccessful=true;
+corp.archives.cards[0].faceUp=true;
+corp.archives.cards[1].faceUp=true;
+corp.archives.cards[2].faceUp=true;
+corp.archives.cards[2].host=null;
+corp.archives.cards[3].faceUp=true;
+corp.archives.cards[4].faceUp=true;
+corp.archives.cards[5].faceUp=true;
+corp.archives.cards[6].faceUp=true;
+corp.archives.cards[7].faceUp=true;
+corp.archives.cards[7].host=null;
+corp.archives.cards[8].faceUp=true;
+corp.archives.cards[8].host=null;
+corp.archives.cards[9].faceUp=true;
+corp.archives.cards[9].host=null;
+corp.RnD.ice[0].rezzed=true;
+corp.RnD.ice[0].advancement=3;
+corp.RnD.ice[0].hostedCards = [];
+InstanceCardsPush(26003,corp.RnD.ice[0].hostedCards,1,cardBackTexturesRunner,glowTextures,strengthTextures)[0].host = corp.RnD.ice[0];
+corp.RnD.ice[0].hostedCards[0].faceUp=true;
+corp.RnD.ice[0].hostedCards[0].virus=4;
+corp.RnD.ice[0].hostedCards[0].host=corp.RnD.ice[0];
+corp.HQ.ice[0].rezzed=true;
+corp.HQ.ice[0].advancement=3;
+corp.HQ.ice[0].hostedCards = [];
+InstanceCardsPush(26003,corp.HQ.ice[0].hostedCards,1,cardBackTexturesRunner,glowTextures,strengthTextures)[0].host = corp.HQ.ice[0];
+corp.HQ.ice[0].hostedCards[0].faceUp=true;
+corp.HQ.ice[0].hostedCards[0].host=corp.HQ.ice[0];
+corp.HQ.ice[0].cannotBreakUsingAIPrograms=true;
+corp.HQ.ice[1].rezzed=true;
+corp.HQ.ice[2].rezzed=true;
+corp.remoteServers[0].root[0].AITurnsInstalled=1;
+corp.archives.AISuccessfulRuns=1;
+corp.RnD.AISuccessfulRuns=6;
 
-    CorpTestField(30059, //identity - The Outfit
-      [], //archivesCards
-      [], //rndCards
-      [], //hqCards 
-      [], //archivesInstalled
-      [30073, 30072], //rndInstalled - Ping (str 1), Logjam (str 2) - outermost first
-      [], //hqInstalled
-      [[30069],[30069, 1074,30039],[30069],[30069]], //remotes 01074
-      [], //scored
-      cardBackTexturesCorp,glowTextures,strengthTextures
-    );
-
-    // REZ ICE on R&D
-    corp.RnD.ice[0].rezzed = true; // Ping (str 1) - outermost
-    corp.RnD.ice[1].rezzed = true; // Logjam (str 2) - innermost
-
-    // INSTALL CHISEL ON OUTERMOST ICE (Ping)
-    // Ping has strength 1, so with 1 virus counter Chisel will trash it
-    var targetIce = corp.RnD.ice[0]; // Ping
-    targetIce.hostedCards = [];
-    var chiselCard = InstanceCardsPush(26003, targetIce.hostedCards, 1, cardBackTexturesRunner, glowTextures, strengthTextures)[0];
-    chiselCard.host = targetIce;
-    chiselCard.virus = 0; // Start with 0 counters - first encounter will add 1, second will trash
-
-    // GIVE CREDITS
-    GainCredits(runner, 10);
-    GainCredits(corp, 20);
-
-    // START RUNNER ACTION PHASE
-    // Runner can: 
-    // 1. Run R&D to encounter Ping with Chisel (will add virus counter, reducing Ping to str 0)
-    // 2. Run again to trash Ping
-    // 3. Install second Chisel on Logjam
-    ChangePhase(phases.runnerActionMain);
     
     // RunnerTestField(31001, //identity
     //   [30032, 30032, 35009, 35008, 30007, 30007], //heapCards
@@ -886,7 +884,7 @@ function LoadDecks() {
     // // SET THE PHASE
     // // -------------
 
-    // ChangePhase(phases.runnerStartResponse); // Runner starts turn
+     ChangePhase(phases.runnerStartResponse); // Runner starts turn
     // ChangePhase(phases.corpStartDraw);    
 
     // // OTHER STUFF
