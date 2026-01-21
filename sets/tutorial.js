@@ -59,7 +59,7 @@ tutorial[5] = {
 		corp.RnD.ice[0].rezzed=true;
 		corp.HQ.ice[0].rezzed=true;
         ChangePhase(phases.corpStartDraw);
-        TutorialMessage("Welcome to part 5 of the tutorial series, in which we will review 'Upgrades and Root'.\n\nFor this last guided part of the tutorial series, we will view the game as Corp.\n\nYou can view your facedown installed cards but the Runner cannot.",true);
+        TutorialMessage("Welcome to part 6 of the tutorial series, in which we will review 'Upgrades and Root'.\n\nFor this last guided part of the tutorial series, we will view the game as Corp.\n\nYou can view your facedown installed cards but the Runner cannot.",true);
       },
     },
     {
