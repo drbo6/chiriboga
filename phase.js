@@ -1876,7 +1876,13 @@ $(function () {
   $('#history').on('mouseenter', '.historyentry', function(){ showHistoryTooltip(this); });
   $('#history').on('mouseleave', '.historyentry', function(){ hideHistoryTooltip(); });
   $('#history').on('touchstart', '.historyentry', function(){ showHistoryTooltip(this); });
-  $('#history').on('touchend', '.historyentry', function(){ hideHistoryTooltip(); });
+  // On mobile: close tooltip when clicking/tapping anywhere except the history bar itself
+  $(document).on('click touchend', function(e) {
+    // Only close if tooltip is visible and click was not on history
+    if (_historyHoverEl && !$(e.target).closest('#history-wrapper').length) {
+      hideHistoryTooltip();
+    }
+  });
   $('#history-wrapper').on('scroll', function(){
     if (_historyHoverEl) {
       var rect = _historyHoverEl.getBoundingClientRect();
