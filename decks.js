@@ -774,7 +774,7 @@ function LoadDecks() {
   // //   code gate - 30054 (Funhouse)
   // //   barrier   - 30039 (Bran 1.0)
 
-  if (true) { // Use this to easily disable everything below
+  if (false) { // Use this to easily disable everything below
 
     debugging = true; //set true to log extra details and pause execution on error
     mainLoopDelay = 50; //for speedy AI vs AI testing (any faster than this and funny things happen at end-of-game)
