@@ -774,7 +774,7 @@ function LoadDecks() {
   // //   code gate - 30054 (Funhouse)
   // //   barrier   - 30039 (Bran 1.0)
 
-  if (false) { // Use this to easily disable everything below
+  if (true) { // Use this to easily disable everything below
 
     debugging = true; //set true to log extra details and pause execution on error
     mainLoopDelay = 50; //for speedy AI vs AI testing (any faster than this and funny things happen at end-of-game)
@@ -783,48 +783,71 @@ function LoadDecks() {
     // SET UP THE MAIN STATES FOR THE RUNNER AND CORP
     // ----------------------------------------------
 
-    // TEST: Chisel (26003) - Virus Trojan that trashes ice when strength <= 0
-    // Ping (30073) has strength 1, Logjam (30072) has strength 2
- RunnerTestField(30001, [30030,30032,30030,30029,30030,30029,30028,33018,1008,30016,31037], [30034,35011,30033,1014,30034,30029,30033,1005,30031,35003,30032,31015,30028], [35029,33002,35031,30034,30032,30028,33017], [31036,30033,30031,30031,31007,30015,35032], [31071,31073], cardBackTexturesRunner,glowTextures,strengthTextures);
-CorpTestField(30059, [30075,30064,30053,30066,30056,30063,31058,31082,31082,31042], [30074,31071,30062,30053,30064,30062,31072,31076,31058,30066,30075,31075,30063,30075,31076,31072,30056,30070], [31073,31072,31042,30060,31071], [], [31077,31075], [31076,31077,31066], [[31073,31077,30074]], [], cardBackTexturesCorp,glowTextures,strengthTextures);
-runner.scoreArea[1].rezzed=false;
-runner.stack[9].accessedTitlesThisRun=[];
-runner.heap[1].host=null;
-runner.heap[8].host=null;
-runner.heap[10].runWasSuccessful=true;
-corp.archives.cards[0].faceUp=true;
-corp.archives.cards[1].faceUp=true;
-corp.archives.cards[2].faceUp=true;
-corp.archives.cards[2].host=null;
-corp.archives.cards[3].faceUp=true;
-corp.archives.cards[4].faceUp=true;
-corp.archives.cards[5].faceUp=true;
-corp.archives.cards[6].faceUp=true;
-corp.archives.cards[7].faceUp=true;
-corp.archives.cards[7].host=null;
-corp.archives.cards[8].faceUp=true;
-corp.archives.cards[8].host=null;
-corp.archives.cards[9].faceUp=true;
-corp.archives.cards[9].host=null;
-corp.RnD.ice[0].rezzed=true;
-corp.RnD.ice[0].advancement=3;
-corp.RnD.ice[0].hostedCards = [];
-InstanceCardsPush(26003,corp.RnD.ice[0].hostedCards,1,cardBackTexturesRunner,glowTextures,strengthTextures)[0].host = corp.RnD.ice[0];
-corp.RnD.ice[0].hostedCards[0].faceUp=true;
-corp.RnD.ice[0].hostedCards[0].virus=4;
-corp.RnD.ice[0].hostedCards[0].host=corp.RnD.ice[0];
-corp.HQ.ice[0].rezzed=true;
-corp.HQ.ice[0].advancement=3;
-corp.HQ.ice[0].hostedCards = [];
-InstanceCardsPush(26003,corp.HQ.ice[0].hostedCards,1,cardBackTexturesRunner,glowTextures,strengthTextures)[0].host = corp.HQ.ice[0];
-corp.HQ.ice[0].hostedCards[0].faceUp=true;
-corp.HQ.ice[0].hostedCards[0].host=corp.HQ.ice[0];
-corp.HQ.ice[0].cannotBreakUsingAIPrograms=true;
-corp.HQ.ice[1].rezzed=true;
-corp.HQ.ice[2].rezzed=true;
-corp.remoteServers[0].root[0].AITurnsInstalled=1;
-corp.archives.AISuccessfulRuns=1;
-corp.RnD.AISuccessfulRuns=6;
+// Runner Test Field
+// Identity: Tāo Salonga (30019) - Shaper
+RunnerTestField(30019,
+  // heapCards
+  [],
+  // stackCards
+  [26016, 30006, 26090, 26090, 30030, 30030, 34030, 34030], // Self-modifying Code x2, Sure Gamble x2, Bahia Bands x2
+  // gripCards
+  [34089, 34089, 34089, 26090, 30005], // Coalescence x3, Self-modifying Code x1
+  // installed programs/hardware/resources
+  [26016, 30006, 26094, 26094, 26095], // Bukhgalter, Buzzsaw, Cleaver, Rezeki x3, Daily Casts x2, DreamNet
+  // stolen agendas
+  [],
+  cardBackTexturesRunner, glowTextures, strengthTextures
+);
+
+// Corp Test Field
+CorpTestField(30035, // HB: Precision Design
+  // archivesCards
+  [],
+  // rndCards
+  [30047, 30047, 30073, 30073, 30039, 30039, 30054, 30036, 30036, 30042],
+  // hqCards
+  [30040, 30040, 30037, 30037, 30042],
+  // archivesInstalled
+  [],
+  // rndInstalled
+  [30073, 30039], // Ping, Bran
+  // hqInstalled
+  [30047, 30054], // Karuna, Funhouse
+  // remotes
+  [[30037, 30073, 30047]], // Remote with Nico Campaign, Ping, Karuna
+  // scored
+  [],
+  cardBackTexturesCorp, glowTextures, strengthTextures
+);
+
+// Rez ice for testing
+corp.RnD.ice[0].rezzed = true;
+corp.RnD.ice[1].rezzed = true;
+corp.HQ.ice[0].rezzed = true;
+corp.HQ.ice[1].rezzed = true;
+corp.remoteServers[0].ice[0].rezzed = true;
+corp.remoteServers[0].ice[1].rezzed = true;
+corp.remoteServers[0].root[0].rezzed = true;
+
+// Daily Casts loads 8 credits on install automatically via automaticOnInstall
+// No need to manually set credits - the card handles it
+
+runner.rig.resources[0].credits = 8;
+runner.rig.resources[1].credits = 4;
+
+// Give starting credits
+GainCredits(runner, 10);
+GainCredits(corp, 15);
+
+    AddTags(3);
+
+// Start on runner's turn
+ChangePhase(phases.runnerStartResponse);
+
+
+
+
+
 
     
     // RunnerTestField(31001, //identity
@@ -884,7 +907,7 @@ corp.RnD.AISuccessfulRuns=6;
     // // SET THE PHASE
     // // -------------
 
-     ChangePhase(phases.runnerStartResponse); // Runner starts turn
+    // ChangePhase(phases.runnerStartResponse); // Runner starts turn
     // ChangePhase(phases.corpStartDraw);    
 
     // // OTHER STUFF

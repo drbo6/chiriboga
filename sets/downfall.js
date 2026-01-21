@@ -156,3 +156,195 @@ cardSet[26003] = {
     return false;
   },
 };
+
+//Rezeki (26026)
+//Shaper Program, cost 2, MU 1, influence 1
+//When your turn begins, gain 1 credit.
+cardSet[26026] = {
+  title: "Rezeki",
+  imageFile: "26026.png",
+  player: runner,
+  faction: "Shaper",
+  influence: 1,
+  cardType: "program",
+  subTypes: [],
+  installCost: 2,
+  memoryCost: 1,
+  
+  //When your turn begins, gain 1 credit.
+  responseOnRunnerTurnBegins: {
+    Resolve: function () {
+      GainCredits(runner, 1, "", this);
+    },
+    automatic: true,
+  },
+  
+  //AI: This is a good drip economy card
+  AIEconomyInstall: function () {
+    //High priority - consistent drip economy
+    return 2;
+  },
+  
+  AIWorthKeeping: function (installedRunnerCards, spareMU) {
+    //Always worth keeping - cheap drip economy
+    //Check if we have MU for it
+    if (spareMU >= 1) return true;
+    //Even without MU, might be worth keeping if we expect to get more MU
+    return true;
+  },
+};
+
+//Bukhgalter (26016)
+//Criminal Program: Icebreaker - Killer, cost 3, MU 1, strength 1, influence 4
+//Interface → 1 credit: Break 1 sentry subroutine.
+//1 credit: +1 strength.
+//The first time each turn this program fully breaks a piece of ice, gain 2 credits.
+cardSet[26016] = {
+  title: "Bukhgalter",
+  imageFile: "26016.png",
+  player: runner,
+  faction: "Criminal",
+  influence: 4,
+  cardType: "program",
+  subTypes: ["Icebreaker", "Killer"],
+  installCost: 3,
+  memoryCost: 1,
+  strength: 1,
+  
+  //Track strength boost for encounter
+  strengthBoost: 0,
+  modifyStrength: {
+    Resolve: function (card) {
+      if (card == this) return this.strengthBoost;
+      return 0;
+    },
+  },
+  
+  //Track if fully broken an ice this turn
+  hasFullyBrokenThisTurn: false,
+  responseOnRunnerTurnBegins: {
+    Resolve: function () {
+      this.hasFullyBrokenThisTurn = false;
+    },
+    automatic: true,
+    availableWhenInactive: true,
+  },
+  responseOnCorpTurnBegins: {
+    Resolve: function () {
+      this.hasFullyBrokenThisTurn = false;
+    },
+    automatic: true,
+    availableWhenInactive: true,
+  },
+  
+  //Helper function to check if ice is fully broken and trigger credit gain
+  _checkFullyBroken: function () {
+    if (this.hasFullyBrokenThisTurn) return; //Already triggered this turn
+    if (!CheckEncounter()) return;
+    //Check if all subroutines are broken
+    if (!CheckUnbrokenSubroutines()) {
+      //Ice is fully broken!
+      this.hasFullyBrokenThisTurn = true;
+      GainCredits(runner, 2, "", this);
+      Log(GetTitle(this) + " fully broke " + GetTitle(attackedServer.ice[approachIce]) + ", gaining 2[c]");
+    }
+  },
+  
+  abilities: [
+    {
+      text: "Break 1 sentry subroutine.",
+      Enumerate: function () {
+        if (!CheckEncounter()) return [];
+        if (!CheckSubType(attackedServer.ice[approachIce], "Sentry")) return [];
+        if (!CheckCredits(runner, 1, "using", this)) return [];
+        if (!CheckStrength(this)) return [];
+        return ChoicesEncounteredSubroutines();
+      },
+      Resolve: function (params) {
+        var cardRef = this;
+        SpendCredits(
+          runner,
+          1,
+          "using",
+          this,
+          function () {
+            Break(params.subroutine);
+            //Check if ice is now fully broken
+            cardRef._checkFullyBroken();
+          },
+          this
+        );
+      },
+    },
+    {
+      text: "+1 strength.",
+      Enumerate: function () {
+        if (!CheckEncounter()) return [];
+        if (CheckStrength(this)) return []; //Don't over-boost for usability
+        if (!CheckUnbrokenSubroutines()) return []; //Don't boost if nothing to break
+        if (!CheckSubType(attackedServer.ice[approachIce], "Sentry")) return [];
+        if (!CheckCredits(runner, 1, "using", this)) return [];
+        return [{}];
+      },
+      Resolve: function (params) {
+        SpendCredits(
+          runner,
+          1,
+          "using",
+          this,
+          function () {
+            BoostStrength(this, 1);
+          },
+          this
+        );
+      },
+    },
+  ],
+  
+  //Reset strength boost when encounter ends
+  responseOnEncounterEnds: {
+    Resolve: function () {
+      this.strengthBoost = 0;
+    },
+    automatic: true,
+  },
+  
+  //AI: Standard icebreaker implementation
+  AIImplementBreaker: function(rc, result, point, server, cardStrength, iceAI, iceStrength, clicksLeft, creditsLeft) {
+    //Args for ImplementIcebreaker: point, card, cardStrength, iceAI, iceStrength, iceSubTypes, costToUpStr, amtToUpStr, costToBreak, amtToBreak, creditsLeft
+    result = result.concat(
+      rc.ImplementIcebreaker(
+        point,
+        this,
+        cardStrength,
+        iceAI,
+        iceStrength,
+        ["Sentry"],
+        1,  //cost to boost strength
+        1,  //amount to boost strength
+        1,  //cost to break
+        1,  //amount to break
+        creditsLeft
+      )
+    );
+    return result;
+  },
+  
+  AIPreferredInstallChoice: function (choices) {
+    //Standard install - just install in the rig
+    return 0;
+  },
+  
+  AIWorthKeeping: function (installedRunnerCards, spareMU) {
+    //Worth keeping - efficient killer with economy bonus
+    //Check if we already have a killer
+    for (var i = 0; i < installedRunnerCards.length; i++) {
+      if (CheckSubType(installedRunnerCards[i], "Killer")) {
+        //Already have a killer, less important
+        return spareMU >= 2;
+      }
+    }
+    //No killer yet - definitely keep
+    return true;
+  },
+};

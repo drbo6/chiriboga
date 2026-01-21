@@ -251,3 +251,65 @@ cardSet[34082] = {
     return [{ effects: credEff, persistents: persistents }];
   },
 };
+
+//Coalescence (34089)
+//Shaper Program, cost 2, MU 1, influence 2
+//When you install this program, place 2 power counters on it.
+//Hosted power counter: Gain 2 credits. Use this ability only during your turn.
+cardSet[34089] = {
+  title: "Coalescence",
+  imageFile: "34089.png",
+  player: runner,
+  faction: "Shaper",
+  influence: 2,
+  cardType: "program",
+  subTypes: [],
+  installCost: 2,
+  memoryCost: 1,
+  
+  //When you install this program, place 2 power counters on it.
+  automaticOnInstall: {
+    Resolve: function (card) {
+      if (card == this) {
+        AddCounters(this, "power", 2);
+      }
+    },
+  },
+  
+  //Hosted power counter: Gain 2 credits. Use this ability only during your turn.
+  abilities: [
+    {
+      text: "Gain 2 credits",
+      Enumerate: function () {
+        //Must be during runner's turn
+        if (playerTurn != runner) return [];
+        //Must have at least 1 power counter
+        if (!CheckCounters(this, "power", 1)) return [];
+        return [{}];
+      },
+      Resolve: function (params) {
+        RemoveCounters(this, "power", 1);
+        GainCredits(runner, 2, "", this);
+      },
+    },
+  ],
+  
+  //AI helper functions
+  AIWouldTrigger: function () {
+    //Use if we need credits
+    if (Credits(runner) < 5) return true;
+    //Use if we have counters and it's a good time
+    if (CheckCounters(this, "power", 1)) return true;
+    return false;
+  },
+  
+  AIEconomyInstall: function () {
+    //Good economy card - 2 cost for 4 credits = +2 net, moderate priority
+    return 2;
+  },
+  
+  AIWorthKeeping: function (installedRunnerCards, spareMU) {
+    //Worth keeping - good economy card
+    return true;
+  },
+};
