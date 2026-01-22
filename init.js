@@ -1485,7 +1485,7 @@ function Render() {
 		  guiWOffset -= guiWSpacingModifier;
 	  }
   }
-  runner._renderOnlyMU = MemoryUnits() - InstalledMemoryCost();
+  runner._renderOnlyMU = InstalledMemoryCost();
   countersUI.mu.runner.postfix = "/" + MemoryUnits();
   countersUI.mu.runner.richText.text = runner._renderOnlyMU + countersUI.mu.runner.postfix;
   runner._renderOnlyHandSize = MaxHandSize(runner);

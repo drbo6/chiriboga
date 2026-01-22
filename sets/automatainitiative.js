@@ -303,10 +303,10 @@ cardSet[34030] = {
             return;
           }
           //Install the card (discount applied via modifyInstallCost checking installingCards)
-          //Keep availableWhenInactive true - will be cleared by responseOnRunEnds
           Install(installParams.card, installParams.host);
           
-          //Continue to second effect choice after install completes
+          //Clear discount flag and continue to second effect choice
+          cardRef.modifyInstallCost.availableWhenInactive = false;
           if (effectNumber === 1) {
             cardRef._chooseEffect(2);
           }
@@ -420,6 +420,72 @@ cardSet[34030] = {
   AIWorthKeeping: function (installedRunnerCards, spareMU) {
     //Worth keeping if we can afford it and have a use for the effects
     if (Credits(runner) < 6) return false; //need credits for play cost + something
+    return true;
+  },
+};
+
+//Joy Ride (34021)
+//Shaper Event: Run, cost 2, influence 3
+//Run R&D. If successful, draw 5 cards.
+cardSet[34021] = {
+  title: "Joy Ride",
+  imageFile: "34021.png",
+  player: runner,
+  faction: "Shaper",
+  influence: 3,
+  cardType: "event",
+  subTypes: ["Run"],
+  playCost: 2,
+  
+  runningWithThis: false,
+  
+  Enumerate: function () {
+    return [{}]; //always possible to run R&D
+  },
+  
+  Resolve: function (params) {
+    this.runningWithThis = true;
+    MakeRun(corp.RnD);
+  },
+  
+  responseOnRunSuccessful: {
+    Resolve: function () {
+      if (!this.runningWithThis) return;
+      Draw(runner, 5);
+    },
+    automatic: true,
+  },
+  
+  responseOnRunEnds: {
+    Resolve: function () {
+      this.runningWithThis = false;
+    },
+    automatic: true,
+  },
+  
+  //AI: Run event evaluation
+  AIRunEventExtraPotential: function(server, potential) {
+    //Only useful for R&D runs
+    if (server !== corp.RnD) return 0;
+    //Check for Crisium Grid
+    if (runner.AI._rootKnownToContainCopyOfCard(server, "Crisium Grid")) return 0;
+    
+    //Value based on hand size and potential
+    var handSize = runner.grip.length;
+    var value = 0.3;
+    
+    //More valuable if hand is small
+    if (handSize <= 2) value += 0.3;
+    else if (handSize <= 4) value += 0.15;
+    
+    //Less valuable if hand is near max
+    if (handSize >= runner.maxHandSize - 2) value -= 0.2;
+    
+    return value;
+  },
+  
+  AIWorthKeeping: function (installedRunnerCards, spareMU) {
+    //Worth keeping for R&D pressure + card draw
     return true;
   },
 };

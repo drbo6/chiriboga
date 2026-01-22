@@ -774,7 +774,7 @@ function LoadDecks() {
   // //   code gate - 30054 (Funhouse)
   // //   barrier   - 30039 (Bran 1.0)
 
-  if (false) { // Use this to easily disable everything below
+  if (true) { // Use this to easily disable everything below
 
     debugging = true; //set true to log extra details and pause execution on error
     mainLoopDelay = 50; //for speedy AI vs AI testing (any faster than this and funny things happen at end-of-game)
@@ -791,9 +791,9 @@ RunnerTestField(30019,
   // stackCards
   [26016, 30006, 26090, 26090, 30030, 30030, 34030, 34030], // Self-modifying Code x2, Sure Gamble x2, Bahia Bands x2
   // gripCards
-  [34089, 34089, 34089, 26090, 30005, 1012], // Coalescence x3, Self-modifying Code x1
+  [34089, 34089, 34089, 26090, 30005, 1012,33090,33073,34021,26088], // Coalescence x3, Self-modifying Code x1
   // installed programs/hardware/resources
-  [26016, 30006, 26094, 26094, 26095], // Bukhgalter, Buzzsaw, Cleaver, Rezeki x3, Daily Casts x2, DreamNet
+  [26016, 30006, 26094, 26094, 26095, 30032], // Bukhgalter, Buzzsaw, Cleaver, Rezeki x3, Daily Casts x2, DreamNet
   // stolen agendas
   [],
   cardBackTexturesRunner, glowTextures, strengthTextures

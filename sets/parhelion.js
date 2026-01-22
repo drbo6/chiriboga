@@ -138,3 +138,130 @@ cardSet[33087] = {
     return false;
   },
 };
+
+//Num (33073)
+//Anarch Program: Icebreaker - Killer, cost 4, MU 1, strength 8, influence 3
+//Interface → 2 credits: Break 1 sentry subroutine.
+cardSet[33073] = {
+  title: "Num",
+  imageFile: "33073.png",
+  player: runner,
+  faction: "Anarch",
+  influence: 3,
+  cardType: "program",
+  subTypes: ["Icebreaker", "Killer"],
+  memoryCost: 1,
+  installCost: 4,
+  strength: 8,
+  
+  //Interface → 2 credits: Break 1 sentry subroutine.
+  abilities: [
+    {
+      text: "Break 1 sentry subroutine.",
+      Enumerate: function () {
+        if (!CheckEncounter()) return [];
+        if (!CheckSubType(attackedServer.ice[approachIce], "Sentry")) return [];
+        if (!CheckCredits(runner, 2, "using", this)) return [];
+        if (!CheckStrength(this)) return [];
+        return ChoicesEncounteredSubroutines();
+      },
+      Resolve: function (params) {
+        SpendCredits(
+          runner,
+          2,
+          "using",
+          this,
+          function () {
+            Break(params.subroutine);
+          },
+          this
+        );
+      },
+    },
+  ],
+  
+  //AI: Fixed strength breaker - no boost ability
+  AIFixedStrength: true,
+  
+  AIImplementBreaker: function(rc, result, point, server, cardStrength, iceAI, iceStrength, clicksLeft, creditsLeft) {
+    //Args for ImplementIcebreaker: point, card, cardStrength, iceAI, iceStrength, iceSubTypes, costToUpStr, amtToUpStr, costToBreak, amtToBreak, creditsLeft
+    result = result.concat(
+      rc.ImplementIcebreaker(
+        point,
+        this,
+        cardStrength,
+        iceAI,
+        iceStrength,
+        ["Sentry"],
+        999, //cost to boost strength (can't boost)
+        0,   //amount to boost strength
+        2,   //cost to break
+        1,   //amount to break
+        creditsLeft
+      )
+    );
+    return result;
+  },
+  
+  AIWorthKeeping: function (installedRunnerCards, spareMU) {
+    //Worth keeping - efficient fixed-strength killer
+    //Check if we already have a killer
+    for (var i = 0; i < installedRunnerCards.length; i++) {
+      if (CheckSubType(installedRunnerCards[i], "Killer")) {
+        //Already have a killer, less important
+        return spareMU >= 2;
+      }
+    }
+    //No killer yet - definitely keep
+    return true;
+  },
+};
+
+//K2CP Turbine (33090)
+//Shaper Program, cost 4, MU 1, influence 4
+//Each installed non-AI icebreaker gets +2 strength.
+cardSet[33090] = {
+  title: "K2CP Turbine",
+  imageFile: "33090.png",
+  player: runner,
+  faction: "Shaper",
+  influence: 4,
+  cardType: "program",
+  subTypes: [],
+  memoryCost: 1,
+  installCost: 4,
+  
+  //Each installed non-AI icebreaker gets +2 strength.
+  modifyStrength: {
+    Resolve: function (card) {
+      //Only affect installed icebreakers that aren't AI
+      if (card.player !== runner) return 0;
+      if (!CheckInstalled(card)) return 0;
+      if (!CheckSubType(card, "Icebreaker")) return 0;
+      if (CheckSubType(card, "AI")) return 0;
+      return 2;
+    },
+  },
+  
+  AIWorthKeeping: function (installedRunnerCards, spareMU) {
+    //Worth keeping if we have non-AI icebreakers installed or in hand
+    var hasBreakers = false;
+    for (var i = 0; i < installedRunnerCards.length; i++) {
+      if (CheckSubType(installedRunnerCards[i], "Icebreaker") && 
+          !CheckSubType(installedRunnerCards[i], "AI")) {
+        hasBreakers = true;
+        break;
+      }
+    }
+    //Check hand for breakers too
+    for (var i = 0; i < runner.grip.length; i++) {
+      if (CheckSubType(runner.grip[i], "Icebreaker") && 
+          !CheckSubType(runner.grip[i], "AI")) {
+        hasBreakers = true;
+        break;
+      }
+    }
+    if (hasBreakers && spareMU >= 1) return true;
+    return false;
+  },
+};

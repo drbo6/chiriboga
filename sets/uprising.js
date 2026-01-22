@@ -365,9 +365,11 @@ cardSet[26095] = {
   //The first time each turn you make a successful run, draw 1 card.
   //If your identity is digital or you have at least 2 link, also gain 1 credit.
   responseOnRunSuccessful: {
+    Enumerate: function () {
+      if (this.triggeredThisTurn) return [];
+      return [{}];
+    },
     Resolve: function (params) {
-      //Only trigger once per turn (check here since automatic ignores Enumerate)
-      if (this.triggeredThisTurn) return;
       this.triggeredThisTurn = true;
       
       //Draw 1 card
@@ -381,6 +383,7 @@ cardSet[26095] = {
         GainCredits(runner, 1, "", this);
       }
     },
+    text: "DreamNet: Draw 1 card",
     automatic: true,
   },
   
@@ -397,5 +400,58 @@ cardSet[26095] = {
   AIWorthKeeping: function (installedRunnerCards, spareMU) {
     //Always worth keeping - solid card draw for runners who run
     return true;
+  },
+};
+
+//Mantle (26088)
+//Shaper Program: Stealth, cost 1, MU 1, influence 2
+//1 recurring credit. You can spend hosted credits to use hardware and programs.
+cardSet[26088] = {
+  title: "Mantle",
+  imageFile: "26088.png",
+  player: runner,
+  faction: "Shaper",
+  influence: 2,
+  cardType: "program",
+  subTypes: ["Stealth"],
+  memoryCost: 1,
+  installCost: 1,
+  
+  //1 recurring credit
+  recurringCredits: 1,
+  
+  //You can spend hosted credits to use hardware and programs.
+  canUseCredits: function (doing, card) {
+    if (doing == "using") {
+      if (!card) return false;
+      //Can use for hardware
+      if (card.cardType == "hardware") return true;
+      //Can use for programs (includes icebreakers)
+      if (card.cardType == "program") return true;
+      //Also check subtypes for icebreakers explicitly
+      if (CheckSubType(card, "Icebreaker")) return true;
+    }
+    return false;
+  },
+  
+  //AI evaluation
+  AIEconomyInstall: function () {
+    //Useful stealth credit for icebreakers
+    return 1.5;
+  },
+  
+  AIWorthKeeping: function (installedRunnerCards, spareMU) {
+    //Worth keeping if we have programs that can use the credits (icebreakers, etc)
+    if (spareMU < 1) return false;
+    
+    //Check if we have icebreakers or other programs that cost credits to use
+    for (var i = 0; i < installedRunnerCards.length; i++) {
+      if (CheckSubType(installedRunnerCards[i], "Icebreaker")) return true;
+    }
+    //Check grip for icebreakers
+    for (var i = 0; i < runner.grip.length; i++) {
+      if (CheckSubType(runner.grip[i], "Icebreaker")) return true;
+    }
+    return true; //generally useful
   },
 };
