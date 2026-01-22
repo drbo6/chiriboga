@@ -264,4 +264,37 @@ cardSet[33090] = {
     if (hasBreakers && spareMU >= 1) return true;
     return false;
   },
+  
+  AIEconomyInstall: function () {
+    //Check for installed non-AI icebreakers that would benefit
+    var installedBreakers = 0;
+    var installedCards = InstalledCards(runner);
+    for (var i = 0; i < installedCards.length; i++) {
+      if (CheckSubType(installedCards[i], "Icebreaker") && 
+          !CheckSubType(installedCards[i], "AI")) {
+        installedBreakers++;
+      }
+    }
+    
+    //High priority if we have 2+ icebreakers installed
+    if (installedBreakers >= 2) return 3;
+    
+    //Moderate priority if we have 1 icebreaker installed
+    if (installedBreakers >= 1) return 2;
+    
+    //Check hand for non-AI icebreakers we plan to install
+    var breakersInHand = 0;
+    for (var i = 0; i < runner.grip.length; i++) {
+      if (CheckSubType(runner.grip[i], "Icebreaker") && 
+          !CheckSubType(runner.grip[i], "AI")) {
+        breakersInHand++;
+      }
+    }
+    
+    //Low priority if we have breakers in hand (install them first)
+    if (breakersInHand >= 1) return 1;
+    
+    //Don't install if no breakers to benefit
+    return 0;
+  },
 };

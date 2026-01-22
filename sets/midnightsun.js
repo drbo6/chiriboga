@@ -854,3 +854,84 @@ cardSet[33020] = {
     return true;
   },
 };
+
+//Stoneship Chart Room (33030)
+//Shaper Resource: Location, cost 0, influence 1
+//trash: Draw 2 cards.
+//trash: Charge 1 of your installed cards.
+cardSet[33030] = {
+  title: "Stoneship Chart Room",
+  imageFile: "33030.png",
+  player: runner,
+  faction: "Shaper",
+  influence: 1,
+  cardType: "resource",
+  subTypes: ["Location"],
+  installCost: 0,
+  
+  abilities: [
+    {
+      text: "Draw 2 cards.",
+      Enumerate: function () {
+        if (!CheckTrash(this)) return [];
+        return [{}];
+      },
+      Resolve: function (params) {
+        Trash(this, false, function () {
+          Draw(runner, 2);
+        });
+      },
+    },
+    {
+      text: "Charge 1 of your installed cards.",
+      Enumerate: function () {
+        if (!CheckTrash(this)) return [];
+        var chargeChoices = ChoicesCharge(runner);
+        if (chargeChoices.length == 0) return [];
+        return [{}];
+      },
+      Resolve: function (params) {
+        var cardRef = this;
+        Trash(this, false, function () {
+          var chargeChoices = ChoicesCharge(runner);
+          DecisionPhase(
+            runner,
+            chargeChoices,
+            function (paramsB) {
+              ChargeCard(paramsB.card);
+            },
+            "Stoneship Chart Room",
+            "Charge 1 of your installed cards",
+            cardRef
+          );
+        });
+      },
+    },
+  ],
+  
+  //AI: Determine when to use abilities
+  AIWouldUse: function () {
+    //Use draw ability if low on cards
+    if (runner.grip.length <= 2) return 0;
+    
+    //Use charge ability if we have something valuable to charge
+    var chargeChoices = ChoicesCharge(runner);
+    if (chargeChoices.length > 0) {
+      //Check if any card really needs charging (low on counters)
+      for (var i = 0; i < chargeChoices.length; i++) {
+        var card = chargeChoices[i].card;
+        if (card && Counters(card, "power") <= 1) {
+          return 1; //Charge ability
+        }
+      }
+    }
+    
+    //Default: don't use yet, save for when needed
+    return -1;
+  },
+  
+  AIWorthKeeping: function (installedRunnerCards, spareMU) {
+    //Always worth keeping - free install and flexible utility
+    return true;
+  },
+};

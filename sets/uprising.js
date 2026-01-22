@@ -455,3 +455,103 @@ cardSet[26088] = {
     return true; //generally useful
   },
 };
+
+//Cybertrooper Talut (26091)
+//Shaper Resource: Connection - Virtual, cost 2, influence 2, unique
+//+1 link
+//Whenever you install a non-AI icebreaker, that icebreaker gets +2 strength for the remainder of the turn.
+cardSet[26091] = {
+  title: "Cybertrooper Talut",
+  imageFile: "26091.png",
+  player: runner,
+  faction: "Shaper",
+  influence: 2,
+  cardType: "resource",
+  subTypes: ["Connection", "Virtual"],
+  installCost: 2,
+  unique: true,
+  
+  //+1 link
+  link: 1,
+  
+  //Track icebreakers boosted this turn
+  boostedCards: [],
+  
+  //Whenever you install a non-AI icebreaker, that icebreaker gets +2 strength for the remainder of the turn.
+  automaticOnInstall: {
+    Resolve: function (card) {
+      //Check if installed card is a non-AI icebreaker
+      if (!CheckSubType(card, "Icebreaker")) return;
+      if (CheckSubType(card, "AI")) return;
+      //Boost it
+      this.boostedCards.push(card);
+      Log(GetTitle(card, true) + " gets +2 strength for the remainder of the turn");
+    },
+  },
+  
+  //Modify strength for boosted cards
+  modifyStrength: {
+    Resolve: function (card) {
+      if (this.boostedCards.includes(card)) return 2;
+      return 0;
+    },
+  },
+  
+  //Clear boosted cards at end of turn
+  responseOnRunnerTurnEnds: {
+    Resolve: function () {
+      this.boostedCards = [];
+    },
+    automatic: true,
+    availableWhenInactive: true,
+  },
+  responseOnCorpTurnEnds: {
+    Resolve: function () {
+      this.boostedCards = [];
+    },
+    automatic: true,
+    availableWhenInactive: true,
+  },
+  
+  //AI evaluation
+  AIWorthKeeping: function (installedRunnerCards, spareMU) {
+    //Worth keeping if we have non-AI icebreakers or plan to install them
+    for (var i = 0; i < installedRunnerCards.length; i++) {
+      if (CheckSubType(installedRunnerCards[i], "Icebreaker") && 
+          !CheckSubType(installedRunnerCards[i], "AI")) {
+        return true;
+      }
+    }
+    //Check grip for non-AI icebreakers
+    for (var i = 0; i < runner.grip.length; i++) {
+      if (CheckSubType(runner.grip[i], "Icebreaker") && 
+          !CheckSubType(runner.grip[i], "AI")) {
+        return true;
+      }
+    }
+    //Link is always useful
+    return true;
+  },
+  
+  AIEconomyInstall: function () {
+    //This card is most valuable when installed BEFORE icebreakers
+    //so we get the +2 strength bonus when installing them
+    
+    //Check hand for non-AI icebreakers we plan to install
+    var breakersInHand = 0;
+    for (var i = 0; i < runner.grip.length; i++) {
+      if (CheckSubType(runner.grip[i], "Icebreaker") && 
+          !CheckSubType(runner.grip[i], "AI")) {
+        breakersInHand++;
+      }
+    }
+    
+    //High priority if we have icebreakers in hand to install after this
+    if (breakersInHand >= 2) return 3;
+    if (breakersInHand >= 1) return 2;
+    
+    //Low priority for just the +1 link
+    //Still useful but not urgent
+    return 1;
+  },
+};
