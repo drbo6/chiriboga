@@ -289,11 +289,11 @@ var gauntletConfig = {
   // Subtypes are case-sensitive and must match exactly as printed on cards
   randomCardRequirements: [
     // Hardware
-    { quantity: 1, cardType: 'hardware', matchSubtypes: ['Console'], excludeSubtypes: [] },
+    { quantity: 2, cardType: 'hardware', matchSubtypes: ['Console'], excludeSubtypes: [] },
     { quantity: 3, cardType: 'hardware', matchSubtypes: [], excludeSubtypes: ['Console'] },
     
     // Resources (any subtype)
-    { quantity: 5, cardType: 'resource', matchSubtypes: [], excludeSubtypes: [] },
+    { quantity: 6, cardType: 'resource', matchSubtypes: [], excludeSubtypes: [] },
     
     // Programs - Icebreakers
     { quantity: 1, cardType: 'program', matchSubtypes: ['Icebreaker', 'Killer'], excludeSubtypes: [] },
@@ -302,10 +302,11 @@ var gauntletConfig = {
     
     // Programs - Other
     { quantity: 1, cardType: 'program', matchSubtypes: ['Trojan'], excludeSubtypes: ['Icebreaker'] },
-    { quantity: 3, cardType: 'program', matchSubtypes: [], excludeSubtypes: ['Icebreaker'] },
+    { quantity: 4, cardType: 'program', matchSubtypes: [], excludeSubtypes: ['Icebreaker'] },
+    { quantity: 1, cardType: 'program', matchSubtypes: [], excludeSubtypes: [] },        
     
     // Events
-    { quantity: 8, cardType: 'event', matchSubtypes: [], excludeSubtypes: [] }
+    { quantity: 9, cardType: 'event', matchSubtypes: [], excludeSubtypes: [] }
   ],
 
   // ===== CARD PACK CONFIGURATIONS =====
