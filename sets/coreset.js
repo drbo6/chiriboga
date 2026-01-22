@@ -340,7 +340,7 @@ coreSet[1012] = {
   faction: "Anarch",
   influence: 2,
   cardType: "program",
-  subTypes: ["Virus"],
+  subTypes: ["Virus", "Trojan"],
   installCost: 2,
   memoryCost: 1,
   installOnlyOn: function (card) {
