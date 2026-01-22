@@ -296,9 +296,10 @@ var gauntletConfig = {
     { quantity: 6, cardType: 'resource', matchSubtypes: [], excludeSubtypes: [] },
     
     // Programs - Icebreakers
-    { quantity: 1, cardType: 'program', matchSubtypes: ['Icebreaker', 'Killer'], excludeSubtypes: [] },
-    { quantity: 1, cardType: 'program', matchSubtypes: ['Icebreaker', 'Fracter'], excludeSubtypes: [] },
-    { quantity: 1, cardType: 'program', matchSubtypes: ['Icebreaker', 'Decoder'], excludeSubtypes: [] },
+    { quantity: 1, cardType: 'program', matchSubtypes: ['Icebreaker', 'Killer'], excludeSubtypes: ['AI'] },
+    { quantity: 1, cardType: 'program', matchSubtypes: ['Icebreaker', 'Fracter'], excludeSubtypes: ['AI'] },
+    { quantity: 1, cardType: 'program', matchSubtypes: ['Icebreaker', 'Decoder'], excludeSubtypes: ['AI'] },
+    { quantity: 1, cardType: 'program', matchSubtypes: ['Icebreaker'], excludeSubtypes: ['AI'] },    
     
     // Programs - Other
     { quantity: 1, cardType: 'program', matchSubtypes: ['Trojan'], excludeSubtypes: ['Icebreaker'] },
@@ -306,7 +307,7 @@ var gauntletConfig = {
     { quantity: 1, cardType: 'program', matchSubtypes: [], excludeSubtypes: [] },        
     
     // Events
-    { quantity: 9, cardType: 'event', matchSubtypes: [], excludeSubtypes: [] }
+    { quantity: 8, cardType: 'event', matchSubtypes: [], excludeSubtypes: [] }
   ],
 
   // ===== CARD PACK CONFIGURATIONS =====
