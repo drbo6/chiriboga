@@ -770,11 +770,11 @@ function LoadDecks() {
   // //   ice       - 30038 (Ansel 1.0)
   // //   operation - 30040 (Seamless Launch)
   // //   upgrade   - 30042 (Manegarm Skunkworks)
-  // //   sentry    - 30047 (Karuna)
+  // //   sentry    - 30047 (Karuna) | 31075 (Archer)
   // //   code gate - 30054 (Funhouse)
   // //   barrier   - 30039 (Bran 1.0)
 
-  if (false) { // Use this to easily disable everything below
+  if (true) { // Use this to easily disable everything below
 
     debugging = true; //set true to log extra details and pause execution on error
     mainLoopDelay = 50; //for speedy AI vs AI testing (any faster than this and funny things happen at end-of-game)
@@ -791,7 +791,7 @@ RunnerTestField(30019,
   // stackCards
   [26016, 30006, 26090, 26090, 30030, 30030, 34030, 34030], // Self-modifying Code x2, Sure Gamble x2, Bahia Bands x2
   // gripCards
-  [34089, 34089, 34089, 26090, 30005], // Coalescence x3, Self-modifying Code x1
+  [34089, 34089, 34089, 26090, 30005, 1012], // Coalescence x3, Self-modifying Code x1
   // installed programs/hardware/resources
   [26016, 30006, 26094, 26094, 26095], // Bukhgalter, Buzzsaw, Cleaver, Rezeki x3, Daily Casts x2, DreamNet
   // stolen agendas
@@ -810,11 +810,11 @@ CorpTestField(30035, // HB: Precision Design
   // archivesInstalled
   [],
   // rndInstalled
-  [30073, 30039], // Ping, Bran
+  [30073, 31075], 
   // hqInstalled
-  [30047, 30054], // Karuna, Funhouse
+  [30047, 30054], 
   // remotes
-  [[30037, 30073, 30047]], // Remote with Nico Campaign, Ping, Karuna
+  [[30037, 30073, 31075]],
   // scored
   [],
   cardBackTexturesCorp, glowTextures, strengthTextures
@@ -822,7 +822,7 @@ CorpTestField(30035, // HB: Precision Design
 
 // Rez ice for testing
 corp.RnD.ice[0].rezzed = true;
-corp.RnD.ice[1].rezzed = true;
+// corp.RnD.ice[1].rezzed = true;
 corp.HQ.ice[0].rezzed = true;
 corp.HQ.ice[1].rezzed = true;
 corp.remoteServers[0].ice[0].rezzed = true;

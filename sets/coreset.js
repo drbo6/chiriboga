@@ -343,32 +343,118 @@ coreSet[1012] = {
   subTypes: ["Virus", "Trojan"],
   installCost: 2,
   memoryCost: 1,
+  
+  //Install only on a rezzed piece of ice.
   installOnlyOn: function (card) {
     if (!CheckCardType(card, ["ice"])) return false;
     if (typeof card.rezzed === "undefined") return false;
     if (!card.rezzed) return false;
     return true;
   },
+  
+  //Host ice gets -1 strength for each hosted virus counter.
   modifyStrength: {
     Resolve: function (card) {
-      if (card == this.host && typeof this.virus !== "undefined") {
-        return -this.virus;
+      //Only affect host ice, with null check for when host is trashed
+      if (this.host && card == this.host) {
+        return -Counters(this, "virus");
       }
       return 0; //no modification to strength
     },
   },
+  
+  //When host ice has 0 or less strength, trash it (state-based check)
   automaticOnAnyChange: {
     Resolve: function () {
       if (typeof this.host === "undefined") return; //not fully installed yet
-      if (this.host == null) return; //not hosted (won't be around long unless it is soon!)
+      if (this.host == null) return; //not hosted
       if (Strength(this.host) <= 0) Trash(this.host, false);
     },
   },
+  
+  //When your turn begins, place 1 virus counter on this program.
   responseOnRunnerTurnBegins: {
     Resolve: function () {
-      AddCounters(this, "virus");
+      AddCounters(this, "virus", 1);
     },
-    automatic: true, //for usability, this is not strict implementation
+    automatic: true,
+  },
+  
+  //AI: Marks Parasite as a special breaker (non-icebreaker that deals with ice)
+  AISpecialBreaker: true,
+  
+  //AI: Check if Parasite can handle specific ice (will trash it)
+  AIMatchingBreakerInstalled: function (iceCard) {
+    if (this.host && this.host == iceCard) {
+      //Check if Parasite will trash the ice (strength <= 0 after virus reduction)
+      var iceStrength = Strength(iceCard);
+      if (iceStrength <= 0) {
+        return this; //Parasite will trash this ice
+      }
+    }
+    return null;
+  },
+  
+  //AI: Prefer to install on high-value ice
+  AIPreferredInstallChoice: function (choices) {
+    //Don't install on ice that already has Parasite or similar trojans
+    var htsi = runner.AI._highestThreatScoreIce([this].concat(runner.AI._iceHostingSpecialBreakers()));
+    
+    //Find the best target
+    var bestIndex = -1;
+    var bestValue = 0;
+    
+    for (var i = 0; i < choices.length; i++) {
+      var targetIce = choices[i].host;
+      if (!targetIce) continue;
+      if (!targetIce.rezzed) continue; //Parasite requires rezzed ice
+      
+      //Calculate value based on ice strength and rez cost
+      var iceStrength = Strength(targetIce);
+      var iceCost = RezCost(targetIce);
+      
+      //Value based on how hard the ice is to deal with
+      var value = iceStrength + (iceCost / 2);
+      
+      //Bonus for ice we can destroy quickly (low strength)
+      if (iceStrength <= 3) {
+        value += 3;
+      }
+      
+      //Bonus for expensive ice
+      if (iceCost >= 5) {
+        value += 2;
+      }
+      
+      //Prefer the highest threat score ice if available
+      if (targetIce == htsi) {
+        value += 5;
+      }
+      
+      if (value > bestValue) {
+        bestValue = value;
+        bestIndex = i;
+      }
+    }
+    
+    //Only install if we found a reasonable target
+    if (bestValue >= 2) {
+      return bestIndex;
+    }
+    
+    return -1; //don't install if no good target
+  },
+  
+  AIWorthKeeping: function (installedRunnerCards, spareMU) {
+    //Worth keeping if there's rezzed ice to target
+    var installedCorpCards = InstalledCards(corp);
+    for (var i = 0; i < installedCorpCards.length; i++) {
+      var card = installedCorpCards[i];
+      if (CheckCardType(card, ["ice"]) && card.rezzed) {
+        return true;
+      }
+    }
+    return false;
   },
 };
 coreSet[1013] = {
