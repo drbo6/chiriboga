@@ -783,71 +783,75 @@ function LoadDecks() {
     // SET UP THE MAIN STATES FOR THE RUNNER AND CORP
     // ----------------------------------------------
 
-// Runner Test Field
-// Identity: Tāo Salonga (30019) - Shaper
-RunnerTestField(30019,
-  // heapCards
-  [],
-  // stackCards
-  [26016, 30006, 26090, 26090, 30030, 30030, 34030, 34030, 34089], // Self-modifying Code x2, Sure Gamble x2, Bahia Bands x2
-  // gripCards
-  [34089, 34089, 34089, 26090, 33030, 26091, 30006], // Coalescence x3, Self-modifying Code x1
-  // installed programs/hardware/resources
-  [26016, 30006, 26094, 26094, 26095, 30032], // Bukhgalter, Buzzsaw, Cleaver, Rezeki x3, Daily Casts x2, DreamNet
-  // stolen agendas
-  [],
-  cardBackTexturesRunner, glowTextures, strengthTextures
-);
+    // Runner Test Field
+    // Identity: Tāo Salonga (30019) - Shaper
+    RunnerTestField(30019,
+      // heapCards
+      [],
+      // stackCards
+      [26016, 30006, 26090, 26090, 30030, 30030, 34030, 34030, 34089], // Self-modifying Code x2, Sure Gamble x2, Bahia Bands x2
+      // gripCards
+      [34089, 34089, 34089, 26090, 33030, 26091, 30006], // Coalescence x3, Self-modifying Code x1
+      // installed programs/hardware/resources
+      [26016, 30006, 26094, 26094, 26095, 30032], // Bukhgalter, Buzzsaw, Cleaver, Rezeki x3, Daily Casts x2, DreamNet
+      // stolen agendas
+      [],
+      cardBackTexturesRunner, glowTextures, strengthTextures
+    );
 
-// Corp Test Field
-CorpTestField(30035, // HB: Precision Design
-  // archivesCards
-  [],
-  // rndCards
-  [30047, 30047, 30073, 30073, 30039, 30039, 30054, 30036, 30036, 30042],
-  // hqCards
-  [30040, 30040, 30037, 30037, 30042],
-  // archivesInstalled
-  [],
-  // rndInstalled
-  [30073, 31075], 
-  // hqInstalled
-  [30047, 30054], 
-  // remotes
-  [[30037, 30073, 31075]],
-  // scored
-  [],
-  cardBackTexturesCorp, glowTextures, strengthTextures
-);
+    // -------------------------------------------------------------------------
+    // CORP TEST FIELD
+    // -------------------------------------------------------------------------
+    CorpTestField(35046, // AU Co.: The Gold Standard in Clones
+      // archivesCards
+      [],
+      // rndCards - known order (top of R&D = last in array)
+      // Top card is Snare! for access-damage testing
+      [
+        30071,  // Regolith Mining License (bottom)
+        30044,  // Longevity Serum
+        30072,  // Palisade
+        31051,  // House of Knives
+        30049,  // Neurospike
+        30045,  // Urtica Cipher
+        30067,  // Offworld Office
+        30047,  // Karunā
+        30075,  // Hedge Fund
+        31052,  // Nisei MK II
+        31054,  // Snare!          ← top 1
+      ],
+      // hqCards - all Snare! for damage-on-access testing
+      [31054, 31054, 31054, 31054, 31054, 30048], // Snare! x5
+      // archivesInstalled
+      [],
+      // rndInstalled (ice on R&D) - Karunā unrezzed
+      [30047, 30072], // Karunā, Palisade
+      // hqInstalled (ice on HQ)
+      [30073, 30074], // Tithe, Whitespace
+      // remotes: [[root cards, ice...]]
+      [[31051, 30047, 31055]], // Remote 1: House of Knives behind Karunā + Lotus Field
+      // scored agendas
+      [],
+      cardBackTexturesCorp, glowTextures, strengthTextures
+    );
 
-// Rez ice for testing
-corp.RnD.ice[0].rezzed = true;
-// corp.RnD.ice[1].rezzed = true;
-corp.HQ.ice[0].rezzed = true;
-corp.HQ.ice[1].rezzed = true;
-corp.remoteServers[0].ice[0].rezzed = true;
-corp.remoteServers[0].ice[1].rezzed = true;
-corp.remoteServers[0].root[0].rezzed = true;
+    // All ice unrezzed (Karunās will rez during runs to trigger damage)
+    // corp.RnD.ice[0].rezzed = true;
+    corp.HQ.ice[0].rezzed = true;    // Tithe on HQ (let runner through to hit Snare!)
+    corp.HQ.ice[1].rezzed = true;    // Whitespace on HQ
 
-// Daily Casts loads 8 credits on install automatically via automaticOnInstall
-// No need to manually set credits - the card handles it
+    // Pre-set 2 power counters on AU Co. for immediate turn-begin test
+    corp.identityCard.power = 2;
 
-runner.rig.resources[0].credits = 8;
-runner.rig.resources[1].credits = 4;
+    // Advance House of Knives in remote (almost scoreable)
+    corp.remoteServers[0].root[0].advancement = 2;
 
-// Give starting credits
-GainCredits(runner, 10);
-GainCredits(corp, 15);
+    // Starting credits
+    GainCredits(runner, 15);
+    GainCredits(corp, 12);
 
-    AddTags(3);
-
-// Start on runner's turn
-ChangePhase(phases.runnerStartResponse);
-
-
-
-
-
+    // Start on Corp's turn (to test turn-begin trigger immediately)
+    ChangePhase(phases.corpStartDraw);
 
     
     // RunnerTestField(31001, //identity

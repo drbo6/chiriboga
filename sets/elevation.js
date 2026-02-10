@@ -8156,3 +8156,188 @@ cardSet[35068] = {
     automatic: true,
   },
 };
+//AU Co.: The Gold Standard in Clones (35046)
+//Jinteki Identity: Division
+//Deck: 45, Influence: 15
+//Whenever you do damage or trash 1 or more cards from HQ, place 1 power counter on this identity.
+//When your turn begins, you may remove 2 hosted power counters to look at the top 3 cards of R&D.
+//Trash 1 of those cards and add the rest to HQ.
+cardSet[35046] = {
+  title: "AU Co.: The Gold Standard in Clones",
+  imageFile: "35046.png",
+  player: corp,
+  faction: "Jinteki",
+  cardType: "identity",
+  subTypes: ["Division"],
+  deckSize: 45,
+  influenceLimit: 15,
+  
+  //TRIGGER 1: "Whenever you do damage..." → place 1 power counter
+  //automaticOnTakeDamage fires after damage resolves (inside Trash's fromDamage path).
+  //The corp identity card is checked because ChoicesActiveTriggers checks all cards.
+  automaticOnTakeDamage: {
+    Resolve: function (damage, damageType) {
+      if (damage > 0) {
+        AddCounters(this, "power", 1);
+        Log(GetTitle(this) + " gains 1 power counter (damage dealt)");
+      }
+    },
+  },
+  
+  //TRIGGER 2a: "...or trash 1 or more cards from HQ" → place 1 power counter
+  //automaticOnWouldTrash fires BEFORE cards are moved, so cardLocation still reflects origin.
+  //We check if any card in the batch came from corp.HQ.cards.
+  //Note: damage trashes from runner.grip (not HQ), so no double-counting with Trigger 1.
+  automaticOnWouldTrash: {
+    Resolve: function (cards) {
+      for (var i = 0; i < cards.length; i++) {
+        if (cards[i].cardLocation == corp.HQ.cards) {
+          AddCounters(this, "power", 1);
+          Log(GetTitle(this) + " gains 1 power counter (cards trashed from HQ)");
+          return; //only 1 counter per batch, regardless of how many HQ cards trashed
+        }
+      }
+    },
+  },
+  
+  //NOTE: Discarding during the discard phase does NOT count as trashing (CR 5.5.2b),
+  //so no responseOnDiscardToMaxHandSize handler is needed.
+  
+  //TRIGGER 3: "When your turn begins, you may remove 2 hosted power counters
+  //to look at the top 3 cards of R&D. Trash 1 of those cards and add the rest to HQ."
+  responseOnCorpTurnBegins: {
+    Enumerate: function () {
+      //Need at least 2 power counters and cards in R&D
+      if (!CheckCounters(this, "power", 2)) return [];
+      if (corp.RnD.cards.length === 0) return [];
+      
+      //**AI code - always use the ability (free R&D filtering + card draw is very strong)
+      if (corp.AI != null) {
+        return [{ id: 0, label: "Use AU Co. ability", button: "Use AU Co." }];
+      }
+      
+      return [
+        { id: 0, label: "Remove 2 power counters to look at top 3 of R&D", button: "Use AU Co." },
+        { id: 1, label: "Decline", button: "Decline" }
+      ];
+    },
+    Resolve: function (params) {
+      if (params.id === 1) return; //Declined
+      
+      RemoveCounters(this, "power", 2);
+      
+      //Look at top 3 cards of R&D (or fewer if R&D is small)
+      var numToLook = Math.min(3, corp.RnD.cards.length);
+      var allTopCards = [];
+      
+      for (var i = 0; i < numToLook; i++) {
+        //Top card is at length-1, so top 3 are length-1, length-2, length-3
+        var card = corp.RnD.cards[corp.RnD.cards.length - 1 - i];
+        allTopCards.push(card);
+      }
+      
+      //Make all cards face up so they display
+      for (var i = 0; i < allTopCards.length; i++) {
+        allTopCards[i].faceUp = true;
+      }
+      
+      //**AI code - resolve immediately without DecisionPhase
+      if (corp.AI != null) {
+        //AI picks the least valuable card to trash
+        var worstIdx = 0;
+        var worstValue = Infinity;
+        for (var i = 0; i < allTopCards.length; i++) {
+          var card = allTopCards[i];
+          var value = 0;
+          if (CheckCardType(card, ["agenda"])) {
+            //Agendas are very valuable - they win the game
+            value = 10 + (card.agendaPoints || 0);
+          } else if (CheckCardType(card, ["ice"])) {
+            //Ice is important for protection
+            value = 5 + (RezCost(card) / 2);
+          } else if (CheckCardType(card, ["asset", "upgrade"])) {
+            //Assets/upgrades provide ongoing value
+            value = 4;
+          } else if (CheckCardType(card, ["operation"])) {
+            //Operations are one-time use, lowest priority to keep
+            value = 2;
+          }
+          if (value < worstValue) {
+            worstValue = value;
+            worstIdx = i;
+          }
+        }
+        
+        var cardToTrash = allTopCards[worstIdx];
+        
+        //Restore faceUp status
+        for (var i = 0; i < allTopCards.length; i++) {
+          allTopCards[i].faceUp = false;
+        }
+        
+        //Move non-trashed cards to HQ
+        for (var i = 0; i < allTopCards.length; i++) {
+          if (allTopCards[i] !== cardToTrash) {
+            MoveCard(allTopCards[i], corp.HQ.cards);
+            Log(GetTitle(allTopCards[i], true) + " added to HQ");
+          }
+        }
+        
+        //Trash the chosen card
+        Log(GetTitle(this) + " trashes " + GetTitle(cardToTrash, true));
+        Trash(cardToTrash, false);
+        return;
+      }
+      
+      //Human player: build choices - must pick exactly 1 to trash
+      var choices = [];
+      for (var i = 0; i < allTopCards.length; i++) {
+        choices.push({
+          card: allTopCards[i],
+          label: "Trash " + GetTitle(allTopCards[i], true)
+        });
+      }
+      
+      var cardRef = this;
+      
+      DecisionPhase(
+        corp,
+        choices,
+        function (choiceParams) {
+          var cardToTrash = choiceParams.card;
+          
+          //Restore faceUp status for all viewed cards
+          for (var i = 0; i < allTopCards.length; i++) {
+            allTopCards[i].faceUp = false;
+          }
+          viewingGrid = null;
+          
+          //Move non-trashed cards to HQ
+          for (var i = 0; i < allTopCards.length; i++) {
+            if (allTopCards[i] !== cardToTrash) {
+              MoveCard(allTopCards[i], corp.HQ.cards);
+              Log(GetTitle(allTopCards[i], true) + " added to HQ");
+            }
+          }
+          
+          //Trash the chosen card
+          Log(GetTitle(cardRef) + " trashes " + GetTitle(cardToTrash, true));
+          Trash(cardToTrash, false);
+        },
+        "AU Co.: The Gold Standard in Clones",
+        "Trash 1 card, add the rest to HQ",
+        cardRef
+      );
+      
+      //After DecisionPhase sets up, add all top cards to viewingGrid so they display
+      //(They are also all in choices, so they will all glow)
+      if (!viewingGrid) viewingGrid = [];
+      for (var i = 0; i < allTopCards.length; i++) {
+        if (!viewingGrid.includes(allTopCards[i])) {
+          viewingGrid.push(allTopCards[i]);
+        }
+      }
+    },
+    text: "AU Co.: Look at top 3 of R&D",
+  },
+};

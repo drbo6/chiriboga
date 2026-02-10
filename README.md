@@ -54,7 +54,6 @@ Card art and symbols are property of Null Signal Games and used under [CC BY-ND 
 The following Elevation cards are not yet implemented (17 cards):
 
 ## Jinteki
-- **35046** - AU Co.: The Gold Standard in Clones (Identity)
 - **35047** - PT Untaian: Life's Building Blocks (Identity)
 - **35048** - Proprionegation (Agenda) (Hidden Funds)
 - **35049** - Sericulture Expansion (Agenda) (Hidden Funds)
