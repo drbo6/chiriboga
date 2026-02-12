@@ -776,9 +776,9 @@ function LoadDecks() {
 
   if (false) { // Use this to easily disable everything below
 
-    debugging = true; //set true to log extra details and pause execution on error
+    // debugging = true; //set true to log extra details and pause execution on error
     mainLoopDelay = 50; //for speedy AI vs AI testing (any faster than this and funny things happen at end-of-game)
-    viewAllFronts = true; //set true to see all card fronts (for testing)     
+    viewAllFronts = false; //set true to see all card fronts (for testing)     
 
     // SET UP THE MAIN STATES FOR THE RUNNER AND CORP
     // ----------------------------------------------
@@ -821,7 +821,7 @@ function LoadDecks() {
         31054,  // Snare!          ← top 1
       ],
       // hqCards - all Snare! for damage-on-access testing
-      [31054, 31054, 31054, 31054, 31054, 30048], // Snare! x5
+      [31054, 31054, 31054, 31054, 35049, 35051], // Snare! x5
       // archivesInstalled
       [],
       // rndInstalled (ice on R&D) - Karunā unrezzed
@@ -829,7 +829,7 @@ function LoadDecks() {
       // hqInstalled (ice on HQ)
       [30073, 30074], // Tithe, Whitespace
       // remotes: [[root cards, ice...]]
-      [[31051, 30047, 31055]], // Remote 1: House of Knives behind Karunā + Lotus Field
+      [[31051, 30047, 31055], [31051, 30047, 31055, 30047, 31055]], 
       // scored agendas
       [],
       cardBackTexturesCorp, glowTextures, strengthTextures

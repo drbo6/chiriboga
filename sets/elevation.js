@@ -8157,6 +8157,227 @@ cardSet[35068] = {
     automatic: true,
   },
 };
+
+//Phật Gioan Baotixita (35051)
+//Jinteki Asset: Executive
+//Cost: 1, Trash: 3, Influence: 4, Unique
+//When your discard phase ends, place 1 power counter on this asset.
+//The first time each turn an agenda is scored or stolen, you may remove up to 2 hosted
+//power counters. Do 1 net damage plus 1 net damage for each power counter removed this way.
+cardSet[35051] = {
+  title: "Phật Gioan Baotixita",
+  imageFile: "35051.png",
+  player: corp,
+  faction: "Jinteki",
+  influence: 4,
+  cardType: "asset",
+  subTypes: ["Executive"],
+  rezCost: 1,
+  trashCost: 3,
+  unique: true,
+  
+  //When your discard phase ends, place 1 power counter on this asset.
+  responseOnCorpDiscardEnds: {
+    Resolve: function() {
+      AddCounters(this, "power", 1);
+      Log(GetTitle(this) + " gains 1 power counter");
+    },
+  },
+  
+  //Track "first time each turn" (Near-Earth Hub pattern)
+  triggeredThisTurn: false,
+  responseOnRunnerTurnBegins: {
+    Resolve: function() {
+      this.triggeredThisTurn = false;
+    },
+    automatic: true,
+  },
+  responseOnCorpTurnBegins: {
+    Resolve: function() {
+      this.triggeredThisTurn = false;
+    },
+    automatic: true,
+  },
+  
+  //The first time each turn an agenda is scored or stolen, you may remove
+  //up to 2 hosted power counters. Do 1 net damage plus 1 for each removed.
+  //Shared resolve for both scored and stolen (Pantograph pattern)
+  _sharedResolve: function() {
+    if (this.triggeredThisTurn) return;
+    this.triggeredThisTurn = true;
+    
+    var cardRef = this;
+    var maxRemove = Math.min(2, Counters(this, "power"));
+    
+    //Build choices (Lie Low pattern, but with a "don't remove any" option)
+    var choices = [];
+    if (maxRemove >= 2) {
+      choices.push({ id: 2, label: "Remove 2 counters (3 net damage)", button: "Remove 2)" });
+    }
+    if (maxRemove >= 1) {
+      choices.push({ id: 1, label: "Remove 1 counter (2 net damage)", button: "Remove 1" });
+    }
+    choices.push({ id: 0, label: "Don't remove any (1 net damage)", button: "Remove 0" });
+    
+    //**AI code - always remove the max for maximum damage
+    if (corp.AI != null) {
+      choices = [choices[0]]; //first choice is always the highest removal
+    }
+    
+    DecisionPhase(
+      corp,
+      choices,
+      function(decision) {
+        if (decision.id > 0) {
+          RemoveCounters(cardRef, "power", decision.id);
+        }
+        var totalDamage = 1 + decision.id;
+        Log(GetTitle(cardRef) + " does " + totalDamage + " net damage");
+        Damage("net", totalDamage, true);
+      },
+      "Phật Gioan Baotixita",
+      "Remove up to 2 power counters?",
+      cardRef
+    );
+  },
+  
+  responseOnScored: {
+    Enumerate: function() {
+      if (this.triggeredThisTurn) return [];
+      return [{}];
+    },
+    Resolve: function() {
+      this._sharedResolve();
+    },
+    text: "Phật Gioan Baotixita: net damage",
+  },
+  
+  responseOnStolen: {
+    Enumerate: function() {
+      if (this.triggeredThisTurn) return [];
+      return [{}];
+    },
+    Resolve: function() {
+      this._sharedResolve();
+    },
+    text: "Phật Gioan Baotixita: net damage",
+  },
+};
+
+//Sericulture Expansion (35049)
+//Jinteki Agenda: Expansion
+//Advancement: 3, Points: 2
+//Dividends 1 (When you score this agenda, place 1 agenda counter on it for each excess advancement counter.)
+//When your discard phase ends, you may remove 1 hosted agenda counter to place 2 advancement counters
+//on 1 installed card. (You cannot score that card this turn.)
+cardSet[35049] = {
+  title: "Sericulture Expansion",
+  imageFile: "35049.png",
+  player: corp,
+  faction: "Jinteki",
+  cardType: "agenda",
+  subTypes: ["Expansion"],
+  agendaPoints: 2,
+  advancementRequirement: 3,
+  
+  //Dividends 1: When scored, place 1 agenda counter for each excess advancement
+  responseOnScored: {
+    Resolve: function() {
+      //Calculate excess advancement (advancement - requirement)
+      var excess = this.advancement - this.advancementRequirement;
+      if (excess > 0) {
+        //Dividends 1 means 1 counter per excess
+        AddCounters(this, "agenda", excess);
+        Log(GetTitle(this) + " places " + excess + " agenda counter" + (excess > 1 ? "s" : "") + " (Dividends)");
+      }
+    },
+    automatic: true,
+  },
+  
+  //When your discard phase ends, you may remove 1 hosted agenda counter
+  //to place 2 advancement counters on 1 installed card.
+  //(You cannot score that card this turn - this is moot since the turn ends immediately after.)
+  responseOnCorpDiscardEnds: {
+    Enumerate: function() {
+      //Need at least 1 agenda counter
+      if (!CheckCounters(this, "agenda", 1)) return [];
+      //Need at least 1 advanceable installed card
+      var advanceableCards = ChoicesInstalledCards(corp, function(card) {
+        return CheckAdvance(card);
+      });
+      if (advanceableCards.length === 0) return [];
+      return [{}];
+    },
+    Resolve: function() {
+      var cardRef = this;
+      
+      //Build choices of advanceable installed cards
+      var choices = ChoicesInstalledCards(corp, function(card) {
+        return CheckAdvance(card);
+      });
+      
+      //Add decline option
+      choices.push({ card: null, label: "Decline", button: "Decline" });
+      
+      //**AI code
+      if (corp.AI != null) {
+        //Prefer to advance the agenda closest to scoring
+        var bestChoice = null;
+        var bestScore = -1;
+        for (var i = 0; i < choices.length - 1; i++) {
+          var card = choices[i].card;
+          var score = 0;
+          if (CheckCardType(card, ["agenda"])) {
+            //Prioritize agendas - prefer those closest to being scored
+            var remaining = (card.advancementRequirement || 0) - (card.advancement || 0);
+            //Higher score for agendas that need fewer advancements
+            score = 20 - remaining;
+            //Bonus for high-value agendas
+            score += (card.agendaPoints || 0);
+          } else if (CheckCardType(card, ["ice"])) {
+            //Advanceable ice - moderate value
+            score = 3;
+          } else {
+            //Other advanceable cards (like Urtica Cipher, traps)
+            score = 5;
+          }
+          if (score > bestScore) {
+            bestScore = score;
+            bestChoice = choices[i];
+          }
+        }
+        if (bestChoice) {
+          choices = [bestChoice];
+        } else {
+          choices = [{ card: null, label: "Decline", button: "Decline" }];
+        }
+      }
+      
+      DecisionPhase(
+        corp,
+        choices,
+        function(params) {
+          if (params.card !== null) {
+            RemoveCounters(cardRef, "agenda", 1);
+            PlaceAdvancement(params.card, 2);
+            Log(GetTitle(cardRef) + " places 2 advancement counters on " + GetTitle(params.card, true));
+          }
+        },
+        "Sericulture Expansion",
+        "Place 2 advancement counters on 1 installed card",
+        cardRef
+      );
+    },
+    text: "Remove 1 agenda counter to place 2 advancements",
+  },
+  
+  //**AI code
+  AIOverAdvance: function() {
+    //Worth over-advancing for the dividend counters
+    return 2; //up to 2 extra advancements
+  },
+};
+
 //AU Co.: The Gold Standard in Clones (35046)
 //Jinteki Identity: Division
 //Deck: 45, Influence: 15
