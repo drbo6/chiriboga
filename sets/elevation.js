@@ -6935,7 +6935,7 @@ cardSet[35074] = {
 
 //Measured Response
 //Weyland Operation: Black Ops
-//Cost: 5, Influence: 4
+//Cost: 5, Trash: 3, Influence: 4
 //Play only if the threat level is 4 or greater, and only if the Runner made a successful run during their last turn.
 //Do 4 meat damage unless the Runner pays 8 credits.
 cardSet[35078] = {
@@ -6945,6 +6945,7 @@ cardSet[35078] = {
   faction: "Weyland Consortium",
   influence: 4,
   cardType: "operation",
+  trashCost: 3,
   subTypes: ["Black Ops"],
   playCost: 5,
   
