@@ -51,7 +51,7 @@ Card art and symbols are property of Null Signal Games and used under [CC BY-ND 
 
 # Missing Cards
 
-The following Elevation cards are not yet implemented (9 cards):
+The following Elevation cards are not yet implemented (8 cards):
 
 ## Jinteki
 - **35047** - PT Untaian: Life's Building Blocks (Identity)
