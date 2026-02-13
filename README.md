@@ -54,16 +54,15 @@ Card art and symbols are property of Null Signal Games and used under [CC BY-ND 
 The following Elevation cards are not yet implemented (8 cards):
 
 ## Jinteki
-- **35047** - PT Untaian: Life's Building Blocks (Identity)
 - **35056** - Mitra Aman (Upgrade - Clone) (Hidden Funds)
 
 ## NBN
 - **35057** - Nebula Talent Management: Making Stars (Identity - Flip)
 - **35058** - Synapse Global: Faster than Thought (Identity)
-- **35059** - Embedded Reporting (Agenda - Initiative) (Fine Print)
-- **35060** - Next Big Thing (Agenda - Initiative) (Fine Print)
-- **35065** - Bigger Picture (Operation - Gray Ops) (Fine Print)
-- **35066** - IP Enforcement (Operation - Gray Ops) (Fine Print)
+- **35059** - Embedded Reporting (Agenda - Initiative)
+- **35060** - Next Big Thing (Agenda - Initiative)
+- **35065** - Bigger Picture (Operation - Gray Ops)
+- **35066** - IP Enforcement (Operation - Gray Ops)
 
 I'll get to these when I have a minute.
 

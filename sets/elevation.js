@@ -8271,6 +8271,103 @@ cardSet[35051] = {
 //When your discard phase ends, you may remove 1 hosted agenda counter to place 2 advancement counters
 //on 1 installed card. (You cannot score that card this turn.)
 
+//PT Untaian: Life's Building Blocks (35047)
+//Jinteki Identity: Division
+//Deck: 45, Influence: 15
+//When your discard phase ends, if there are 3 or fewer cards in HQ, you may pay 1 credit
+//to place 1 advancement counter on an unrezzed card you can advance.
+//(You cannot score that card this turn.)
+cardSet[35047] = {
+  title: "PT Untaian: Life's Building Blocks",
+  imageFile: "35047.png",
+  player: corp,
+  faction: "Jinteki",
+  cardType: "identity",
+  subTypes: ["Division"],
+  deckSize: 45,
+  influenceLimit: 15,
+  
+  //When your discard phase ends, if there are 3 or fewer cards in HQ,
+  //you may pay 1 credit to place 1 advancement counter on an unrezzed card you can advance.
+  //(You cannot score that card this turn - moot since discard phase is end of turn.)
+  responseOnCorpDiscardEnds: {
+    Enumerate: function () {
+      //Must have 3 or fewer cards in HQ
+      if (corp.HQ.cards.length > 3) return [];
+      //Must be able to pay 1 credit
+      if (!CheckCredits(corp, 1)) return [];
+      //Must have at least one valid target (unrezzed advanceable card)
+      var targets = ChoicesInstalledCards(corp, function (card) {
+        return !card.rezzed && CheckAdvance(card);
+      });
+      if (targets.length === 0) return [];
+      return [{}];
+    },
+    Resolve: function (params) {
+      var cardRef = this;
+      
+      //Build choices of unrezzed advanceable installed cards
+      var choices = ChoicesInstalledCards(corp, function (card) {
+        return !card.rezzed && CheckAdvance(card);
+      });
+      
+      //Add decline option
+      choices.push({ card: null, label: "Decline", button: "Decline" });
+      
+      //**AI code
+      if (corp.AI != null) {
+        //Prefer to advance the agenda closest to scoring
+        var bestChoice = null;
+        var bestScore = -1;
+        for (var i = 0; i < choices.length - 1; i++) {
+          var card = choices[i].card;
+          var score = 0;
+          if (CheckCardType(card, ["agenda"])) {
+            //Prioritize agendas - prefer those closest to being scored
+            var remaining = (card.advancementRequirement || 0) - (card.advancement || 0);
+            //Higher score for agendas that need fewer advancements
+            score = 20 - remaining;
+            //Bonus for high-value agendas
+            score += (card.agendaPoints || 0);
+          } else if (CheckCardType(card, ["ice"])) {
+            //Advanceable ice - moderate value
+            score = 3;
+          } else {
+            //Other advanceable cards (like Urtica Cipher, traps)
+            score = 5;
+          }
+          if (score > bestScore) {
+            bestScore = score;
+            bestChoice = choices[i];
+          }
+        }
+        if (bestChoice) {
+          choices = [bestChoice];
+        } else {
+          choices = [{ card: null, label: "Decline", button: "Decline" }];
+        }
+      }
+      
+      DecisionPhase(
+        corp,
+        choices,
+        function (params) {
+          if (params.card !== null) {
+            SpendCredits(corp, 1, "", cardRef, function () {
+              PlaceAdvancement(params.card, 1);
+              Log(GetTitle(cardRef) + " places 1 advancement counter on " + GetTitle(params.card, true));
+            });
+          }
+        },
+        "PT Untaian: Life's Building Blocks",
+        "Place 1 advancement counter on an unrezzed card",
+        cardRef
+      );
+    },
+    text: "PT Untaian: Place 1 advancement counter",
+  },
+};
+
 //Proprionegation (35048)
 //Jinteki Agenda: Security, 4/2
 //When you score this agenda, place 1 agenda counter on it.

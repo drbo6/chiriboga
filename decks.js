@@ -774,7 +774,7 @@ function LoadDecks() {
   // //   code gate - 30054 (Funhouse)
   // //   barrier   - 30039 (Bran 1.0)
 
-  if (false) { // Use this to easily disable everything below
+  if (true) { // Use this to easily disable everything below
 
     // debugging = true; //set true to log extra details and pause execution on error
     mainLoopDelay = 50; //for speedy AI vs AI testing (any faster than this and funny things happen at end-of-game)
@@ -802,9 +802,9 @@ function LoadDecks() {
     // -------------------------------------------------------------------------
     // CORP TEST FIELD
     // -------------------------------------------------------------------------
-    CorpTestField(35046, // AU Co.: The Gold Standard in Clones
+    CorpTestField(35047, // AU Co.: The Gold Standard in Clones
       // archivesCards
-      [],
+      [30072],
       // rndCards - known order (top of R&D = last in array)
       // Top card is Snare! for access-damage testing
       [
@@ -821,7 +821,7 @@ function LoadDecks() {
         31054,  // Snare!          ← top 1
       ],
       // hqCards - all Snare! for damage-on-access testing
-      [31054, 31054, 31054, 31054, 35049, 35048], // Snare! x5
+      [31054, 31054, 30072], // Snare! x5
       // archivesInstalled
       [31055, 31055],
       // rndInstalled (ice on R&D) - Karunā unrezzed
@@ -840,11 +840,8 @@ function LoadDecks() {
     corp.HQ.ice[0].rezzed = true;    // Tithe on HQ (let runner through to hit Snare!)
     corp.HQ.ice[1].rezzed = true;    // Whitespace on HQ
 
-    // Pre-set 2 power counters on AU Co. for immediate turn-begin test
-    corp.identityCard.power = 2;
-
     // Advance House of Knives in remote (almost scoreable)
-    corp.remoteServers[0].root[0].advancement = 2;
+    corp.remoteServers[0].root[0].advancement = 3;
 
     // Starting credits
     GainCredits(runner, 15);
