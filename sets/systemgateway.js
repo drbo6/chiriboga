@@ -1649,7 +1649,7 @@ cardSet[30019] = {
         //console.log("Good: "+GetTitle(goodIce,true)+" , Poor: "+GetTitle(poorIce,true));
         if (poorIce && goodIce) return [{ cards: [poorIce, goodIce] }];
       }
-      return continueChoice;
+      return []; //no good swap found
     }
     //not AI? set up for human choice (multi-choice)
     for (var i = 0; i < choices.length; i++) {
@@ -1661,6 +1661,8 @@ cardSet[30019] = {
   SharedResolve: function (iceToSwap) {
     //an array of two card objects
     if (typeof iceToSwap !== "undefined") {
+      //validate that two different cards were selected
+      if (iceToSwap[0] === iceToSwap[1]) return;
       var firstServer = GetServer(iceToSwap[0]);
       var secondServer = GetServer(iceToSwap[1]);
 	  var firstIndex = firstServer.ice.indexOf(iceToSwap[0]);
