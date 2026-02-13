@@ -49,14 +49,11 @@ Card art and symbols are property of Null Signal Games and used under [CC BY-ND 
 
 # Developer Documentation
 
-# Missing Cards
+## Missing Cards
 
-The following Elevation cards are not yet implemented (8 cards):
+The following Elevation cards are not yet implemented (6 cards):
 
-## Jinteki
-- **35056** - Mitra Aman (Upgrade - Clone) (Hidden Funds)
-
-## NBN
+### NBN
 - **35057** - Nebula Talent Management: Making Stars (Identity - Flip)
 - **35058** - Synapse Global: Faster than Thought (Identity)
 - **35059** - Embedded Reporting (Agenda - Initiative)
@@ -66,7 +63,7 @@ The following Elevation cards are not yet implemented (8 cards):
 
 I'll get to these when I have a minute.
 
-# Setup
+## Setup
 
 1. Clone the repository
 2. Download the card images from [chiriboga.cronbach.com/images/images.zip](https://chiriboga.cronbach.com/images/images.zip)
@@ -74,13 +71,13 @@ I'll get to these when I have a minute.
 
 > **Note:** Card images are not included in this repository due to licensing. See `LICENSE.txt` in the zip for attribution details.
 
-# Debugging and Testing Guide for Chiriboga
+## Debugging and Testing Guide for Chiriboga
 
 This guide explains how to create specific board states, enable debugging features, and test scenarios in the Netrunner implementation.
 
-## Enabling Debug Mode
+### Enabling Debug Mode
 
-### Quick Setup
+#### Quick Setup
 
 Add or modify these lines at the start of your game session (in browser console or in `decks.js` around line 712):
 
@@ -90,7 +87,7 @@ debugging = true;        // Enables detailed logging and pauses on errors
 viewAllFronts = false;   // Set true to see all card faces (changes AI behavior)
 ```
 
-### What Each Flag Does
+#### What Each Flag Does
 
 | Flag | Effect |
 |------|--------|
@@ -98,7 +95,7 @@ viewAllFronts = false;   // Set true to see all card faces (changes AI behavior)
 | `debugging` | Pauses execution on `console.error()` calls; enables extra AI logging |
 | `viewAllFronts` | Shows card fronts for all cards when zoomed (note: AI plays differently when enabled) |
 
-## Using the Debug Menu
+### Using the Debug Menu
 
 Once `enableDebugMenu = true`, a debug button appears in the UI. It provides these functions:
 
@@ -111,13 +108,13 @@ Once `enableDebugMenu = true`, a debug button appears in the UI. It provides the
 | Lose Game | Immediately loses the game for the viewing player |
 | Add Card to Hand | Spawns any card from a dropdown menu into your hand |
 
-## Creating a Test Board State
+### Creating a Test Board State
 
 The codebase provides two functions for setting up specific board states: `RunnerTestField()` and `CorpTestField()`. 
 
 **These are called in `decks.js` after the normal deck loading**. There is a condition set to false that you can set to true to enable it and see it in action. (Just start a game to see the board state that is present there.)
 
-### Example: Setting Up a Test Scenario
+#### Example: Setting Up a Test Scenario
 
 Paste this code in `decks.js` at line 711 (where it says `//PASTE REPLICATION CODE HERE`):
 
@@ -144,7 +141,7 @@ CorpTestField(30035,           // Identity
     cardBackTexturesCorp,glowTextures,strengthTextures);
 ```
 
-### Setting Card Properties After Creation
+#### Setting Card Properties After Creation
 
 After calling the test field functions, you can modify individual card properties:
 
@@ -188,7 +185,7 @@ attackedServer = corp.RnD;
 ChangePhase(phases.runApproachServer); // Skip all ice
 ```
 
-### Common Phases
+#### Common Phases
 
 | Phase | Description |
 |-------|-------------|
@@ -201,9 +198,9 @@ ChangePhase(phases.runApproachServer); // Skip all ice
 | `phases.runnerEndOfTurn` | End of runner turn |
 | `phases.runApproachServer` | Runner approaching server (after ice) |
 
-## Capturing Current Game State
+### Capturing Current Game State
 
-### Using ReproductionCode()
+#### Using ReproductionCode()
 
 At any point during a game, you can generate code that recreates the current board state:
 
@@ -215,7 +212,7 @@ console.log(ReproductionCode(false)); // false = just card positions
 
 This outputs JavaScript code you can paste into `decks.js` to reproduce the exact game state.
 
-### Downloading the Full Log
+#### Downloading the Full Log
 
 The game captures all console output. To download it (including hidden information and reproduction code):
 
@@ -230,9 +227,9 @@ This creates a file named `chiriboga-log-[timestamp].txt` containing:
 - ReproductionCode for recreating the state
 - Version reference
 
-## AI Debugging
+### AI Debugging
 
-### Viewing AI Decision Logs
+#### Viewing AI Decision Logs
 
 Both AI modules (`ai_corp.js` and `ai_runner.js`) have internal logging via `_log()`:
 
@@ -245,7 +242,7 @@ _log(message) {
 
 When `debugging = true`, additional decision path information is logged for damage calculations and advancement planning.
 
-### Key AI Debug Output Examples
+#### Key AI Debug Output Examples
 
 The AI logs decisions like:
 
@@ -255,11 +252,11 @@ The AI logs decisions like:
 - `"AI: Server protection scores: {...}"`
 - `"AI: Suspected HQ: [card info] (info HQ score: X.X)"`
 
-## Forcing AI Actions
+### Forcing AI Actions
 
 The AI uses a `preferred` property to override its normal decision-making. You can set this to force specific actions for testing.
 
-### Basic Preference Structure
+#### Basic Preference Structure
 
 ```javascript
 player.AI.preferred = {
@@ -269,7 +266,7 @@ player.AI.preferred = {
 };
 ```
 
-### Finding Card References
+#### Finding Card References
 
 To find a specific card by name at runtime:
 
@@ -289,7 +286,7 @@ var corpCard = corp.HQ.cards.find(c => c.title === "Hedge Fund");
 var installedCard = runner.rig.programs.find(c => c.title === "Corroder");
 ```
 
-### Server References
+#### Server References
 
 | Server | Reference |
 |--------|-----------|
@@ -299,7 +296,7 @@ var installedCard = runner.rig.programs.find(c => c.title === "Corroder");
 | Remote 1 | `corp.remoteServers[0]` |
 | Remote 2 | `corp.remoteServers[1]` |
 
-### Corp AI Preferences
+#### Corp AI Preferences
 
 ```javascript
 // Play an operation
@@ -352,7 +349,7 @@ corp.AI.preferred = {
 };
 ```
 
-### Runner AI Preferences
+#### Runner AI Preferences
 
 ```javascript
 // Play an event
@@ -388,7 +385,7 @@ runner.AI.preferred = {
 };
 ```
 
-### Chaining Preferences for Sub-Decisions
+#### Chaining Preferences for Sub-Decisions
 
 Some actions require follow-up choices (e.g., playing a run event requires choosing a server). Use `nextPrefs` to chain preferences:
 
@@ -413,7 +410,7 @@ corp.AI.preferred = {
 };
 ```
 
-### The `chooseServer` Special Preference
+#### The `chooseServer` Special Preference
 
 The `chooseServer` property works regardless of the current phase—useful for any server selection:
 
@@ -424,7 +421,7 @@ runner.AI.preferred = {
 };
 ```
 
-### Complete Example: Testing a Specific Card
+#### Complete Example: Testing a Specific Card
 
 ```javascript
 debugging = true;
@@ -456,7 +453,7 @@ runner.AI.preferred = {
 };
 ```
 
-### Preference Reference Table
+#### Preference Reference Table
 
 | Command | Key(s) | Player | Description |
 |---------|--------|--------|-------------|
@@ -473,7 +470,7 @@ runner.AI.preferred = {
 | (any) | `chooseServer` | Runner | Select a server (works in any phase) |
 | (any) | `nextPrefs` | Both | Chain another preference for sub-decisions |
 
-## Quick Reference: Browser Console Commands
+### Quick Reference: Browser Console Commands
 
 ```javascript
 // Enable debug features at runtime
@@ -498,7 +495,7 @@ runner.clickTracker = 4;
 corp.clickTracker = 3;
 ```
 
-## Debug URLs
+### Debug URLs
 
 The application leverages URI (Uniform Resource Identifier) as the primary mechanism for handling data transfer and state management. This URI-based approach provides a significant advantage for debugging workflows as you can store a URL to revist it later.
 

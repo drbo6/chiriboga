@@ -774,7 +774,7 @@ function LoadDecks() {
   // //   code gate - 30054 (Funhouse)
   // //   barrier   - 30039 (Bran 1.0)
 
-  if (true) { // Use this to easily disable everything below
+  if (false) { // Use this to easily disable everything below
 
     // debugging = true; //set true to log extra details and pause execution on error
     mainLoopDelay = 50; //for speedy AI vs AI testing (any faster than this and funny things happen at end-of-game)
@@ -804,7 +804,7 @@ function LoadDecks() {
     // -------------------------------------------------------------------------
     CorpTestField(35047, // AU Co.: The Gold Standard in Clones
       // archivesCards
-      [30072],
+      [30072, 31055],
       // rndCards - known order (top of R&D = last in array)
       // Top card is Snare! for access-damage testing
       [
@@ -821,7 +821,7 @@ function LoadDecks() {
         31054,  // Snare!          ← top 1
       ],
       // hqCards - all Snare! for damage-on-access testing
-      [31054, 31054, 35056, 35056, 31055], // Snare! x5
+      [31054, 31055, 35056, 31055], // Snare! x5
       // archivesInstalled
       [31055, 31055],
       // rndInstalled (ice on R&D) - Karunā unrezzed
@@ -848,7 +848,12 @@ function LoadDecks() {
     GainCredits(corp, 12);
 
     // Start on Corp's turn (to test turn-begin trigger immediately)
-    ChangePhase(phases.corpStartDraw);
+    ChangePhase(phases.runnerStartResponse);
+
+    // Install Botulus on innermost ice of remote 0
+    corp.remoteServers[0].ice[0].hostedCards = [];
+    InstanceCardsPush(30004, corp.remoteServers[0].ice[0].hostedCards, 1, cardBackTexturesRunner, glowTextures, strengthTextures)[0].host = corp.remoteServers[0].ice[0];
+    corp.remoteServers[0].ice[0].hostedCards[0].virus = 2;
 
     
     // RunnerTestField(31001, //identity

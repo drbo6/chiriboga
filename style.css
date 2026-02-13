@@ -772,6 +772,7 @@ canvas {
 	gap: 16px 20px;
 }
 .toggle-options .toggle-item { font-size:12px; color:var(--crt-green-muted); letter-spacing:1px; }
+.toggle-options .toggle-separator { grid-column:1/-1; border-top:1px solid var(--border-green); margin:2px 0; }
 .toggle-options input { margin-right:4px; }
 
 @media (max-width: 600px), (max-height: 520px) {
@@ -3674,4 +3675,93 @@ body.deck-builder-page {
 #loading-overlay .loading-bar {
     position: relative;
     z-index: 2;
+}
+/* ======================================================
+   NO-CRT MODE: Disable all CRT visual effects
+   Applied via body.no-crt class from settings
+   ====================================================== */
+
+/* Remove body-level scanlines and ambient glow/pulse */
+body.no-crt::before,
+body.no-crt::after {
+  animation: none !important;
+  background: none !important;
+  opacity: 0 !important;
+}
+
+/* Remove screen vignette and scanlines (index page) */
+body.no-crt .screen::before,
+body.no-crt .screen::after {
+  display: none !important;
+}
+
+/* Remove screen-content flicker (index page) */
+body.no-crt .screen-content {
+  animation: none !important;
+}
+
+/* Remove glow overlay and noise (index page) */
+body.no-crt .glow-overlay,
+body.no-crt .noise {
+  display: none !important;
+}
+
+/* Remove dataentry flicker, glow, and scanlines (game pages) */
+body.no-crt #dataentry {
+  animation: none !important;
+}
+body.no-crt #dataentry::before,
+body.no-crt #dataentry::after {
+  display: none !important;
+}
+
+/* Remove #crt-overlay */
+body.no-crt #crt-overlay {
+  display: none !important;
+}
+
+/* Remove header/footer flicker */
+body.no-crt #footer,
+body.no-crt #header {
+  animation: none !important;
+}
+
+/* Remove scanlines on all buttons and menu items */
+body.no-crt .menu-item::after,
+body.no-crt .button::after,
+body.no-crt #menubar .menu-trigger::after,
+body.no-crt #menubar .deck-info-button::after,
+body.no-crt #menubar .rulebook-button::after,
+body.no-crt #menubar .debug-menu-button::after,
+body.no-crt .fullscreen-button::after {
+  display: none !important;
+}
+
+/* Remove solo-menu flicker and scanlines */
+body.no-crt .solo-menu {
+  animation: none !important;
+}
+body.no-crt .solo-menu::after {
+  display: none !important;
+}
+
+/* Remove content background pulse/grid */
+body.no-crt .content:before {
+  animation: none !important;
+}
+
+/* Remove lightbox scanlines */
+body.no-crt #lightbox-overlay::before {
+  display: none !important;
+}
+
+/* Remove opponent box scanline overlays */
+body.no-crt .opponent-inner::after {
+  display: none !important;
+}
+
+/* Remove background glow from scan line overlays on card containers */
+body.no-crt .netrunner-bg-watermark {
+  text-shadow: none !important;
+  opacity: 0.02 !important;
 }

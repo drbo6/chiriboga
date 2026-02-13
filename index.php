@@ -1,5 +1,5 @@
 <?php
-$version = "0.6.12-BETA";
+$version = "0.6.13-BETA";
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -208,6 +208,10 @@ $version = "0.6.12-BETA";
   ?>
 </head>
 <body class="no-scroll">
+  <script>
+  // Apply CRT setting immediately to avoid flash of effects
+  (function(){try{var s=localStorage.getItem('chiriboga-settings');if(s){var p=JSON.parse(s);if(p.crtEffects===false)document.body.classList.add('no-crt');}}catch(e){}})();
+  </script>
   <div class="terminal-frame">
     <div class="screen">
       <div class="glow-overlay"></div>
@@ -326,6 +330,13 @@ $version = "0.6.12-BETA";
                   <div class="settings-switch">
                     <input type="checkbox" id="enable-hires-toggle" onchange="toggleEnableHiRes()">
                     <label for="enable-hires-toggle" class="switch-label"></label>
+                  </div>
+                </div>
+                <div class="settings-group" title="Toggle CRT visual effects (scanlines, flicker, glow) across all pages">
+                  <label class="settings-label">CRT EFFECTS</label>
+                  <div class="settings-switch">
+                    <input type="checkbox" id="crt-effects-toggle" onchange="toggleCrtEffects()">
+                    <label for="crt-effects-toggle" class="switch-label"></label>
                   </div>
                 </div>
                 <div class="settings-section-header">CUSTOM GAME SETTINGS</div>
@@ -485,7 +496,8 @@ $version = "0.6.12-BETA";
       strictPacks: null,
       allowedSets: null,
       customSets: null,  // Sets loaded in Custom Game / decklauncher
-      preconOverrides: {}  // Maps precon name to boolean override for useForGauntlet
+      preconOverrides: {},  // Maps precon name to boolean override for useForGauntlet
+      crtEffects: true  // CRT visual effects enabled by default
     };
     
     // ========================================
@@ -905,6 +917,11 @@ $version = "0.6.12-BETA";
       settingsOverrides.enableHiRes = (saved && typeof saved.enableHiRes === 'boolean')
         ? saved.enableHiRes
         : (typeof gauntletConfig !== 'undefined' && typeof gauntletConfig.enableHiRes === 'boolean' ? gauntletConfig.enableHiRes : false);
+
+      // Load CRT effects preference (default true = enabled)
+      settingsOverrides.crtEffects = (saved && typeof saved.crtEffects === 'boolean')
+        ? saved.crtEffects
+        : true;
       
       // Update UI to match
       document.getElementById('gauntlet-length-value').textContent = settingsOverrides.gauntletLength;
@@ -939,6 +956,9 @@ $version = "0.6.12-BETA";
       document.getElementById('debug-menu-settings-toggle').checked = settingsOverrides.debugMenuEnabled;
       // Set hi-res toggle
       document.getElementById('enable-hires-toggle').checked = settingsOverrides.enableHiRes;
+      // Set CRT effects toggle
+      document.getElementById('crt-effects-toggle').checked = settingsOverrides.crtEffects;
+      applyCrtEffects();
       
       // Update stepper button states
       updateStepperButtons();
@@ -961,6 +981,7 @@ $version = "0.6.12-BETA";
           gameSpeed: settingsOverrides.gameSpeed,
           debugMenuEnabled: settingsOverrides.debugMenuEnabled,
           enableHiRes: settingsOverrides.enableHiRes,
+          crtEffects: settingsOverrides.crtEffects,
           hiddenSetsRevealed: hiddenSetsRevealed,
         };
         localStorage.setItem('chiriboga-settings', JSON.stringify(toSave));
@@ -1021,6 +1042,20 @@ $version = "0.6.12-BETA";
     function toggleEnableHiRes() {
       settingsOverrides.enableHiRes = document.getElementById('enable-hires-toggle').checked;
       saveSettings();
+    }
+
+    function toggleCrtEffects() {
+      settingsOverrides.crtEffects = document.getElementById('crt-effects-toggle').checked;
+      applyCrtEffects();
+      saveSettings();
+    }
+
+    function applyCrtEffects() {
+      if (settingsOverrides.crtEffects) {
+        document.body.classList.remove('no-crt');
+      } else {
+        document.body.classList.add('no-crt');
+      }
     }
     
     function toggleAllowedSet(setCode) {

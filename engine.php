@@ -548,6 +548,17 @@
 	</head>
 
 	<body id="body" onload="Init();">
+		<script>
+		// Apply CRT setting immediately to avoid flash of effects
+		(function(){try{var s=localStorage.getItem('chiriboga-settings');if(s){var p=JSON.parse(s);if(p.crtEffects===false)document.body.classList.add('no-crt');}}catch(e){}})();
+		function toggleCrtFromMenu(enabled){
+			if(enabled){document.body.classList.remove('no-crt');}else{document.body.classList.add('no-crt');}
+			try{var s=localStorage.getItem('chiriboga-settings');var p=s?JSON.parse(s):{};p.crtEffects=enabled;localStorage.setItem('chiriboga-settings',JSON.stringify(p));}catch(e){}
+		}
+		document.addEventListener('DOMContentLoaded',function(){
+			try{var s=localStorage.getItem('chiriboga-settings');if(s){var p=JSON.parse(s);var cb=document.getElementById('crt-toggle');if(cb)cb.checked=(p.crtEffects!==false);}}catch(e){}
+		});
+		</script>
 		<div id="contentcontainer" class="content">
 			<div class="netrunner-bg-watermark"></div> <!-- default watermark text, will be replaced -->
 			<!-- ...existing code... -->
@@ -599,7 +610,9 @@
 						   <label class="toggle-item"><input type="checkbox" id="narration"> Narrate AI</label>
 					   <label class="toggle-item"><input type="checkbox" id="largerhistory"> Larger history</label>
 					   <label class="toggle-item"><input type="checkbox" id="debugmenu-toggle"> Debug Menu</label>
-					   <div class="toggle-item" style="display:flex;align-items:center;gap:12px;justify-content:flex-start;">
+				   <label class="toggle-item"><input type="checkbox" id="crt-toggle" onchange="toggleCrtFromMenu(this.checked)"> CRT Effects</label>
+					   <div class="toggle-separator"></div>
+				   <div class="toggle-item" style="display:flex;align-items:center;gap:12px;justify-content:center;grid-column:1/-1;">
 						   <span style="min-width:50px;color:var(--crt-green-muted);">SPEED:</span>
 						   <label style="display:flex;align-items:center;gap:4px;margin:0;">
 							   <input type="checkbox" id="speed-1" onchange="debugSetSpeedPreset(1000)">

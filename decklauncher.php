@@ -2285,6 +2285,10 @@
 
 
 	<body onload="Init();">
+		<script>
+		// Apply CRT setting immediately to avoid flash of effects
+		(function(){try{var s=localStorage.getItem('chiriboga-settings');if(s){var p=JSON.parse(s);if(p.crtEffects===false)document.body.classList.add('no-crt');}}catch(e){}})();
+		</script>
 		<!-- Loading Overlay - hidden when page is ready -->
 		<div id="loading-overlay">
 			<div class="loading-text">Loading<span class="loading-dots"></span></div>

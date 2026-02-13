@@ -6605,6 +6605,34 @@ cardSet[35056] = {
   trashCost: 3,
   unique: true,
   
+  //Shared helper: trash hosted cards on the approached ice (CR 1.13.11), then perform the swap
+  _performSwap: function (approachedIce, newIce, myServer, approachedIceIndex) {
+    var doSwap = function () {
+      var sourcePile = newIce.cardLocation;
+      //Protect against server destruction during swap
+      var serverIndex = corp.remoteServers.indexOf(myServer);
+      MoveCard(approachedIce, sourcePile);
+      if (serverIndex > -1) {
+        if (GetServerByArray(myServer.ice) == null)
+          corp.remoteServers.splice(serverIndex, 0, myServer);
+      }
+      MoveCard(newIce, myServer.ice, approachedIceIndex);
+      //Correct approachIce (MoveCardByIndex auto-increments it on insertion)
+      approachIce = approachedIceIndex;
+      Log(GetTitle(approachedIce, true) + " swapped with " + GetTitle(newIce, true));
+    };
+    
+    //Trash any cards hosted on the approached ice before moving it (CR 1.13.11)
+    if (approachedIce.hostedCards && approachedIce.hostedCards.length > 0) {
+      var hostedToTrash = approachedIce.hostedCards.slice();
+      Trash(hostedToTrash, false, function () {
+        doSwap();
+      });
+    } else {
+      doSwap();
+    }
+  },
+  
   responseOnApproachIce: {
     Enumerate: function (card) {
       //Only trigger for ice protecting this server
@@ -6651,6 +6679,7 @@ cardSet[35056] = {
     },
     Resolve: function (params) {
       var cardRef = this;
+      var cardDef = cardSet[35056];
       var myServer = GetServer(this);
       var approachedIce = attackedServer.ice[approachIce];
       var approachedIceIndex = approachIce;
@@ -6684,18 +6713,7 @@ cardSet[35056] = {
             }
           }
           if (bestIce) {
-            var sourcePile = bestIce.cardLocation;
-            //Protect against server destruction during swap
-            var serverIndex = corp.remoteServers.indexOf(myServer);
-            MoveCard(approachedIce, sourcePile);
-            if (serverIndex > -1) {
-              if (GetServerByArray(myServer.ice) == null)
-                corp.remoteServers.splice(serverIndex, 0, myServer);
-            }
-            MoveCard(bestIce, myServer.ice, approachedIceIndex);
-            //Correct approachIce (MoveCardByIndex auto-increments it on insertion)
-            approachIce = approachedIceIndex;
-            Log(GetTitle(approachedIce, true) + " swapped with " + GetTitle(bestIce, true));
+            cardDef._performSwap(approachedIce, bestIce, myServer, approachedIceIndex);
           }
         }, cardRef);
         return;
@@ -6717,20 +6735,22 @@ cardSet[35056] = {
               Log(GetTitle(cardRef) + " gains 3[c]");
               
               //Build list of ice from Archives and HQ
+              //Use .iceCard instead of .card to avoid drag-to-play behavior for HQ cards
+              //Choices without .card or .button render in the modal as clickable text
               var swapChoices = [];
               for (var i = 0; i < corp.archives.cards.length; i++) {
                 if (CheckCardType(corp.archives.cards[i], ["ice"])) {
-                  swapChoices.push({ card: corp.archives.cards[i], label: GetTitle(corp.archives.cards[i], true) + " (Archives)" });
+                  swapChoices.push({ iceCard: corp.archives.cards[i], label: GetTitle(corp.archives.cards[i], true) + " (Archives)" });
                 }
               }
               for (var i = 0; i < corp.HQ.cards.length; i++) {
                 if (CheckCardType(corp.HQ.cards[i], ["ice"])) {
-                  swapChoices.push({ card: corp.HQ.cards[i], label: GetTitle(corp.HQ.cards[i], true) + " (HQ)" });
+                  swapChoices.push({ iceCard: corp.HQ.cards[i], label: GetTitle(corp.HQ.cards[i], true) + " (HQ)" });
                 }
               }
               
               //Add decline option (swap is optional)
-              swapChoices.push({ card: null, label: "Decline", button: "Decline" });
+              swapChoices.push({ iceCard: null, label: "Decline", button: "Decline" });
               
               if (swapChoices.length === 1) {
                 //Only decline option - no ice available to swap
@@ -6741,29 +6761,8 @@ cardSet[35056] = {
                 corp,
                 swapChoices,
                 function (swapParams) {
-                  if (swapParams.card !== null) {
-                    var newIce = swapParams.card;
-                    var sourcePile = newIce.cardLocation;
-                    
-                    //Protect against server destruction during swap
-                    var serverIndex = corp.remoteServers.indexOf(myServer);
-                    
-                    //Move approached ice to the source pile
-                    MoveCard(approachedIce, sourcePile);
-                    
-                    //Re-insert server if destroyed
-                    if (serverIndex > -1) {
-                      if (GetServerByArray(myServer.ice) == null) {
-                        corp.remoteServers.splice(serverIndex, 0, myServer);
-                      }
-                    }
-                    
-                    //Move new ice to the approached position
-                    MoveCard(newIce, myServer.ice, approachedIceIndex);
-                    //Correct approachIce (MoveCardByIndex auto-increments it on insertion)
-                    approachIce = approachedIceIndex;
-                    
-                    Log(GetTitle(approachedIce, true) + " swapped with " + GetTitle(newIce, true));
+                  if (swapParams.iceCard !== null) {
+                    cardDef._performSwap(approachedIce, swapParams.iceCard, myServer, approachedIceIndex);
                   }
                 },
                 "Mitra Aman",
