@@ -102,7 +102,9 @@ phaseTemplates.standardResponse = {
           "Approaching next piece of ice protecting " +
             attackedServer.serverName
         );
-      //TODO cardApproached would trigger here but not implemented yet
+      //fire approach ice triggers
+      AutomaticTriggers("automaticOnApproachIce", [attackedServer.ice[approachIce]]);
+      TriggeredResponsePhase(playerTurn, "responseOnApproachIce", [attackedServer.ice[approachIce]], function () {}, "Approach Ice");
     } else if (currentPhase.identifier == "Run 3.1") {
       //Run: Encounter Ice (Nisei 2021 3.1)
       SetHistoryThumbnail(

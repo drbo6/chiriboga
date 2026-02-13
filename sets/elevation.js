@@ -6588,6 +6588,201 @@ cardSet[35055] = {
   },
 };
 
+//Mitra Aman (35056)
+//Jinteki Upgrade: Clone, cost 0, trash 3, influence 2, unique
+//Whenever the Runner approaches a piece of ice protecting this server,
+//you may trash this upgrade. If you do, gain 3 credits and you may swap
+//the ice being approached with a piece of ice from Archives or HQ.
+cardSet[35056] = {
+  title: "Mitra Aman",
+  imageFile: "35056.png",
+  player: corp,
+  faction: "Jinteki",
+  influence: 2,
+  cardType: "upgrade",
+  subTypes: ["Clone"],
+  rezCost: 0,
+  trashCost: 3,
+  unique: true,
+  
+  responseOnApproachIce: {
+    Enumerate: function (card) {
+      //Only trigger for ice protecting this server
+      var myServer = GetServer(this);
+      if (!myServer) return [];
+      if (!attackedServer) return [];
+      if (attackedServer !== myServer) return [];
+      //Must have ice at the approach position
+      if (approachIce < 0 || approachIce >= attackedServer.ice.length) return [];
+      //Must be rezzed to use
+      if (!this.rezzed) return [];
+      
+      //**AI code
+      if (corp.AI != null) {
+        //Check if there's any ice in HQ or Archives worth swapping
+        var hasSwapCandidate = false;
+        for (var i = 0; i < corp.archives.cards.length; i++) {
+          if (CheckCardType(corp.archives.cards[i], ["ice"])) { hasSwapCandidate = true; break; }
+        }
+        if (!hasSwapCandidate) {
+          for (var i = 0; i < corp.HQ.cards.length; i++) {
+            if (CheckCardType(corp.HQ.cards[i], ["ice"])) { hasSwapCandidate = true; break; }
+          }
+        }
+        if (!hasSwapCandidate) return []; //no ice to swap in, don't bother
+        
+        //Only use if the approached ice is rezzed (we know what we're giving up)
+        //and there's a potentially better replacement
+        var approachedIce = attackedServer.ice[approachIce];
+        if (approachedIce.rezzed) {
+          var approachedStrength = Strength(approachedIce);
+          //Use if approached ice is relatively weak
+          if (approachedStrength <= 3) return [{}];
+          //Use if approached ice has few subroutines
+          if (approachedIce.subroutines && approachedIce.subroutines.length <= 1) return [{}];
+        }
+        //Also use if unrezzed (element of surprise - swap in something nasty)
+        if (!approachedIce.rezzed) return [{}];
+        
+        return [];
+      }
+      
+      return [{}];
+    },
+    Resolve: function (params) {
+      var cardRef = this;
+      var myServer = GetServer(this);
+      var approachedIce = attackedServer.ice[approachIce];
+      var approachedIceIndex = approachIce;
+      
+      //**AI code
+      if (corp.AI != null) {
+        //AI always trashes if Enumerate allowed it
+        Trash(cardRef, false, function () {
+          GainCredits(corp, 3, "", cardRef);
+          Log(GetTitle(cardRef) + " gains 3[c]");
+          
+          //Find the best ice to swap in
+          var bestIce = null;
+          var bestScore = -1;
+          var candidates = [];
+          for (var i = 0; i < corp.archives.cards.length; i++) {
+            if (CheckCardType(corp.archives.cards[i], ["ice"])) candidates.push(corp.archives.cards[i]);
+          }
+          for (var i = 0; i < corp.HQ.cards.length; i++) {
+            if (CheckCardType(corp.HQ.cards[i], ["ice"])) candidates.push(corp.HQ.cards[i]);
+          }
+          for (var i = 0; i < candidates.length; i++) {
+            var ice = candidates[i];
+            //Score based on rez cost (proxy for power) and subroutine count
+            var score = (ice.rezCost || 0) + (ice.subroutines ? ice.subroutines.length * 2 : 0);
+            //Bonus for ice with end-the-run subroutines
+            if (ice.strength) score += ice.strength;
+            if (score > bestScore) {
+              bestScore = score;
+              bestIce = ice;
+            }
+          }
+          if (bestIce) {
+            var sourcePile = bestIce.cardLocation;
+            //Protect against server destruction during swap
+            var serverIndex = corp.remoteServers.indexOf(myServer);
+            MoveCard(approachedIce, sourcePile);
+            if (serverIndex > -1) {
+              if (GetServerByArray(myServer.ice) == null)
+                corp.remoteServers.splice(serverIndex, 0, myServer);
+            }
+            MoveCard(bestIce, myServer.ice, approachedIceIndex);
+            //Correct approachIce (MoveCardByIndex auto-increments it on insertion)
+            approachIce = approachedIceIndex;
+            Log(GetTitle(approachedIce, true) + " swapped with " + GetTitle(bestIce, true));
+          }
+        }, cardRef);
+        return;
+      }
+      
+      //Human player: choose to trash or not
+      var choices = [
+        { id: 0, label: "Trash " + GetTitle(this) + " to gain 3[c] and swap ice", button: "Trash Mitra Aman" },
+        { id: 1, label: "Decline", button: "Decline" }
+      ];
+      
+      DecisionPhase(
+        corp,
+        choices,
+        function (decision) {
+          if (decision.id === 0) {
+            Trash(cardRef, false, function () {
+              GainCredits(corp, 3, "", cardRef);
+              Log(GetTitle(cardRef) + " gains 3[c]");
+              
+              //Build list of ice from Archives and HQ
+              var swapChoices = [];
+              for (var i = 0; i < corp.archives.cards.length; i++) {
+                if (CheckCardType(corp.archives.cards[i], ["ice"])) {
+                  swapChoices.push({ card: corp.archives.cards[i], label: GetTitle(corp.archives.cards[i], true) + " (Archives)" });
+                }
+              }
+              for (var i = 0; i < corp.HQ.cards.length; i++) {
+                if (CheckCardType(corp.HQ.cards[i], ["ice"])) {
+                  swapChoices.push({ card: corp.HQ.cards[i], label: GetTitle(corp.HQ.cards[i], true) + " (HQ)" });
+                }
+              }
+              
+              //Add decline option (swap is optional)
+              swapChoices.push({ card: null, label: "Decline", button: "Decline" });
+              
+              if (swapChoices.length === 1) {
+                //Only decline option - no ice available to swap
+                return;
+              }
+              
+              DecisionPhase(
+                corp,
+                swapChoices,
+                function (swapParams) {
+                  if (swapParams.card !== null) {
+                    var newIce = swapParams.card;
+                    var sourcePile = newIce.cardLocation;
+                    
+                    //Protect against server destruction during swap
+                    var serverIndex = corp.remoteServers.indexOf(myServer);
+                    
+                    //Move approached ice to the source pile
+                    MoveCard(approachedIce, sourcePile);
+                    
+                    //Re-insert server if destroyed
+                    if (serverIndex > -1) {
+                      if (GetServerByArray(myServer.ice) == null) {
+                        corp.remoteServers.splice(serverIndex, 0, myServer);
+                      }
+                    }
+                    
+                    //Move new ice to the approached position
+                    MoveCard(newIce, myServer.ice, approachedIceIndex);
+                    //Correct approachIce (MoveCardByIndex auto-increments it on insertion)
+                    approachIce = approachedIceIndex;
+                    
+                    Log(GetTitle(approachedIce, true) + " swapped with " + GetTitle(newIce, true));
+                  }
+                },
+                "Mitra Aman",
+                "Swap ice with a piece of ice from Archives or HQ",
+                cardRef
+              );
+            }, cardRef);
+          }
+          //id === 1: decline, do nothing
+        },
+        "Mitra Aman",
+        null,
+        cardRef
+      );
+    },
+    text: "Mitra Aman: Trash to gain 3[c] and swap ice",
+  },
+};
+
 //Plutus
 //Weyland Asset: Deep Net
 //Rez: 0, Trash: 3, Influence: 3, Unique

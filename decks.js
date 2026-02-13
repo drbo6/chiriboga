@@ -821,7 +821,7 @@ function LoadDecks() {
         31054,  // Snare!          ← top 1
       ],
       // hqCards - all Snare! for damage-on-access testing
-      [31054, 31054, 30072], // Snare! x5
+      [31054, 31054, 35056, 35056, 31055], // Snare! x5
       // archivesInstalled
       [31055, 31055],
       // rndInstalled (ice on R&D) - Karunā unrezzed
@@ -829,7 +829,7 @@ function LoadDecks() {
       // hqInstalled (ice on HQ)
       [30073, 30074], // Tithe, Whitespace
       // remotes: [[root cards, ice...]]
-      [[35048, 30047, 31055], [35048, 30047, 31055, 30047, 31055]], 
+      [[35056, 30047, 31055], [35056, 30047, 31055, 30047, 31055]], 
       // scored agendas
       [],
       cardBackTexturesCorp, glowTextures, strengthTextures
