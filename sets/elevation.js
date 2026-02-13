@@ -8270,6 +8270,109 @@ cardSet[35051] = {
 //Dividends 1 (When you score this agenda, place 1 agenda counter on it for each excess advancement counter.)
 //When your discard phase ends, you may remove 1 hosted agenda counter to place 2 advancement counters
 //on 1 installed card. (You cannot score that card this turn.)
+
+//Proprionegation (35048)
+//Jinteki Agenda: Security, 4/2
+//When you score this agenda, place 1 agenda counter on it.
+//Hosted agenda counter: The Runner moves to the outermost position of Archives.
+//(They approach any ice in that position.) Use this ability only during a run.
+cardSet[35048] = {
+  title: "Proprionegation",
+  imageFile: "35048.png",
+  player: corp,
+  faction: "Jinteki",
+  cardType: "agenda",
+  subTypes: ["Security"],
+  agendaPoints: 2,
+  advancementRequirement: 4,
+  
+  //When you score this agenda, place 1 agenda counter on it.
+  responseOnScored: {
+    Resolve: function () {
+      if (intended.score == this) {
+        AddCounters(this, "agenda", 1);
+      }
+    },
+    automatic: true,
+  },
+  
+  //Hosted agenda counter: The Runner moves to the outermost position of Archives.
+  //(They approach any ice in that position.) Use this ability only during a run.
+  abilities: [
+    {
+      text: "The Runner moves to the outermost position of Archives.",
+      Enumerate: function () {
+        //Use this ability only during a run
+        if (!attackedServer) return [];
+        //Must have at least 1 agenda counter
+        if (!CheckCounters(this, "agenda", 1)) return [];
+        //Don't use if already running Archives (no point)
+        if (attackedServer == corp.archives) return [];
+        
+        //**AI code
+        if (corp.AI) {
+          //Only use during approach to server (for maximum effect, just before breach)
+          if (currentPhase.identifier != "Run 4.5" || approachIce > 0) return [];
+          
+          //Use case 1: Runner is running a remote with an agenda and Archives doesn't have one
+          var isRemote = (attackedServer !== corp.HQ && attackedServer !== corp.RnD && attackedServer !== corp.archives);
+          if (isRemote && corp.AI._agendaPointsInServer(attackedServer) > 0) {
+            //Only if Archives doesn't have agendas the runner could steal
+            if (corp.AI._agendaPointsInServer(corp.archives) == 0) {
+              return [{}];
+            }
+          }
+          
+          //Use case 2: Archives has nasty rezzed ice
+          if (corp.AI._rezzedIce(corp.archives).length >= 2) {
+            //Worth using if there's substantial ice to re-encounter
+            return [{}];
+          }
+          
+          //Use case 3: Runner might win if they breach this server
+          if (corp.AI._runnerMayWinIfServerBreached(attackedServer)) {
+            //Desperate measure — use it to protect the win
+            if (corp.AI._agendaPointsInServer(corp.archives) == 0) {
+              return [{}];
+            }
+          }
+          
+          return [];
+        }
+        
+        return [{}];
+      },
+      Resolve: function (params) {
+        RemoveCounters(this, "agenda", 1);
+        Log(GetTitle(this) + ": Runner moves to the outermost position of Archives");
+        
+        //If mid-encounter, route through encounter end for proper cleanup
+        if (encountering) {
+          attackedServer = corp.archives;
+          if (corp.archives.ice.length > 0) {
+            approachIce = corp.archives.ice.length - 1;
+            phases.runEncounterEnd.next = phases.runApproachIce;
+          } else {
+            approachIce = -1;
+            phases.runEncounterEnd.next = phases.runDecideContinue;
+          }
+          ChangePhase(phases.runEncounterEnd);
+        } else {
+          //Not encountering — go directly
+          attackedServer = corp.archives;
+          if (corp.archives.ice.length > 0) {
+            approachIce = corp.archives.ice.length - 1;
+            ChangePhase(phases.runApproachIce);
+          } else {
+            approachIce = -1;
+            ChangePhase(phases.runDecideContinue);
+          }
+        }
+      },
+    },
+  ],
+};
+
 cardSet[35049] = {
   title: "Sericulture Expansion",
   imageFile: "35049.png",

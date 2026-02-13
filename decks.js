@@ -774,7 +774,7 @@ function LoadDecks() {
   // //   code gate - 30054 (Funhouse)
   // //   barrier   - 30039 (Bran 1.0)
 
-  if (false) { // Use this to easily disable everything below
+  if (true) { // Use this to easily disable everything below
 
     // debugging = true; //set true to log extra details and pause execution on error
     mainLoopDelay = 50; //for speedy AI vs AI testing (any faster than this and funny things happen at end-of-game)
@@ -821,15 +821,15 @@ function LoadDecks() {
         31054,  // Snare!          ← top 1
       ],
       // hqCards - all Snare! for damage-on-access testing
-      [31054, 31054, 31054, 31054, 35049, 35051], // Snare! x5
+      [31054, 31054, 31054, 31054, 35049, 35048], // Snare! x5
       // archivesInstalled
-      [],
+      [31055, 31055],
       // rndInstalled (ice on R&D) - Karunā unrezzed
       [30047, 30072], // Karunā, Palisade
       // hqInstalled (ice on HQ)
       [30073, 30074], // Tithe, Whitespace
       // remotes: [[root cards, ice...]]
-      [[31051, 30047, 31055], [31051, 30047, 31055, 30047, 31055]], 
+      [[35048, 30047, 31055], [35048, 30047, 31055, 30047, 31055]], 
       // scored agendas
       [],
       cardBackTexturesCorp, glowTextures, strengthTextures
