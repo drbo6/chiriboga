@@ -55,7 +55,6 @@ The following Elevation cards are not yet implemented (9 cards):
 
 ## Jinteki
 - **35047** - PT Untaian: Life's Building Blocks (Identity)
-- **35048** - Proprionegation (Agenda) (Hidden Funds)
 - **35056** - Mitra Aman (Upgrade - Clone) (Hidden Funds)
 
 ## NBN
