@@ -1569,6 +1569,8 @@ cardSet[35006] = {
     Enumerate: function(card) {
       //Don't trigger for Bling itself
       if (card === this) return [];
+	  //Don't trigger for installed corp cards
+	  if (card.player === corp) return [];
       //Only trigger if install cost was 0
       if (intended.installCostPaid !== 0) return [];
       //Must have cards in stack
