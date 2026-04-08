@@ -1210,9 +1210,11 @@ cardSet[35028] = {
         for (var i = 0; i < this.hostedCards.length; i++) {
           var card = this.hostedCards[i];
           //Check if can afford install cost
-          if (ChoicesCardInstall(card).length > 0) {
+          var installChoices = ChoicesCardInstall(card);
+          if (installChoices.length > 0) {
             choices.push({ 
               card: card, 
+              installChoices: installChoices,
               label: "Install " + GetTitle(card, true) + " (" + InstallCost(card) + "[c])"
             });
           }
@@ -1236,8 +1238,29 @@ cardSet[35028] = {
         //Clear notInstalled flag before installing
         params.card.notInstalled = false;
         
-        //Install the program (pays install cost)
-        Install(params.card, null);
+        //If there are multiple install choices (e.g., trojan needing to choose host ice),
+        //let the player choose the destination
+        if (params.installChoices && params.installChoices.length > 1) {
+          var cardToInstall = params.card;
+          DecisionPhase(
+            runner,
+            params.installChoices,
+            function(choiceParams) {
+              Install(cardToInstall, choiceParams.host);
+            },
+            "Madani",
+            "Choose install destination",
+            this,
+            "install"
+          );
+        } else {
+          //Single install option, use its host (null for normal programs, ice for trojans)
+          var host = null;
+          if (params.installChoices && params.installChoices.length === 1) {
+            host = params.installChoices[0].host;
+          }
+          Install(params.card, host);
+        }
       },
     },
   ],

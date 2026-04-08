@@ -799,9 +799,6 @@ function LoadDecks() {
       cardBackTexturesRunner, glowTextures, strengthTextures
     );
 
-    // -------------------------------------------------------------------------
-    // CORP TEST FIELD
-    // -------------------------------------------------------------------------
     CorpTestField(35047, // AU Co.: The Gold Standard in Clones
       // archivesCards
       [30072, 31055],
